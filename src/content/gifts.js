@@ -15,7 +15,6 @@ import tree from "../assets/gifts-tree.jpg"; /* Thirdman, 7656746 */
 import wheelchair from "../assets/gifts-wheelchair.jpg"; /* Kampus, 8777810 */
 import eye from "../assets/gifts-eye.jpg"; /* Pavel Danilyuk, 5996653 */
 import maternal from "../assets/gifts-maternal.jpg"; /* Mahyub Hamida, 30313887 */
-import prayer from "../assets/gifts-prayer.jpg"; /* Firman Marek Brew, 36319737 */
 import volunteers from "../assets/ngo-volunteers.jpg";
 import waterChild from "../assets/ngo-water-child.jpg";
 import waterPump from "../assets/ngo-water-pump.jpg";
@@ -55,7 +54,7 @@ export const GIFTS = {
   water: {
     heading: "Sustainable Water Solutions",
     intro:
-      "Unsafe water remains one of the biggest threats to health worldwide, claiming over 800,000 lives each year (WHO). Access to clean water transforms entire communities – improving health, education, and livelihoods. Your Zakat or Sadaqah can fund large-scale water solutions such as solar-powered boreholes and water filtration plants, delivering safe, reliable water for years to come. Each donated water project includes a personalized report, photos, location details, and the option to place a name plaque in honor of yourself or a loved one.",
+      "Unsafe water remains one of the biggest threats to health worldwide, claiming over 800,000 lives each year (WHO). Access to clean water transforms entire communities – improving health, education, and livelihoods. Your gift — including Zakat or Sadaqah, if that is how you give — can fund large-scale water solutions such as solar-powered boreholes and water filtration plants, delivering safe, reliable water for years to come. Each donated water project includes a personalized report, photos, location details, and the option to place a name plaque in honor of yourself or a loved one.",
     surface: "mist",
     items: [
       {
@@ -141,15 +140,20 @@ export const GIFTS = {
     ],
   },
 
+  /* Zakat is still offered — it is one of the routes on /giving — but this
+     section no longer assumes the reader gives it. It states the fact for
+     donors who do and reads as information, not instruction, for everyone
+     else. The photograph was hands raised in prayer inside a mosque; it is
+     now the project the money builds, which is what the section is about. */
   zakat: {
     heading: "Zakat-Eligible",
     paragraphs: [
-      "Your donations to build a Major Giving project are Zakat-eligible.",
-      "Fulfill an important pillar of Islam, offering dignity, hope, and support to families in need.",
+      "Major Giving projects qualify for Zakat.",
+      "If you give Zakat, it can fund a borehole, a clinic or a classroom in full — and we will account for it separately, as Zakat requires.",
     ],
-    cta: { label: "Give your Zakat today and make a difference", to: "/giving" },
-    src: prayer,
-    alt: "A person raising their hands in prayer inside a mosque",
+    cta: { label: "More ways to give", to: "/giving" },
+    src: borehole,
+    alt: "Workers digging the trench for a new village borehole",
     flip: true,
   },
 

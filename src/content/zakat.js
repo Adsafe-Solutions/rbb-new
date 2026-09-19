@@ -1,4 +1,15 @@
-/* Every string on /giving (the Zakat page), in page order.
+/* Every string on /giving/zakat, in page order.
+
+   ⚠ This page moved. It used to be served at /giving — the main nav's
+   "Giving" entry — which meant every donor arriving from the header landed
+   on Nisab thresholds and scholar verification whether or not they give
+   Zakat. RBB is not a faith-specific organisation, so /giving is now the
+   Ways to Give hub (content/giving.js) and Zakat is one route on it, with
+   this page kept whole underneath.
+
+   The copy here is ADDRESSED TO SOMEONE WHO GIVES ZAKAT and should stay
+   that way — a reader who has followed a link marked "Zakat & Sadaqah" has
+   told you who they are. It is the pages above it that must not assume.
 
    Reproduced from muslimhands.ca/giving/islamic-giving/zakat (fetched
    2026-09-15), organisation name via BRAND.name. Where the source was
@@ -21,12 +32,12 @@ import sudan from "../assets/ngo-sudan.jpg";
 import waterPump from "../assets/ngo-water-pump.jpg";
 import classroom from "../assets/ngo-classroom.jpg";
 
-const CALCULATOR = "/islamic-resources/zakat-resources/zakat-calculator";
+const CALCULATOR = "/giving/zakat/calculator";
 
 export const ZAKAT = {
   hero: {
     heading: "Give Your Zakat",
-    body: "Distributing your Zakat for over 30 years",
+    body: "One of several ways to give with us — and one we have been distributing faithfully for over 30 years.",
     cta: { label: "Calculate Your Zakat", to: CALCULATOR },
     src: hero,
     alt: "Two people passing a filled donation box between them",

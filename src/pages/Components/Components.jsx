@@ -25,6 +25,8 @@ import CampaignHero from "../../components/CampaignHero/CampaignHero.jsx";
 import ActionCard from "../../components/ActionCard/ActionCard.jsx";
 import GetInvolved from "../../components/GetInvolved/GetInvolved.jsx";
 import FightFor from "../../components/FightFor/FightFor.jsx";
+import AppealSpotlight from "../../components/AppealSpotlight/AppealSpotlight.jsx";
+import LegacyCollage from "../../components/LegacyCollage/LegacyCollage.jsx";
 import ImpactMosaic from "../../components/ImpactMosaic/ImpactMosaic.jsx";
 import PageHero from "../../components/PageHero/PageHero.jsx";
 import FeatureGrid from "../../components/FeatureGrid/FeatureGrid.jsx";
@@ -285,13 +287,13 @@ export default function Components() {
       >
         <div className="flex flex-col gap-6">
           <Frame label="FeatureBanner · honey">
-            <FeatureBanner {...NGO.work} />
+            <FeatureBanner {...NGO.resources} />
           </Frame>
           <Frame label="FeatureBanner · pollen, with CTA">
             <FeatureBanner {...NGO.about} cta={NGO.resources.cta} />
           </Frame>
           <Frame label="ImpactStats · four, highlighted">
-            <ImpactStats {...NGO.appealStats} />
+            <ImpactStats {...NGO.overallStats} />
           </Frame>
           <Frame label="ImpactStats · three, on paper">
             <ImpactStats {...NGO.overallStats} surface="paper" />
@@ -307,6 +309,12 @@ export default function Components() {
           </Frame>
           <Frame label="GetInvolved">
             <GetInvolved {...NGO.getInvolved} />
+          </Frame>
+          <Frame label="LegacyCollage">
+            <LegacyCollage {...NGO.legacy} />
+          </Frame>
+          <Frame label="AppealSpotlight">
+            <AppealSpotlight {...NGO.gaza} />
           </Frame>
           <Frame label="FightFor">
             <FightFor {...NGO.fightFor} />

@@ -6,17 +6,23 @@
 import { BRAND } from "./brand.js";
 
 /* Only paths that have a real page behind them. The site's other slugs
-   (the appeals, the Islamic-giving sub-pages, the resource pages) still
+   (the appeals, the Zakat sub-pages, the resource pages) still
    route to the stub — see STUB_PATHS in App.jsx — but the footer does not
    advertise them until there is something to land on. Add the link back
    here the day its page ships. */
 export const FOOTER_COLUMNS = [
   {
+    /* Order matters here. "Zakat & Sadaqah" used to be the first link in
+       the only giving column, which framed RBB as a Muslim charity in the
+       footer of every page on the site. The hub leads now and Zakat sits
+       among the routes it offers — still one click away, no longer the
+       heading act. */
     heading: "Giving",
     links: [
-      { label: "Zakat & Sadaqah", to: "/giving" },
+      { label: "Ways to Give", to: "/giving" },
       { label: "Charity Gifts", to: "/gifts" },
       { label: "Major Gifts", to: "/giving/major-giving" },
+      { label: "Zakat & Sadaqah", to: "/giving/zakat" },
     ],
   },
   {

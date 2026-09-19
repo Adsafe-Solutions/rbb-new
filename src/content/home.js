@@ -41,7 +41,7 @@ export const HERO = {
   subheading: "Emergency relief and long-term change since 1993",
   /* The single-line version, for anywhere that needs the headline whole —
      document titles, share cards, the component catalog. */
-  heading: "Delivering your Sadaqah and Zakat since 1993",
+  heading: "Delivering aid where it is needed most, since 1993",
   body: `${BRAND.name} delivers humanitarian aid across 15+ countries, providing emergency relief and long-term solutions through clean water, healthcare, education, and life-changing orphan support.`,
   cta: { label: "Donate Now", to: "/donate" },
 

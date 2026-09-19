@@ -9,6 +9,7 @@ export {
   FOOTER_SIGNUP,
   FOOTER_SOCIAL_HEADING,
 } from "./footer.js";
+export { GIVING } from "./giving.js";
 export { HERO, HERO_BLEED, MISSION, MEMBER_CIRCLE, PRODUCTS, STORY, GET_APP } from "./home.js";
 export { NGO } from "./ngo.js";
 export { ZAKAT } from "./zakat.js";

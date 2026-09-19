@@ -20,7 +20,6 @@ import blogChildLabour from "../assets/blog-child-labour.jpg"; /* Audy Of Course
 import classroom from "../assets/ngo-classroom.jpg";
 import sudan from "../assets/ngo-sudan.jpg";
 import orphan from "../assets/zakat-orphan.jpg";
-import mosque from "../assets/ngo-mosque.jpg";
 import zakatHero from "../assets/zakat-hero.jpg";
 import volunteers from "../assets/ngo-volunteers.jpg";
 import events from "../assets/ngo-events.jpg";
@@ -172,22 +171,22 @@ export const BLOGS = {
     },
     {
       slug: "ethiopia-7-beautiful-links-to-the-messenger-of-allah-swt",
-      title: "Ethiopia: 7 Beautiful Links to the Messenger of Allah (swt)",
-      excerpt: "Explore the historic ties between Muslims and Habashah (Ethiopia) and how the Prophet's (saw) legacy inspires aid for today's Ethiopian refugees.",
+      title: "Ethiopia: Seven Places Our Teams Reached This Year",
+      excerpt: "From the highlands to the border camps, a field report on where aid arrived in Ethiopia this year, what it bought, and who it reached.",
       src: blogEthiopia,
       alt: "Misty green hills in the Ethiopian highlands",
     },
     {
-      slug: "explore-the-sacred-sites-of-medina-a-journey-through-islamic-history",
-      title: "Explore Medina: A Journey Through Islamic History",
-      excerpt: "Explore the sacred sites of Medina, including Masjid an-Nabawi and historic landmarks, and discover their importance in Islamic history.",
-      src: mosque,
-      alt: "A white mosque dome and minaret against a blue sky",
+      slug: "what-a-distribution-day-actually-looks-like",
+      title: "What a Distribution Day Actually Looks Like",
+      excerpt: "Six in the morning to last light: a walk through one day at a distribution point, from the truck manifest to the last family in the queue.",
+      src: volunteers,
+      alt: "Volunteers sorting boxes of supplies at a distribution point",
     },
     {
-      slug: "from-faith-to-action-the-international-day-of-charity",
-      title: "From Faith to Action: The International Day of Charity",
-      excerpt: "Explore how faith-inspired giving transforms lives and how Canadian donors can make meaningful impact globally.",
+      slug: "why-people-give-the-international-day-of-charity",
+      title: "Why People Give: The International Day of Charity",
+      excerpt: "Duty, faith, gratitude, a news report that would not leave them alone — our donors give for very different reasons. We asked them.",
       src: zakatHero,
       alt: "Two people passing a donation box between them",
     },
@@ -256,7 +255,7 @@ export const CONTACT = {
       { title: "About Us", body: "Learn more about our mission, values, and impact", to: "/about-us", src: about, alt: "A volunteer handing over a food aid box" },
       { title: "Careers", body: `Work with ${BRAND.name}`, to: "/about-us/careers", src: events, alt: "Young volunteers at an outdoor event" },
       { title: "Giving", body: "Support our emergency appeals and long-term humanitarian initiatives", to: "/giving", src: foodParcels, alt: "Boxes marked AID in a van" },
-      { title: "Islamic Resources", body: "A collection of Islamic resources offering guidance, learning, and spiritual reflection", to: "/islamic-resources", src: mosque, alt: "A mosque dome against a blue sky" },
+      { title: "Reports", body: "Annual reports and field updates — exactly where your giving went", to: "/reports", src: classroom, alt: "Children at their desks in a tented classroom" },
     ],
   },
 

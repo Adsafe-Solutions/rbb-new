@@ -3,7 +3,11 @@
    hero mark, which renders whatever string this gives it. */
 export const BRAND = {
   name: "RBB",
-  tagline: "Delivering your Sadaqah and Zakat since 1993",
+  /* Faith-neutral by design. RBB serves and is supported by people of
+     every faith and none, so the line the whole site hangs off cannot name
+     one tradition. Zakat and Sadaqah are still offered — as one route on
+     /giving, alongside the others — but they are not the premise. */
+  tagline: "Delivering aid where it is needed most, since 1993",
 
   /* Kept short: the mark is doing the talking. */
   description: "Humanitarian aid across 15+ countries — emergency relief, clean water, healthcare, education and orphan support.",

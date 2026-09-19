@@ -5,6 +5,7 @@ import Footer from "./components/Footer/Footer.jsx";
 import Home from "./pages/Home/Home.jsx";
 import DesignSystem from "./pages/DesignSystem/DesignSystem.jsx";
 import Components from "./pages/Components/Components.jsx";
+import Giving from "./pages/Giving/Giving.jsx";
 import Zakat from "./pages/Zakat/Zakat.jsx";
 import Gifts from "./pages/Gifts/Gifts.jsx";
 import Volunteer from "./pages/Volunteer/Volunteer.jsx";
@@ -27,15 +28,20 @@ const STUB_PATHS = [
   ...NAV.map((item) => item.to),
   "/about-us",
   "/about-us/careers",
-  "/islamic-resources",
-  "/islamic-resources/zakat-resources/zakat-calculator",
+  /* Zakat's own sub-tree now hangs off /giving/zakat rather than off an
+     "/islamic-resources" section, which no longer exists: RBB serves and is
+     funded by people of every faith and none, so one tradition does not get
+     a top-level branch of the site. */
+  "/giving/zakat/calculator",
+  "/giving/monthly",
+  "/giving/gifts-in-wills",
+  "/reports",
   "/giving/emergencies/gaza-emergency",
   "/giving/emergencies/sudan-emergency-appeal",
   "/giving/emergencies/yemen-emergency-appeal",
   "/giving/sponsorships/sponsor-an-orphan",
-  "/giving/islamic-giving/sadaqah-jariyah",
-  "/giving/islamic-giving/give-sadaqah",
-  "/giving/islamic-giving/aqiqah",
+  "/giving/zakat/sadaqah-jariyah",
+  "/giving/zakat/give-sadaqah",
   "/giving/great-charity-gifts",
   "/giving/give-the-gift-of-water",
   "/giving/hope-shops",
@@ -82,7 +88,12 @@ function Shell() {
           <Route path="/" element={<Home />} />
           {/* Declared before the stubs: the nav lists this path too, and
               the real page has to win over the placeholder. */}
-          <Route path="/giving" element={<Zakat />} />
+          {/* The hub, and Zakat one level down. /giving was the Zakat
+              page itself until RBB's framing was widened; the old path
+              still resolves, it just resolves to the hub that offers
+              Zakat rather than to Zakat. */}
+          <Route path="/giving" element={<Giving />} />
+          <Route path="/giving/zakat" element={<Zakat />} />
           <Route path="/gifts" element={<Gifts />} />
           <Route path="/giving/major-giving" element={<Gifts />} />
           <Route path="/get-involved/volunteer" element={<Volunteer />} />

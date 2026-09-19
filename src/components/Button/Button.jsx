@@ -15,19 +15,26 @@ import { cx } from "../../lib/cx.js";
    No hover lift: feedback comes from the colour changing, green to Deep
    Trust Blue. */
 
+/* ⚠ No padding and no radius in BASE. They used to live here, and every
+   variant that needed different ones — `link` with none, `pill` with less
+   — lost: two utilities setting the same property on one element resolve
+   by the order Tailwind EMITS them, not the order they appear in the class
+   string, so `px-7` beat `link`'s `px-0` and every text link on the site
+   carried 28px of invisible padding on each side. Each variant now states
+   its own box, so there is nothing to fight with. */
 const BASE = cx(
   "inline-flex cursor-pointer items-center justify-center gap-2",
-  "whitespace-nowrap rounded-2xl px-7 py-4",
+  "whitespace-nowrap",
   "text-[length:var(--text-body)] font-medium leading-none tracking-body",
   "transition-colors duration-200"
 );
 
 const VARIANTS = {
   /* The primary. Green fill, paper text. Donate, submit, subscribe. */
-  solid: "bg-growth-green text-paper-white hover:bg-trust-blue",
+  solid: "rounded-2xl px-7 py-4 bg-growth-green text-paper-white hover:bg-trust-blue",
 
   /* The same button on a dark or saturated ground. */
-  inverse: "bg-paper-white text-trust-blue hover:bg-mist",
+  inverse: "rounded-2xl px-7 py-4 bg-paper-white text-trust-blue hover:bg-mist",
 
   /* The quiet second action beside `solid` — "watch the film" next to
      "get involved". NOT a second fill: it is the page's own ground with a
@@ -36,8 +43,17 @@ const VARIANTS = {
      ring thickens on hover rather than the box filling in, so it never
      starts competing with the green. */
   outline: cx(
-    "bg-transparent text-trust-blue ring-1 ring-inset ring-bumble-ink/20",
+    "rounded-2xl px-7 py-4 bg-transparent text-trust-blue ring-1 ring-inset ring-bumble-ink/20",
     "transition-[box-shadow,background-color] hover:bg-paper-white hover:ring-bumble-ink/40"
+  ),
+
+  /* `outline` on a dark ground — the bleed hero's Deep Trust Blue band.
+     Same hairline logic, inverted: the trust-blue text of `outline` is
+     invisible on that band, and filling it white would make it a second
+     `inverse` and break the rule of one filled button per decision. */
+  outlineInverse: cx(
+    "rounded-2xl px-7 py-4 bg-transparent text-paper-white ring-1 ring-inset ring-paper-white/35",
+    "transition-[box-shadow,background-color] hover:bg-paper-white/10 hover:ring-paper-white/70"
   ),
 
   /* The active nav pill: white on the honey band, the exact inverse of
@@ -45,12 +61,12 @@ const VARIANTS = {
   pill: "rounded-2xl bg-paper-white px-5 py-2.5 text-bumble-ink",
 
   /* Unfilled nav item and utility controls. */
-  ghost: "bg-transparent text-bumble-ink hover:bg-paper-white/60",
+  ghost: "rounded-2xl px-7 py-4 bg-transparent text-bumble-ink hover:bg-paper-white/60",
 
   /* The underlined in-card link. Not a button shape at all — no padding,
      no radius — so it never reads as a second CTA next to the real one. */
   link: cx(
-    "rounded-none px-0 py-0 underline underline-offset-4",
+    "underline underline-offset-4",
     "text-trust-blue hover:decoration-2"
   ),
 };

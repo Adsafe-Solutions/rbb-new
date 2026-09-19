@@ -7,11 +7,11 @@ import { cx } from "../../lib/cx.js";
 import { HERO_BLEED } from "../../content/index.js";
 
 /* The alternate hero: the photograph runs the full height of the band on
-   the right, the copy sits on the page's own white on the left, and the
-   two meet in a wide feathered seam rather than at an edge.
+   the right, the copy sits on a Deep Trust Blue ground on the left, and
+   the two meet in a wide feathered seam rather than at an edge.
 
    The seam is the whole trick. The photograph is laid across a good deal
-   more than the half it appears to occupy, and a white gradient is drawn
+   more than the half it appears to occupy, and a blue gradient is drawn
    back over its left side — so the image does not stop anywhere, it simply
    runs out. A hard 50/50 split would make this an ordinary two-column
    layout with a picture in one of them.
@@ -28,13 +28,14 @@ import { HERO_BLEED } from "../../content/index.js";
    that exact strapline ON A BANNER inside the frame. The script landed on
    top of the real thing: two wordmarks, one corner. The photograph says it
    better than an overlay could. If it ever comes back it belongs on the
-   white side, not over the picture.
+   blue side, not over the picture.
 
    ⚠ Below `lg` the photograph is NOT behind the copy — it drops into flow
    as a band underneath it and the scrim is switched off. Holding it behind
    the headline on a phone was tried: the scrim has to reach about 90%
-   white before body copy is legible over a patterned dress, and at 90%
-   white there is no photograph left to look at. Stacked, both survive.
+   opacity before body copy is legible over a patterned dress, and at 90%
+   there is no photograph left to look at. Stacked, both survive — the copy
+   on the band's blue, the photograph in full beneath it.
 
    Everything decorative here is `aria-hidden` and none of it may widen the
    page: the band carries `overflow-hidden` for that, which is safe on a
@@ -76,18 +77,20 @@ const STAGGER_MS = 90;
 
    The stops are set from where the COPY actually ends, not by eye. At
    1512px the panel starts at x≈423 and the copy column runs out by x≈700
-   — about a quarter of the way across the panel. So the white only has to
-   be solid to 22%, and everything past that is the photograph's.
+   — about a quarter of the way across the panel. So the colour only has
+   to be solid to 22%, and everything past that is the photograph's.
 
-   It used to hold 85% white all the way to 45% and not clear until 72%,
-   which whited out the middle of every frame — the half with the faces in
-   it. Pulling the falloff left gives the picture back. The 32 points
-   between 22% and 54% are still ~350px of gradient, so there is no visible
-   seam; shortening that range is what would produce one. */
+   It is Deep Trust Blue, not white. A white fade read as the photograph
+   being washed out; the brand's own dark blue reads as the band and the
+   picture meeting. It also matches the section's ground (bg-trust-blue
+   on the <section>), so the solid end of the gradient is indistinguishable
+   from the band itself and the photograph appears to rise out of it.
+   The 32 points between 22% and 54% are ~350px of gradient — shorten that
+   range and a seam appears. */
 const SCRIM = [
   "hidden lg:block",
-  "bg-gradient-to-r from-paper-white from-22%",
-  "via-paper-white/70 via-34% to-transparent to-54%",
+  "bg-gradient-to-r from-trust-blue from-22%",
+  "via-trust-blue/75 via-36% to-transparent to-56%",
 ].join(" ");
 
 function ArrowIcon() {
@@ -211,13 +214,13 @@ export default function HeroBleed() {
     <section
       onFocusCapture={() => setHeld(true)}
       onBlurCapture={() => setHeld(false)}
-      className="relative -mt-[var(--header-h)] overflow-hidden bg-paper-white pt-[var(--header-h)] lg:min-h-[46rem]"
+      className="relative -mt-[var(--header-h)] overflow-hidden bg-trust-blue pt-[var(--header-h)] lg:min-h-[46rem]"
     >
       {/* The mark, oversized and pale, bled off the LEFT edge behind the
           copy. It sat in the seam before, where it covered the middle of
           the photograph — the one part of the band already doing a job.
           Over here it has nothing but white underneath it. */}
-      <Mark className="pointer-events-none absolute -left-[10%] top-1/2 z-0 hidden h-[34vw] w-[34vw] max-h-[34rem] max-w-[34rem] -translate-y-1/2 text-bumble-honey/[0.07] lg:block" />
+      <Mark className="pointer-events-none absolute -left-[10%] top-1/2 z-0 hidden h-[34vw] w-[34vw] max-h-[34rem] max-w-[34rem] -translate-y-1/2 text-paper-white/[0.06] lg:block" />
 
       <Container className="relative z-10">
         <div className="reveal max-w-xl py-14 md:py-20 lg:max-w-[38rem] lg:py-24">
@@ -250,21 +253,25 @@ export default function HeroBleed() {
           {/* Keyed by POSITION, never by the words — see RISE AND SET. These
               elements have to survive the slide change for the transition
               to have anything to run from. */}
-          <h1 className="mt-6 text-[length:clamp(2.5rem,5.2vw,4rem)] font-bold leading-[1.05] tracking-heading-lg">
+          {/* `text-paper-white` on the h1 ITSELF: styles/index.css sets
+              :where(h1,h2,h3,h4) to Deep Trust Blue, and a colour declared
+              on the element beats one inherited from a wrapper — on this
+              band that is Deep Trust Blue on Deep Trust Blue. */}
+          <h1 className="mt-6 text-[length:clamp(2.5rem,5.2vw,4rem)] font-bold leading-[1.05] tracking-heading-lg text-paper-white">
             {slide.headline.map((line, i) => (
               <span key={i} {...rise(i + 1, "block")}>
                 {line}
               </span>
             ))}
-            {/* The one accented line. Sky Blue against the Deep Trust Blue
-                the rest of the headline inherits from styles/index.css —
-                the palette's own emphasis, not a highlight colour. */}
+            {/* The one accented line. Sky Blue against the white of the
+                rest of the headline — the palette's own emphasis, not a
+                highlight colour. */}
             <span {...rise(accentOrder, "block text-bumble-honey")}>
               {slide.headlineAccent}
             </span>
           </h1>
 
-          <p {...rise(accentOrder + 1, "mt-6 max-w-prose text-graphite")}>
+          <p {...rise(accentOrder + 1, "mt-6 max-w-prose text-paper-white/80")}>
             {slide.body}
           </p>
 
@@ -277,7 +284,7 @@ export default function HeroBleed() {
               <ArrowIcon />
             </Button>
             <Button
-              variant="outline"
+              variant="outlineInverse"
               to={HERO_BLEED.ctas.secondary.to}
               className="gap-3 py-3 pl-3"
             >
@@ -308,7 +315,7 @@ export default function HeroBleed() {
                     "h-2 cursor-pointer rounded-full transition-[width,background-color] duration-300",
                     i === index
                       ? "w-8 bg-bumble-honey"
-                      : "w-2 bg-bumble-ink/20 hover:bg-bumble-ink/40"
+                      : "w-2 bg-paper-white/30 hover:bg-paper-white/60"
                   )}
                 />
               ))}
@@ -319,7 +326,7 @@ export default function HeroBleed() {
                 rather than announced as an instruction nobody can act on. */}
             <p
               aria-hidden="true"
-              className="hidden items-center gap-4 text-[length:var(--text-caption)] uppercase tracking-[0.2em] text-graphite lg:flex"
+              className="hidden items-center gap-4 text-[length:var(--text-caption)] uppercase tracking-[0.2em] text-paper-white/70 lg:flex"
             >
               <svg
                 viewBox="0 0 12 40"

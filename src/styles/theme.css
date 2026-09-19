@@ -1,0 +1,116 @@
+/* =========================================================
+   theme.css — THE design system. Single source of truth.
+
+   Tailwind v4 reads this `@theme` block and emits a utility for every
+   variable in it: `--color-bumble-honey` becomes `bg-bumble-honey` /
+   `text-bumble-honey` / `border-bumble-honey`, `--text-display` becomes
+   `text-display`, and so on. Add a token here and the utility exists;
+   there is no JS config to keep in step.
+
+   ⚠ NO HEX CODES ANYWHERE IN src/ EXCEPT THIS FILE. Every colour the site
+   uses is named here. A component that needs a literal reaches for the
+   utility or the custom property in variables.css, never for `#ffdb5b`.
+
+   Generated from design/tokens.json (DTCG) — see design/DESIGN.md for the
+   rationale behind each value.
+========================================================= */
+@theme {
+  /* ---------------- Colours ----------------
+     The RBB palette (design/DESIGN.md): two blues, one green, three
+     neutrals. The token NAMES are historical — they date from the
+     Bumble-derived layout the site was built on — and are kept so the
+     hundreds of utilities in components stay valid. Read them by role:
+       bumble-honey  → Bright Sky Blue   bands, frames, highlights, accents
+       pollen / mist → Light Gray        cards, sections, quiet surfaces
+       bumble-ink    → Charcoal          body text, icons, borders
+       trust-blue    → Deep Trust Blue   headlines, wordmark, nav, links
+       growth-green  → Growth Green      the filled call-to-action button */
+  --color-bumble-honey: #00adef;
+  --color-pollen: #f5f7fa;
+  --color-bumble-ink: #3a3a3a;
+  --color-paper-white: #ffffff;
+  --color-mist: #f5f7fa;
+  --color-charcoal: #3a3a3a;
+  --color-graphite: #575656; /* helper text — a neutral between Charcoal and Light Gray */
+  --color-onyx: #3a3a3a;
+  --color-trust-blue: #10437c;
+  --color-growth-green: #5cb85c;
+
+  /* ---------------- Typography ----------------
+     BumbleSans is proprietary; DM Sans is the substitute named in
+     DESIGN.md. The stack degrades to the system UI face, never to
+     Helvetica — DESIGN.md rules it out as too clinical. */
+  --font-bumblesans:
+    "BumbleSans", "DM Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+
+  /* The accent face — a signature, not a typeface the system sets text in.
+     It has exactly one job: the handwritten line beside the bleed hero's
+     photograph. Anything a reader has to READ stays in the sans above;
+     a script face at body size is a legibility problem, and at heading
+     size it competes with the wordmark. */
+  --font-script: "Dancing Script", "Brush Script MT", cursive;
+
+  /* Type scale. Each size ships with its own leading and tracking, so
+     `text-body` alone is never the whole story — pair it with
+     `leading-body tracking-body`. The positive tracking at every size is
+     what gives the face its warm, open cadence; never zero it out. */
+  --text-caption: 16px;
+  --leading-caption: 1.5;
+  --tracking-caption: 0.11px;
+  --text-body: 18px;
+  --leading-body: 1.5;
+  --tracking-body: 0.2px;
+  --text-subheading: 22px;
+  --leading-subheading: 1.33;
+  --tracking-subheading: 0.32px;
+  --text-heading-sm: 28px;
+  --leading-heading-sm: 1.25;
+  --tracking-heading-sm: 0.43px;
+  --text-heading: 40px;
+  --leading-heading: 1.15;
+  --tracking-heading: 0.64px;
+  --text-heading-lg: 56px;
+  --leading-heading-lg: 1.1;
+  --tracking-heading-lg: 0.8px;
+  --text-display: 80px;
+  --leading-display: 1;
+  --tracking-display: 1.36px;
+
+  /* ---------------- Spacing ----------------
+     ⚠ DELIBERATELY NOT `--spacing-8: 8px` and friends, which is what the
+     exported token file carried. In Tailwind v4 `--spacing-<key>` overrides
+     that STEP of the spacing scale, so `--spacing-8: 8px` silently redefines
+     `p-8`, `gap-8`, `mt-8` … from 32px to 8px across the whole app — while
+     `p-6` and `p-10`, which the export does not name, stay on the default
+     scale. The result is a scale where p-6 and p-24 are both 24px and p-8 is
+     smaller than p-6.
+
+     The design's base unit is 4px and Tailwind's default scale is ALSO 4px,
+     so the token values already exist natively — the export was describing
+     the scale, not changing it:
+       8px→p-2   12px→p-3  16px→p-4  20px→p-5  24px→p-6
+       32px→p-8  36px→p-9  40px→p-10 48px→p-12
+     The px-named aliases are kept as plain custom properties in
+     variables.css for hand-written CSS, where they collide with nothing. */
+  --spacing: 4px;
+
+  /* ---------------- Radius ----------------
+     Softness is non-negotiable: 16-24px on cards, buttons and nav,
+     1000px on badges, 9px on the small app-store chips. Nothing in this
+     system has a sharp corner. */
+  --radius-lg: 9px; /* small elements — store badges */
+  --radius-2xl: 16px; /* buttons, nav pills, photos */
+  --radius-3xl: 24px; /* cards */
+  --radius-full: 1000px; /* badges and pills */
+
+  /* ---------------- Shadow ----------------
+     One shadow, a whisper at 12%. Never stack it, never intensify it,
+     never tint it. */
+  --shadow-sm: rgba(58, 58, 58, 0.12) 0px 1px 8px 0px;
+
+  /* ---------------- Layout ----------------
+     The contained column. Full-bleed bands break out of it on purpose;
+     everything else snaps back to it. */
+  --container-page: 1320px;
+}

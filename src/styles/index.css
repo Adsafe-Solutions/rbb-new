@@ -1,0 +1,108 @@
+/* =========================================================
+   Base layer.
+
+   Tokens live in theme.css (Tailwind utilities) and variables.css (plain
+   custom properties). Nothing here declares a colour of its own.
+
+   Everything else is utilities in the components themselves. The rules
+   below earn their place because there is nowhere else to put them:
+   they style the document itself, or markup no component owns.
+========================================================= */
+@import "tailwindcss";
+@import "./theme.css";
+@import "./variables.css";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    /* The hero cards and reveal transitions are decorative — a reader who
+       has asked for stillness gets the finished state immediately rather
+       than a faster version of the animation. */
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* `clip`, NOT `hidden`. overflow-x:hidden turns body into a scroll
+     container, which silently kills `position: sticky` for every
+     descendant and changes how absolutely positioned children resolve.
+     `clip` cuts the same overflow without creating a scroll container.
+
+     The hero's tilted cards and the oversized wordmark both overhang the
+     viewport on small screens; this is what stops them scrolling the page
+     sideways. */
+  body {
+    @apply overflow-x-clip bg-paper-white font-bumblesans text-bumble-ink antialiased;
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    letter-spacing: var(--tracking-body);
+  }
+
+  /* Headlines are Deep Trust Blue, body is Charcoal — the palette's
+     split between "primary communication" and "body text". `:where()`
+     keeps this at zero specificity, so any utility on a heading (white
+     on a dark card, graphite in the footer) still wins. */
+  :where(h1, h2, h3, h4) {
+    color: var(--color-trust-blue);
+  }
+
+  /* Never #000. The palette's Charcoal is the darkest value; a true
+     black next to it reads as a mistake. */
+  ::selection {
+    background: var(--color-bumble-honey);
+    color: var(--color-bumble-ink);
+  }
+
+  /* One focus ring for the site, on the ink so it reads on both the white
+     canvas and the honey bands. Keyboard only — `:focus-visible`, so a
+     mouse click on a card does not light it up. */
+  :focus-visible {
+    outline: 2px solid var(--color-bumble-ink);
+    outline-offset: 3px;
+    border-radius: var(--radius-small-elements);
+  }
+}
+
+@layer components {
+  /* Scroll-reveal. The element sits shifted and transparent until the
+     IntersectionObserver in useReveal adds `.in`.
+
+     ⚠ Applied by a hook that scans the DOM on mount — content rendered
+     LATER never gets observed unless the hook re-runs. Anything async
+     should carry its own CSS animation instead. */
+  .reveal {
+    @apply translate-y-6 opacity-0;
+    transition:
+      opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .reveal.in {
+    @apply translate-y-0 opacity-100;
+  }
+
+  /* Entrance for content swapped in place (a tab panel, a carousel slot).
+     A keyframe, not a transition: the element is remounted on every
+     change, so there is no previous state to transition from. Same curve
+     as .reveal so the two read as one motion. */
+  .enter {
+    animation: enter 450ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+}

@@ -50,12 +50,11 @@ export default function AppealSpotlight({
   alt,
 }) {
   return (
-    /* Short at the bottom on purpose: on the homepage the donate widget for
-       the same appeal follows directly, and a full band of space between
-       them split one story into two. */
-    <section className="pb-4 pt-16 md:pb-6 md:pt-24">
+    /* Tighter than a full section: this sits straight after the hero as a
+       compact "what is happening now", not as a chapter of its own. */
+    <section className="py-12 md:py-16">
       <Container>
-        <div className="reveal grid overflow-hidden rounded-3xl bg-paper-white shadow-sm lg:grid-cols-[5fr_7fr]">
+        <div className="reveal grid overflow-hidden rounded-3xl bg-paper-white shadow-sm lg:grid-cols-[4fr_7fr]">
           <div className="relative aspect-[4/3] overflow-hidden rounded-br-[4rem] lg:aspect-auto lg:rounded-br-none lg:rounded-tr-[6rem]">
             <img
               src={src}
@@ -78,14 +77,14 @@ export default function AppealSpotlight({
             </span>
           </div>
 
-          <div className="p-8 md:p-12 lg:p-14">
+          <div className="p-8 md:p-10 lg:p-12">
             <p className="text-[length:var(--text-caption)] font-medium uppercase tracking-[0.18em] text-bumble-honey">
               {kicker}
             </p>
-            <h2 className="mt-3 font-bold text-[length:var(--text-heading)] leading-heading tracking-heading md:text-[length:var(--text-heading-lg)] md:leading-heading-lg md:tracking-heading-lg">
+            <h2 className="mt-3 font-bold text-[length:var(--text-heading)] leading-heading tracking-heading">
               {heading}
             </h2>
-            <p className="mt-5 max-w-prose text-graphite">{body}</p>
+            <p className="mt-4 max-w-prose text-graphite">{body}</p>
 
             {partners && (
               <p className="mt-5 text-[length:var(--text-caption)] leading-caption tracking-caption text-graphite">
@@ -94,22 +93,29 @@ export default function AppealSpotlight({
               </p>
             )}
 
-            <dl className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
+            {/* Three columns from `sm` only. At phone width a third of the card
+                is about 60px, and "225,610" set as a heading clips to
+                "225,6". Below sm each figure is a row instead — number
+                left, label beside it — which costs a little height and
+                loses nothing. */}
+            <dl className="mt-7 grid gap-2 sm:grid-cols-3 sm:gap-3">
               {stats.map((stat) => (
                 <div
                   key={stat.label}
                   className={cx(
-                    "flex flex-col-reverse justify-end rounded-2xl p-5",
+                    "flex flex-row-reverse items-baseline justify-end gap-3 rounded-2xl px-5 py-3.5",
+                    "sm:flex-col-reverse sm:items-start sm:gap-0 sm:p-5",
                     stat.highlight ? "bg-trust-blue text-paper-white" : "bg-mist"
                   )}
                 >
                   {/* <dt> comes first in the markup, so a screen reader
                       hears "People reached, 225,610" — label, then value.
-                      `flex-col-reverse` flips only the PAINTED order, so
-                      the eye gets the number first. */}
+                      The -reverse directions flip only the PAINTED order,
+                      so the eye gets the number first: to its left on a
+                      phone, above it from sm up. */}
                   <dt
                     className={cx(
-                      "mt-1 text-[length:var(--text-caption)] leading-caption tracking-caption",
+                      "text-[length:var(--text-caption)] leading-caption tracking-caption sm:mt-1",
                       stat.highlight ? "text-paper-white/80" : "text-graphite"
                     )}
                   >
@@ -127,7 +133,7 @@ export default function AppealSpotlight({
               ))}
             </dl>
 
-            <div className="mt-9 flex flex-wrap items-center gap-4">
+            <div className="mt-8 flex flex-wrap items-center gap-4">
               <Button href={ctas.primary.href} to={ctas.primary.to} className="gap-3">
                 {ctas.primary.label}
                 <ArrowIcon />

@@ -19,12 +19,13 @@ import kitchen from "../assets/ngo-kitchen.jpg"; /* Eden FC, 20859655 */
 import sudan from "../assets/ngo-sudan.jpg"; /* Ahmed Akacha, 10629442 */
 import waterChild from "../assets/ngo-water-child.jpg"; /* Ahmed Akacha, 10214733 */
 import waterPump from "../assets/ngo-water-pump.jpg"; /* Matazu Multimedia, 32154739 */
+import yemenChild from "../assets/hero-water.jpg"; /* Illustrate Digital UG, 28101461 */
 import tentGirl from "../assets/ngo-tent-girl.jpg"; /* Ahmed Akacha, 27198722 */
 import volunteers from "../assets/ngo-volunteers.jpg"; /* RDNE Stock Project, 6646918 */
 import volunteer from "../assets/ngo-volunteer.jpg"; /* RDNE Stock Project, 6646893 */
 import events from "../assets/ngo-events.jpg"; /* Quyn Phạm, 13418669 */
 import fundraise from "../assets/ngo-fundraise.jpg"; /* cottonbro, 6591154 */
-import about from "../assets/ngo-about.jpg"; /* RDNE Stock Project, 6646886 */
+import medical from "../assets/zakat-medical.jpg"; /* Pavel Danilyuk, 5998449 */
 import legacySewing from "../assets/zakat-sewing.jpg"; /* Illustrate Digital UG, 20853652 */
 import legacyBoy from "../assets/zakat-orphan.jpg"; /* umar-muazu, 32662981 */
 import legacyDig from "../assets/gifts-hero.jpg";
@@ -44,29 +45,26 @@ export const NGO = {
      ⚠ The partner names are a factual claim carried over from the source
      copy. Confirm them against RBB's actual agreements before launch. */
   gaza: {
-    /* The pill says whether it is live; the kicker says what KIND of
-       work this is. A kicker of "Gaza" over a heading ending "in Gaza"
-       said the same word twice in two lines. */
     status: "Active now",
     kicker: "Emergency appeal",
     heading: "Our Work in Gaza",
-    body: `${BRAND.name} works through partners on the ground to reach families in Gaza with hot meals, emergency food parcels, bread and shelter — delivered as close to the need as access allows.`,
-    partners: {
-      label: "Delivering with",
-      names: ["UN World Food Programme", "International Organization for Migration"],
-    },
-    /* Values are the NUMBER only; the unit lives in the label. "158 Metric
-       Tonnes of Bread" as a value wrapped to three lines beside two-line
-       neighbours and made the row look broken. */
+    /* One sentence. This sits directly under the hero now, and a second
+       wall of copy there pushes everything else down the page before
+       anyone has scrolled. The detail belongs to /reports. */
+    body: "Hot meals, food parcels, bread and shelter for families in Gaza — delivered through partners on the ground.",
+    /* Three, not four: the food-pack count was the smallest and least
+       telling of the set. `partners` is dropped from display too — it
+       named two UN agencies, a claim still waiting to be confirmed, and
+       the compact version has no room to hedge it. AppealSpotlight still
+       renders `partners` if an entry supplies it. */
     stats: [
       { value: "225,610", label: "People reached", highlight: true },
       { value: "417,380", label: "Hot meals served" },
-      { value: "500", label: "Emergency food packs" },
       { value: "158 t", label: "Bread delivered" },
     ],
     ctas: {
       primary: { label: "Donate to Gaza", href: "#donate-gaza" },
-      secondary: { label: "Read the Gaza report", to: "/reports" },
+      secondary: { label: "Read the report", to: "/reports" },
     },
     src: tentGirl,
     alt: "A young girl standing among the tents of a displacement camp",
@@ -91,13 +89,25 @@ export const NGO = {
     alt: "A woman carrying a baby walks with a child past tents at a camp for displaced families",
   },
 
-  action: {
+  /* Yemen, as the Sudan campaign's mirror: same component, flipped by the
+     homepage, so the two appeals read as a pair zigzagging across the page. It used to
+     be a charcoal ActionCard, a different idiom sitting straight after
+     Sudan, which made two appeals of equal weight look unrelated.
+
+     `tag` is not shown by CampaignHero — Sudan has no tag and the pair
+     should match. It is kept because the component catalog still renders
+     ActionCard from this entry, and that card needs one.
+
+     The photograph changed too: it was the girl at the tap, which "What
+     We Fight For" already shows higher up the same page. */
+  yemen: {
     tag: "Yemen Emergency",
     heading: "Help Save Lives in Yemen",
+    accent: "Save Lives",
     body: "Provide essential aid and support families in need. 19.5 million people across Yemen require humanitarian assistance. $50 can feed 100 people per day for a month through the Yemen Bread Factory, which makes 10,000 loaves of bread daily.",
     cta: { label: "Feed 200 people in Yemen", to: "/donate" },
-    src: waterChild,
-    alt: "A young girl drinking water from an outdoor tap",
+    src: yemenChild,
+    alt: "A child drinking straight from the spout of a hand pump",
   },
 
   getInvolved: {
@@ -194,42 +204,75 @@ export const NGO = {
     sideStat: { value: "Since 1993", label: "Delivering aid where it is needed most" },
   },
 
-  /* This slot used to hold an "Islamic Resources" band under a photograph
-     of a mosque. RBB is not a faith-specific organisation, so a single
-     tradition cannot stand at the centre of the homepage — and standing
-     for "faith" in general is not a job one mosque photograph can do.
+  /* Reports & Accountability. This slot used to hold an "Islamic
+     Resources" band; then a plain FeatureBanner asking for trust with a
+     stock photograph and one sentence. A section about accountability has
+     to SHOW something, so it now carries the commitments and the actual
+     documents a donor would go and check.
 
-     The BAND stays rather than the section being deleted: the homepage's
-     rhythm is an alternation of full-bleed and contained surfaces (see
-     pages/Home) and pulling one out leaves a hole, not a saving. What it
-     holds now is the thing a donor of any faith actually wants next —
-     where the money went. */
-  resources: {
-    surface: "honey",
-    src: fundraise,
-    alt: "Two fundraisers going through paperwork together beside a crate of supplies",
-    heading: "Reports & Accountability",
-    body: "Every appeal is accounted for. Read our annual reports and field updates to see exactly what your giving bought, and where.",
+     ⚠ No figures here on purpose. A "where your money goes" chart is the
+     obvious move and the wrong one until RBB supplies audited numbers — an
+     invented 92% on the accountability section is the worst possible
+     place for an invented number.
+
+     ⚠ The commitments are claims. "Independently audited" and the CRA
+     registration repeat what the site already says elsewhere; confirm
+     both before launch. The document links go to the /reports stub until
+     the real PDFs exist. */
+  accountability: {
+    kicker: "Reports & Accountability",
+    heading: "Every gift, accounted for.",
+    body: "We publish where the money goes — not a summary on request. Annual reports, audited accounts and field updates, so you can see exactly what your giving bought, and where.",
+    commitments: [
+      "Independently audited every year",
+      "Restricted gifts tracked and reported separately",
+      "Registered charity with the Canada Revenue Agency",
+    ],
+    documents: [
+      { title: "Annual Report", meta: "The year in review · PDF", to: "/reports" },
+      { title: "Audited Financial Statements", meta: "Independent audit · PDF", to: "/reports" },
+      { title: "Field Updates", meta: "From each appeal, as it happens", to: "/reports" },
+    ],
     cta: { label: "Read our reports", to: "/reports" },
   },
 
+  /* Who we are. This was a FeatureBanner headed just "RBB" — a heading that
+     told the reader nothing — with three centred sentences and no way to
+     go further. The facts are the same; they now have a headline, the
+     three principles they imply, and the registration as a credential
+     rather than a sentence.
+
+     "Impartial" says what it means — aid by need alone, not by faith —
+     which is the promise the faith-neutral rework of the site rests on. */
   about: {
-    surface: "pollen",
-    src: about,
-    alt: "A volunteer handing a box marked FOOD AID to another person",
-    heading: BRAND.name,
+    kicker: `About ${BRAND.name}`,
+    heading: "Impartial, efficient, and open about both.",
     body: [
-      `${BRAND.name} is a registered charity with the Canada Revenue Agency.`,
-      "We are an international aid agency and NGO working globally to help those affected by natural disasters, conflict and poverty.",
-      "We ensure your donations reach the people that really need them and provide an efficient, impartial and transparent service.",
+      "We are an international aid agency working to help people affected by natural disasters, conflict and poverty — whoever and wherever they are.",
+      "We make sure your donations reach the people who really need them, with an efficient, impartial and transparent service.",
     ],
+    pillars: [
+      { title: "Impartial", body: "Aid goes by need alone — never by faith, ethnicity or politics." },
+      { title: "Efficient", body: "Field teams and local partners, so more of every gift arrives." },
+      { title: "Transparent", body: "Reports and audited accounts, published every year." },
+    ],
+    credential: { label: "Registered charity", value: "Canada Revenue Agency" },
+    cta: { label: "More about us", to: "/about-us" },
+    src: medical,
+    alt: "A doctor examining a young girl at a medical camp",
   },
 
+  /* The lifetime figures, last thing before the footer. They used to sit
+     there with no heading and nothing on the cards saying whose numbers
+     they were. `icon` picks one of the inline glyphs in ImpactStats
+     (people | relief | water); a stat without one simply has no tile. */
   overallStats: {
+    heading: "Our Impact Since 1993",
+    branded: true,
     stats: [
-      { label: "Beneficiaries Supported", value: "3 Million+", note: "Received life-saving support" },
-      { label: "Emergency Beneficiaries", value: "1.2 Million+", note: "Provided with emergency relief" },
-      { label: "Water", value: "1 Million+", note: "Gained access to clean water" },
+      { icon: "people", label: "Beneficiaries Supported", value: "3 Million+", note: "Received life-saving support" },
+      { icon: "relief", label: "Emergency Beneficiaries", value: "1.2 Million+", note: "Provided with emergency relief" },
+      { icon: "water", label: "Water", value: "1 Million+", note: "Gained access to clean water" },
     ],
   },
 };

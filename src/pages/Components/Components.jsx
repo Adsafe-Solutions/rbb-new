@@ -19,6 +19,8 @@ import Story from "../../components/Story/Story.jsx";
 import GetApp from "../../components/GetApp/GetApp.jsx";
 import Footer from "../../components/Footer/Footer.jsx";
 import FeatureBanner from "../../components/FeatureBanner/FeatureBanner.jsx";
+import AccountabilityBand from "../../components/AccountabilityBand/AccountabilityBand.jsx";
+import AboutIntro from "../../components/AboutIntro/AboutIntro.jsx";
 import ImpactStats from "../../components/ImpactStats/ImpactStats.jsx";
 import DonateWidget from "../../components/DonateWidget/DonateWidget.jsx";
 import CampaignHero from "../../components/CampaignHero/CampaignHero.jsx";
@@ -286,11 +288,14 @@ export default function Components() {
         note="The sections that stack into the homepage below the hero. Each takes its content as props, so the same component serves several programmes — FeatureBanner and ImpactStats both appear more than once on the page."
       >
         <div className="flex flex-col gap-6">
-          <Frame label="FeatureBanner · honey">
-            <FeatureBanner {...NGO.resources} />
+          <Frame label="AccountabilityBand">
+            <AccountabilityBand {...NGO.accountability} />
           </Frame>
-          <Frame label="FeatureBanner · pollen, with CTA">
-            <FeatureBanner {...NGO.about} cta={NGO.resources.cta} />
+          <Frame label="AboutIntro">
+            <AboutIntro {...NGO.about} />
+          </Frame>
+          <Frame label="FeatureBanner">
+            <FeatureBanner {...NGO.about} />
           </Frame>
           <Frame label="ImpactStats · four, highlighted">
             <ImpactStats {...NGO.overallStats} />
@@ -304,8 +309,11 @@ export default function Components() {
           <Frame label="CampaignHero">
             <CampaignHero {...NGO.campaign} />
           </Frame>
+          <Frame label="CampaignHero · flip">
+            <CampaignHero {...NGO.yemen} flip />
+          </Frame>
           <Frame label="ActionCard">
-            <ActionCard {...NGO.action} />
+            <ActionCard {...NGO.yemen} />
           </Frame>
           <Frame label="GetInvolved">
             <GetInvolved {...NGO.getInvolved} />

@@ -1,13 +1,13 @@
 import Hero from "../../components/Hero/Hero.jsx";
 import HeroBleed from "../../components/HeroBleed/HeroBleed.jsx";
-import FeatureBanner from "../../components/FeatureBanner/FeatureBanner.jsx";
+import AccountabilityBand from "../../components/AccountabilityBand/AccountabilityBand.jsx";
+import AboutIntro from "../../components/AboutIntro/AboutIntro.jsx";
 import FightFor from "../../components/FightFor/FightFor.jsx";
 import AppealSpotlight from "../../components/AppealSpotlight/AppealSpotlight.jsx";
 import LegacyCollage from "../../components/LegacyCollage/LegacyCollage.jsx";
 import ImpactStats from "../../components/ImpactStats/ImpactStats.jsx";
 import DonateWidget from "../../components/DonateWidget/DonateWidget.jsx";
 import CampaignHero from "../../components/CampaignHero/CampaignHero.jsx";
-import ActionCard from "../../components/ActionCard/ActionCard.jsx";
 import GetInvolved from "../../components/GetInvolved/GetInvolved.jsx";
 import ImpactMosaic from "../../components/ImpactMosaic/ImpactMosaic.jsx";
 import useReveal from "../../hooks/useReveal.js";
@@ -19,20 +19,24 @@ import { NGO } from "../../content/index.js";
      hero           HeroBleed      the rotating photograph, copy on white
                                    (or Hero, the logo-framed one — the
                                    switch is SECTIONS.homeHero)
+     white          AppealSpotlight the live Gaza appeal, compact — first
+                                   thing after the hero, because it is the
+                                   thing happening now
      mist band      FightFor       what we fight for — photo + card
-     white          AppealSpotlight the Gaza appeal — photo, story, four
-                                   figures and the way to give, in one card
-     white          DonateWidget   the appeal form (the spotlight's
+     white          DonateWidget   the Gaza form (the spotlight's
                                    "Donate to Gaza" jumps here)
-     white          CampaignHero   investigation lead with the swooped photo
-     ink card       ActionCard     the petition
+     white          CampaignHero   Sudan — copy left, swooped photo right
+     white          CampaignHero   Yemen — the same, flipped (photo left),
+                                   so the two appeals zigzag as a pair
      ink card       GetInvolved    volunteer / events / fundraise tabs
      mist band      LegacyCollage  thirty years in one sentence, beside a
                                    three-photo collage — the claim, just
                                    before the mosaic that backs it up
      honey band     ImpactMosaic   stats and photos in three columns
-     honey banner   FeatureBanner  resources
-     pollen banner  FeatureBanner  about
+     blue band      AccountabilityBand  reports: the commitments beside the
+                                        documents that back them
+     white          AboutIntro     who we are — principles, and the
+                                   registration pinned to the photograph
      white          ImpactStats    three lifetime figures
 
    The alternation is the point — full-bleed yellow, then contained white,
@@ -47,22 +51,24 @@ export default function Home() {
   return (
     <>
       {SECTIONS.homeHero === "bleed" ? <HeroBleed /> : <Hero />}
-      <FightFor {...NGO.fightFor} />
       <AppealSpotlight {...NGO.gaza} />
-      {/* The spotlight's "Donate to Gaza" button jumps here — the widget
-          for the same appeal, directly below. `scroll-mt` because the
-          header is fixed: without it the jump lands with the widget's top
-          under the header. */}
+      <FightFor {...NGO.fightFor} />
+      {/* The spotlight's "Donate to Gaza" button jumps here. The widget
+          stays below FightFor rather than following the spotlight up the
+          page: a full donation form straight after the hero would make the
+          top of the page heavier, and the jump works across any distance.
+          `scroll-mt` because the header is fixed — without it the jump
+          lands with the widget's top under the header. */}
       <div id="donate-gaza" className="scroll-mt-[var(--header-h)]">
         <DonateWidget {...NGO.donate} />
       </div>
       <CampaignHero {...NGO.campaign} />
-      <ActionCard {...NGO.action} />
+      <CampaignHero {...NGO.yemen} flip joined />
       <GetInvolved {...NGO.getInvolved} />
       <LegacyCollage {...NGO.legacy} />
       <ImpactMosaic {...NGO.mosaic} />
-      <FeatureBanner {...NGO.resources} />
-      <FeatureBanner {...NGO.about} />
+      <AccountabilityBand {...NGO.accountability} />
+      <AboutIntro {...NGO.about} />
       <ImpactStats {...NGO.overallStats} surface="paper" />
     </>
   );

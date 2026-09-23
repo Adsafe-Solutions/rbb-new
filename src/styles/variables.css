@@ -107,4 +107,32 @@
 
   /* Header height, read by the hero's top padding and by scroll offsets. */
   --header-h: 96px;
+
+  /* Gaps between cards — THE rule for the space between sibling cards,
+     used through the gap-cards / gap-tiles / gap-stack utilities in
+     index.css. Pick by what the cards ARE, never by eye:
+
+       cards  separate cards side by side in a grid, row or carousel —
+              each one a thing of its own (a project, a post, a step)
+       tiles  pieces of ONE composition — the photos of a collage —
+              set tighter so they read as a single picture
+       stack  full-width cards in a vertical list (FAQ, documents) —
+              tight, because each row is already a full-width shape
+
+     Not for the gutter between a text column and its photograph in a
+     split layout: that is page layout, not a gap between cards.
+
+     Here and not in theme.css because they change at a breakpoint, and
+     @theme cannot hold a media query. Nor as `--spacing-*`: see the
+     warning in theme.css. */
+  --gap-cards: 16px;
+  --gap-tiles: 12px;
+  --gap-stack: 12px;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --gap-cards: 24px;
+    --gap-tiles: 16px;
+  }
 }

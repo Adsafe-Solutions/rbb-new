@@ -93,7 +93,7 @@ export default function AccountabilityBand({
 
         {/* The documents. Real links, one per document, so each is its
             own tab stop and its own destination the day the PDFs exist. */}
-        <ul className="reveal space-y-4">
+        <ul className="reveal flex flex-col gap-stack">
           {documents.map((doc) => (
             <li key={doc.title}>
               <Link

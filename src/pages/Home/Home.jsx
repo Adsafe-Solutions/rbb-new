@@ -10,6 +10,7 @@ import DonateWidget from "../../components/DonateWidget/DonateWidget.jsx";
 import CampaignHero from "../../components/CampaignHero/CampaignHero.jsx";
 import GetInvolved from "../../components/GetInvolved/GetInvolved.jsx";
 import ImpactMosaic from "../../components/ImpactMosaic/ImpactMosaic.jsx";
+import RegularGiving from "../../components/RegularGiving/RegularGiving.jsx";
 import useReveal from "../../hooks/useReveal.js";
 import { SECTIONS } from "../../config/sections.js";
 import { NGO } from "../../content/index.js";
@@ -38,6 +39,8 @@ import { NGO } from "../../content/index.js";
      white          AboutIntro     who we are — principles, and the
                                    registration pinned to the photograph
      white          ImpactStats    three lifetime figures
+     blue card      RegularGiving  the monthly-giving ask — the figures
+                                   above are the case, this is the close
 
    The alternation is the point — full-bleed yellow, then contained white,
    is the punctuation the whole page is built on. Reordering these changes
@@ -70,6 +73,7 @@ export default function Home() {
       <AccountabilityBand {...NGO.accountability} />
       <AboutIntro {...NGO.about} />
       <ImpactStats {...NGO.overallStats} surface="paper" />
+      <RegularGiving {...NGO.regular} />
     </>
   );
 }

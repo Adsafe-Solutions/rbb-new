@@ -116,6 +116,38 @@ const SPACING = [
   ["48px", "p-12"],
 ];
 
+/* The card-gap rule. Full class strings, not built from `name`: Tailwind
+   only generates utilities it finds written out literally. */
+const GAPS = [
+  {
+    name: "cards",
+    cls: "gap-cards",
+    value: "16px → 24px from md",
+    use: "Separate cards side by side in a grid, row or carousel.",
+    count: 3,
+    tile: "h-20 rounded-3xl bg-mist",
+    layout: "grid grid-cols-3",
+  },
+  {
+    name: "tiles",
+    cls: "gap-tiles",
+    value: "12px → 16px from md",
+    use: "Pieces of one composition — the photos of a collage.",
+    count: 4,
+    tile: "h-12 rounded-2xl bg-bumble-honey/40",
+    layout: "grid grid-cols-2",
+  },
+  {
+    name: "stack",
+    cls: "gap-stack",
+    value: "12px",
+    use: "Full-width cards in a vertical list — FAQ, documents.",
+    count: 3,
+    tile: "h-8 rounded-2xl bg-mist",
+    layout: "flex flex-col",
+  },
+];
+
 const RADII = [
   { name: "small elements", value: "9px", cls: "rounded-lg" },
   { name: "buttons / nav / photos", value: "16px", cls: "rounded-2xl" },
@@ -159,7 +191,7 @@ export default function DesignSystem() {
         title="Colour"
         note="Two blues, one green, three neutrals. The blues carry trust and the green is reserved for the call to action; token names are historical, read the swatch names for the role."
       >
-        <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="grid gap-cards sm:grid-cols-2 lg:grid-cols-4">
           {COLORS.map((color) => (
             <li key={color.token}>
               {/* The two lightest swatches carry a hairline — paper on
@@ -212,10 +244,36 @@ export default function DesignSystem() {
       </Section>
 
       <Section
+        title="Card gaps"
+        note="Every gap between sibling cards on the site is one of these three, picked by what the cards are — never a number chosen by eye. Split layouts (a text column beside its photograph) are page layout, not card gaps, and keep their own gutters."
+      >
+        <ul className="grid gap-cards md:grid-cols-3">
+          {GAPS.map((gap) => (
+            <li key={gap.name}>
+              <div className={cx(gap.layout, gap.cls)}>
+                {Array.from({ length: gap.count }, (_, i) => (
+                  <div key={i} className={gap.tile} />
+                ))}
+              </div>
+              <p className="mt-4 font-medium">
+                {gap.name} · <code>{gap.cls}</code>
+              </p>
+              <p className="text-[length:var(--text-caption)] tracking-caption text-graphite">
+                {gap.value}
+              </p>
+              <p className="mt-1 text-[length:var(--text-caption)] tracking-caption text-graphite">
+                {gap.use}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section
         title="Radius and elevation"
         note="Nothing in this system has a sharp corner. One shadow only, a whisper at 12% — never stacked, never tinted."
       >
-        <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="grid gap-cards sm:grid-cols-2 lg:grid-cols-4">
           {RADII.map((r) => (
             <li key={r.cls}>
               <div className={cx("h-24 bg-trust-blue", r.cls)} />

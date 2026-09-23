@@ -72,8 +72,8 @@ export default function OptionStrip({ heading, intro, items, surface = "paper" }
           className={cx(
             "reveal mt-10",
             scrolls
-              ? "flex snap-x snap-mandatory gap-6 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              : "grid gap-6 md:grid-cols-3"
+              ? "flex snap-x snap-mandatory gap-cards overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              : "grid gap-cards md:grid-cols-3"
           )}
         >
           {items.map((item) => (

@@ -41,8 +41,8 @@ export default function ImpactMosaic({ leadStat, leadPhoto, feature, sidePhoto, 
   return (
     <section className="bg-mist py-20 md:py-32">
       <Container>
-        <div className="reveal grid gap-6 md:grid-cols-3">
-          <div className="flex flex-col gap-6">
+        <div className="reveal grid gap-cards md:grid-cols-3">
+          <div className="flex flex-col gap-cards">
             <StatCard {...leadStat} />
             <Picture {...leadPhoto} ratio="1/1" />
           </div>
@@ -67,7 +67,7 @@ export default function ImpactMosaic({ leadStat, leadPhoto, feature, sidePhoto, 
             </div>
           </div>
 
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-cards">
             <Picture {...sidePhoto} ratio="4/3" />
             <StatCard {...sideStat} />
           </div>

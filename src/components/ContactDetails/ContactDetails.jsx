@@ -68,7 +68,7 @@ export default function ContactDetails({ heading, subheading, body, tiles }) {
           <p className="mt-4 text-graphite">{body}</p>
         </div>
 
-        <ul className="reveal mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="reveal mt-14 grid gap-cards sm:grid-cols-2 lg:grid-cols-4">
           {tiles.map((tile) => (
             <li key={tile.title} className="rounded-3xl rounded-tr-[3rem] bg-mist p-8">
               <span className="grid h-12 w-12 place-items-center rounded-full bg-paper-white text-bumble-honey">

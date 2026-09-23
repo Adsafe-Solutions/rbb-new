@@ -89,7 +89,7 @@ export default function ImpactStats({ heading, stats, surface = "mist", branded 
 
         <ul
           className={cx(
-            "reveal grid gap-6 sm:grid-cols-2",
+            "reveal grid gap-cards sm:grid-cols-2",
             stats.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4",
             heading && "mt-14"
           )}

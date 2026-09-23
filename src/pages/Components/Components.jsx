@@ -185,7 +185,7 @@ export default function Components() {
         title="Photo"
         note="A photograph, or a tonal stand-in at the right aspect ratio when a real image hasn't landed yet — the layout holds its true shape either way."
       >
-        <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="grid gap-cards sm:grid-cols-2 lg:grid-cols-4">
           {PHOTO_RATIOS.map(([ratio, label]) => (
             <li key={ratio}>
               <Photo label={label} ratio={ratio} />

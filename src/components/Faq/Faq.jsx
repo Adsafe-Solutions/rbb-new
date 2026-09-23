@@ -28,7 +28,7 @@ export default function Faq({ heading, items }) {
           {heading}
         </h2>
 
-        <div className="reveal mx-auto mt-14 flex max-w-4xl flex-col gap-3">
+        <div className="reveal mx-auto mt-14 flex max-w-4xl flex-col gap-stack">
           {items.map((item) => (
             <details key={item.q} name="faq" className="group rounded-3xl bg-paper-white">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-6 px-8 py-6 font-semibold text-[length:var(--text-subheading)] leading-subheading tracking-subheading [&::-webkit-details-marker]:hidden">

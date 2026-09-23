@@ -12,7 +12,7 @@ export default function ProjectGrid({ heading, items }) {
           {heading}
         </h2>
 
-        <ul className="reveal mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="reveal mt-14 grid gap-cards sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
             <li key={item.title}>
               <Link

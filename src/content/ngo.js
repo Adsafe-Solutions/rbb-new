@@ -17,6 +17,7 @@ import { BRAND } from "./brand.js";
 
 import kitchen from "../assets/ngo-kitchen.jpg"; /* Eden FC, 20859655 */
 import sudan from "../assets/ngo-sudan.jpg"; /* Ahmed Akacha, 10629442 */
+import maternal from "../assets/gifts-maternal.jpg"; /* Mahyub Hamida, 30313887 */
 import waterChild from "../assets/ngo-water-child.jpg"; /* Ahmed Akacha, 10214733 */
 import waterPump from "../assets/ngo-water-pump.jpg"; /* Matazu Multimedia, 32154739 */
 import yemenChild from "../assets/hero-water.jpg"; /* Illustrate Digital UG, 28101461 */
@@ -274,6 +275,20 @@ export const NGO = {
       { icon: "relief", label: "Emergency Beneficiaries", value: "1.2 Million+", note: "Provided with emergency relief" },
       { icon: "water", label: "Water", value: "1 Million+", note: "Gained access to clean water" },
     ],
+  },
+
+  /* The regular-giving ask, closing the page. Monthly donors are what let
+     a field team plan past the next emergency, so the copy sells the
+     predictability rather than the amount. */
+  regular: {
+    /* One entry per line: the break before "regular donor" is a
+       deliberate typographic choice, not something any column width
+       would produce on its own. Lines still wrap on a narrow phone. */
+    heading: ["Make a difference.", "Become a", "regular donor"],
+    body: `Join a community of monthly givers whose steady support gives ${BRAND.name} the predictability and flexibility to reach people who need it most — before, during and after an emergency.`,
+    cta: { label: "Start giving", to: "/giving/monthly" },
+    src: maternal,
+    alt: "A health worker checks a baby held in their mother's arms at a clinic",
   },
 };
 

@@ -64,7 +64,7 @@ export default function Testimonials({ heading, items }) {
         <ul
           ref={strip}
           className={cx(
-            "reveal mt-10 flex snap-x snap-mandatory gap-6 overflow-x-auto pb-4",
+            "reveal mt-10 flex snap-x snap-mandatory gap-cards overflow-x-auto pb-4",
             "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           )}
         >

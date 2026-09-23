@@ -49,7 +49,7 @@ export default function BlogGrid({ heading, items, searchPlaceholder = "Search" 
         {visible.length === 0 ? (
           <p className="mt-14 text-graphite">Nothing matches “{query}”.</p>
         ) : (
-          <ul className="reveal mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="reveal mt-14 grid gap-cards sm:grid-cols-2 lg:grid-cols-3">
             {visible.map((post) => (
               <li key={post.slug} className="group flex flex-col">
                 <Link to={`/blogs/${post.slug}`} className="flex flex-1 flex-col">

@@ -38,6 +38,18 @@ it is the band that becomes the scroll container, not `body`.
 rendered later is never observed and would sit at `opacity: 0` forever. Give
 async content its own CSS animation.
 
+### Gaps between cards
+
+Three rules, as utilities (tokens in `variables.css`, utilities in
+`index.css`, live on `/design-system`). Pick by what the cards are:
+
+- `gap-cards` — sibling cards in a grid, row or carousel (16px → 24px at md)
+- `gap-tiles` — pieces of one composition, e.g. collage photos (12px → 16px)
+- `gap-stack` — full-width cards in a vertical list, e.g. FAQ (12px)
+
+Never `gap-6` / `gap-8` between cards. Gutters between a text column and
+its photograph in a split layout are page layout, not card gaps.
+
 ## Conventions
 
 - One folder per component, one per page: `components/Button/Button.jsx`.

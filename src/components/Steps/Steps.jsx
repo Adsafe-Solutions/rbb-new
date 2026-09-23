@@ -10,7 +10,7 @@ export default function Steps({ heading, items }) {
           {heading}
         </h2>
 
-        <ol className="reveal mt-14 grid gap-6 md:grid-cols-3">
+        <ol className="reveal mt-14 grid gap-cards md:grid-cols-3">
           {items.map((item, i) => (
             <li key={item.title} className="rounded-3xl rounded-tr-[3rem] bg-paper-white p-8 md:p-10">
               <span className="grid h-12 w-12 place-items-center rounded-full bg-mist font-bold text-[length:var(--text-subheading)] text-bumble-honey">

@@ -12,6 +12,20 @@
 @import "./theme.css";
 @import "./variables.css";
 
+/* The card-gap rule as utilities — see the tokens in variables.css for
+   which one to use when. `@utility` rather than a class so the variants
+   work (`md:gap-cards`, `gap-x-cards` is not needed — the rule is the
+   same both ways). */
+@utility gap-cards {
+  gap: var(--gap-cards);
+}
+@utility gap-tiles {
+  gap: var(--gap-tiles);
+}
+@utility gap-stack {
+  gap: var(--gap-stack);
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;

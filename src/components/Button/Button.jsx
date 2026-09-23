@@ -25,16 +25,28 @@ import { cx } from "../../lib/cx.js";
 const BASE = cx(
   "inline-flex cursor-pointer items-center justify-center gap-2",
   "whitespace-nowrap",
-  "text-[length:var(--text-body)] font-medium leading-none tracking-body",
+  "font-medium leading-none tracking-body",
   "transition-colors duration-200"
 );
 
+/* Padding and type size, by `size`. Same rule as above: they live in ONE
+   place per element, never as a default that a smaller size would have to
+   fight. `sm` is for buttons that share a card with other content — the
+   project cards, where two full-size buttons outweighed the story.
+   Padding applies only to the boxed variants; `pill` keeps its own box
+   and `link` has none. */
+const SIZES = {
+  md: { pad: "px-7 py-4", text: "text-[length:var(--text-body)]" },
+  sm: { pad: "px-4 py-2.5", text: "text-[length:var(--text-caption)]" },
+};
+const BOXED = new Set(["solid", "inverse", "outline", "outlineInverse", "ghost"]);
+
 const VARIANTS = {
   /* The primary. Green fill, paper text. Donate, submit, subscribe. */
-  solid: "rounded-2xl px-7 py-4 bg-growth-green text-paper-white hover:bg-trust-blue",
+  solid: "rounded-2xl bg-growth-green text-paper-white hover:bg-trust-blue",
 
   /* The same button on a dark or saturated ground. */
-  inverse: "rounded-2xl px-7 py-4 bg-paper-white text-trust-blue hover:bg-mist",
+  inverse: "rounded-2xl bg-paper-white text-trust-blue hover:bg-mist",
 
   /* The quiet second action beside `solid` — "watch the film" next to
      "get involved". NOT a second fill: it is the page's own ground with a
@@ -43,7 +55,7 @@ const VARIANTS = {
      ring thickens on hover rather than the box filling in, so it never
      starts competing with the green. */
   outline: cx(
-    "rounded-2xl px-7 py-4 bg-transparent text-trust-blue ring-1 ring-inset ring-bumble-ink/20",
+    "rounded-2xl bg-transparent text-trust-blue ring-1 ring-inset ring-bumble-ink/20",
     "transition-[box-shadow,background-color] hover:bg-paper-white hover:ring-bumble-ink/40"
   ),
 
@@ -52,7 +64,7 @@ const VARIANTS = {
      invisible on that band, and filling it white would make it a second
      `inverse` and break the rule of one filled button per decision. */
   outlineInverse: cx(
-    "rounded-2xl px-7 py-4 bg-transparent text-paper-white ring-1 ring-inset ring-paper-white/35",
+    "rounded-2xl bg-transparent text-paper-white ring-1 ring-inset ring-paper-white/35",
     "transition-[box-shadow,background-color] hover:bg-paper-white/10 hover:ring-paper-white/70"
   ),
 
@@ -61,7 +73,7 @@ const VARIANTS = {
   pill: "rounded-2xl bg-paper-white px-5 py-2.5 text-bumble-ink",
 
   /* Unfilled nav item and utility controls. */
-  ghost: "rounded-2xl px-7 py-4 bg-transparent text-bumble-ink hover:bg-paper-white/60",
+  ghost: "rounded-2xl bg-transparent text-bumble-ink hover:bg-paper-white/60",
 
   /* The underlined in-card link. Not a button shape at all — no padding,
      no radius — so it never reads as a second CTA next to the real one. */
@@ -73,6 +85,7 @@ const VARIANTS = {
 
 export default function Button({
   variant = "solid",
+  size = "md",
   to,
   href,
   type = "button",
@@ -80,7 +93,9 @@ export default function Button({
   children,
   ...rest
 }) {
-  const classes = cx(BASE, VARIANTS[variant] ?? VARIANTS.solid, className);
+  const kind = VARIANTS[variant] ? variant : "solid";
+  const box = SIZES[size] ?? SIZES.md;
+  const classes = cx(BASE, box.text, BOXED.has(kind) && box.pad, VARIANTS[kind], className);
 
   if (to) {
     return (

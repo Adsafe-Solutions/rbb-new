@@ -11,6 +11,7 @@ import Gifts from "./pages/Gifts/Gifts.jsx";
 import Volunteer from "./pages/Volunteer/Volunteer.jsx";
 import Blogs from "./pages/Blogs/Blogs.jsx";
 import Contact from "./pages/Contact/Contact.jsx";
+import About from "./pages/About/About.jsx";
 import Placeholder from "./pages/Placeholder/Placeholder.jsx";
 import NotFound from "./pages/NotFound/NotFound.jsx";
 import { NAV } from "./content/index.js";
@@ -26,7 +27,6 @@ import { SECTIONS } from "./config/sections.js";
    External links are excluded; they are not ours to route. */
 const STUB_PATHS = [
   ...NAV.map((item) => item.to),
-  "/about-us",
   "/about-us/careers",
   /* Zakat's own sub-tree now hangs off /giving/zakat rather than off an
      "/islamic-resources" section, which no longer exists: RBB serves and is
@@ -100,6 +100,7 @@ function Shell() {
           <Route path="/volunteer" element={<Volunteer />} />
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/contact-us" element={<Contact />} />
+          <Route path="/about-us" element={<About />} />
 
           {SECTIONS.designSystemRoute && (
             <Route path="/design-system" element={<DesignSystem />} />

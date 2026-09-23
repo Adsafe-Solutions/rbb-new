@@ -70,7 +70,7 @@ export default function LegacyCollage({
   return (
     <section className="bg-mist py-16 md:py-24">
       <Container className="grid items-center gap-12 lg:grid-cols-[5fr_6fr] lg:gap-20">
-        <div className="reveal relative grid grid-cols-2 gap-3 md:gap-4">
+        <div className="reveal relative grid grid-cols-2 gap-tiles">
           <Frame photo={photos.arch} className="aspect-[4/5] rounded-2xl rounded-t-full" />
           <Frame photo={photos.drop} className="aspect-[4/5] self-end rounded-full rounded-bl-2xl" />
           <Frame

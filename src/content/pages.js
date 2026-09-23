@@ -30,6 +30,11 @@ import foodParcels from "../assets/ngo-food-parcels.jpg";
 const EMAIL = "mail@muslimhands.ca";
 const PHONE = "+1 (289) 722-7272";
 const PHONE_HREF = "tel:+12897227272";
+const ADDRESS = ["Skyward Business Centre", "2255 Dundas Street West, Unit #405", "Mississauga, ON", "L5K 1R6"];
+
+/* The same details the footer shows on every page. One copy, so the
+   placeholder swap before launch is one edit, not a hunt. */
+export const CONTACT_INFO = { email: EMAIL, phone: PHONE, phoneHref: PHONE_HREF, address: ADDRESS };
 
 export const VOLUNTEER = {
   hero: {
@@ -221,12 +226,7 @@ export const CONTACT = {
       {
         icon: "pin",
         title: "Address",
-        lines: [
-          { text: "Skyward Business Centre" },
-          { text: "2255 Dundas Street West, Unit #405" },
-          { text: "Mississauga, ON" },
-          { text: "L5K 1R6" },
-        ],
+        lines: ADDRESS.map((text) => ({ text })),
       },
       {
         icon: "mail",

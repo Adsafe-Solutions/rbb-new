@@ -3,15 +3,11 @@
    and nothing that consumes content has to change. */
 export { BRAND } from "./brand.js";
 export { NAV } from "./nav.js";
-export {
-  FOOTER_COLUMNS,
-  SOCIALS,
-  FOOTER_SIGNUP,
-  FOOTER_SOCIAL_HEADING,
-} from "./footer.js";
+export { FOOTER_COLUMNS, FOOTER_CONTACT, FOOTER_LEGAL, SOCIALS } from "./footer.js";
 export { GIVING } from "./giving.js";
 export { HERO, HERO_BLEED, MISSION, MEMBER_CIRCLE, PRODUCTS, STORY, GET_APP } from "./home.js";
 export { NGO } from "./ngo.js";
 export { ZAKAT } from "./zakat.js";
-export { VOLUNTEER, BLOGS, CONTACT } from "./pages.js";
+export { VOLUNTEER, BLOGS, CONTACT, CONTACT_INFO } from "./pages.js";
 export { GIFTS } from "./gifts.js";
+export { ABOUT } from "./about.js";

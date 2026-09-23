@@ -27,7 +27,7 @@ export default function Products() {
   return (
     <section className="pb-16 md:pb-24">
       <Container>
-        <div className="grid gap-6 md:grid-cols-2 md:gap-8">
+        <div className="grid gap-cards md:grid-cols-2">
           {PRODUCTS.map((product) => (
             <article
               key={product.name}

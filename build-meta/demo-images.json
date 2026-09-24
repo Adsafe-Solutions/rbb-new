@@ -1,0 +1,1558 @@
+{
+  "checkedAt": "2026-09-24T12:05:25.810Z",
+  "images": [
+    {
+      "name": "demo-comm-aid-boxes",
+      "width": 1600,
+      "height": 1067,
+      "routes": [
+        "/",
+        "/stories/packing-day"
+      ],
+      "alt": "Two volunteers carrying cardboard boxes marked aid and food",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/stories/packing-day"
+          ],
+          "problems": [
+            "/ 280x210 natural=320 opacity=1 covered"
+          ]
+        },
+        "375": {
+          "visibleOn": [
+            "/stories/packing-day"
+          ],
+          "problems": [
+            "/ 335x251 natural=375 opacity=1 covered"
+          ]
+        },
+        "640": {
+          "visibleOn": [
+            "/stories/packing-day"
+          ],
+          "problems": [
+            "/ 600x450 natural=640 opacity=1 covered"
+          ]
+        },
+        "1280": {
+          "visibleOn": [
+            "/stories/packing-day"
+          ],
+          "problems": [
+            "/ 486x480 natural=512 opacity=1 covered"
+          ]
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/stories/packing-day"
+          ],
+          "problems": [
+            "/ 335x251 natural=375 opacity=1 covered"
+          ]
+        }
+      }
+    },
+    {
+      "name": "demo-comm-food-prep",
+      "width": 1600,
+      "height": 1067,
+      "routes": [
+        "/stories/packing-day"
+      ],
+      "alt": "Volunteers in masks sorting food into containers on a long table",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/stories/packing-day"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/stories/packing-day"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/stories/packing-day"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/stories/packing-day"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/stories/packing-day"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-comm-gathering",
+      "width": 1600,
+      "height": 1067,
+      "routes": [
+        "/",
+        "/stories",
+        "/stories/new-volunteer-programme",
+        "/stories/packing-day",
+        "/work/community-support",
+        "/work/projects/community-information-days",
+        "/work/projects/essentials-distribution",
+        "/work/projects"
+      ],
+      "alt": "A large group of people sitting and standing together on the grass at an outdoor gathering",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work/community-support",
+            "/work/projects",
+            "/stories",
+            "/stories",
+            "/stories/packing-day",
+            "/stories/new-volunteer-programme",
+            "/work/projects/essentials-distribution",
+            "/work/projects/community-information-days"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work/community-support",
+            "/work/projects",
+            "/stories",
+            "/stories",
+            "/stories/packing-day",
+            "/stories/new-volunteer-programme",
+            "/work/projects/essentials-distribution",
+            "/work/projects/community-information-days"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work/community-support",
+            "/work/projects",
+            "/stories",
+            "/stories",
+            "/stories/packing-day",
+            "/stories/new-volunteer-programme",
+            "/work/projects/essentials-distribution",
+            "/work/projects/community-information-days"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work/community-support",
+            "/work/projects",
+            "/stories",
+            "/stories",
+            "/stories/packing-day",
+            "/stories/new-volunteer-programme",
+            "/work/projects/essentials-distribution",
+            "/work/projects/community-information-days"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work/community-support",
+            "/work/projects",
+            "/stories",
+            "/stories",
+            "/stories/packing-day",
+            "/stories/new-volunteer-programme",
+            "/work/projects/essentials-distribution",
+            "/work/projects/community-information-days"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-comm-packing",
+      "width": 1600,
+      "height": 1067,
+      "routes": [
+        "/",
+        "/stories",
+        "/stories/learning-to-read-together",
+        "/stories/new-volunteer-programme",
+        "/stories/packing-day",
+        "/work/community-support",
+        "/work/projects/community-information-days",
+        "/work/projects/essentials-distribution",
+        "/work/projects"
+      ],
+      "alt": "Volunteers in gloves packing donation boxes at a table",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work/community-support",
+            "/work/projects",
+            "/stories",
+            "/stories/learning-to-read-together",
+            "/stories/packing-day",
+            "/stories/new-volunteer-programme",
+            "/work/projects/essentials-distribution",
+            "/work/projects/community-information-days"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work/community-support",
+            "/work/projects",
+            "/stories",
+            "/stories/learning-to-read-together",
+            "/stories/packing-day",
+            "/stories/new-volunteer-programme",
+            "/work/projects/essentials-distribution",
+            "/work/projects/community-information-days"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work/community-support",
+            "/work/projects",
+            "/stories",
+            "/stories/learning-to-read-together",
+            "/stories/packing-day",
+            "/stories/new-volunteer-programme",
+            "/work/projects/essentials-distribution",
+            "/work/projects/community-information-days"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work/community-support",
+            "/work/projects",
+            "/stories",
+            "/stories/learning-to-read-together",
+            "/stories/packing-day",
+            "/stories/new-volunteer-programme",
+            "/work/projects/essentials-distribution",
+            "/work/projects/community-information-days"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work/community-support",
+            "/work/projects",
+            "/stories",
+            "/stories/learning-to-read-together",
+            "/stories/packing-day",
+            "/stories/new-volunteer-programme",
+            "/work/projects/essentials-distribution",
+            "/work/projects/community-information-days"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-comm-relief-packing",
+      "width": 1600,
+      "height": 1067,
+      "routes": [
+        "/contact",
+        "/stories/packing-day"
+      ],
+      "alt": "Two volunteers packing supplies into cardboard boxes",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/contact",
+            "/stories/packing-day"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/contact",
+            "/stories/packing-day"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/contact",
+            "/stories/packing-day"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/contact",
+            "/stories/packing-day"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/contact",
+            "/stories/packing-day"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-edu-girl-reading",
+      "width": 1600,
+      "height": 1067,
+      "routes": [
+        "/",
+        "/stories/learning-to-read-together"
+      ],
+      "alt": "A young girl standing among trees, smiling as she reads a picture book",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/",
+            "/stories/learning-to-read-together"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/",
+            "/stories/learning-to-read-together"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/",
+            "/stories/learning-to-read-together"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/",
+            "/stories/learning-to-read-together"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/",
+            "/stories/learning-to-read-together"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-edu-reading-circle",
+      "width": 1600,
+      "height": 1067,
+      "routes": [
+        "/",
+        "/stories/a-classroom-with-enough-books",
+        "/stories",
+        "/stories/learning-to-read-together",
+        "/work/education",
+        "/work",
+        "/work/projects/classroom-supplies",
+        "/work/projects/community-reading-clubs",
+        "/work/projects",
+        "/work/projects/teacher-mentoring"
+      ],
+      "alt": "A woman reading a book aloud to a small group of young children seated around her",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work",
+            "/work/education",
+            "/work/projects",
+            "/stories",
+            "/stories/learning-to-read-together",
+            "/stories/a-classroom-with-enough-books",
+            "/work/projects/community-reading-clubs",
+            "/work/projects/classroom-supplies",
+            "/work/projects/teacher-mentoring"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work",
+            "/work/education",
+            "/work/projects",
+            "/stories",
+            "/stories/learning-to-read-together",
+            "/stories/a-classroom-with-enough-books",
+            "/work/projects/community-reading-clubs",
+            "/work/projects/classroom-supplies",
+            "/work/projects/teacher-mentoring"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work",
+            "/work/education",
+            "/work/projects",
+            "/stories",
+            "/stories/learning-to-read-together",
+            "/stories/a-classroom-with-enough-books",
+            "/work/projects/community-reading-clubs",
+            "/work/projects/classroom-supplies",
+            "/work/projects/teacher-mentoring"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work",
+            "/work/education",
+            "/work/projects",
+            "/stories",
+            "/stories/learning-to-read-together",
+            "/stories/a-classroom-with-enough-books",
+            "/work/projects/community-reading-clubs",
+            "/work/projects/classroom-supplies",
+            "/work/projects/teacher-mentoring"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work",
+            "/work/education",
+            "/work/projects",
+            "/stories",
+            "/stories/learning-to-read-together",
+            "/stories/a-classroom-with-enough-books",
+            "/work/projects/community-reading-clubs",
+            "/work/projects/classroom-supplies",
+            "/work/projects/teacher-mentoring"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-edu-rural-classroom",
+      "width": 1600,
+      "height": 1067,
+      "routes": [
+        "/impact",
+        "/",
+        "/stories/a-classroom-with-enough-books",
+        "/stories",
+        "/stories/learning-to-read-together",
+        "/work/education",
+        "/work/projects/classroom-supplies",
+        "/work/projects/community-reading-clubs",
+        "/work/projects",
+        "/work/projects/teacher-mentoring"
+      ],
+      "alt": "Children sitting on the floor of a classroom, writing in notebooks",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/",
+            "/work/education",
+            "/work/projects",
+            "/impact",
+            "/stories",
+            "/stories/learning-to-read-together",
+            "/stories/a-classroom-with-enough-books",
+            "/work/projects/community-reading-clubs",
+            "/work/projects/classroom-supplies",
+            "/work/projects/teacher-mentoring"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/",
+            "/work/education",
+            "/work/projects",
+            "/impact",
+            "/stories",
+            "/stories/learning-to-read-together",
+            "/stories/a-classroom-with-enough-books",
+            "/work/projects/community-reading-clubs",
+            "/work/projects/classroom-supplies",
+            "/work/projects/teacher-mentoring"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/",
+            "/work/education",
+            "/work/projects",
+            "/impact",
+            "/stories",
+            "/stories/learning-to-read-together",
+            "/stories/a-classroom-with-enough-books",
+            "/work/projects/community-reading-clubs",
+            "/work/projects/classroom-supplies",
+            "/work/projects/teacher-mentoring"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/",
+            "/work/education",
+            "/work/projects",
+            "/impact",
+            "/stories",
+            "/stories/learning-to-read-together",
+            "/stories/a-classroom-with-enough-books",
+            "/work/projects/community-reading-clubs",
+            "/work/projects/classroom-supplies",
+            "/work/projects/teacher-mentoring"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/",
+            "/work/education",
+            "/work/projects",
+            "/impact",
+            "/stories",
+            "/stories/learning-to-read-together",
+            "/stories/a-classroom-with-enough-books",
+            "/work/projects/community-reading-clubs",
+            "/work/projects/classroom-supplies",
+            "/work/projects/teacher-mentoring"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-edu-teacher-classroom",
+      "width": 1600,
+      "height": 979,
+      "routes": [
+        "/",
+        "/stories/learning-to-read-together",
+        "/work/education",
+        "/work/projects/classroom-supplies",
+        "/work/projects/community-reading-clubs",
+        "/work/projects",
+        "/work/projects/teacher-mentoring"
+      ],
+      "alt": "A teacher at the front of a classroom leading a lesson with students at their desks",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/",
+            "/work/education",
+            "/work/projects",
+            "/stories/learning-to-read-together",
+            "/work/projects/community-reading-clubs",
+            "/work/projects/classroom-supplies",
+            "/work/projects/teacher-mentoring"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/",
+            "/work/education",
+            "/work/projects",
+            "/stories/learning-to-read-together",
+            "/work/projects/community-reading-clubs",
+            "/work/projects/classroom-supplies",
+            "/work/projects/teacher-mentoring"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/",
+            "/work/education",
+            "/work/projects",
+            "/stories/learning-to-read-together",
+            "/work/projects/community-reading-clubs",
+            "/work/projects/classroom-supplies",
+            "/work/projects/teacher-mentoring"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/",
+            "/work/education",
+            "/work/projects",
+            "/stories/learning-to-read-together",
+            "/work/projects/community-reading-clubs",
+            "/work/projects/classroom-supplies",
+            "/work/projects/teacher-mentoring"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/",
+            "/work/education",
+            "/work/projects",
+            "/stories/learning-to-read-together",
+            "/work/projects/community-reading-clubs",
+            "/work/projects/classroom-supplies",
+            "/work/projects/teacher-mentoring"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-health-checkup",
+      "width": 1600,
+      "height": 1067,
+      "routes": [
+        "/",
+        "/stories/health-day-in-the-square",
+        "/stories",
+        "/stories/water-close-to-home",
+        "/work/health-wellbeing",
+        "/work",
+        "/work/projects/clean-water-points",
+        "/work/projects/community-health-days",
+        "/work/projects"
+      ],
+      "alt": "A doctor in a white coat listening to a patient&#x27;s breathing with a stethoscope",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work",
+            "/work/health-wellbeing",
+            "/work/projects",
+            "/stories",
+            "/stories/water-close-to-home",
+            "/stories/health-day-in-the-square",
+            "/work/projects/community-health-days",
+            "/work/projects/clean-water-points"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work",
+            "/work/health-wellbeing",
+            "/work/projects",
+            "/stories",
+            "/stories/water-close-to-home",
+            "/stories/health-day-in-the-square",
+            "/work/projects/community-health-days",
+            "/work/projects/clean-water-points"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work",
+            "/work/health-wellbeing",
+            "/work/projects",
+            "/stories",
+            "/stories/water-close-to-home",
+            "/stories/health-day-in-the-square",
+            "/work/projects/community-health-days",
+            "/work/projects/clean-water-points"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work",
+            "/work/health-wellbeing",
+            "/work/projects",
+            "/stories",
+            "/stories/water-close-to-home",
+            "/stories/health-day-in-the-square",
+            "/work/projects/community-health-days",
+            "/work/projects/clean-water-points"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work",
+            "/work/health-wellbeing",
+            "/work/projects",
+            "/stories",
+            "/stories/water-close-to-home",
+            "/stories/health-day-in-the-square",
+            "/work/projects/community-health-days",
+            "/work/projects/clean-water-points"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-health-drinking-water",
+      "width": 1600,
+      "height": 1067,
+      "routes": [
+        "/stories/water-close-to-home"
+      ],
+      "alt": "A child bending to drink water flowing from a hand pump",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/stories/water-close-to-home"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/stories/water-close-to-home"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/stories/water-close-to-home"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/stories/water-close-to-home"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/stories/water-close-to-home"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-health-team",
+      "width": 1600,
+      "height": 1067,
+      "routes": [
+        "/stories/health-day-in-the-square"
+      ],
+      "alt": "Two health workers in scrubs and a white coat talking in a hospital corridor",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/stories/health-day-in-the-square"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/stories/health-day-in-the-square"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/stories/health-day-in-the-square"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/stories/health-day-in-the-square"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/stories/health-day-in-the-square"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-health-water-pump",
+      "width": 1600,
+      "height": 1067,
+      "routes": [
+        "/",
+        "/stories/health-day-in-the-square",
+        "/stories",
+        "/stories/water-close-to-home",
+        "/work/health-wellbeing",
+        "/work/projects/clean-water-points",
+        "/work/projects/community-health-days",
+        "/work/projects"
+      ],
+      "alt": "Children gathered around a hand pump, filling containers with water",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/",
+            "/work/health-wellbeing",
+            "/work/projects",
+            "/stories",
+            "/stories/water-close-to-home",
+            "/stories/health-day-in-the-square",
+            "/work/projects/community-health-days",
+            "/work/projects/clean-water-points"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/",
+            "/work/health-wellbeing",
+            "/work/projects",
+            "/stories",
+            "/stories/water-close-to-home",
+            "/stories/health-day-in-the-square",
+            "/work/projects/community-health-days",
+            "/work/projects/clean-water-points"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/",
+            "/work/health-wellbeing",
+            "/work/projects",
+            "/stories",
+            "/stories/water-close-to-home",
+            "/stories/health-day-in-the-square",
+            "/work/projects/community-health-days",
+            "/work/projects/clean-water-points"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/",
+            "/work/health-wellbeing",
+            "/work/projects",
+            "/stories",
+            "/stories/water-close-to-home",
+            "/stories/health-day-in-the-square",
+            "/work/projects/community-health-days",
+            "/work/projects/clean-water-points"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/",
+            "/work/health-wellbeing",
+            "/work/projects",
+            "/stories",
+            "/stories/water-close-to-home",
+            "/stories/health-day-in-the-square",
+            "/work/projects/community-health-days",
+            "/work/projects/clean-water-points"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-live-harvest",
+      "width": 1600,
+      "height": 1067,
+      "routes": [
+        "/",
+        "/stories/market-day",
+        "/work/livelihoods",
+        "/work/projects",
+        "/work/projects/market-traders",
+        "/work/projects/smallholder-farming",
+        "/work/projects/tailoring-skills"
+      ],
+      "alt": "Farmers in straw hats loading harvested crops onto a trailer in a field",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work/livelihoods",
+            "/work/projects",
+            "/stories/market-day",
+            "/work/projects/tailoring-skills",
+            "/work/projects/market-traders",
+            "/work/projects/smallholder-farming"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work/livelihoods",
+            "/work/projects",
+            "/stories/market-day",
+            "/work/projects/tailoring-skills",
+            "/work/projects/market-traders",
+            "/work/projects/smallholder-farming"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work/livelihoods",
+            "/work/projects",
+            "/stories/market-day",
+            "/work/projects/tailoring-skills",
+            "/work/projects/market-traders",
+            "/work/projects/smallholder-farming"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work/livelihoods",
+            "/work/projects",
+            "/stories/market-day",
+            "/work/projects/tailoring-skills",
+            "/work/projects/market-traders",
+            "/work/projects/smallholder-farming"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work/livelihoods",
+            "/work/projects",
+            "/stories/market-day",
+            "/work/projects/tailoring-skills",
+            "/work/projects/market-traders",
+            "/work/projects/smallholder-farming"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-live-market",
+      "width": 1600,
+      "height": 1067,
+      "routes": [
+        "/",
+        "/stories/from-one-sewing-machine",
+        "/stories",
+        "/stories/market-day",
+        "/work/livelihoods",
+        "/work/projects",
+        "/work/projects/market-traders",
+        "/work/projects/smallholder-farming",
+        "/work/projects/tailoring-skills"
+      ],
+      "alt": "A woman arranging tomatoes and vegetables on her market stall",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/",
+            "/work/livelihoods",
+            "/work/projects",
+            "/stories",
+            "/stories/from-one-sewing-machine",
+            "/stories/market-day",
+            "/work/projects/tailoring-skills",
+            "/work/projects/market-traders",
+            "/work/projects/smallholder-farming"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/",
+            "/work/livelihoods",
+            "/work/projects",
+            "/stories",
+            "/stories/from-one-sewing-machine",
+            "/stories/market-day",
+            "/work/projects/tailoring-skills",
+            "/work/projects/market-traders",
+            "/work/projects/smallholder-farming"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/",
+            "/work/livelihoods",
+            "/work/projects",
+            "/stories",
+            "/stories/from-one-sewing-machine",
+            "/stories/market-day",
+            "/work/projects/tailoring-skills",
+            "/work/projects/market-traders",
+            "/work/projects/smallholder-farming"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/",
+            "/work/livelihoods",
+            "/work/projects",
+            "/stories",
+            "/stories/from-one-sewing-machine",
+            "/stories/market-day",
+            "/work/projects/tailoring-skills",
+            "/work/projects/market-traders",
+            "/work/projects/smallholder-farming"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/",
+            "/work/livelihoods",
+            "/work/projects",
+            "/stories",
+            "/stories/from-one-sewing-machine",
+            "/stories/market-day",
+            "/work/projects/tailoring-skills",
+            "/work/projects/market-traders",
+            "/work/projects/smallholder-farming"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-live-sewing",
+      "width": 1600,
+      "height": 1067,
+      "routes": [
+        "/impact",
+        "/",
+        "/stories/from-one-sewing-machine",
+        "/stories",
+        "/stories/market-day",
+        "/work",
+        "/work/livelihoods",
+        "/work/projects",
+        "/work/projects/market-traders",
+        "/work/projects/smallholder-farming",
+        "/work/projects/tailoring-skills"
+      ],
+      "alt": "A person in a red top guiding fabric through a sewing machine",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work",
+            "/work/livelihoods",
+            "/work/projects",
+            "/impact",
+            "/stories",
+            "/stories/from-one-sewing-machine",
+            "/stories/market-day",
+            "/work/projects/tailoring-skills",
+            "/work/projects/market-traders",
+            "/work/projects/smallholder-farming"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work",
+            "/work/livelihoods",
+            "/work/projects",
+            "/impact",
+            "/stories",
+            "/stories/from-one-sewing-machine",
+            "/stories/market-day",
+            "/work/projects/tailoring-skills",
+            "/work/projects/market-traders",
+            "/work/projects/smallholder-farming"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work",
+            "/work/livelihoods",
+            "/work/projects",
+            "/impact",
+            "/stories",
+            "/stories/from-one-sewing-machine",
+            "/stories/market-day",
+            "/work/projects/tailoring-skills",
+            "/work/projects/market-traders",
+            "/work/projects/smallholder-farming"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work",
+            "/work/livelihoods",
+            "/work/projects",
+            "/impact",
+            "/stories",
+            "/stories/from-one-sewing-machine",
+            "/stories/market-day",
+            "/work/projects/tailoring-skills",
+            "/work/projects/market-traders",
+            "/work/projects/smallholder-farming"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/",
+            "/",
+            "/work",
+            "/work/livelihoods",
+            "/work/projects",
+            "/impact",
+            "/stories",
+            "/stories/from-one-sewing-machine",
+            "/stories/market-day",
+            "/work/projects/tailoring-skills",
+            "/work/projects/market-traders",
+            "/work/projects/smallholder-farming"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-live-vegetable-seller",
+      "width": 1600,
+      "height": 1067,
+      "routes": [
+        "/stories/market-day"
+      ],
+      "alt": "A woman seated at a street stall selling vegetables and marigold flowers",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/stories/market-day"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/stories/market-day"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/stories/market-day"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/stories/market-day"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/stories/market-day"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-team-1",
+      "width": 800,
+      "height": 800,
+      "routes": [
+        "/about",
+        "/about/team/amara-demo",
+        "/about/team"
+      ],
+      "alt": "Stock portrait used as a demo placeholder — not a member of Rising Beyond Borders",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/about",
+            "/about/team",
+            "/about/team/amara-demo"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/about",
+            "/about/team",
+            "/about/team/amara-demo"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/about",
+            "/about/team",
+            "/about/team/amara-demo"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/about",
+            "/about/team",
+            "/about/team/amara-demo"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/about",
+            "/about/team",
+            "/about/team/amara-demo"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-team-2",
+      "width": 800,
+      "height": 800,
+      "routes": [
+        "/about",
+        "/about/team/grace-demo",
+        "/about/team"
+      ],
+      "alt": "Stock portrait used as a demo placeholder — not a member of Rising Beyond Borders",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/about",
+            "/about/team",
+            "/about/team/grace-demo"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/about",
+            "/about/team",
+            "/about/team/grace-demo"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/about",
+            "/about/team",
+            "/about/team/grace-demo"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/about",
+            "/about/team",
+            "/about/team/grace-demo"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/about",
+            "/about/team",
+            "/about/team/grace-demo"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-team-3",
+      "width": 800,
+      "height": 800,
+      "routes": [
+        "/about",
+        "/about/team",
+        "/about/team/samuel-demo"
+      ],
+      "alt": "Stock portrait used as a demo placeholder — not a member of Rising Beyond Borders",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/about",
+            "/about/team",
+            "/about/team/samuel-demo"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/about",
+            "/about/team",
+            "/about/team/samuel-demo"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/about",
+            "/about/team",
+            "/about/team/samuel-demo"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/about",
+            "/about/team",
+            "/about/team/samuel-demo"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/about",
+            "/about/team",
+            "/about/team/samuel-demo"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-team-4",
+      "width": 800,
+      "height": 800,
+      "routes": [
+        "/about/team",
+        "/about/team/leila-demo"
+      ],
+      "alt": "Stock portrait used as a demo placeholder — not a member of Rising Beyond Borders",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/about/team",
+            "/about/team/leila-demo"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/about/team",
+            "/about/team/leila-demo"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/about/team",
+            "/about/team/leila-demo"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/about/team",
+            "/about/team/leila-demo"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/about/team",
+            "/about/team/leila-demo"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-team-5",
+      "width": 800,
+      "height": 800,
+      "routes": [
+        "/about/team/daniel-demo",
+        "/about/team"
+      ],
+      "alt": "Stock portrait used as a demo placeholder — not a member of Rising Beyond Borders",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/about/team",
+            "/about/team/daniel-demo"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/about/team",
+            "/about/team/daniel-demo"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/about/team",
+            "/about/team/daniel-demo"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/about/team",
+            "/about/team/daniel-demo"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/about/team",
+            "/about/team/daniel-demo"
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "name": "demo-team-6",
+      "width": 800,
+      "height": 800,
+      "routes": [
+        "/about/team/hannah-demo",
+        "/about/team"
+      ],
+      "alt": "Stock portrait used as a demo placeholder — not a member of Rising Beyond Borders",
+      "webp": true,
+      "browser": {
+        "320": {
+          "visibleOn": [
+            "/about/team",
+            "/about/team/hannah-demo"
+          ],
+          "problems": []
+        },
+        "375": {
+          "visibleOn": [
+            "/about/team",
+            "/about/team/hannah-demo"
+          ],
+          "problems": []
+        },
+        "640": {
+          "visibleOn": [
+            "/about/team",
+            "/about/team/hannah-demo"
+          ],
+          "problems": []
+        },
+        "1280": {
+          "visibleOn": [
+            "/about/team",
+            "/about/team/hannah-demo"
+          ],
+          "problems": []
+        },
+        "375-nojs": {
+          "visibleOn": [
+            "/about/team",
+            "/about/team/hannah-demo"
+          ],
+          "problems": []
+        }
+      }
+    }
+  ],
+  "problems": [
+    "demo-comm-aid-boxes: @320 / 280x210 natural=320 opacity=1 covered",
+    "demo-comm-aid-boxes: @375 / 335x251 natural=375 opacity=1 covered",
+    "demo-comm-aid-boxes: @640 / 600x450 natural=640 opacity=1 covered",
+    "demo-comm-aid-boxes: @1280 / 486x480 natural=512 opacity=1 covered",
+    "demo-comm-aid-boxes: @375-nojs / 335x251 natural=375 opacity=1 covered"
+  ]
+}

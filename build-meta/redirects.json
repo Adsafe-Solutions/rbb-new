@@ -1,0 +1,102 @@
+[
+  {
+    "from": "/about-us",
+    "to": "/about",
+    "status": 301
+  },
+  {
+    "from": "/contact-us",
+    "to": "/contact",
+    "status": 301
+  },
+  {
+    "from": "/blogs",
+    "to": "/stories",
+    "status": 301
+  },
+  {
+    "from": "/volunteer",
+    "to": "/get-involved/volunteer",
+    "status": 301
+  },
+  {
+    "from": "/donate",
+    "to": "/get-involved/donate",
+    "status": 301
+  },
+  {
+    "from": "/fundraise",
+    "to": "/get-involved/fundraise",
+    "status": 301
+  },
+  {
+    "from": "/reports",
+    "to": "/about/transparency",
+    "status": 301
+  },
+  {
+    "from": "/about/who-we-are",
+    "to": "/about#who-we-are",
+    "status": 301
+  },
+  {
+    "from": "/about/mission-vision",
+    "to": "/about#mission-vision",
+    "status": 301
+  },
+  {
+    "from": "/about/values",
+    "to": "/about#values",
+    "status": 301
+  },
+  {
+    "from": "/impact/at-a-glance",
+    "to": "/impact#at-a-glance",
+    "status": 301
+  },
+  {
+    "from": "/impact/stories",
+    "to": "/impact#stories",
+    "status": 301
+  },
+  {
+    "from": "/blogs/learning-to-read-together",
+    "to": "/stories/learning-to-read-together",
+    "status": 301
+  },
+  {
+    "from": "/blogs/a-classroom-with-enough-books",
+    "to": "/stories/a-classroom-with-enough-books",
+    "status": 301
+  },
+  {
+    "from": "/blogs/water-close-to-home",
+    "to": "/stories/water-close-to-home",
+    "status": 301
+  },
+  {
+    "from": "/blogs/health-day-in-the-square",
+    "to": "/stories/health-day-in-the-square",
+    "status": 301
+  },
+  {
+    "from": "/blogs/from-one-sewing-machine",
+    "to": "/stories/from-one-sewing-machine",
+    "status": 301
+  },
+  {
+    "from": "/blogs/market-day",
+    "to": "/stories/market-day",
+    "status": 301
+  },
+  {
+    "from": "/blogs/packing-day",
+    "to": "/stories/packing-day",
+    "status": 301
+  },
+  {
+    "from": "/blogs/new-volunteer-programme",
+    "to": "/stories/new-volunteer-programme",
+    "status": 301
+  }
+]

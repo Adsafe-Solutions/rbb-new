@@ -1,0 +1,40 @@
+{
+  "streams": {
+    "analytics": {
+      "status": "not-approved",
+      "provider": null,
+      "enabledInThisBuild": false
+    },
+    "errors": {
+      "status": "not-approved",
+      "provider": null,
+      "enabledInThisBuild": false
+    },
+    "performance": {
+      "status": "not-approved",
+      "provider": null,
+      "enabledInThisBuild": false
+    },
+    "uptime": {
+      "status": "not-approved",
+      "provider": null,
+      "enabledInThisBuild": false
+    },
+    "searchConsole": {
+      "status": "not-approved",
+      "provider": null,
+      "enabledInThisBuild": false
+    }
+  },
+  "events": {
+    "page_view": "proposed",
+    "navigation_interaction": "proposed",
+    "outbound_link": "proposed",
+    "cta_interaction": "proposed"
+  },
+  "thirdPartyOrigins": [
+    "https://api.fontshare.com",
+    "https://fonts.googleapis.com",
+    "https://fonts.gstatic.com"
+  ]
+}

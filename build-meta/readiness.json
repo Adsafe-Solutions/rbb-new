@@ -1,0 +1,45 @@
+{
+  "siteOrigin": false,
+  "impactFigures": [
+    {
+      "id": "lives",
+      "status": "pending-review"
+    },
+    {
+      "id": "countries",
+      "status": "pending-review"
+    },
+    {
+      "id": "partners",
+      "status": "pending-review"
+    }
+  ],
+  "financialOverview": "pending-review",
+  "documents": {
+    "annualReports": 0,
+    "financial": 0,
+    "governance": "approved"
+  },
+  "programsWithDetail": 4,
+  "projects": 10,
+  "stories": 8,
+  "team": 6,
+  "geography": "approved",
+  "contactMethods": 2,
+  "policiesPublished": [
+    "privacy",
+    "terms",
+    "accessibility"
+  ],
+  "forms": {
+    "contact": "disabled",
+    "volunteer": "disabled",
+    "partner": "disabled",
+    "fundraise": "disabled",
+    "newsletter": "disabled"
+  },
+  "donation": {
+    "state": "pending",
+    "checkoutReady": false
+  }
+}

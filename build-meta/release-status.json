@@ -1,0 +1,66 @@
+{
+  "state": "PREVIEW-READY",
+  "next": "PRODUCTION-CONTENT-READY",
+  "blockersToNext": [
+    "working placeholder content is still published in 100 file(s): demo address, demo answer, demo author, demo country, demo figure, demo location, demo prefix, demo profile, demo quotation, demo role, demo summary, demo text, example.* address or URL, fictional 555 phone number, fictional team name, working placeholder photograph, working placeholder team profile, working text — replace it with Rising Beyond Borders' final content",
+    "RBB approval missing — coreIdentity: Name, mission, vision and final positioning (the annual report wording is in place, awaiting RBB's confirmation)",
+    "RBB approval missing — impact: 50K+ lives, 25 countries, 200+ partners & donors — and any other published figure",
+    "content not ready — impact: impact figures are still pending-review in content/impact.js",
+    "RBB approval missing — financials: 2026 shares 78 / 12 / 10, and the actual reports and documents",
+    "content not ready — financials: financial overview not verified, or no approved annual report file (content/transparency.js)",
+    "RBB approval missing — programs: Final descriptions, projects and impact claims for the four programs",
+    "RBB approval missing — team: Names, roles, bios, photographs (with consent) and governance",
+    "RBB approval missing — geography: Countries and locations actually served",
+    "RBB approval missing — stories: Final text, quotes, authors, dates and imagery",
+    "RBB approval missing — contact: Email, phone, office, social accounts, hours and response time",
+    "RBB approval missing — policies: Privacy, Terms, Accessibility, and a decision on Cookies",
+    "RBB approval missing — images: Ownership, licences and permissions for every published image (docs/IMAGE_INVENTORY.md)"
+  ],
+  "allBlockers": {
+    "PREVIEW-READY": [],
+    "PRODUCTION-CONTENT-READY": [
+      "working placeholder content is still published in 100 file(s): demo address, demo answer, demo author, demo country, demo figure, demo location, demo prefix, demo profile, demo quotation, demo role, demo summary, demo text, example.* address or URL, fictional 555 phone number, fictional team name, working placeholder photograph, working placeholder team profile, working text — replace it with Rising Beyond Borders' final content",
+      "RBB approval missing — coreIdentity: Name, mission, vision and final positioning (the annual report wording is in place, awaiting RBB's confirmation)",
+      "RBB approval missing — impact: 50K+ lives, 25 countries, 200+ partners & donors — and any other published figure",
+      "content not ready — impact: impact figures are still pending-review in content/impact.js",
+      "RBB approval missing — financials: 2026 shares 78 / 12 / 10, and the actual reports and documents",
+      "content not ready — financials: financial overview not verified, or no approved annual report file (content/transparency.js)",
+      "RBB approval missing — programs: Final descriptions, projects and impact claims for the four programs",
+      "RBB approval missing — team: Names, roles, bios, photographs (with consent) and governance",
+      "RBB approval missing — geography: Countries and locations actually served",
+      "RBB approval missing — stories: Final text, quotes, authors, dates and imagery",
+      "RBB approval missing — contact: Email, phone, office, social accounts, hours and response time",
+      "RBB approval missing — policies: Privacy, Terms, Accessibility, and a decision on Cookies",
+      "RBB approval missing — images: Ownership, licences and permissions for every published image (docs/IMAGE_INVENTORY.md)"
+    ],
+    "PRODUCTION-INTEGRATION-READY": [
+      "RBB approval missing — forms: Fields, consent wording, recipients, acknowledgement and success/error wording",
+      "content not ready — forms: no form is enabled (content/forms.js + VITE_FORM_ENDPOINT_*)",
+      "RBB approval missing — email: From domain and sender, recipients, newsletter confirmation and unsubscribe process",
+      "RBB approval missing — donation: Currency, amounts, donor fields, donor wording, Razorpay account settings (or: launch without online donations)",
+      "content not ready — donation: donation page is not live (content/donation.js) — or record an approved decision to launch without online donations",
+      "RBB approval missing — infrastructure: Domain, host, HTTPS, redirects, headers, and any scripts the host adds",
+      "content not ready — infrastructure: VITE_SITE_URL (verified production origin) is not set",
+      "not done — Real email delivery in EMAIL_MODE=staging through a verified Resend domain",
+      "not done — Real Razorpay TEST-mode payments: card, UPI, netbanking, 3-D Secure; success, failure, cancel",
+      "not done — Real TEST webhook deliveries: signature, idempotency, redelivery",
+      "not done — Checkout CSP re-verified in report-only mode with test keys (docs/DONATIONS.md)",
+      "not done — Live Razorpay and Resend credentials stored in the host's secrets (never in the repo)",
+      "not done — Security headers, HTTPS, redirects and 404 verified on the production host",
+      "not done — Preview deployment of the release artifact: `npm run smoke -- --url=<preview> --expect=preview --origin=<production>` + --browser",
+      "not done — scripts/audit-technology.mjs against the real host: cookies, storage, injected scripts, third parties"
+    ],
+    "RELEASE-READY": [
+      "not done — Full Document 24 §21 QA matrix on the frozen release candidate",
+      "not done — After DNS cutover: `npm run smoke -- --url=https://<domain>` + --browser, release digest recorded",
+      "content freeze not recorded (EVIDENCE.contentFreeze)"
+    ]
+  },
+  "build": {
+    "contentRevision": "09fd7437ba6da038",
+    "files": 211,
+    "gitCommit": "bf0724e",
+    "uncommittedSourceChanges": true
+  },
+  "checkedAt": "2026-09-24T12:27:34.307Z"
+}

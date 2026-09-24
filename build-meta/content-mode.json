@@ -1,0 +1,11 @@
+{
+  "mode": "staging",
+  "demo": {
+    "stories": 8,
+    "projects": 10,
+    "team": 6,
+    "policies": 4,
+    "givingMethods": 2,
+    "donationFaqs": 3
+  }
+}

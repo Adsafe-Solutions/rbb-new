@@ -1,0 +1,48 @@
+{
+  "site": "http://localhost:5190",
+  "auditedAt": "2026-09-24T10:53:33.695Z",
+  "routesCrawled": 28,
+  "cookies": [],
+  "cookieSetters": [],
+  "storage": {
+    "localStorage": [],
+    "sessionStorage": [],
+    "indexedDB": [],
+    "serviceWorkers": []
+  },
+  "thirdPartyOrigins": [
+    {
+      "origin": "https://api.fontshare.com",
+      "firstParty": false,
+      "types": [
+        "stylesheet"
+      ],
+      "requests": 28
+    },
+    {
+      "origin": "https://fonts.googleapis.com",
+      "firstParty": false,
+      "types": [
+        "stylesheet"
+      ],
+      "requests": 28
+    },
+    {
+      "origin": "https://cdn.fontshare.com",
+      "firstParty": false,
+      "types": [
+        "font"
+      ],
+      "requests": 112
+    }
+  ],
+  "scriptOrigins": [
+    "http://localhost:5190"
+  ],
+  "fontOrigins": [
+    "http://localhost:5190",
+    "https://api.fontshare.com",
+    "https://fonts.googleapis.com",
+    "https://cdn.fontshare.com"
+  ]
+}

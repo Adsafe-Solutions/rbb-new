@@ -1,0 +1,22 @@
+{
+  "donation.js:givingMethods": {
+    "kept": 0,
+    "removed": 0
+  },
+  "donation.js:faqs": {
+    "kept": 0,
+    "removed": 0
+  },
+  "work.js:PROJECT_RECORDS": {
+    "kept": 10,
+    "removed": 0
+  },
+  "stories.js:STORIES": {
+    "kept": 8,
+    "removed": 0
+  },
+  "team.js:TEAM_MEMBERS": {
+    "kept": 6,
+    "removed": 0
+  }
+}

@@ -1,7 +1,9 @@
-/* Every string on the homepage, in the order the page uses them.
+/* Sample content for components that are no longer on any page and are
+   kept for the /components catalog. The homepage's own strings are in
+   content/homepage.js.
 
-   HERO follows content/ngo.js: copy reproduced from muslimhands.ca with
-   the organisation name swapped for BRAND.name — see the note there.
+   HERO feeds the logo-framed hero (components/Hero). Its copy and card
+   labels came from another charity's appeals and are placeholders.
    Everything from MISSION down is ORIGINAL copy for the dating sections,
    which no longer render on the homepage but stay in the catalog.
 
@@ -11,6 +13,7 @@
    tile — there is no real app to screenshot. */
 
 import { BRAND } from "./brand.js";
+import { SITE } from "./site.js";
 
 import heroGaza from "../assets/hero-gaza.jpg"; /* Abd Alrhman Al Darra, 30230054 */
 import heroSudan from "../assets/hero-sudan.jpg"; /* Halidenurk, 27962039 */
@@ -24,11 +27,6 @@ import productsDateB from "../assets/products-date-b.jpg";
 import productsFriendsA from "../assets/products-friends-a.jpg";
 import productsFriendsB from "../assets/products-friends-b.jpg";
 import storyCouple from "../assets/story-couple.jpg";
-/* The bleed hero's own photography — RBB's branded field images, so the
-   mark and the promise are in the picture as well as on the page. */
-import bleedKids from "../assets/helping kids.png";
-import bleedField from "../assets/helping-onfield.png";
-import bleedElder from "../assets/helping old.png";
 
 export const HERO = {
   /* The headline is split into three parts because the design sets them in
@@ -36,112 +34,35 @@ export const HERO = {
      oversized, `subheading` in small caps beneath both. Keeping them as
      separate strings means the break never depends on where a <br> or a
      space happens to fall at a given viewport width. */
-  lead: `${BRAND.name} has delivered`,
-  emphasis: "Aid Across 15+ Countries",
-  subheading: "Emergency relief and long-term change since 1993",
+  lead: BRAND.fullName,
+  emphasis: "Headline to be provided",
+  subheading: BRAND.summary,
   /* The single-line version, for anywhere that needs the headline whole —
      document titles, share cards, the component catalog. */
-  heading: "Delivering aid where it is needed most, since 1993",
-  body: `${BRAND.name} delivers humanitarian aid across 15+ countries, providing emergency relief and long-term solutions through clean water, healthcare, education, and life-changing orphan support.`,
-  cta: { label: "Donate Now", to: "/donate" },
+  heading: BRAND.fullName,
+  body: SITE.placeholder,
+  cta: { label: "Donate Now", to: "/get-involved/donate" },
 
   /* The auto-swiping card deck — one card per live appeal, in the order
-     the source site's hero carousel runs them. Order here is only the
+     the source site's hero carousel ran them. Order here is only the
      starting order: Hero cycles the front card to the back on a timer,
      so per-card `tilt`/`y` would drift out of sync after the first swipe.
      Depth is computed from stack position instead; see SLOTS in Hero.jsx. */
   cards: [
     {
-      name: "Gaza Emergency",
+      name: "Appeal 1 — to be confirmed",
       src: heroGaza,
       alt: "Rows of tents and shelters in a displacement camp at sunset",
     },
     {
-      name: "Sudan Emergency",
+      name: "Appeal 2 — to be confirmed",
       src: heroSudan,
       alt: "Children washing dishes in basins outside family tents in a camp",
     },
     {
-      name: "Give the Gift of Water",
+      name: "Appeal 3 — to be confirmed",
       src: heroWater,
       alt: "A child drinking straight from the spout of a hand pump",
-    },
-  ],
-};
-
-/* The alternate hero: the photograph runs full height on the right and
-   the copy sits on the page's own white, rather than the mark-framed
-   photograph HERO uses. Both are live — config/sections.js picks which one
-   the homepage opens with — so this is a second treatment of the SAME
-   promise, not a second message. Keep them saying the same thing.
-
-   The parts that do not change per slide live at the top; `slides` carries
-   a photograph and the words that belong to it. */
-export const HERO_BLEED = {
-  ctas: {
-    primary: { label: "Get Involved", to: "/volunteer" },
-    secondary: { label: "Watch Our Story", to: "/about" },
-  },
-
-  /* The card that floats over the photograph's lower corner. */
-  note: { text: "A global community creating lasting impact.", to: "/about" },
-
-  scrollLabel: "Scroll to explore",
-
-  /* One photograph and the words that belong to it. The copy changes with
-     the picture — a headline about clean water over a photograph of a
-     litter pick is the thing this rotation exists to avoid.
-
-     ⚠ EVERY slide must have exactly three `kicker` parts and exactly two
-     `headline` lines. HeroBleed animates the copy by transitioning the
-     SAME elements rather than replacing them, so the slots have to line
-     up; a slide with one headline line leaves the second slot holding the
-     previous slide's words.
-
-     ⚠ And keep each headline line UNDER ABOUT SEVENTEEN CHARACTERS. The
-     line is set at up to 64px in a 38rem column, so a longer one wraps —
-     which turns a three-line headline into four, pushes the band taller,
-     and shoves the note card off the bottom of the screen.
-
-     `focal` is the photograph's object-position. It is per slide because
-     the subject is not in the same place in every frame, and the left
-     third of the panel is under the scrim: a centred subject lands in the
-     haze. LOWER the first number to move the subject RIGHT on screen —
-     object-position aligns that point of the SOURCE with the same point
-     of the box, so raising it walks the crop window right through the
-     image and the subject leftward across the panel. */
-  slides: [
-    {
-      kicker: ["People", "Purpose", "A brighter tomorrow"],
-      headline: ["Different people", "Brighter"],
-      headlineAccent: "tomorrows.",
-      body: `${BRAND.name} is a global community working together to create positive change through compassion, collaboration, and meaningful action.`,
-      src: bleedKids,
-      /* High, so the crop window walks right and keeps RBB's banner whole
-         at the frame's edge. The girl still lands around 59% of the panel,
-         clear of the scrim, which runs out at 54%. */
-      focal: "75% 45%",
-      alt: "An RBB field worker handing a bundle of school supplies to a smiling girl, other children crowding in beside her",
-    },
-    {
-      kicker: ["Neighbours", "Not strangers", "Side by side"],
-      headline: ["Ordinary hands", "Extraordinary"],
-      headlineAccent: "change.",
-      body: "Volunteers give their weekends to the work that holds a community together — packing, loading, carrying, handing over. None of it makes the news. All of it makes the difference.",
-      src: bleedField,
-      focal: "60% 45%",
-      alt: "An RBB distribution in progress: volunteers unloading a truck and sorting boxes of supplies in a camp",
-    },
-    {
-      kicker: ["Dignity", "Care", "Nobody overlooked"],
-      headline: ["The last in line", "is the first"],
-      headlineAccent: "we look for.",
-      body: "Elders are the quietest casualties of a crisis — least able to queue, least likely to ask. Our distributions start with the people a queue leaves behind.",
-      src: bleedElder,
-      /* All the way right: it is the only value that fits RBB's banner in
-         whole, and the seated woman still sits at about 65% of the panel. */
-      focal: "100% 45%",
-      alt: "An RBB field worker passing a sack of rice into the hands of an elderly woman seated at a distribution point",
     },
   ],
 };

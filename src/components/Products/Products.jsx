@@ -4,7 +4,9 @@ import Button from "../Button/Button.jsx";
 import Photo from "../Photo/Photo.jsx";
 import PhoneMock from "../PhoneMock/PhoneMock.jsx";
 import Container from "../Container/Container.jsx";
-import { PRODUCTS } from "../../content/index.js";
+/* Catalogue-only sample data (/components), imported directly rather than
+   through content/index.js so it never enters the public build. */
+import { PRODUCTS } from "../../content/home.js";
 
 /* The two product cards — Date and Friends — side by side.
 

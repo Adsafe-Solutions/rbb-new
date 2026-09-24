@@ -31,22 +31,34 @@ import AppealSpotlight from "../../components/AppealSpotlight/AppealSpotlight.js
 import LegacyCollage from "../../components/LegacyCollage/LegacyCollage.jsx";
 import ImpactMosaic from "../../components/ImpactMosaic/ImpactMosaic.jsx";
 import PageHero from "../../components/PageHero/PageHero.jsx";
-import FeatureGrid from "../../components/FeatureGrid/FeatureGrid.jsx";
-import ProjectGrid from "../../components/ProjectGrid/ProjectGrid.jsx";
-import NisabCallout from "../../components/NisabCallout/NisabCallout.jsx";
 import Faq from "../../components/Faq/Faq.jsx";
 import Newsletter from "../../components/Newsletter/Newsletter.jsx";
 import BannerHero from "../../components/BannerHero/BannerHero.jsx";
+import ProgramAreas from "../../components/ProgramAreas/ProgramAreas.jsx";
+import ApproachFlow from "../../components/ApproachFlow/ApproachFlow.jsx";
+import ImpactMetrics from "../../components/ImpactMetrics/ImpactMetrics.jsx";
+import FeaturedWork from "../../components/FeaturedWork/FeaturedWork.jsx";
+import StoriesOfChange from "../../components/StoriesOfChange/StoriesOfChange.jsx";
+import TrustPanel from "../../components/TrustPanel/TrustPanel.jsx";
+import InvolvementPaths from "../../components/InvolvementPaths/InvolvementPaths.jsx";
+import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
+import BrandPanel from "../../components/BrandPanel/BrandPanel.jsx";
+import StatementSplit from "../../components/StatementSplit/StatementSplit.jsx";
+import MissionVision from "../../components/MissionVision/MissionVision.jsx";
+import ValuesList from "../../components/ValuesList/ValuesList.jsx";
+import TeamGrid from "../../components/TeamGrid/TeamGrid.jsx";
 import Prose from "../../components/Prose/Prose.jsx";
 import SignupCard from "../../components/SignupCard/SignupCard.jsx";
 import Steps from "../../components/Steps/Steps.jsx";
 import Testimonials from "../../components/Testimonials/Testimonials.jsx";
-import BlogGrid from "../../components/BlogGrid/BlogGrid.jsx";
 import ContactDetails from "../../components/ContactDetails/ContactDetails.jsx";
 import LinkCards from "../../components/LinkCards/LinkCards.jsx";
-import SplitFeature from "../../components/SplitFeature/SplitFeature.jsx";
-import OptionStrip from "../../components/OptionStrip/OptionStrip.jsx";
-import { NGO, ZAKAT, VOLUNTEER, BLOGS, CONTACT, GIFTS } from "../../content/index.js";
+import { ABOUT, HOMEPAGE, ZAKAT } from "../../content/index.js";
+/* Catalogue-only sample data, imported from its own modules rather than
+   through content/index.js: through the barrel it landed in every
+   visitor's bundle, although only this dev page uses it (Document 15). */
+import { NGO } from "../../content/ngo.js";
+import { VOLUNTEER, CONTACT } from "../../content/pages.js";
 
 /* The live component catalog at /components — every component in
    src/components/, rendered with its real variants rather than described
@@ -249,18 +261,93 @@ export default function Components() {
       </Section>
 
       <Section
-        title="Page sections"
-        note="The composed sections that stack into the homepage, in the order they appear there."
+        title="Homepage sections"
+        note="The ten sections of the homepage (Document 02), in page order, with the homepage's own content."
       >
         <div className="flex flex-col gap-6">
           <Frame label="Header">
             <Header />
           </Frame>
+          <Frame label="HeroBleed">
+            <HeroBleed {...HOMEPAGE.hero} />
+          </Frame>
+          <Frame label="AboutIntro · imageFirst">
+            <AboutIntro
+              {...HOMEPAGE.whoWeAre}
+              src={HOMEPAGE.whoWeAre.image.src}
+              alt={HOMEPAGE.whoWeAre.image.alt}
+              focal={HOMEPAGE.whoWeAre.image.focal}
+              imageFirst
+            />
+          </Frame>
+          <Frame label="ProgramAreas">
+            <ProgramAreas {...HOMEPAGE.programs} />
+          </Frame>
+          <Frame label="ApproachFlow">
+            <ApproachFlow {...HOMEPAGE.approach} />
+          </Frame>
+          <Frame label="ImpactMetrics">
+            <ImpactMetrics {...HOMEPAGE.impact} />
+          </Frame>
+          <Frame label="FeaturedWork · placeholder slots">
+            <FeaturedWork {...HOMEPAGE.featuredWork} />
+          </Frame>
+          <Frame label="StoriesOfChange · placeholder slots">
+            <StoriesOfChange {...HOMEPAGE.stories} />
+          </Frame>
+          <Frame label="TrustPanel">
+            <TrustPanel {...HOMEPAGE.transparency} />
+          </Frame>
+          <Frame label="InvolvementPaths">
+            <InvolvementPaths {...HOMEPAGE.getInvolved} />
+          </Frame>
+          <Frame label="ClosingCta">
+            <ClosingCta {...HOMEPAGE.finalCta} />
+          </Frame>
+          <Frame label="Footer">
+            <Footer />
+          </Frame>
+        </div>
+      </Section>
+
+      <Section
+        title="About page sections"
+        note="The sections of /about (Document 03), with the page's own content. Values and Team are shown in their empty states; ClosingCta without an image."
+      >
+        <div className="flex flex-col gap-6">
+          <Frame label="BrandPanel">
+            <div className="max-w-md p-6">
+              <BrandPanel />
+            </div>
+          </Frame>
+          <Frame label="StatementSplit">
+            <StatementSplit {...ABOUT.whoWeAre} id={undefined} />
+          </Frame>
+          <Frame label="MissionVision">
+            <MissionVision {...ABOUT.missionVision} id={undefined} />
+          </Frame>
+          <Frame label="ValuesList · empty">
+            <ValuesList {...ABOUT.values} id={undefined} />
+          </Frame>
+          <Frame label="ApproachFlow · no steps">
+            <ApproachFlow {...ABOUT.approach} id={undefined} />
+          </Frame>
+          <Frame label="TeamGrid · empty">
+            <TeamGrid {...ABOUT.team} members={[]} id={undefined} />
+          </Frame>
+          <Frame label="ClosingCta · no image">
+            <ClosingCta {...ABOUT.closingCta} />
+          </Frame>
+        </div>
+      </Section>
+
+      <Section
+        title="Earlier page sections"
+        note="Sections from earlier versions of the site, no longer on any page. Kept for reuse; their sample content is placeholder."
+      >
+        <div className="flex flex-col gap-6">
           <Frame label="Hero">
             <Hero />
-          </Frame>
-          <Frame label="HeroBleed">
-            <HeroBleed />
           </Frame>
           <Frame label="Mission">
             <Mission />
@@ -277,15 +364,12 @@ export default function Components() {
           <Frame label="GetApp">
             <GetApp />
           </Frame>
-          <Frame label="Footer">
-            <Footer />
-          </Frame>
         </div>
       </Section>
 
       <Section
         title="NGO sections"
-        note="The sections that stack into the homepage below the hero. Each takes its content as props, so the same component serves several programmes — FeatureBanner and ImpactStats both appear more than once on the page."
+        note="Sections that made up the previous homepage, kept for the inner pages that will need them. Each takes its content as props; AboutIntro is also on /about."
       >
         <div className="flex flex-col gap-6">
           <Frame label="AccountabilityBand">
@@ -335,23 +419,14 @@ export default function Components() {
 
       <Section
         title="Zakat page sections"
-        note="The pieces that stack into /giving (the Zakat page). The impact tabs there are GetInvolved with the CTA left off."
+        note="The pieces that stack into /giving/zakat — a placeholder until RBB supplies its own Zakat information — plus the Faq it used to carry, shown with other pages' content. NisabCallout is not shown: there is no verified Nisab content to render it with."
       >
         <div className="flex flex-col gap-6">
           <Frame label="PageHero">
             <PageHero {...ZAKAT.hero} />
           </Frame>
-          <Frame label="FeatureGrid">
-            <FeatureGrid {...ZAKAT.trust} />
-          </Frame>
-          <Frame label="ProjectGrid">
-            <ProjectGrid {...ZAKAT.projects} />
-          </Frame>
-          <Frame label="NisabCallout">
-            <NisabCallout {...ZAKAT.calc} />
-          </Frame>
           <Frame label="Faq">
-            <Faq {...ZAKAT.faq} />
+            <Faq {...VOLUNTEER.faq} />
           </Frame>
           <Frame label="Newsletter">
             <Newsletter {...ZAKAT.newsletter} />
@@ -361,7 +436,7 @@ export default function Components() {
 
       <Section
         title="Inner page sections"
-        note="The pieces that stack into /get-involved/volunteer, /blogs and /contact-us."
+        note="The pieces that stack into /get-involved/volunteer, /stories and /contact."
       >
         <div className="flex flex-col gap-6">
           <Frame label="BannerHero">
@@ -379,23 +454,11 @@ export default function Components() {
           <Frame label="Testimonials">
             <Testimonials {...VOLUNTEER.feedback} />
           </Frame>
-          <Frame label="BlogGrid">
-            <BlogGrid {...BLOGS} />
-          </Frame>
           <Frame label="ContactDetails">
             <ContactDetails {...CONTACT.details} />
           </Frame>
           <Frame label="LinkCards">
             <LinkCards {...CONTACT.links} />
-          </Frame>
-          <Frame label="SplitFeature · flipped, with CTA">
-            <SplitFeature {...GIFTS.feedback} />
-          </Frame>
-          <Frame label="OptionStrip · three, on mist">
-            <OptionStrip {...GIFTS.water} />
-          </Frame>
-          <Frame label="OptionStrip · four, scrolls">
-            <OptionStrip {...GIFTS.empowerment} />
           </Frame>
         </div>
       </Section>

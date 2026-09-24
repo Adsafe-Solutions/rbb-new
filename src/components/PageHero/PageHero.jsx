@@ -1,6 +1,7 @@
 import { cx } from "../../lib/cx.js";
 import Button from "../Button/Button.jsx";
 import Container from "../Container/Container.jsx";
+import Picture from "../Picture/Picture.jsx";
 
 /* An inner-page hero: the same Light Gray band as the homepage's, with a
    single photograph in place of the swipe deck.
@@ -31,7 +32,14 @@ export default function PageHero({ heading, body, cta, src, alt }) {
         </div>
 
         <div className="reveal aspect-[4/3] overflow-hidden rounded-3xl rounded-tr-[5rem] shadow-sm">
-          <img src={src} alt={alt} decoding="async" className="h-full w-full object-cover" />
+          <Picture
+            sizes="(min-width: 1024px) 40vw, 100vw"
+            src={src}
+            alt={alt}
+            fetchpriority="high"
+            decoding="async"
+            className="h-full w-full object-cover"
+          />
         </div>
       </Container>
     </section>

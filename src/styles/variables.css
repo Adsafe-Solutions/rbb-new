@@ -21,10 +21,11 @@
   --color-onyx: #3a3a3a;
   --color-trust-blue: #10437c;
   --color-growth-green: #5cb85c;
+  --color-alert: #b3261e; /* form errors only — see theme.css */
 
   /* Typography — families */
   --font-bumblesans:
-    "BumbleSans", "DM Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Satoshi", "DM Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, sans-serif;
 
   /* The accent face. One line of copy uses it — the signature beside the

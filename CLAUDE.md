@@ -50,10 +50,45 @@ Three rules, as utilities (tokens in `variables.css`, utilities in
 Never `gap-6` / `gap-8` between cards. Gutters between a text column and
 its photograph in a split layout are page layout, not card gaps.
 
+### One content source (Document 27)
+
+**Content is not an environment. Infrastructure is.** There is one set of
+content files under `src/content/`, one image set under `src/assets/`, and
+one build. `npm run dev` and `npm run build` show the same complete site.
+There is no staging content mode, no `src/content/demo/`, no
+`VITE_CONTENT_MODE`, no `build:staging`.
+
+Much of that content is a WORKING PLACEHOLDER while RBB's own words are
+written. Every placeholder says so on its face — "Demo text — …",
+"· Demo profile", "(demo)", reserved `example.org` / `555 01xx` contact
+values — so nothing invented can be read as RBB's. Write new placeholders
+the same way; see `docs/WORKING_CONTENT.md`. A few things never get a
+placeholder, because a self-label cannot save them: impact figures,
+financial percentages and any DOCUMENT (a report link is a file someone
+downloads). Those stay empty or `pending-review` until RBB supplies them.
+
+What the build enforces splits in two (`scripts/production-gate.mjs`):
+
+- **Safety** — credentials, forbidden files, dev-catalogue routes. Always
+  fails the build. Also `src/content/validate.js`, on the content files.
+- **Readiness** — where working placeholders are still published. Never
+  fails a build; it is written to `build-meta/content-readiness.json` and
+  blocks PRODUCTION-CONTENT-READY in `npm run release:status` (approvals
+  in `release/approvals.mjs`, docs/RELEASE_READINESS.md).
+
+Environments still differ in INFRASTRUCTURE: email (off/test/live),
+payments (off/test/live), analytics, secrets and indexing. Deploy/launch:
+`docs/LAUNCH_RUNBOOK.md` — `npm run smoke`, `npm run release:package`.
+Host adapters use only `createServerApp` (`server/app.mjs`); no host is
+chosen yet — `docs/HOST_CONFIGURATION.md`.
+
 ## Conventions
 
 - One folder per component, one per page: `components/Button/Button.jsx`.
 - Copy lives in `src/content/`, never inline in a component.
+- The sitemap is `src/content/nav.js`. Header, mobile menu, footer,
+  breadcrumbs, routes and titles all read it. A page with real content
+  registers in `BUILT` in `App.jsx`; anything else renders `Placeholder`.
 - `src/config/env.js` is the only file that touches `import.meta.env`.
 - Feature switches go in `src/config/sections.js` with an env override.
 - Comments explain _why_, especially where the obvious approach is wrong.

@@ -14,16 +14,18 @@ export default function FeatureGrid({ heading, intro, items }) {
           {intro && <p className="mt-4 text-graphite">{intro}</p>}
         </div>
 
-        <ul className="reveal mt-14 grid gap-cards sm:grid-cols-2 lg:grid-cols-4">
-          {items.map((item) => (
-            <li key={item.title} className="rounded-3xl rounded-tr-[3rem] bg-paper-white p-8">
-              <h3 className="border-l-4 border-bumble-honey pl-3 font-bold text-[length:var(--text-subheading)] leading-subheading tracking-subheading">
-                {item.title}
-              </h3>
-              <p className="mt-4 text-graphite">{item.body}</p>
-            </li>
-          ))}
-        </ul>
+        {items.length > 0 && (
+          <ul className="reveal mt-14 grid gap-cards sm:grid-cols-2 lg:grid-cols-4">
+            {items.map((item) => (
+              <li key={item.title} className="rounded-3xl rounded-tr-[3rem] bg-paper-white p-8">
+                <h3 className="border-l-4 border-bumble-honey pl-3 font-bold text-[length:var(--text-subheading)] leading-subheading tracking-subheading">
+                  {item.title}
+                </h3>
+                <p className="mt-4 text-graphite">{item.body}</p>
+              </li>
+            ))}
+          </ul>
+        )}
       </Container>
     </section>
   );

@@ -77,14 +77,18 @@ export default function AccountabilityBand({
           </h2>
           <p className="mt-6 max-w-prose text-paper-white/80">{body}</p>
 
-          <ul className="mt-8 space-y-4">
-            {commitments.map((item) => (
-              <li key={item} className="flex gap-3">
-                <CheckIcon />
-                <span className="text-paper-white">{item}</span>
-              </li>
-            ))}
-          </ul>
+          {/* Each is a promise with a tick beside it, so none renders
+              until RBB has confirmed it can stand behind it. */}
+          {commitments.length > 0 && (
+            <ul className="mt-8 space-y-4">
+              {commitments.map((item) => (
+                <li key={item} className="flex gap-3">
+                  <CheckIcon />
+                  <span className="text-paper-white">{item}</span>
+                </li>
+              ))}
+            </ul>
+          )}
 
           <Button variant="inverse" to={cta.to} className="mt-10">
             {cta.label}

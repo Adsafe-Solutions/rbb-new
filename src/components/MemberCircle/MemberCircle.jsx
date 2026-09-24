@@ -3,7 +3,9 @@ import Button from "../Button/Button.jsx";
 import Photo from "../Photo/Photo.jsx";
 import Seal from "../Seal/Seal.jsx";
 import Container from "../Container/Container.jsx";
-import { MEMBER_CIRCLE } from "../../content/index.js";
+/* Catalogue-only sample data (/components), imported directly rather than
+   through content/index.js so it never enters the public build. */
+import { MEMBER_CIRCLE } from "../../content/home.js";
 
 /* The Member Circle card — photo left, copy right, on the soft mist
    surface.

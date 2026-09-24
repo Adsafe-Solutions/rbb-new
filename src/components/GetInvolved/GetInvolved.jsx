@@ -1,15 +1,23 @@
-import { useState } from "react";
+import { useId, useRef, useState } from "react";
 import { cx } from "../../lib/cx.js";
 import Button from "../Button/Button.jsx";
 import Container from "../Container/Container.jsx";
 import Sparkle from "../Sparkle/Sparkle.jsx";
+import Picture from "../Picture/Picture.jsx";
 
 /* "Get involved": one card, three ways in, switched by tabs.
 
    Photograph left, Pollen panel right, and a Pollen Sparkle on the seam
    between them — the panel's own colour, so it reads as the panel
    biting into the photograph rather than as an ornament. Copy AND
-   photograph change with the tab, so the whole card is one tabpanel. */
+   photograph change with the tab, so the whole card is one tabpanel.
+
+   Keyboard (WAI-ARIA tabs): Tab reaches the selected tab only; Left/Right
+   (and Home/End) move between tabs and select them; Tab again goes into
+   the panel. Ids come from useId, so the section can appear twice.
+
+   Without JavaScript the first tab's panel is what the pre-rendered page
+   shows — a complete section on its own, with its own link. */
 
 function ArrowIcon() {
   return (
@@ -28,12 +36,34 @@ function ArrowIcon() {
   );
 }
 
-export default function GetInvolved({ heading, tabs }) {
+export default function GetInvolved({ heading, tabs, id }) {
   const [active, setActive] = useState(tabs[0].key);
   const tab = tabs.find((t) => t.key === active) ?? tabs[0];
+  const uid = useId();
+  const tabId = (key) => `${uid}-tab-${key}`;
+  const panelId = `${uid}-panel`;
+  const buttons = useRef({});
+
+  const onKeyDown = (event) => {
+    const i = tabs.findIndex((t) => t.key === active);
+    const next =
+      event.key === "ArrowRight"
+        ? tabs[(i + 1) % tabs.length]
+        : event.key === "ArrowLeft"
+          ? tabs[(i - 1 + tabs.length) % tabs.length]
+          : event.key === "Home"
+            ? tabs[0]
+            : event.key === "End"
+              ? tabs[tabs.length - 1]
+              : null;
+    if (!next) return;
+    event.preventDefault();
+    setActive(next.key);
+    buttons.current[next.key]?.focus();
+  };
 
   return (
-    <section className="py-10 md:py-16">
+    <section id={id} className="scroll-mt-[var(--header-h)] py-10 md:py-16">
       <Container>
         <h2 className="reveal font-bold text-[length:var(--text-heading-lg)] leading-heading-lg tracking-heading-lg">
           {heading}
@@ -55,8 +85,9 @@ export default function GetInvolved({ heading, tabs }) {
               cornering. */}
           <div className="relative aspect-[4/3] md:aspect-auto md:min-h-[30rem]">
             {tabs.map((t) => (
-              <img
+              <Picture
                 key={t.key}
+                sizes="(min-width: 768px) 40vw, 100vw"
                 src={t.src}
                 alt={t.key === active ? t.alt : ""}
                 aria-hidden={t.key !== active}
@@ -66,6 +97,7 @@ export default function GetInvolved({ heading, tabs }) {
                   "absolute inset-0 h-full w-full object-cover transition-opacity duration-500",
                   t.key === active ? "opacity-100" : "opacity-0"
                 )}
+                style={t.focal ? { objectPosition: t.focal } : undefined}
               />
             ))}
 
@@ -84,21 +116,23 @@ export default function GetInvolved({ heading, tabs }) {
           </div>
 
           <div className="px-6 py-12 md:px-16 md:py-20">
-            <div role="tablist" aria-label={heading} className="flex flex-wrap gap-6">
+            <div role="tablist" aria-label={heading} className="flex flex-wrap gap-x-6 gap-y-3" onKeyDown={onKeyDown}>
               {tabs.map((t) => (
                 <button
                   key={t.key}
                   type="button"
                   role="tab"
-                  id={`get-involved-tab-${t.key}`}
+                  ref={(el) => (buttons.current[t.key] = el)}
+                  id={tabId(t.key)}
                   aria-selected={t.key === active}
-                  aria-controls="get-involved-panel"
+                  aria-controls={panelId}
+                  tabIndex={t.key === active ? 0 : -1}
                   onClick={() => setActive(t.key)}
                   className={cx(
                     "border-b-2 pb-1 font-semibold transition-colors",
                     t.key === active
                       ? "border-trust-blue text-trust-blue"
-                      : "border-transparent text-bumble-ink/70 hover:text-trust-blue"
+                      : "border-transparent text-bumble-ink/80 hover:text-trust-blue"
                   )}
                 >
                   {t.label}
@@ -108,9 +142,9 @@ export default function GetInvolved({ heading, tabs }) {
 
             <div
               key={tab.key}
-              id="get-involved-panel"
+              id={panelId}
               role="tabpanel"
-              aria-labelledby={`get-involved-tab-${tab.key}`}
+              aria-labelledby={tabId(tab.key)}
               className="enter mt-10"
             >
               <h3 className="font-bold text-[length:var(--text-heading)] leading-heading tracking-heading">

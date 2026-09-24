@@ -3,24 +3,51 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Marks the page as script-capable BEFORE first paint. The scroll
+         reveal (.reveal in styles/index.css) only hides content under
+         .js, so the pre-rendered HTML reads in full without JavaScript,
+         and with it the fade-in starts from the same frame as before. -->
+    <script>document.documentElement.classList.add("js")</script>
+    <!-- The one description the supplied annual report confirms. Mirrors
+         BRAND.summary in src/content/brand.js — change both together. -->
     <meta
       name="description"
-      content="Meet new people, make friends and find something real."
+      content="Rising Beyond Borders is a non-profit focused on empowering communities and creating sustainable solutions."
     />
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- BumbleSans is proprietary. DESIGN.md names DM Sans as the closest
-         substitute for its geometric warmth; the stack in theme.css falls
-         through to it. Weights 400/500/700 are the three the design uses. -->
-    <!-- Dancing Script is the ONE accent face, and it exists for a single
-         line of copy: the signature beside the bleed hero's photograph.
-         It is never body text, never a heading, never anything a reader
-         has to get through. See --font-script in theme.css. -->
+    <!-- Satoshi is the brand typeface (RBB brand guidelines), free from
+         Fontshare. 900 is for the footer wordmark; there is no 600 in the
+         family, so `font-semibold` resolves to 700. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;900&family=Dancing+Script:wght@600&display=swap"
+      href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap"
       rel="stylesheet"
     />
-    <title>RBB — Date, chat and meet new people</title>
+    <!-- DM Sans is the fallback the site was built on, kept next in the
+         stack in theme.css so a blocked Fontshare request still lands on
+         the geometric sans the layout was tuned for. A FALLBACK, so it no
+         longer blocks rendering: `media="print"` loads it at low priority
+         and src/main.jsx switches it on (`data-deferred-style`). Not an
+         inline onload handler: the Content Security Policy (Document 20)
+         allows no inline event handlers.
+         Dancing Script is no longer requested: the one line that used it
+         (the bleed hero's signature) is not on any page, and a font no
+         page shows is third-party traffic for nothing. --font-script in
+         theme.css keeps its system fallbacks if the line returns. -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;900&display=swap"
+      rel="stylesheet"
+      media="print"
+      data-deferred-style
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;900&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    <title>Rising Beyond Borders</title>
   </head>
   <body>
     <div id="root"></div>

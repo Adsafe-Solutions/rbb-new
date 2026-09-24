@@ -1,5 +1,6 @@
 import { cx } from "../../lib/cx.js";
 import Container from "../Container/Container.jsx";
+import Picture from "../Picture/Picture.jsx";
 
 /* A full-bleed photographic hero with the title set over it — the inner
    page treatment the reference uses for Volunteer.
@@ -10,9 +11,11 @@ import Container from "../Container/Container.jsx";
 export default function BannerHero({ heading, body, src, alt }) {
   return (
     <section className="relative -mt-[var(--header-h)] isolate overflow-hidden bg-bumble-ink text-paper-white">
-      <img
+      <Picture
+        sizes="100vw"
         src={src}
         alt={alt}
+        fetchpriority="high"
         decoding="async"
         className="absolute inset-0 -z-10 h-full w-full object-cover"
       />

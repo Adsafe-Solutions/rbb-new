@@ -1,92 +1,127 @@
-import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { cx } from "../../lib/cx.js";
 import Brand from "../Brand/Brand.jsx";
+import Button from "../Button/Button.jsx";
 import Container from "../Container/Container.jsx";
 import Mark from "../Mark/Mark.jsx";
-import { BRAND, NAV } from "../../content/index.js";
+import DesktopNav from "./DesktopNav.jsx";
+import MobileNav from "./MobileNav.jsx";
+import { MenuIcon } from "./icons.jsx";
+import { BRAND, NAV_CTA } from "../../content/index.js";
 
 /* The floating header.
 
-   Borderless and transparent by design — it sits ON the honey band rather
-   than above it, which is why there is no bottom rule and no background of
-   its own. The nav group carries the only surface: a soft white-tinted
-   pill holding the items, with the active item inverted to white. That
-   white pill and the ink sign-in button are the same shape at opposite
-   values, and the pair is what the design's toggle relationship rests on.
+   Borderless and transparent by design — it sits ON the page's opening
+   band rather than above it, so there is no bottom rule and no background
+   of its own. Each control carries its own white surface instead: the
+   logo pill, the nav pill, the menu button. Donate is the one filled
+   Growth Green button, and it stays in the bar at every width.
 
-   ⚠ Fixed, out of flow, so the hero's Honey runs up behind it. That
+   ⚠ Fixed, out of flow, so the hero's band runs up behind it. That
    means the page has to make room for it: <main> pads its top by
-   `--header-h`, and Hero pulls itself back up by the same amount so the
-   band starts at the top of the viewport. All three read the one
+   `--header-h`, and the heroes pull themselves back up by the same amount
+   so the band starts at the top of the viewport. All of them read the one
    variable in styles/variables.css — change it there, nowhere else.
 
    Stays transparent while scrolling, by request — it floats over
-   whatever section is underneath with no ground of its own. */
+   whatever section is underneath with no ground of its own.
 
-function GlobeIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      aria-hidden="true"
-      className="h-5 w-5"
-    >
-      <circle cx="12" cy="12" r="9" />
-      <path d="M3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18" />
-    </svg>
-  );
-}
+   Focus rings are drawn INSIDE the controls here (negative offset). The
+   site's ring is Charcoal and sits outside the element; behind the
+   header that is often the Deep Trust Blue hero, where Charcoal all but
+   vanishes. Inside, it is always on white or green. */
 
-function ChevronIcon({ open }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      aria-hidden="true"
-      className={cx("h-4 w-4 transition-transform", open && "rotate-180")}
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
-}
-
-function MenuIcon({ open }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      aria-hidden="true"
-      className="h-6 w-6"
-    >
-      {open ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M3 7h18M3 12h18M3 17h18" />}
-    </svg>
-  );
-}
+const LG = "(min-width: 64rem)";
 
 export default function Header() {
-  const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const toggleRef = useRef(null);
+
+  /* Navigating closes the menu — back/forward included, which never
+     passes through a link's onClick. */
+  useEffect(() => setMenuOpen(false), [pathname]);
+
+  /* While the menu is open:
+       · the page behind it does not scroll. On <html>, not <body>: body
+         carries `overflow-x: clip` for the overhanging artwork, and
+         setting overflow there would replace it (see styles/index.css).
+       · Escape closes it and returns focus to the toggle.
+       · widening past `lg` closes it — the desktop nav has appeared, and
+         a menu left open behind it would keep the scroll lock. */
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+
+    const root = document.documentElement;
+    const previous = root.style.overflow;
+    root.style.overflow = "hidden";
+
+    const onKeyDown = (e) => {
+      if (e.key !== "Escape") return;
+      setMenuOpen(false);
+      toggleRef.current?.focus();
+    };
+    const wide = window.matchMedia(LG);
+    const onWide = (e) => e.matches && setMenuOpen(false);
+
+    document.addEventListener("keydown", onKeyDown);
+    wide.addEventListener("change", onWide);
+    return () => {
+      root.style.overflow = previous;
+      document.removeEventListener("keydown", onKeyDown);
+      wide.removeEventListener("change", onWide);
+    };
+  }, [menuOpen]);
+
+  /* Tabbing past the last link in the menu closes it, rather than
+     carrying focus on into a page the open menu is covering. No focus
+     trap: the menu is a disclosure, not a dialog, and Tab always leaves. */
+  const onBlur = (e) => {
+    if (menuOpen && e.relatedTarget && !e.currentTarget.contains(e.relatedTarget)) {
+      setMenuOpen(false);
+    }
+  };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50">
-      <Container className="flex h-[var(--header-h)] items-center justify-between gap-4">
-        {/* Mark and wordmark, in their own white pill alongside the nav
-            group and the donate control. The pill is not decoration: the
-            header is transparent and fixed over whatever the page opens
-            with, and the home hero opens on a Deep Trust Blue band — the
-            same colour the wordmark is set in. Without the pill it would
-            disappear into it. */}
+    <header
+      onBlur={onBlur}
+      className="fixed inset-x-0 top-0 z-50 [&_:focus-visible]:[outline-offset:-4px]"
+    >
+      {/* The first thing Tab reaches on every page: straight past the
+          header to <main>. Invisible until focused. */}
+      <a
+        href="#main"
+        className={cx(
+          "sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-20",
+          "focus:rounded-2xl focus:bg-paper-white focus:px-5 focus:py-3 focus:font-medium focus:text-trust-blue focus:shadow-sm"
+        )}
+      >
+        Skip to content
+      </a>
+
+      {/* Dims the page behind the open menu; a tap on it closes the menu.
+          Before the bar in the DOM, so the bar and the sheet paint over
+          it. Hidden from assistive tech — Escape and the toggle are the
+          accessible ways out. */}
+      {menuOpen && (
+        <div
+          aria-hidden="true"
+          onClick={() => setMenuOpen(false)}
+          className="enter fixed inset-0 bg-bumble-ink/40 lg:hidden"
+        />
+      )}
+
+      <Container className="relative flex h-[var(--header-h)] items-center justify-between gap-3">
+        {/* Mark and wordmark, in their own white pill. The pill is not
+            decoration: the header is transparent and fixed over whatever
+            the page opens with, and the home hero opens on a Deep Trust
+            Blue band — the same colour the wordmark is set in. Without
+            the pill it would disappear into it. */}
         <Link
           to="/"
-          aria-label={BRAND.name}
-          className="flex items-center gap-2.5 rounded-2xl bg-paper-white px-4 py-2.5"
+          aria-label={`${BRAND.fullName} home`}
+          className="flex shrink-0 items-center gap-2.5 rounded-2xl bg-paper-white px-3 py-2.5 sm:px-4"
         >
           <Mark className="h-7 w-7 shrink-0 text-bumble-honey" />
           {/* `as="span"`: this whole pill is already the link home, and a
@@ -94,92 +129,43 @@ export default function Header() {
           <Brand size="nav" as="span" />
         </Link>
 
-        {/* The nav group. Hidden below lg, where it becomes the sheet
-            below — five items plus a brand and a control do not fit on a
-            phone at this type size without shrinking the type past the
-            15px floor the design sets. */}
-        <nav
-          aria-label="Primary"
-          className={cx(
-            "hidden items-center rounded-2xl bg-paper-white/45 p-1.5 lg:flex"
-          )}
-        >
-          {NAV.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                cx(
-                  "rounded-2xl px-5 py-2.5 font-medium transition-colors",
-                  "text-[length:var(--text-body)] leading-none tracking-body",
-                  isActive
-                    ? "bg-paper-white text-trust-blue"
-                    : "text-trust-blue hover:bg-paper-white/60"
-                )
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
+        <DesktopNav />
 
-        <div className="flex items-center gap-3">
-          {/* Language selector. A real locale menu belongs behind this;
-              today it is the control's shape, so the header is complete
-              and the menu is a drop-in rather than a re-layout. */}
-          <button
-            type="button"
-            aria-label="Change language"
-            className={cx(
-              "hidden items-center gap-2 rounded-2xl bg-paper-white px-5 py-3",
-              "text-bumble-ink transition-colors hover:bg-mist sm:inline-flex"
-            )}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* `sm` box so it fits beside the logo and the menu button on a
+              320px phone; `h-12` matches their height. At `lg` it matches
+              the nav pill instead, and with the room it steps up to the
+              body size the nav is set in. */}
+          <Button
+            to={NAV_CTA.to}
+            size="sm"
+            aria-current={pathname === NAV_CTA.to ? "page" : undefined}
+            className="h-12 lg:h-12.5 lg:px-7 lg:text-[length:var(--text-body)]"
           >
-            <GlobeIcon />
-            <ChevronIcon open={false} />
-          </button>
+            {NAV_CTA.label}
+          </Button>
 
           <button
+            ref={toggleRef}
             type="button"
-            aria-label={open ? "Close menu" : "Open menu"}
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
-            className="rounded-2xl bg-paper-white p-3 text-bumble-ink lg:hidden"
+            aria-label="Menu"
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+            onClick={() => setMenuOpen((v) => !v)}
+            className="rounded-2xl bg-paper-white p-3 text-trust-blue transition-colors hover:bg-mist lg:hidden"
           >
-            <MenuIcon open={open} />
+            <MenuIcon open={menuOpen} />
           </button>
         </div>
       </Container>
 
-      {/* The small-screen sheet. Rendered under the bar rather than over
-          the page: the header is transparent, so a full-screen overlay
-          would have nothing to sit against and the honey band would read
-          straight through it. */}
-      {open && (
-        <Container className="lg:hidden">
-          <nav
-            aria-label="Primary"
-            className="mb-4 flex flex-col gap-1 rounded-3xl bg-paper-white p-3 shadow-sm"
-          >
-            {NAV.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                onClick={() => setOpen(false)}
-                className={({ isActive }) =>
-                  cx(
-                    "rounded-2xl px-4 py-3 font-medium",
-                    "text-[length:var(--text-body)] tracking-body",
-                    isActive ? "bg-mist text-trust-blue" : "text-trust-blue"
-                  )
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
-        </Container>
-      )}
+      <Container className="relative lg:hidden">
+        <MobileNav
+          id="mobile-menu"
+          open={menuOpen}
+          onNavigate={() => setMenuOpen(false)}
+        />
+      </Container>
     </header>
   );
 }

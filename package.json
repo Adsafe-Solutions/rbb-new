@@ -5,12 +5,21 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && vite build --ssr src/entry-server.jsx --outDir dist-ssr && NODE_ENV=production node scripts/prerender.mjs",
     "build:dev": "vite build --mode development",
-    "build:prod": "vite build --mode production",
+    "build:prod": "vite build --mode production && vite build --mode production --ssr src/entry-server.jsx --outDir dist-ssr && NODE_ENV=production node scripts/prerender.mjs",
     "preview": "vite preview",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "build:client": "vite build",
+    "validate:content": "RBB_KEEP_DRAFTS=1 vite build --ssr src/entry-server.jsx --outDir build-meta/.validate --logLevel error && node scripts/validate-content.mjs",
+    "test:server": "node --test \"server/test/*.test.mjs\"",
+    "test:release": "node --test \"scripts/test/*.test.mjs\"",
+    "release:status": "node scripts/release-status.mjs",
+    "smoke": "node scripts/smoke-test.mjs",
+    "release:package": "node scripts/package-release.mjs",
+    "serve:local": "node --env-file-if-exists=server/local.env --env-file-if-exists=server/.env.local server/dev-server.mjs",
+    "check:razorpay": "node scripts/check-razorpay-checkout.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

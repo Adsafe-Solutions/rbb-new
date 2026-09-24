@@ -1,0 +1,295 @@
+{
+  "rbb-field-kids": {
+    "width": 1536,
+    "height": 1024,
+    "widths": [
+      480,
+      800,
+      1200,
+      1536
+    ]
+  },
+  "rbb-field-distribution": {
+    "width": 1536,
+    "height": 1024,
+    "widths": [
+      480,
+      800,
+      1200,
+      1536
+    ]
+  },
+  "rbb-field-elder": {
+    "width": 1536,
+    "height": 1024,
+    "widths": [
+      480,
+      800,
+      1200,
+      1536
+    ]
+  },
+  "ngo-volunteers": {
+    "width": 1200,
+    "height": 800,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "ngo-events": {
+    "width": 1200,
+    "height": 800,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "gifts-hero": {
+    "width": 1200,
+    "height": 800,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "zakat-hero": {
+    "width": 1200,
+    "height": 800,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "ngo-classroom": {
+    "width": 1200,
+    "height": 1600,
+    "widths": [
+      480,
+      800,
+      1200
+    ]
+  },
+  "demo-comm-aid-boxes": {
+    "width": 1600,
+    "height": 1067,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600
+    ]
+  },
+  "demo-comm-food-prep": {
+    "width": 1600,
+    "height": 1067,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600
+    ]
+  },
+  "demo-comm-gathering": {
+    "width": 1600,
+    "height": 1067,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600
+    ]
+  },
+  "demo-comm-packing": {
+    "width": 1600,
+    "height": 1067,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600
+    ]
+  },
+  "demo-comm-relief-packing": {
+    "width": 1600,
+    "height": 1067,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600
+    ]
+  },
+  "demo-edu-girl-reading": {
+    "width": 1600,
+    "height": 1067,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600
+    ]
+  },
+  "demo-edu-reading-circle": {
+    "width": 1600,
+    "height": 1067,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600
+    ]
+  },
+  "demo-edu-rural-classroom": {
+    "width": 1600,
+    "height": 1067,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600
+    ]
+  },
+  "demo-edu-teacher-classroom": {
+    "width": 1600,
+    "height": 979,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600
+    ]
+  },
+  "demo-health-checkup": {
+    "width": 1600,
+    "height": 1067,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600
+    ]
+  },
+  "demo-health-drinking-water": {
+    "width": 1600,
+    "height": 1067,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600
+    ]
+  },
+  "demo-health-team": {
+    "width": 1600,
+    "height": 1067,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600
+    ]
+  },
+  "demo-health-water-pump": {
+    "width": 1600,
+    "height": 1067,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600
+    ]
+  },
+  "demo-live-harvest": {
+    "width": 1600,
+    "height": 1067,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600
+    ]
+  },
+  "demo-live-market": {
+    "width": 1600,
+    "height": 1067,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600
+    ]
+  },
+  "demo-live-sewing": {
+    "width": 1600,
+    "height": 1067,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600
+    ]
+  },
+  "demo-live-vegetable-seller": {
+    "width": 1600,
+    "height": 1067,
+    "widths": [
+      480,
+      800,
+      1200,
+      1600
+    ]
+  },
+  "demo-team-1": {
+    "width": 800,
+    "height": 800,
+    "widths": [
+      480,
+      800
+    ]
+  },
+  "demo-team-2": {
+    "width": 800,
+    "height": 800,
+    "widths": [
+      480,
+      800
+    ]
+  },
+  "demo-team-3": {
+    "width": 800,
+    "height": 800,
+    "widths": [
+      480,
+      800
+    ]
+  },
+  "demo-team-4": {
+    "width": 800,
+    "height": 800,
+    "widths": [
+      480,
+      800
+    ]
+  },
+  "demo-team-5": {
+    "width": 800,
+    "height": 800,
+    "widths": [
+      480,
+      800
+    ]
+  },
+  "demo-team-6": {
+    "width": 800,
+    "height": 800,
+    "widths": [
+      480,
+      800
+    ]
+  }
+}

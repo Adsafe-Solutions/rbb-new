@@ -1,31 +1,30 @@
 import PageHero from "../../components/PageHero/PageHero.jsx";
-import FeatureGrid from "../../components/FeatureGrid/FeatureGrid.jsx";
-import ProjectGrid from "../../components/ProjectGrid/ProjectGrid.jsx";
+import DonationAction from "../../components/DonationAction/DonationAction.jsx";
 import Newsletter from "../../components/Newsletter/Newsletter.jsx";
 import useReveal from "../../hooks/useReveal.js";
-import { GIVING } from "../../content/index.js";
+import { DONATION, GIVING, donationState, legacyGivingBlock } from "../../content/index.js";
 
-/* /giving — the Ways to Give hub:
+/* /giving — a legacy address, kept so old links land (Document 11):
 
-     mist band    PageHero       heading, line, donate CTA
-     mist band    FeatureGrid    four promises that hold for every donor
-     white        ProjectGrid    the six routes in, Zakat among them
-     white        Newsletter     stay informed
+     mist band    PageHero        heading, line, → /get-involved/donate
+     white        DonationAction  the current giving state, → Donate
+     white        Newsletter      stay informed
 
-   This route used to render the Zakat page. It does not any more, and the
-   reason is not cosmetic: a donor arriving from the main nav was landing on
-   Nisab thresholds and scholar verification, which tells anyone who does
-   not give Zakat that the charity is not addressed to them. Zakat kept
-   everything — page, calculator, FAQs — one level down at /giving/zakat,
-   where it is one route among six rather than the front door. */
+   It offers no giving routes of its own; see content/giving.js for why
+   the six it used to list are gone. */
 export default function Giving() {
   useReveal();
 
   return (
     <>
       <PageHero {...GIVING.hero} />
-      <FeatureGrid {...GIVING.trust} />
-      <ProjectGrid {...GIVING.routes} />
+      <DonationAction
+        kicker={DONATION.legacy.kicker}
+        state={donationState()}
+        block={legacyGivingBlock()}
+        onward={DONATION.legacy.onward}
+        className="pt-20 md:pt-28"
+      />
       <Newsletter {...GIVING.newsletter} />
     </>
   );

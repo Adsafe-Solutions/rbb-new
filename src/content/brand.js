@@ -13,14 +13,14 @@ export const BRAND = {
      measuring this exact text, and a transform would change the glyphs
      after the measurement was taken. */
   wordmark: { lead: "Rising", rest: "beyond borders" },
-  /* Faith-neutral by design. RBB serves and is supported by people of
-     every faith and none, so the line the whole site hangs off cannot name
-     one tradition. Zakat and Sadaqah are still offered — as one route on
-     /giving, alongside the others — but they are not the premise. */
-  tagline: "Delivering aid where it is needed most, since 1993",
-
-  /* Kept short: the mark is doing the talking. */
-  description: "Humanitarian aid across 15+ countries — emergency relief, clean water, healthcare, education and orphan support.",
+  /* The one description the supplied annual report confirms (Document 01,
+     "Organizational basis"). Used by the footer, the page metadata and
+     the "who we are" block. The tagline and description this file used
+     to carry — "since 1993", "15+ countries" — are not in the supplied
+     materials and were removed rather than left for something to pick
+     up. */
+  summary:
+    "A non-profit focused on empowering communities and creating sustainable solutions.",
 };
 
 export default BRAND;

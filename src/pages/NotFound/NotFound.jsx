@@ -1,7 +1,15 @@
 import Button from "../../components/Button/Button.jsx";
 import Container from "../../components/Container/Container.jsx";
+import useSeo from "../../hooks/useSeo.js";
+import { notFoundMeta } from "../../content/seo.js";
+
+/* Every miss: an unknown URL, and every detail slug that is not an
+   approved record. `noindex, nofollow`, no canonical, and the title says
+   "Page not found" — never the slug, which would read as a real page. */
 
 export default function NotFound() {
+  useSeo(notFoundMeta());
+
   return (
     <Container className="flex min-h-[60vh] flex-col justify-center py-20">
       <p className="text-[length:var(--text-caption)] tracking-caption text-graphite">

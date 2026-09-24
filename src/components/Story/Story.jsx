@@ -2,7 +2,9 @@ import { cx } from "../../lib/cx.js";
 import Button from "../Button/Button.jsx";
 import Photo from "../Photo/Photo.jsx";
 import Container from "../Container/Container.jsx";
-import { STORY } from "../../content/index.js";
+/* Catalogue-only sample data (/components), imported directly rather than
+   through content/index.js so it never enters the public build. */
+import { STORY } from "../../content/home.js";
 
 /* A member story — oversized quote left, portrait right.
 

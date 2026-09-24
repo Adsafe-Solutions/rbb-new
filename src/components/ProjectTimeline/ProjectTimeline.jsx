@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { cx } from "../../lib/cx.js";
 import Button from "../Button/Button.jsx";
 import Container from "../Container/Container.jsx";
+import Picture from "../Picture/Picture.jsx";
 
 /* Recent project highlights: a row of cards that moves sideways as the
    page scrolls down, over a timeline that fills in as it goes.
@@ -31,6 +32,13 @@ import Container from "../Container/Container.jsx";
    to an ordinary swipeable row with fixed-ratio photos, the timeline
    driven by that row's own scroll instead of the page's.
 
+   RBB CONTENT (content/work.js `projectHighlights`): one card per
+   project — its place (verified location, else its program), title and
+   summary, a Donate link to the donation page and a link to the project's
+   own page. The pill under each dot is the project's `date` when RBB
+   gives one, otherwise its `status` ("Active", "Planned"…) — never an
+   invented date. The legacy appeal copy this was drawn with is gone.
+
    ⚠ No `.reveal` inside the track. useReveal's observer works off the
    element's position in the page, and a card that enters by sliding
    sideways inside a pinned panel never crosses its threshold. */
@@ -46,7 +54,8 @@ const SCROLL_RATIO = 4;
    floatier; 1 turns the easing off. */
 const EASE = 0.06;
 
-export default function ProjectTimeline({ heading, items }) {
+function Timeline({ heading, items }) {
+  const headingId = useId();
   const sectionRef = useRef(null);
   const panelRef = useRef(null);
   const headingRef = useRef(null);
@@ -205,7 +214,7 @@ export default function ProjectTimeline({ heading, items }) {
   return (
     <section
       ref={sectionRef}
-      aria-labelledby="project-timeline-heading"
+      aria-labelledby={headingId}
       className="bg-mist"
       style={pinned ? { height: `calc(100svh - var(--header-h) + ${travel * SCROLL_RATIO}px)` } : undefined}
     >
@@ -220,7 +229,7 @@ export default function ProjectTimeline({ heading, items }) {
         <Container className="shrink-0">
           <h2
             ref={headingRef}
-            id="project-timeline-heading"
+            id={headingId}
             className="font-bold text-[length:var(--text-heading-sm)] leading-heading-sm tracking-heading-sm md:text-[length:var(--text-heading)] md:leading-heading md:tracking-heading"
           >
             {heading}
@@ -269,17 +278,23 @@ export default function ProjectTimeline({ heading, items }) {
                         pinned ? "min-h-24 flex-1" : "aspect-[16/10]"
                       )}
                     >
-                      <img
-                        src={item.src}
-                        alt={item.alt}
-                        loading="lazy"
-                        decoding="async"
-                        className="absolute inset-0 h-full w-full object-cover"
-                      />
+                      {item.src && (
+                        <Picture
+                          sizes="(min-width: 768px) 21rem, 19rem"
+                          src={item.src}
+                          alt={item.alt}
+                          loading="lazy"
+                          decoding="async"
+                          className="absolute inset-0 h-full w-full object-cover"
+                          style={item.focal ? { objectPosition: item.focal } : undefined}
+                        />
+                      )}
                     </div>
 
                     <div className="flex shrink-0 flex-col p-4">
-                      <p className="text-[length:var(--text-caption)] font-medium uppercase tracking-[0.18em] text-bumble-honey">
+                      {/* Deep Trust Blue, not Sky Blue: Sky Blue text on white
+                          is 2.55:1, under WCAG's 4.5:1 for text this size. */}
+                      <p className="text-[length:var(--text-caption)] font-semibold uppercase tracking-[0.18em] text-trust-blue">
                         {item.place}
                       </p>
                       {/* Title and body together hold room for their
@@ -347,24 +362,47 @@ export default function ProjectTimeline({ heading, items }) {
             </div>
 
             <ol className="mt-3 flex shrink-0 gap-cards">
-              {items.map((item, i) => (
-                <li key={item.title} className="flex w-[var(--card)] justify-center">
-                  <time
-                    className={cx(
-                      "rounded-full border px-3 py-0.5 text-[length:var(--text-caption)] leading-caption font-medium transition-colors duration-300",
-                      i < reached
-                        ? "border-bumble-honey/40 text-trust-blue"
-                        : "border-bumble-ink/10 text-graphite"
+              {items.map((item, i) => {
+                /* A real <time> only for a real date; a status is a label. */
+                const Pill = item.date ? "time" : "span";
+                const pill = cx(
+                  "rounded-full border px-3 py-0.5 text-[length:var(--text-caption)] leading-caption font-medium transition-colors duration-300",
+                  i < reached ? "border-bumble-honey/40 text-trust-blue" : "border-bumble-ink/10 text-graphite"
+                );
+                return (
+                  <li key={item.title} className="flex w-[var(--card)] justify-center">
+                    {item.dateLabel && (
+                      <Pill dateTime={item.date ?? undefined} className={pill}>
+                        {item.dateLabel}
+                      </Pill>
                     )}
-                  >
-                    {item.date}
-                  </time>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ol>
           </div>
         </div>
       </div>
     </section>
   );
+}
+
+/* With no projects there is nothing to pin, scroll or measure, and every
+   effect in Timeline assumes cards exist — so an empty list gets the
+   heading and a line of text instead. `empty` is that line. */
+export default function ProjectTimeline({ heading, items, empty }) {
+  if (!items.length) {
+    return (
+      <section className="py-20 md:py-28">
+        <Container>
+          <h2 className="reveal font-bold text-[length:var(--text-heading-sm)] leading-heading-sm tracking-heading-sm md:text-[length:var(--text-heading)] md:leading-heading md:tracking-heading">
+            {heading}
+          </h2>
+          {empty && <p className="reveal mt-4 max-w-prose text-graphite">{empty}</p>}
+        </Container>
+      </section>
+    );
+  }
+
+  return <Timeline heading={heading} items={items} />;
 }

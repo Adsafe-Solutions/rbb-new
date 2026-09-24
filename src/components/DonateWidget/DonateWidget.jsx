@@ -22,6 +22,9 @@ const FREQUENCIES = [
   { key: "monthly", label: "Regular giving" },
 ];
 
+/* ⚠ The amounts and currency this renders are provisional until Rising
+   Beyond Borders confirms them — see the note on `donate` in
+   content/ngo.js. */
 export default function DonateWidget({ appeal, amounts, currency, addon, cta, src, alt }) {
   const navigate = useNavigate();
   const [frequency, setFrequency] = useState("once");

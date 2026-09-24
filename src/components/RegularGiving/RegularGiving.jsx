@@ -1,6 +1,7 @@
 import { useId } from "react";
 import Button from "../Button/Button.jsx";
 import Container from "../Container/Container.jsx";
+import Picture from "../Picture/Picture.jsx";
 
 /* The regular-giving ask: copy on a Deep Trust Blue card, the photograph
    cut into a soft organic shape on the right, with two Sky Blue shapes
@@ -30,7 +31,12 @@ const PHOTO =
 const PALE =
   "M0.12,0.3 C0.02,0.42 -0.02,0.64 0.06,0.82 C0.1,0.9 0.18,0.97 0.26,1 L0.6,1 L0.6,0.3 Z";
 
-export default function RegularGiving({ heading, body, cta, src, alt }) {
+/* Also the homepage's closing invitation (Document 02 §10): `heading` may
+   be one string or one entry per line; `secondary` is an optional second
+   way on, as an outline button (`outlineInverse` — the only second
+   button that reads on Deep Trust Blue without becoming a second fill). */
+export default function RegularGiving({ heading, body, cta, secondary, src, alt, focal }) {
+  const lines = Array.isArray(heading) ? heading : [heading];
   const id = useId();
   const photoClip = `${id}-photo`;
   const paleClip = `${id}-pale`;
@@ -41,16 +47,23 @@ export default function RegularGiving({ heading, body, cta, src, alt }) {
         <div className="reveal grid overflow-hidden rounded-3xl bg-trust-blue md:grid-cols-[5fr_6fr]">
           <div className="px-8 py-12 md:py-20 md:pl-16 lg:pl-20">
             <h2 className="font-bold text-[length:var(--text-heading)] leading-heading tracking-heading text-paper-white">
-              {heading.map((line) => (
+              {lines.map((line) => (
                 <span key={line} className="block">
                   {line}
                 </span>
               ))}
             </h2>
-            <p className="mt-6 max-w-[30rem] text-paper-white/90">{body}</p>
-            <Button to={cta.to} className="mt-8">
-              {cta.label}
-            </Button>
+            {body && <p className="mt-6 max-w-[30rem] text-paper-white/90">{body}</p>}
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Button to={cta.to} className="whitespace-normal!">
+                {cta.label}
+              </Button>
+              {secondary && (
+                <Button to={secondary.to} variant="outlineInverse" className="whitespace-normal!">
+                  {secondary.label}
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* The artwork. A fixed height on a phone, where it stacks under
@@ -81,12 +94,16 @@ export default function RegularGiving({ heading, body, cta, src, alt }) {
               className="absolute inset-y-0 right-0 left-[6%]"
               style={{ clipPath: `url(#${photoClip})` }}
             >
-              <img
+              <Picture
+                sizes="(min-width: 768px) 55vw, 100vw"
                 src={src}
                 alt={alt}
                 loading="lazy"
                 decoding="async"
-                className="h-full w-full object-cover object-[35%_center]"
+                className="h-full w-full object-cover"
+                /* Focal point from content — an inline style, because a
+                   class built from a variable is one Tailwind never emits. */
+                style={{ objectPosition: focal ?? "35% center" }}
               />
             </div>
 

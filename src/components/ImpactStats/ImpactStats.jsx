@@ -1,6 +1,7 @@
 import { cx } from "../../lib/cx.js";
 import Container from "../Container/Container.jsx";
 import Mark from "../Mark/Mark.jsx";
+import Button from "../Button/Button.jsx";
 
 /* A row of headline numbers, each on its own card with a swooped top-right
    corner. One card can be `highlight`ed — it goes Deep Trust Blue (never
@@ -49,6 +50,20 @@ const ICONS = {
       <path d="M9.2 14.6a2.9 2.9 0 0 0 2.6 2.7" />
     </>
   ),
+  /* A globe — "countries reached". */
+  globe: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M3.5 12h17M12 3.5c2.4 2.4 3.6 5.2 3.6 8.5s-1.2 6.1-3.6 8.5c-2.4-2.4-3.6-5.2-3.6-8.5S9.6 5.9 12 3.5z" />
+    </>
+  ),
+  /* Two joined hands — "partners & donors". */
+  partners: (
+    <>
+      <path d="M3.5 12.5 7 9l3 1.2 2.5-1.7 3 .2L20.5 12" />
+      <path d="M7 9 3.5 12.5l4.3 4.3a1.6 1.6 0 0 0 2.3 0l.6-.6a1.6 1.6 0 0 0 2.3 0l.8-.8a1.6 1.6 0 0 0 2.3 0l1.9-1.9a1.6 1.6 0 0 0 0-2.3L16.5 9" />
+    </>
+  ),
 };
 
 function StatIcon({ name, inverted }) {
@@ -69,13 +84,36 @@ function StatIcon({ name, inverted }) {
   );
 }
 
-export default function ImpactStats({ heading, stats, surface = "mist", branded = false }) {
+/* For RBB's own figures (Documents 02, 05): `kicker` over the heading;
+   `note` — the verification line, shown whenever a figure is still
+   pending (content/impact.js `metricsNote`), in words and never dropped;
+   `source` — where the figures come from; `cta` — a way on. `id` makes the
+   section a jump target (/impact#at-a-glance). */
+export default function ImpactStats({
+  id,
+  kicker,
+  heading,
+  stats,
+  surface = "mist",
+  branded = false,
+  note,
+  source,
+  cta,
+}) {
   return (
-    <section className={cx("py-20 md:py-32", SURFACES[surface] ?? SURFACES.mist)}>
+    <section
+      id={id}
+      className={cx("scroll-mt-[var(--header-h)] py-20 md:py-32", SURFACES[surface] ?? SURFACES.mist)}
+    >
       <Container>
         {heading && (
           <div className="reveal flex flex-col items-center text-center">
             {branded && <Mark className="h-12 w-12 text-bumble-honey" />}
+            {kicker && (
+              <p className={cx("text-[length:var(--text-caption)] font-semibold uppercase tracking-[0.16em] text-trust-blue", branded && "mt-4")}>
+                {kicker}
+              </p>
+            )}
             <h2
               className={cx(
                 "font-bold text-[length:var(--text-heading-lg)] leading-heading-lg tracking-heading-lg",
@@ -94,9 +132,9 @@ export default function ImpactStats({ heading, stats, surface = "mist", branded 
             heading && "mt-14"
           )}
         >
-          {stats.map((stat) => (
+          {stats.map((stat, i) => (
             <li
-              key={stat.label}
+              key={i}
               className={cx(
                 "relative flex flex-col overflow-hidden rounded-3xl rounded-tr-[3rem] p-8 md:p-10",
                 stat.highlight
@@ -126,7 +164,10 @@ export default function ImpactStats({ heading, stats, surface = "mist", branded 
                   className={cx(
                     "text-[length:var(--text-caption)] font-semibold tracking-caption",
                     branded && "uppercase tracking-[0.12em]",
-                    branded && !stat.highlight && "text-bumble-honey"
+                    /* Charcoal, not Sky Blue: Sky Blue text on white is
+                       2.55:1 (WCAG 1.4.3 asks 4.5:1 at this size). The sky
+                       accent stays in the icon tile and the watermark. */
+                    branded && !stat.highlight && "text-bumble-ink"
                   )}
                 >
                   {stat.label}
@@ -141,14 +182,33 @@ export default function ImpactStats({ heading, stats, surface = "mist", branded 
                   >
                     {stat.value}
                   </p>
-                  <p className={cx("mt-1", stat.highlight ? "text-paper-white/80" : "text-graphite")}>
-                    {stat.note}
-                  </p>
+                  {stat.note && (
+                    <p className={cx("mt-1", stat.highlight ? "text-paper-white/80" : "text-graphite")}>
+                      {stat.note}
+                    </p>
+                  )}
                 </div>
               </div>
             </li>
           ))}
         </ul>
+
+        {(source || note || cta) && (
+          <div className="reveal mt-10 flex flex-col items-center gap-6 text-center">
+            {(source || note) && (
+              <p className="max-w-prose text-[length:var(--text-caption)] leading-caption tracking-caption text-graphite">
+                {source}
+                {source && note && " "}
+                {note && <strong className="font-semibold text-bumble-ink">{note}</strong>}
+              </p>
+            )}
+            {cta && (
+              <Button to={cta.to} variant="outline">
+                {cta.label}
+              </Button>
+            )}
+          </div>
+        )}
       </Container>
     </section>
   );

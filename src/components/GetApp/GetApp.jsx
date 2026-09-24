@@ -1,7 +1,9 @@
 import { cx } from "../../lib/cx.js";
 import PhoneMock from "../PhoneMock/PhoneMock.jsx";
 import Container from "../Container/Container.jsx";
-import { GET_APP } from "../../content/index.js";
+/* Catalogue-only sample data (/components), imported directly rather than
+   through content/index.js so it never enters the public build. */
+import { GET_APP } from "../../content/home.js";
 
 /* The download band that closes the page.
 

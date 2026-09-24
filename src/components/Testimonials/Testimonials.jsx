@@ -25,7 +25,9 @@ function Arrow({ flip }) {
   );
 }
 
-export default function Testimonials({ heading, items }) {
+/* `empty` is what shows in place of the strip when there are no quotes
+   yet — heading and a line of text, and no arrows to scroll nothing. */
+export default function Testimonials({ heading, items, empty }) {
   const strip = useRef(null);
 
   const nudge = (dir) => {
@@ -35,6 +37,19 @@ export default function Testimonials({ heading, items }) {
     const step = card ? card.getBoundingClientRect().width + 24 : el.clientWidth;
     el.scrollBy({ left: dir * step, behavior: "smooth" });
   };
+
+  if (!items.length) {
+    return (
+      <section className="py-20 md:py-32">
+        <Container>
+          <h2 className="reveal font-bold text-[length:var(--text-heading-lg)] leading-heading-lg tracking-heading-lg">
+            {heading}
+          </h2>
+          {empty && <p className="reveal mt-4 max-w-prose text-graphite">{empty}</p>}
+        </Container>
+      </section>
+    );
+  }
 
   return (
     <section className="py-20 md:py-32">

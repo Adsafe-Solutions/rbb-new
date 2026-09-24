@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import Button from "../Button/Button.jsx";
 import Container from "../Container/Container.jsx";
 import LogoFrame from "../LogoFrame/LogoFrame.jsx";
-import { BRAND, HERO } from "../../content/index.js";
+import { BRAND } from "../../content/index.js";
+/* Catalogue-only sample data (/components), imported directly rather than
+   through content/index.js so it never enters the public build. */
+import { HERO } from "../../content/home.js";
 
 /* The hero: a full-bleed Deep Trust Blue band with the appeal photography
    held in a logo-shaped frame on the left and the headline on the right.

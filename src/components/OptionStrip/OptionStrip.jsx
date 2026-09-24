@@ -67,52 +67,55 @@ export default function OptionStrip({ heading, intro, items, surface = "paper" }
           )}
         </div>
 
-        <ul
-          ref={strip}
-          className={cx(
-            "reveal mt-10",
-            scrolls
-              ? "flex snap-x snap-mandatory gap-cards overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              : "grid gap-cards md:grid-cols-3"
-          )}
-        >
-          {items.map((item) => (
-            <li
-              key={item.title}
-              className={cx(
-                "flex flex-col overflow-hidden rounded-3xl",
-                surface === "mist" ? "bg-paper-white" : "bg-mist",
-                scrolls && "w-[85%] shrink-0 snap-start sm:w-[60%] lg:w-[calc((100%-3rem)/3)]"
-              )}
-            >
-              <div className="aspect-[4/3] overflow-hidden">
-                <img
-                  src={item.src}
-                  alt={item.alt}
-                  loading="lazy"
-                  decoding="async"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <div className="flex flex-1 flex-col p-6 md:p-8">
-                <h3 className="font-bold text-[length:var(--text-subheading)] leading-subheading tracking-subheading">
-                  {item.title}
-                </h3>
-                <p className="mt-3 text-graphite">{item.body}</p>
-                {item.detail && (
-                  <p className="mt-4 border-l-4 border-bumble-honey pl-3 text-[length:var(--text-caption)] font-semibold tracking-caption">
-                    {item.detail}
-                  </p>
+        {/* No items, no strip: the intro above carries the placeholder. */}
+        {items.length > 0 && (
+          <ul
+            ref={strip}
+            className={cx(
+              "reveal mt-10",
+              scrolls
+                ? "flex snap-x snap-mandatory gap-cards overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                : "grid gap-cards md:grid-cols-3"
+            )}
+          >
+            {items.map((item) => (
+              <li
+                key={item.title}
+                className={cx(
+                  "flex flex-col overflow-hidden rounded-3xl",
+                  surface === "mist" ? "bg-paper-white" : "bg-mist",
+                  scrolls && "w-[85%] shrink-0 snap-start sm:w-[60%] lg:w-[calc((100%-3rem)/3)]"
                 )}
-                {item.cta && (
-                  <Button variant="link" to={item.cta.to} className="mt-auto pt-6">
-                    {item.cta.label}
-                  </Button>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
+              >
+                <div className="aspect-[4/3] overflow-hidden">
+                  <img
+                    src={item.src}
+                    alt={item.alt}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div className="flex flex-1 flex-col p-6 md:p-8">
+                  <h3 className="font-bold text-[length:var(--text-subheading)] leading-subheading tracking-subheading">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-graphite">{item.body}</p>
+                  {item.detail && (
+                    <p className="mt-4 border-l-4 border-bumble-honey pl-3 text-[length:var(--text-caption)] font-semibold tracking-caption">
+                      {item.detail}
+                    </p>
+                  )}
+                  {item.cta && (
+                    <Button variant="link" to={item.cta.to} className="mt-auto pt-6">
+                      {item.cta.label}
+                    </Button>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </Container>
     </section>
   );

@@ -1,19 +1,20 @@
-/* Every string on the homepage below the hero, in the order the page uses
-   them.
+/* Sample content for the sections that made up the PREVIOUS homepage —
+   appeal spotlight, donate form, campaigns, collage, mosaic, accountability
+   band, stats, regular giving. The homepage no longer uses any of it
+   (Document 02 rebuilt it; its strings are in content/homepage.js). It
+   feeds the /components catalog, and `about` is still the "who we are"
+   block on /about.
 
-   ⚠ Copy and figures are reproduced from muslimhands.ca (fetched
-   2026-09-15) at the user's request, with the organisation name swapped
-   for BRAND.name so a rename stays one edit. Two things were deliberately
-   left out and must be supplied by whoever owns this site:
-     - the CRA charity registration number — a real charity's number
-       under a different name is misrepresentation, so `about` says
-       "registered charity" without one;
-     - photography — theirs is copyrighted; these are free-license Pexels
-       stock, credited beside each import.
-   If this site is not for that charity, every figure below is someone
-   else's audited impact and has to be replaced before it ships. */
+   ⚠ This content was first another charity's copy and figures: its
+   appeals, its impact numbers, its founding year, its registration. All
+   of it was replaced with placeholders. Do not put a figure, a country, a
+   year or a credential back in here until RBB has supplied and confirmed
+   it.
+
+   Photography is free-license Pexels stock, credited beside each import. */
 
 import { BRAND } from "./brand.js";
+import { SITE } from "./site.js";
 
 import kitchen from "../assets/ngo-kitchen.jpg"; /* Eden FC, 20859655 */
 import sudan from "../assets/ngo-sudan.jpg"; /* Ahmed Akacha, 10629442 */
@@ -31,82 +32,82 @@ import legacySewing from "../assets/zakat-sewing.jpg"; /* Illustrate Digital UG,
 import legacyBoy from "../assets/zakat-orphan.jpg"; /* umar-muazu, 32662981 */
 import legacyDig from "../assets/gifts-hero.jpg";
 
+/* The two placeholders this page leans on: a statistic with no verified
+   number yet, and an appeal RBB has not named yet. */
+const FIGURE = SITE.figurePlaceholder;
+const APPEAL = {
+  heading: "Appeal to be confirmed",
+  body: "Appeal details to be provided by Rising Beyond Borders.",
+};
+
 export const NGO = {
-  /* The Gaza appeal, as ONE section. It used to be two — a FeatureBanner
-     headed "Our Work in Gaza" and an ImpactStats band headed "Your Impact
-     in Gaza" — which repeated each other's heading across a gap and a
-     change of surface. Neither worked alone: the first had no numbers,
-     the second had no context, and neither had a way to act.
+  /* The live appeal, straight after the hero. It held another charity's
+     Gaza appeal and its figures; the slots stay so Document 02 can fill
+     them with an appeal RBB is actually running. The key is still `gaza`
+     (and the jump target `#donate-gaza`) only because the page wires to
+     those names — nothing on screen says Gaza.
 
-     ⚠ `note` on the first stat used to read "Lives Saved". The figure is
-     BENEFICIARIES — people who received aid — and "lives saved" is a
-     different, much stronger claim a donor or a regulator can hold us to.
-     Keep the label to what the number actually counts.
-
-     ⚠ The partner names are a factual claim carried over from the source
-     copy. Confirm them against RBB's actual agreements before launch. */
+     ⚠ When real figures arrive, keep each label to what its number
+     actually counts: "people reached" is not "lives saved". */
   gaza: {
-    status: "Active now",
-    kicker: "Emergency appeal",
-    heading: "Our Work in Gaza",
-    /* One sentence. This sits directly under the hero now, and a second
-       wall of copy there pushes everything else down the page before
-       anyone has scrolled. The detail belongs to /reports. */
-    body: "Hot meals, food parcels, bread and shelter for families in Gaza — delivered through partners on the ground.",
-    /* Three, not four: the food-pack count was the smallest and least
-       telling of the set. `partners` is dropped from display too — it
-       named two UN agencies, a claim still waiting to be confirmed, and
-       the compact version has no room to hedge it. AppealSpotlight still
-       renders `partners` if an entry supplies it. */
-    stats: [
-      { value: "225,610", label: "People reached", highlight: true },
-      { value: "417,380", label: "Hot meals served" },
-      { value: "158 t", label: "Bread delivered" },
-    ],
+    kicker: "Appeal",
+    heading: APPEAL.heading,
+    /* One sentence when it is real. This sits directly under the hero,
+       and a wall of copy there pushes everything else down the page. */
+    body: APPEAL.body,
+    /* Three figures. AppealSpotlight also renders `partners` and
+       `status` ("Active now") if an entry supplies them — both are
+       claims, so both wait for RBB. */
+    stats: [{ ...FIGURE, highlight: true }, { ...FIGURE }, { ...FIGURE }],
     ctas: {
-      primary: { label: "Donate to Gaza", href: "#donate-gaza" },
-      secondary: { label: "Read the report", to: "/reports" },
+      primary: { label: "Donate", href: "#donate-gaza" },
+      secondary: { label: "Transparency & Financials", to: "/about/transparency" },
     },
     src: tentGirl,
     alt: "A young girl standing among the tents of a displacement camp",
   },
 
+  /* ⚠ PROVISIONAL — the amounts and the currency below are not RBB's.
+     They came in with another charity's donation form and are left in
+     place only so the widget keeps working until Document 02. Canadian
+     dollars assumes a Canadian base, which the supplied materials have
+     not settled (Document 01 flags a Beverly Hills, CA address against
+     the stated Canada-based positioning). Rising Beyond Borders must
+     confirm the currency, the suggested amounts and the payment setup
+     before this widget takes a real donation. Nothing here is wired to
+     a payment processor. */
   donate: {
-    appeal: { name: "Gaza Emergency Appeal", changeTo: "/donate" },
-    amounts: [150, 175, 300],
-    currency: { symbol: "CA$", code: "CAD" },
+    appeal: { name: APPEAL.heading, changeTo: "/get-involved/donate" },
+    amounts: [150, 175, 300], // provisional — see note above
+    currency: { symbol: "CA$", code: "CAD" }, // provisional — see note above
     addon: "Zakat",
-    cta: { label: "Donate", to: "/donate" },
+    cta: { label: "Donate", to: "/get-involved/donate" },
     src: kitchen,
     alt: "Volunteers ladling food from a large steaming pot at a community kitchen",
   },
 
   campaign: {
-    heading: "Provide Urgent Relief to Sudan",
-    accent: "Urgent Relief",
-    body: "Sudan is facing one of the world's most devastating humanitarian crises. More than 30 million people urgently need assistance. 21 million people are facing acute hunger, 75% of health facilities have collapsed, and 11 million people have been forced to flee.",
-    cta: { label: "Sudan Emergency Fund", to: "/donate" },
+    heading: APPEAL.heading,
+    body: APPEAL.body,
+    cta: { label: "Donate", to: "/get-involved/donate" },
     src: sudan,
     alt: "A woman carrying a baby walks with a child past tents at a camp for displaced families",
   },
 
-  /* Yemen, as the Sudan campaign's mirror: same component, flipped by the
-     homepage, so the two appeals read as a pair zigzagging across the page. It used to
-     be a charcoal ActionCard, a different idiom sitting straight after
-     Sudan, which made two appeals of equal weight look unrelated.
+  /* The second appeal slot, as the first one's mirror: same component,
+     flipped by the homepage, so the two read as a pair zigzagging across
+     the page. Both held another charity's country appeals and are
+     placeholders until RBB names its own. The keys are unchanged only
+     because the page wires to them.
 
-     `tag` is not shown by CampaignHero — Sudan has no tag and the pair
-     should match. It is kept because the component catalog still renders
-     ActionCard from this entry, and that card needs one.
-
-     The photograph changed too: it was the girl at the tap, which "What
-     We Fight For" already shows higher up the same page. */
+     `tag` is not shown by CampaignHero — the first slot has no tag and
+     the pair should match. It is kept because the component catalog
+     still renders ActionCard from this entry, and that card needs one. */
   yemen: {
-    tag: "Yemen Emergency",
-    heading: "Help Save Lives in Yemen",
-    accent: "Save Lives",
-    body: "Provide essential aid and support families in need. 19.5 million people across Yemen require humanitarian assistance. $50 can feed 100 people per day for a month through the Yemen Bread Factory, which makes 10,000 loaves of bread daily.",
-    cta: { label: "Feed 200 people in Yemen", to: "/donate" },
+    tag: "Appeal",
+    heading: APPEAL.heading,
+    body: APPEAL.body,
+    cta: { label: "Donate", to: "/get-involved/donate" },
     src: yemenChild,
     alt: "A child drinking straight from the spout of a hand pump",
   },
@@ -118,8 +119,8 @@ export const NGO = {
         key: "volunteer",
         label: "Volunteer",
         heading: "Volunteer",
-        body: "Get involved by volunteering your time with food banks, community initiatives, events, outreach, and fundraising - there is a role for everyone!",
-        cta: { label: "Volunteer", to: "/volunteer" },
+        body: SITE.placeholder,
+        cta: { label: "Volunteer", to: "/get-involved/volunteer" },
         src: volunteer,
         alt: "A smiling volunteer carrying a box of food supplies beside a delivery van",
       },
@@ -127,7 +128,7 @@ export const NGO = {
         key: "events",
         label: "Events",
         heading: "Events",
-        body: "From local events to international volunteer trips, our opportunities inspire positive change through hands-on humanitarian action. Explore our upcoming events to get involved.",
+        body: SITE.placeholder,
         cta: { label: "Events", to: "/events" },
         src: events,
         alt: "A group of young volunteers in matching shirts at an outdoor event",
@@ -136,8 +137,8 @@ export const NGO = {
         key: "fundraise",
         label: "Fundraise",
         heading: "Fundraise",
-        body: `Use our crowdfunding feature to set up a fundraiser on behalf of ${BRAND.name} – Choose your cause and share your fundraiser with friends and family to make a big impact!`,
-        cta: { label: "Do Your Own Fundraising", to: "/fundraise" },
+        body: SITE.placeholder,
+        cta: { label: "Do Your Own Fundraising", to: "/get-involved/fundraise" },
         src: fundraise,
         alt: "Four volunteers packing food donations into boxes",
       },
@@ -158,17 +159,18 @@ export const NGO = {
       "We work to close that gap: reaching people first when an emergency hits, and staying long enough to leave behind water, health, education and livelihoods that last.",
     ],
     links: [
-      { label: "Our Work", to: "/about-us" },
-      { label: "Our Impact", to: "/reports" },
-      { label: "Donate to Help People", to: "/donate" },
+      { label: "Our Work", to: "/work" },
+      { label: "Our Impact", to: "/impact" },
+      { label: "Donate to Help People", to: "/get-involved/donate" },
     ],
     src: waterChild,
     alt: "A child drinking from cupped hands at a village standpipe",
   },
 
-  /* The long view: three decades in one sentence, beside a three-photo
-     collage. It sits directly before the mosaic of figures, so the claim
-     ("for over 30 years") arrives just before the evidence for it.
+  /* The long view, beside a three-photo collage. It used to open "For
+     over 30 years" with a "30+ years" badge on the collage — a founding
+     date nothing supplied supports, so both are gone. LegacyCollage
+     renders no badge when there is none.
 
      `headline` is split so the last phrase can take the accent colour —
      the promise itself, not the organisation's name, is what gets the
@@ -179,12 +181,11 @@ export const NGO = {
      close-up is exactly what that small circular frame wants), and a wide
      scene with people across it for the long frame underneath. */
   legacy: {
-    headline: `For over 30 years, ${BRAND.name} has worked towards a world where`,
+    headline: `${BRAND.name} is working towards a world where`,
     headlineAccent: "no one is left behind.",
-    body: "From emergency convoys to village boreholes, classrooms to sewing co-operatives — we show up where the need is greatest, and stay until communities can stand on their own.",
-    cta: { label: "See our recent successes", to: "/blogs" },
-    secondary: { label: "About us", to: "/about-us" },
-    badge: { value: "30+", label: "years in the field" },
+    body: SITE.placeholder,
+    cta: { label: "See our recent successes", to: "/stories" },
+    secondary: { label: "About us", to: "/about" },
     photos: {
       arch: { src: legacySewing, alt: "A young woman smiling at her sewing machine in a livelihoods workshop", focal: "50% 30%" },
       drop: { src: legacyBoy, alt: "A boy smiling straight at the camera", focal: "50% 35%" },
@@ -193,16 +194,15 @@ export const NGO = {
   },
 
   mosaic: {
-    leadStat: { value: "15+", label: "Countries receiving humanitarian aid" },
+    leadStat: FIGURE,
     leadPhoto: { src: waterPump, alt: "A child working a hand pump to fill a bucket with water" },
     feature: {
-      value: "3 Million+",
-      label: "Loaves distributed in Yemen in 2025",
+      ...FIGURE,
       src: tentGirl,
       alt: "A girl in pink standing beside a tent in a camp",
     },
     sidePhoto: { src: volunteers, alt: "Volunteers in matching shirts handing out aid boxes" },
-    sideStat: { value: "Since 1993", label: "Delivering aid where it is needed most" },
+    sideStat: FIGURE,
   },
 
   /* Reports & Accountability. This slot used to hold an "Islamic
@@ -216,64 +216,53 @@ export const NGO = {
      invented 92% on the accountability section is the worst possible
      place for an invented number.
 
-     ⚠ The commitments are claims. "Independently audited" and the CRA
-     registration repeat what the site already says elsewhere; confirm
-     both before launch. The document links go to the /reports stub until
-     the real PDFs exist. */
+     ⚠ No commitments either, for the same reason. The list used to say
+     "independently audited every year" and "registered charity with the
+     Canada Revenue Agency" — neither is in anything RBB has supplied.
+     `commitments` returns when RBB confirms what it can stand behind, and
+     the document rows stop saying "to be provided" when the PDFs exist. */
   accountability: {
     kicker: "Reports & Accountability",
-    heading: "Every gift, accounted for.",
-    body: "We publish where the money goes — not a summary on request. Annual reports, audited accounts and field updates, so you can see exactly what your giving bought, and where.",
-    commitments: [
-      "Independently audited every year",
-      "Restricted gifts tracked and reported separately",
-      "Registered charity with the Canada Revenue Agency",
-    ],
+    heading: "Transparency & Financials",
+    body: SITE.placeholder,
+    commitments: [],
     documents: [
-      { title: "Annual Report", meta: "The year in review · PDF", to: "/reports" },
-      { title: "Audited Financial Statements", meta: "Independent audit · PDF", to: "/reports" },
-      { title: "Field Updates", meta: "From each appeal, as it happens", to: "/reports" },
+      { title: "Annual Report", meta: "To be provided by Rising Beyond Borders", to: "/about/transparency" },
+      { title: "Financial Statements", meta: "To be provided by Rising Beyond Borders", to: "/about/transparency" },
     ],
-    cta: { label: "Read our reports", to: "/reports" },
+    cta: { label: "Learn more", to: "/about/transparency" },
   },
 
-  /* Who we are. This was a FeatureBanner headed just "RBB" — a heading that
-     told the reader nothing — with three centred sentences and no way to
-     go further. The facts are the same; they now have a headline, the
-     three principles they imply, and the registration as a credential
-     rather than a sentence.
-
-     "Impartial" says what it means — aid by need alone, not by faith —
-     which is the promise the faith-neutral rework of the site rests on. */
+  /* Who we are — shown on /about. The first sentence is the
+     description the supplied annual report confirms. The block used to
+     carry another charity's "who we are", three principles built on it,
+     and a "Registered charity · Canada Revenue Agency" credential. The
+     principles come back from RBB's own values (/about/values), and the
+     credential only with a registration RBB has confirmed; AboutIntro
+     renders neither while they are absent. */
   about: {
     kicker: `About ${BRAND.name}`,
-    heading: "Impartial, efficient, and open about both.",
-    body: [
-      "We are an international aid agency working to help people affected by natural disasters, conflict and poverty — whoever and wherever they are.",
-      "We make sure your donations reach the people who really need them, with an efficient, impartial and transparent service.",
-    ],
-    pillars: [
-      { title: "Impartial", body: "Aid goes by need alone — never by faith, ethnicity or politics." },
-      { title: "Efficient", body: "Field teams and local partners, so more of every gift arrives." },
-      { title: "Transparent", body: "Reports and audited accounts, published every year." },
-    ],
-    credential: { label: "Registered charity", value: "Canada Revenue Agency" },
-    cta: { label: "More about us", to: "/about-us" },
+    heading: "Who we are",
+    body: [`${BRAND.fullName} is ${BRAND.summary.replace(/^A /, "a ")}`, SITE.placeholder],
+    pillars: [],
+    cta: { label: "More about us", to: "/about" },
     src: medical,
     alt: "A doctor examining a young girl at a medical camp",
   },
 
-  /* The lifetime figures, last thing before the footer. They used to sit
-     there with no heading and nothing on the cards saying whose numbers
-     they were. `icon` picks one of the inline glyphs in ImpactStats
-     (people | relief | water); a stat without one simply has no tile. */
+  /* The lifetime figures, last thing before the footer. Three empty
+     slots until RBB confirms its headline metrics — Document 01 lists
+     them as "verify before publication", and one carries a label that
+     still has to be clarified. `icon` picks one of the inline glyphs in
+     ImpactStats (people | relief | water); a stat without one simply has
+     no tile. */
   overallStats: {
-    heading: "Our Impact Since 1993",
+    heading: "Our Impact",
     branded: true,
     stats: [
-      { icon: "people", label: "Beneficiaries Supported", value: "3 Million+", note: "Received life-saving support" },
-      { icon: "relief", label: "Emergency Beneficiaries", value: "1.2 Million+", note: "Provided with emergency relief" },
-      { icon: "water", label: "Water", value: "1 Million+", note: "Gained access to clean water" },
+      { label: "Impact figure", value: FIGURE.value, note: FIGURE.label },
+      { label: "Impact figure", value: FIGURE.value, note: FIGURE.label },
+      { label: "Impact figure", value: FIGURE.value, note: FIGURE.label },
     ],
   },
 

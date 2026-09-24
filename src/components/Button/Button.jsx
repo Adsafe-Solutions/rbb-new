@@ -42,8 +42,15 @@ const SIZES = {
 const BOXED = new Set(["solid", "inverse", "outline", "outlineInverse", "ghost"]);
 
 const VARIANTS = {
-  /* The primary. Green fill, paper text. Donate, submit, subscribe. */
-  solid: "rounded-2xl bg-growth-green text-paper-white hover:bg-trust-blue",
+  /* The primary. Green fill, Charcoal text. Donate, submit, subscribe.
+
+     ⚠ Charcoal, NOT white (Document 16). White on Growth Green is 2.48:1
+     — below WCAG AA even for large text — on the one button every page
+     leads with. Charcoal on the same green is 4.59:1, and both colours are
+     already in the palette, so the brand does not change; only the pairing
+     does. PENDING RBB approval as a contrast treatment. On hover it turns
+     Deep Trust Blue with white text (9.92:1). */
+  solid: "rounded-2xl bg-growth-green text-bumble-ink hover:bg-trust-blue hover:text-paper-white",
 
   /* The same button on a dark or saturated ground. */
   inverse: "rounded-2xl bg-paper-white text-trust-blue hover:bg-mist",

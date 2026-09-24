@@ -3,7 +3,9 @@ import Badge from "../Badge/Badge.jsx";
 import Button from "../Button/Button.jsx";
 import Photo from "../Photo/Photo.jsx";
 import Container from "../Container/Container.jsx";
-import { MISSION } from "../../content/index.js";
+/* Catalogue-only sample data (/components), imported directly rather than
+   through content/index.js so it never enters the public build. */
+import { MISSION } from "../../content/home.js";
 
 /* The mission statement — the white section directly under the honey band.
 

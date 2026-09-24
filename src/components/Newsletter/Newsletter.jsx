@@ -1,36 +1,27 @@
-import { useState } from "react";
 import { cx } from "../../lib/cx.js";
 import Container from "../Container/Container.jsx";
+import FormShell from "../FormShell/FormShell.jsx";
+import { FORMS } from "../../content/index.js";
 import Sparkle from "../Sparkle/Sparkle.jsx";
+import Picture from "../Picture/Picture.jsx";
 
-/* The newsletter card: form left, photograph right, the whole card
+/* The newsletter card: copy left, photograph right, the whole card
    sitting half on the page and half on a Light Gray band beneath it.
 
-   Nothing is sent anywhere yet — the form only validates and confirms in
-   place, so a mail provider is a drop-in behind `onSubmit`.
+   ⚠ No form. It used to have one that "confirmed in place" — said
+   "Thanks — you're on the list." and sent the address nowhere. Nobody was
+   on any list. Until RBB approves a newsletter provider, privacy wording
+   and data handling (Document 07), the card states that sign-up is not yet
+   available (`pending`) instead. The form returns through FormShell only
+   when the newsletter config is ready — which also needs approved consent
+   wording and a real privacy policy (Document 12). Nothing is ever stored
+   in the browser. */
 
-   The send control is Growth Green, the system's one filled button
-   colour; the band beneath the card is Light Gray. */
-
-function SendIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      className="h-5 w-5"
-    >
-      <path d="M22 2 11 13M22 2l-7 20-4-9-9-4z" />
-    </svg>
-  );
-}
-
-export default function Newsletter({ heading, body, consent, src, alt }) {
-  const [done, setDone] = useState(false);
+/* RBB (Document 26 promotion): `kicker` over the heading; the form uses
+   FormShell's inline layout — the design's one-line email + send button —
+   with the real newsletter configuration, so it is live only when that
+   config is (consent wording, Privacy Policy, endpoint). */
+export default function Newsletter({ kicker, heading, body, pending, src, alt, focal, form = FORMS.newsletter }) {
 
   return (
     <section className="relative py-20 md:py-32">
@@ -40,59 +31,46 @@ export default function Newsletter({ heading, body, consent, src, alt }) {
       <Container className="relative">
         <div className="reveal grid overflow-hidden rounded-3xl bg-paper-white shadow-sm md:grid-cols-[6fr_5fr]">
           <div className="flex flex-col justify-center px-8 py-12 md:px-14 md:py-20">
+            {kicker && (
+              <p className="mb-4 flex items-center gap-3 text-[length:var(--text-caption)] font-semibold uppercase tracking-[0.16em] text-trust-blue">
+                <span aria-hidden="true" className="h-0.5 w-6 rounded-full bg-bumble-honey" />
+                {kicker}
+              </p>
+            )}
             <h2 className="font-bold text-[length:var(--text-heading-lg)] leading-heading-lg tracking-heading-lg">
               {heading}
             </h2>
             {body && <p className="mt-4 max-w-prose text-graphite">{body}</p>}
 
-            {done ? (
-              <p className="mt-8 rounded-2xl bg-mist px-6 py-4 font-medium">
-                Thanks — you're on the list.
-              </p>
-            ) : (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setDone(true);
-                }}
-                className="mt-8 flex max-w-lg flex-col gap-4"
-              >
-                <label className="flex items-center gap-3 rounded-2xl border border-mist p-2 pl-6 focus-within:border-bumble-ink">
-                  <span className="sr-only">Email address</span>
-                  <input
-                    type="email"
-                    required
-                    placeholder="Your Email"
-                    className="min-w-0 flex-1 bg-transparent py-3 outline-none placeholder:text-graphite/70"
-                  />
-                  <button
-                    type="submit"
-                    aria-label="Subscribe"
-                    className={cx(
-                      "grid h-14 w-16 shrink-0 place-items-center rounded-2xl",
-                      "bg-growth-green text-paper-white transition-colors hover:bg-trust-blue"
-                    )}
-                  >
-                    <SendIcon />
-                  </button>
-                </label>
-                <label className="flex items-start gap-3 text-graphite">
-                  <input type="checkbox" required className="mt-1.5 h-4 w-4 accent-bumble-ink" />
-                  {consent}
-                </label>
-              </form>
-            )}
+            {/* No form until there is somewhere real to send it — see
+                the note above. Until `form` is ready (content/forms.js)
+                the pending line takes its place. */}
+            <FormShell
+              config={form}
+              layout="inline"
+              className="mt-8 max-w-lg"
+              fallback={
+                pending && (
+                  <p className="mt-8 max-w-lg rounded-2xl bg-mist px-6 py-4 font-medium text-bumble-ink">
+                    {pending}
+                  </p>
+                )
+              }
+            />
           </div>
 
-          {/* Fixed height, not min-height — a portrait photograph would
-              otherwise set the card's height from its own aspect ratio. */}
-          <div className="relative aspect-[4/3] rounded-tl-[5rem] md:aspect-auto md:h-[28rem]">
-            <img
+          {/* At least 28rem, and otherwise as tall as the copy beside it —
+              the photograph is absolutely placed inside, so its own
+              aspect ratio never sets the card's height. */}
+          <div className="relative aspect-[4/3] rounded-tl-[5rem] md:aspect-auto md:min-h-[28rem]">
+            <Picture
+              sizes="(min-width: 768px) 40vw, 100vw"
               src={src}
               alt={alt}
               loading="lazy"
               decoding="async"
-              className="h-full w-full rounded-tl-[5rem] object-cover"
+              className="absolute inset-0 h-full w-full rounded-tl-[5rem] object-cover"
+              style={focal ? { objectPosition: focal } : undefined}
             />
             {/* Centred on the seam — the top edge when stacked, the left
                 edge side by side — in the card's own white, so it reads

@@ -65,16 +65,19 @@ export default function AppealSpotlight({
             />
             {/* The status pill. A live appeal and a finished one look
                 identical otherwise, and "is this still happening?" is the
-                first thing someone deciding whether to give wants to know. */}
-            <span className="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full bg-paper-white/90 px-4 py-2 text-[length:var(--text-caption)] font-medium tracking-caption text-trust-blue shadow-sm backdrop-blur-sm">
-              {/* The dot pulses, gently: it is the one thing on the card
-                  that says "now". `motion-reduce` keeps it as a still dot. */}
-              <span aria-hidden="true" className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-growth-green opacity-60 motion-reduce:animate-none" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-growth-green" />
+                first thing someone deciding whether to give wants to know.
+                Only when the entry states one: "Active now" is a claim. */}
+            {status && (
+              <span className="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full bg-paper-white/90 px-4 py-2 text-[length:var(--text-caption)] font-medium tracking-caption text-trust-blue shadow-sm backdrop-blur-sm">
+                {/* The dot pulses, gently: it is the one thing on the card
+                    that says "now". `motion-reduce` keeps it as a still dot. */}
+                <span aria-hidden="true" className="relative flex h-2.5 w-2.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-growth-green opacity-60 motion-reduce:animate-none" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-growth-green" />
+                </span>
+                {status}
               </span>
-              {status}
-            </span>
+            )}
           </div>
 
           <div className="p-8 md:p-10 lg:p-12">
@@ -99,9 +102,10 @@ export default function AppealSpotlight({
                 left, label beside it — which costs a little height and
                 loses nothing. */}
             <dl className="mt-7 grid gap-2 sm:grid-cols-3 sm:gap-3">
-              {stats.map((stat) => (
+              {/* Index keys: placeholder figures share a label. */}
+              {stats.map((stat, i) => (
                 <div
-                  key={stat.label}
+                  key={i}
                   className={cx(
                     "flex flex-row-reverse items-baseline justify-end gap-3 rounded-2xl px-5 py-3.5",
                     "sm:flex-col-reverse sm:items-start sm:gap-0 sm:p-5",

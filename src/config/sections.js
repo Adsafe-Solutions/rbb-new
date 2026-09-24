@@ -15,20 +15,6 @@ export const SECTIONS = {
      variants. Same default as designSystemRoute above; the two are
      companion dev tools and ship (or don't) together. */
   componentsRoute: ENV.componentsRoute ?? import.meta.env.DEV,
-
-  /* ── WHICH HERO THE HOMEPAGE OPENS WITH ──────────────────────────
-     Change the string below and the homepage swaps. Both heroes stay
-     built either way, and both are in the /components catalog.
-
-       "bleed" — the rotating photograph running full height behind the
-                 copy, with the mark bled off the left (components/HeroBleed)
-       "logo"  — the appeal photograph held inside the RBB mark, on the
-                 Deep Trust Blue band (components/Hero)
-
-     Per deployment, VITE_HOME_HERO overrides this without an edit — but
-     see the warning in .env.development about WHICH env file to set it in:
-     .env.development loads after .env.local and will win. */
-  homeHero: ENV.homeHero ?? "bleed",
 };
 
 export default SECTIONS;

@@ -1,4 +1,9 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
+
+/* useLayoutEffect in the browser (the wordmark is fitted before paint, so
+   it never visibly jumps), useEffect during the build's pre-render, where
+   there is no layout and React warns about the layout variant. */
+const useFitEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 import { Link } from "react-router-dom";
 import { cx } from "../../lib/cx.js";
 import Brand from "../Brand/Brand.jsx";
@@ -10,15 +15,17 @@ import {
   FOOTER_CONTACT,
   FOOTER_LEGAL,
   SOCIALS,
+  methodHref,
 } from "../../content/index.js";
 
 /* The footer: a full-width Deep Trust Blue band in three tiers.
 
-     top     the mark and tagline on the left; Navigation, Giving and
-             Contact columns on the right
+     top     the mark and summary on the left; Explore, Get Involved and
+             Organization columns on the right
      middle  the wordmark, set so large it spans the whole column edge
              to edge — the footer's one gesture
-     bottom  a hairline, then the copyright and a back-to-top control
+     bottom  a hairline, then the copyright, the legal links (published
+             policies only) and a back-to-top control
 
    Everything else is deliberately quiet — small type, one accent colour
    on the column headings — so the wordmark carries the band. */
@@ -66,59 +73,19 @@ function FooterLink({ link }) {
   );
 }
 
-/* Small spaced capitals in Sky Blue — the one place in the system that
-   uppercases, because at this size weight alone does not separate a
-   heading from its list. */
+/* Small spaced capitals in a light tint of Sky Blue — the one place in
+   the system that uppercases, because at this size weight alone does not
+   separate a heading from its list.
+
+   A tint, not Sky Blue itself: Sky Blue on Deep Trust Blue is 3.9:1,
+   under the 4.5:1 that text this small needs. Mixed 60/40 with white it
+   is about 5.5:1 and still reads as the brand's blue. Mixed here from the
+   two tokens rather than added to the palette, so the palette itself is
+   unchanged. */
 const HEADING = cx(
-  "text-[length:12px] font-bold uppercase tracking-[0.14em] text-bumble-honey"
+  "text-[length:12px] font-bold uppercase tracking-[0.14em]",
+  "text-[color:color-mix(in_srgb,var(--color-bumble-honey)_60%,var(--color-paper-white))]"
 );
-
-/* Copies the address rather than opening a mail client: on a machine
-   with no mail app set up, a bare mailto link does nothing at all, and
-   the reader is left retyping it. Confirms in place for two seconds. */
-function CopyButton({ text }) {
-  const [copied, setCopied] = useState(false);
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      /* No clipboard access (an insecure origin, a denied permission):
-         the address is right there to select, so fail silently. */
-    }
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={copy}
-      aria-label={copied ? "Email address copied" : "Copy email address"}
-      className="grid h-6 w-6 place-items-center rounded-md text-bumble-honey transition-colors hover:bg-paper-white/10"
-    >
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        className="h-4 w-4"
-      >
-        {copied ? (
-          <path d="m5 12 5 5L20 7" />
-        ) : (
-          <>
-            <rect x="9" y="9" width="11" height="11" rx="2" />
-            <path d="M5 15V6a2 2 0 0 1 2-2h9" />
-          </>
-        )}
-      </svg>
-    </button>
-  );
-}
 
 /* The wordmark, as one row: "Rising" huge in the black weight with tight
    tracking, "Beyond Borders" at under half its size in semibold on the
@@ -157,7 +124,7 @@ function Wordmark() {
   const leadRef = useRef(null);
   const restRef = useRef(null);
 
-  useLayoutEffect(() => {
+  useFitEffect(() => {
     const box = boxRef.current;
     const lead = leadRef.current;
     const rest = restRef.current;
@@ -245,11 +212,16 @@ function Wordmark() {
   );
 }
 
+const socials = SOCIALS.filter((social) => social.href);
+
 export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-trust-blue text-paper-white">
+    /* The site's focus ring is Charcoal, which all but disappears on
+       Deep Trust Blue — white here, so a keyboard user can still see
+       where they are in the footer's links. */
+    <footer className="bg-trust-blue text-paper-white [&_:focus-visible]:outline-paper-white">
       {/* No Container: the footer runs the full window width, and every
           tier — columns, wordmark, bottom bar — shares this one gutter so
           their edges line up. The wordmark scales to fill it, so on a wide
@@ -260,102 +232,123 @@ export default function Footer() {
           <div className="lg:col-span-5">
             <Link
               to="/"
-              aria-label={`${BRAND.name} home`}
+              aria-label={`${BRAND.fullName} home`}
               className="inline-flex items-center gap-2"
             >
               <Mark className="h-8 w-8 shrink-0 text-bumble-honey" />
               <Brand size="nav" as="span" tone="invert" />
             </Link>
             <p className="mt-4 max-w-xs text-[length:var(--text-caption)] leading-caption tracking-caption text-paper-white/70">
-              {BRAND.tagline}
+              {BRAND.summary}
             </p>
 
-            <ul className="mt-6 flex flex-wrap items-center gap-2">
-              {SOCIALS.map((social) => (
-                <li key={social.icon}>
-                  <a
-                    href={social.href}
-                    aria-label={social.label}
-                    className={cx(
-                      "grid h-9 w-9 place-items-center rounded-full",
-                      "border border-paper-white/20 text-paper-white",
-                      "transition-colors hover:border-bumble-honey hover:text-bumble-honey"
-                    )}
-                  >
-                    <SocialIcon name={social.icon} />
-                  </a>
-                </li>
-              ))}
-            </ul>
+            {/* Contact, from the shared source (content/contact.js): the
+                verified methods as real links, or the one pending line —
+                never a guessed address or number. */}
+            {FOOTER_CONTACT.methods.length > 0 ? (
+              <ul className="mt-5 flex flex-col gap-2 text-[length:var(--text-caption)] leading-caption tracking-caption">
+                {FOOTER_CONTACT.methods.map((method) => (
+                  <li key={method.id}>
+                    <a href={methodHref(method)} className="text-paper-white transition-colors hover:text-bumble-honey">
+                      <span className="sr-only">{method.label}: </span>
+                      {method.value}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-3 max-w-xs text-[length:var(--text-caption)] leading-caption tracking-caption text-paper-white/70">
+                {FOOTER_CONTACT.pending}
+              </p>
+            )}
+
+            {/* Only the profiles RBB has supplied a URL for — see SOCIALS.
+                With none yet, the row does not render at all rather than
+                leaving an empty list in the accessibility tree. */}
+            {socials.length > 0 && (
+              <ul className="mt-6 flex flex-wrap items-center gap-2">
+                {socials.map((social) => (
+                  <li key={social.icon}>
+                    <a
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${social.label} (opens in a new tab)`}
+                      className={cx(
+                        "grid h-9 w-9 place-items-center rounded-full",
+                        "border border-paper-white/20 text-paper-white",
+                        "transition-colors hover:border-bumble-honey hover:text-bumble-honey"
+                      )}
+                    >
+                      <SocialIcon name={social.icon} />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <div className="grid gap-10 sm:grid-cols-3 lg:col-span-7">
             {FOOTER_COLUMNS.map((column) => (
-              <nav key={column.heading} aria-label={column.heading}>
+              <nav key={column.heading} aria-label={`Footer: ${column.heading}`}>
                 <h2 className={HEADING}>{column.heading}</h2>
                 <ul className="mt-4 flex flex-col gap-3">
                   {column.links.map((link) => (
-                    <li key={link.label}>
+                    <li key={link.to}>
                       <FooterLink link={link} />
                     </li>
                   ))}
                 </ul>
-                {column.note && (
-                  <p className="mt-4 text-[length:12px] uppercase tracking-[0.12em] text-paper-white/55">
-                    {column.note}
-                  </p>
-                )}
               </nav>
             ))}
-
-            <div>
-              <h2 className={HEADING}>{FOOTER_CONTACT.heading}</h2>
-              <ul className="mt-4 flex flex-col gap-3 text-[length:var(--text-caption)] tracking-caption">
-                <li className="flex items-center gap-2">
-                  <a
-                    href={`mailto:${FOOTER_CONTACT.email}`}
-                    className="break-all transition-colors hover:text-bumble-honey"
-                  >
-                    {FOOTER_CONTACT.email}
-                  </a>
-                  <CopyButton text={FOOTER_CONTACT.email} />
-                </li>
-                <li>
-                  <a
-                    href={FOOTER_CONTACT.phoneHref}
-                    className="transition-colors hover:text-bumble-honey"
-                  >
-                    {FOOTER_CONTACT.phone}
-                  </a>
-                </li>
-                <li>
-                  <address className="not-italic leading-caption text-paper-white/70">
-                    {FOOTER_CONTACT.address.map((line) => (
-                      <span key={line} className="block">
-                        {line}
-                      </span>
-                    ))}
-                  </address>
-                </li>
-              </ul>
-            </div>
           </div>
         </div>
 
-
         <Wordmark />
 
-        <div className="flex flex-col-reverse gap-4 border-t border-paper-white/20 py-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[length:14px] text-paper-white/70">
-            &copy; {year} {FOOTER_LEGAL.copyright}
-          </p>
+        <div className="flex flex-col-reverse gap-4 border-t border-paper-white/20 py-6 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-8">
+            {/* The year is the BUILD's in the pre-rendered page and the
+                visitor's once hydrated; across New Year they differ, and
+                that one text node is allowed to. */}
+            <p className="text-[length:14px] text-paper-white/70" suppressHydrationWarning>
+              &copy; {year} {FOOTER_LEGAL.copyright}
+            </p>
+            {/* Only published policies (content/policies.js) — and no
+                empty "Legal" landmark while there are none. */}
+            {FOOTER_LEGAL.links.length > 0 && (
+              <nav aria-label="Legal">
+                <ul className="flex flex-wrap gap-x-6 gap-y-2">
+                  {FOOTER_LEGAL.links.map((link) => (
+                    <li key={link.to}>
+                      <Link
+                        to={link.to}
+                        className="text-[length:14px] text-paper-white/70 underline-offset-4 transition-colors hover:text-bumble-honey hover:underline"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )}
+          </div>
           {/* Smooth comes from the document's own `scroll-behavior`, which
               the reduced-motion rule already turns off — no JS option to
               keep in step with it. */}
           <button
             type="button"
-            onClick={() => window.scrollTo({ top: 0 })}
-            className="inline-flex items-center gap-2 self-start text-[length:14px] font-bold uppercase tracking-[0.14em] transition-colors hover:text-bumble-honey sm:self-auto"
+            /* Scroll AND move focus (Document 16): scrolling alone left a
+               keyboard user's focus in the footer, so the next Tab jumped
+               straight back to the bottom of the page. #main is already
+               focusable (tabIndex -1) — the skip link's target. */
+            onClick={() => {
+              window.scrollTo({ top: 0 });
+              document.getElementById("main")?.focus({ preventScroll: true });
+            }}
+            /* `-my-1.5 py-1.5`: a hit area over the 24px minimum (WCAG 2.2
+               target size) without moving the row it sits in. */
+            className="-my-1.5 inline-flex items-center gap-2 self-start py-1.5 text-[length:14px] font-bold uppercase tracking-[0.14em] transition-colors hover:text-bumble-honey md:self-auto"
           >
             {FOOTER_LEGAL.backToTop}
             <svg

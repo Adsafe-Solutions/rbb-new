@@ -210,10 +210,11 @@ export function bindMotion(root, { small }) {
     if ("parallax" in el.dataset && !small) {
       bindParallax(el, Number(el.dataset.parallax) || PARALLAX.default);
     }
-    /* The pinned sideways timeline: desktop only (animations/timeline.js);
-       on a phone it stays a native swipeable strip. */
-    if ("timeline" in el.dataset && !small) {
-      const release = bindTimeline(el);
+    /* The pinned sideways timeline, on every screen with motion
+       (animations/timeline.js); with reduced motion it stays a native
+       swipeable strip. */
+    if ("timeline" in el.dataset) {
+      const release = bindTimeline(el, { small });
       if (release) teardown.push(release);
     }
     if ("count" in el.dataset) {

@@ -17,10 +17,12 @@
    component as a `timeline:active` event; the component owns how the
    active card and the timeline rail look.
 
-   Desktop only, and only with motion: on a phone, with reduced motion,
+   Phone and desktop alike, but only with motion: with reduced motion,
    or before this runs, the row is a native sideways-scrolling strip
    with snap points (the component's CSS), and the component highlights
-   the centred card from the strip's own scroll.
+   the centred card from the strip's own scroll. A phone scrolls the
+   page natively (touch is not smoothed — config.SMOOTH.syncTouch), and
+   the pin follows that scroll just the same.
 
    Keyboard: in the pinned row an off-screen card cannot scroll itself
    into view (the row moves by transform), so focusing anything in a
@@ -31,7 +33,7 @@ import { gsap } from "./gsap.js";
 import { EASE } from "./config.js";
 import { jumpTo } from "./lenis.js";
 
-export function bindTimeline(section) {
+export function bindTimeline(section, { small = false } = {}) {
   const pin = section.querySelector("[data-timeline-pin]");
   const viewport = section.querySelector("[data-timeline-viewport]");
   const track = section.querySelector("[data-timeline-track]");
@@ -62,6 +64,11 @@ export function bindTimeline(section) {
       end: () => `+=${distance() * 1.5}`,
       pin,
       scrub: true,
+      /* On a phone one card fills the window, so a stop between two
+         leaves half of each: when the finger lifts, the page settles on
+         the nearest event. Not on desktop, where Lenis owns the scroll
+         and several cards are always whole. */
+      snap: small ? { snapTo: 1 / last, duration: { min: 0.2, max: 0.5 }, delay: 0.08, ease: "power1.inOut" } : undefined,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
         const next = Math.round(self.progress * last);

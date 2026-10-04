@@ -11,12 +11,12 @@ import YouTubePlayer from "../YouTubePlayer/YouTubePlayer.jsx";
    YouTubePlayer), its date, program and one line.
 
    Two ways to move along it, and the same picture either way:
-     · desktop with motion — the section pins and the page's own scroll
-       slides the row sideways (animations/timeline.js, bound from the
-       `data-timeline*` attributes below; this component writes no
-       motion of its own)
-     · phone, reduced motion, or before the motion system binds — the
-       row is a native sideways strip with snap points
+     · with motion, phone or desktop — the section pins and the page's
+       own scroll slides the row sideways (animations/timeline.js, bound
+       from the `data-timeline*` attributes below; this component writes
+       no motion of its own)
+     · reduced motion, or before the motion system binds — the row is a
+       native sideways strip with snap points
    The ACTIVE event is the one at the timeline's current point: from the
    motion system's `timeline:active` event while pinned, from the strip's
    own scroll otherwise. It gets the Sky Blue ring and lift; the rail
@@ -142,15 +142,18 @@ export default function ProgressTimeline({ index, timeline, programOf, tone = "w
                       poster={event.poster}
                       /* 3:4, not the Short's own 9:16: the card is wider
                          without being taller, so the pinned block still fits
-                         the window. The poster fills the frame; a playing
-                         Short sits centred on the frame's dark ground. */
-                      ratio="aspect-[3/4]"
+                         the window. On a phone the frame is near square and
+                         capped at a third of the screen's height, so the
+                         pinned card, rail and date fit a 640px-tall phone
+                         under the header. The poster fills the frame; a
+                         playing Short sits centred on its dark ground. */
+                      ratio="h-[min(calc(var(--card-w)-1.25rem),34svh)] md:h-auto md:aspect-[3/4]"
                       size="md"
                       sizes="(min-width: 768px) 18rem, 78vw"
                     />
                     <div className="px-1.5 pb-2 pt-4">
                       {programOf(event.program) && <p className="type-meta text-quiet">{programOf(event.program)}</p>}
-                      <h3 className="type-card mt-2 text-[19px] leading-snug">{event.title}</h3>
+                      <h3 className="type-card mt-2 text-[17px] leading-snug md:text-[19px]">{event.title}</h3>
                       <p className="mt-2 line-clamp-2 text-[15px] leading-relaxed text-copy">{event.summary}</p>
                     </div>
                   </article>

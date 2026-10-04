@@ -1,12 +1,11 @@
 import PageHeader from "../../components/PageHeader/PageHeader.jsx";
 import IconPanel from "../../components/IconPanel/IconPanel.jsx";
-import InvolvementPaths from "../../components/InvolvementPaths/InvolvementPaths.jsx";
+import GetInvolved from "../../components/GetInvolved/GetInvolved.jsx";
 import ProgramIndex from "../../components/ProgramIndex/ProgramIndex.jsx";
 import ContentRows from "../../components/ContentRows/ContentRows.jsx";
 import TeaserPair from "../../components/TeaserPair/TeaserPair.jsx";
 import QuestionsPanel from "../../components/QuestionsPanel/QuestionsPanel.jsx";
 import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
-import useReveal from "../../hooks/useReveal.js";
 import {
   GET_INVOLVED,
   GET_INVOLVED_PAGES,
@@ -17,20 +16,19 @@ import {
 
 /* /get-involved — the gateway to the four ways to take part (Document 06):
 
-     01  mist band  PageHeader        the invitation
-     02  white      InvolvementPaths  the four paths, as cards
-     03  white      ProgramIndex      each path, a line on it, a link
-     04  white      ContentRows       why get involved — the mission
-     05  white      TeaserPair        Our Work · Our Impact
-     06  white      QuestionsPanel    the contact route, or its pending state
-     07  mist band  ClosingCta        the next step
+         paper   PageHeader        the invitation, the paths' icon cluster
+     01  white   GetInvolved       the four paths, as action boxes — billboard
+     02  ink     ProgramIndex      each path, a line on it, a link
+     03  white   ContentRows       why get involved — the mission
+     —   paper   TeaserPair        Our Work · Our Impact
+     04  white   QuestionsPanel    the contact route, or its pending state
+         accent  ClosingCta        the next step
 
    The paths come from content/getInvolved.js, the same records the nav,
    the homepage and each path's page read. "Why get involved" is the
    mission as the annual report states it — the one approved statement of
    purpose — rather than claims about outcomes, scale or urgency. */
 export default function GetInvolvedPage() {
-  useReveal();
   const t = GET_INVOLVED_PAGES.hub;
   const { paths, contact } = GET_INVOLVED;
 
@@ -39,23 +37,24 @@ export default function GetInvolvedPage() {
       <PageHeader
         title={t.heading}
         kicker={t.kicker}
-        aside={<IconPanel icons={paths.map((p) => p.icon)} className="reveal" />}
+        aside={<IconPanel icons={paths.map((p) => p.icon)} />}
       >
-        <p className="mt-5 max-w-prose text-[length:var(--text-subheading)] leading-subheading tracking-subheading text-graphite">
+        <p className="type-lead mt-7 max-w-[46ch] text-copy">
           {t.body}
         </p>
       </PageHeader>
 
-      <div className="pt-20 md:pt-28">
-        <InvolvementPaths {...t.ways} items={pathCards()} />
-      </div>
+      <GetInvolved index={1} {...t.ways} items={pathCards()} highlight="take part" />
 
       <ProgramIndex
+        index={2}
+        tone="ink"
         {...t.choose}
         programs={paths.map((path) => ({
           title: path.title,
-          description: path.shortDescription,
-          note: t.choose.notes[path.id] ?? t.choose.pending,
+          /* The longer line only: the card row above already gave the
+             short one. */
+          description: t.choose.notes[path.id] ?? t.choose.pending,
           to: path.to,
           icon: path.icon,
           linkLabel: `${t.choose.linkPrefix} ${path.title}`,
@@ -63,7 +62,7 @@ export default function GetInvolvedPage() {
       />
 
       <ContentRows
-        className="pt-0 md:pt-0"
+        start={3}
         rows={[
           {
             id: "why",
@@ -78,9 +77,9 @@ export default function GetInvolvedPage() {
         second={{ ...t.related.impact, body: IMPACT_PAGES.overview.body }}
       />
 
-      <QuestionsPanel {...t.questions} contact={contact} />
+      <QuestionsPanel index={4} tone="white" {...t.questions} contact={contact} />
 
-      <ClosingCta {...t.closing} />
+      <ClosingCta tone="accent" {...t.closing} />
     </>
   );
 }

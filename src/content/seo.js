@@ -41,10 +41,49 @@ import { IMPACT } from "./impact.js";
 import { PROGRAMS, PROJECTS, projectPath } from "./work.js";
 import { published, storyPath, categoryById } from "./stories.js";
 import { approvedMembers, hasProfile, memberPath } from "./team.js";
-import { POLICIES, isPublished } from "./policies.js";
+import { POLICIES, isFinalPolicy } from "./policies.js";
+import { isWorkingContent } from "../lib/releaseMarkers.js";
+import { APPROVALS } from "../../release/approvals.mjs";
 
 const INDEX = "index, follow";
 const NOINDEX = "noindex, follow";
+
+/* ---------------- Indexing follows RBB's approval ----------------
+
+   A page may be indexed only when the RBB approval its content depends on
+   is recorded as approved in release/approvals.mjs — THE approval record
+   (Document 24). The content records' own `status: "approved"` does not
+   mean that: working placeholders carry it so the whole site renders for
+   review (Document 27). So, while an area is pending, its pages are
+   `noindex`, have no canonical, and are not in the sitemap, whatever the
+   build — and a developer cannot make demo content indexable by setting
+   a production domain. scripts/prerender.mjs checks the same thing from
+   the other side and fails a production-domain build that would index a
+   page still showing placeholder content.
+
+   Each route names the approval areas whose content it shows. A route not
+   listed here is never indexable. */
+const approved = (area) => APPROVALS[area]?.status === "approved";
+const allApproved = (areas) => areas.length > 0 && areas.every(approved);
+
+const AREAS = {
+  "/": ["coreIdentity", "programs", "impact", "stories"],
+  "/about": ["coreIdentity", "financials"],
+  "/work": ["programs"],
+  ...Object.fromEntries(PROGRAMS.map((p) => [p.to, ["programs"]])),
+  "/work/projects": ["programs"],
+  "/impact": ["impact", "programs"],
+  "/impact/where-we-work": ["geography"],
+  "/impact/our-approach": ["programs"],
+  "/get-involved": ["forms"],
+  ...Object.fromEntries(GET_INVOLVED.paths.map((p) => [p.to, p.id === "donate" ? ["donation"] : ["forms"]])),
+  "/stories": ["stories"],
+  "/contact": ["contact"],
+  "/about/team": ["team"],
+  "/about-us/careers": ["contact"],
+  ...Object.fromEntries(POLICIES.filter((p) => p.route).map((p) => [p.route, ["policies"]])),
+};
+export const approvalAreas = (route) => AREAS[route] ?? [];
 
 const verified = (block) => ["verified", "approved"].includes(block?.status);
 
@@ -81,8 +120,11 @@ const RULES = {
 
   /* Sections whose own content is real: mission, vision, program areas,
      the ways to take part. */
+  /* The one About page: who RBB is, mission and vision, values, how it
+     works, and transparency and financials — the old standalone pages
+     forward to its sections, so this is the only indexable copy. */
   "/about": {
-    description: `Who ${BRAND.fullName} is: its mission, its vision and how it works.`,
+    description: `Who ${BRAND.fullName} is: its mission, vision and values, how it works, and its transparency and financials.`,
     index: () => true,
   },
   "/work": {
@@ -102,10 +144,6 @@ const RULES = {
   "/get-involved": { index: () => true },
   ...Object.fromEntries(GET_INVOLVED.paths.map((p) => [p.to, { description: p.metaDescription, index: () => true }])),
   "/contact": { description: CONTACT_COPY.metaDescription, index: () => true },
-  "/about/transparency": {
-    description: `How ${BRAND.fullName} approaches transparency, financial information and governance.`,
-    index: () => true,
-  },
 
   /* Directories — indexed once they list something. Until then their
      description says what they are for, not what they contain. */
@@ -132,7 +170,14 @@ const RULES = {
   "/impact/our-approach": { index: () => verified(IMPACT.approach) },
 
   /* Policies — indexed only once published (content/policies.js). */
-  ...Object.fromEntries(POLICIES.filter((p) => p.route).map((p) => [p.route, { index: () => isPublished(p) }])),
+  /* A policy whose text is pending or still working says so in its
+     description too, never "The … privacy policy." */
+  ...Object.fromEntries(
+    POLICIES.filter((p) => p.route).map((p) => [
+      p.route,
+      { index: () => isFinalPolicy(p), description: isFinalPolicy(p) ? undefined : SITE.previewDescription },
+    ])
+  ),
 
   /* Legacy giving addresses (Document 11): kept so old links land, but
      they point to /get-involved/donate and must not compete with it. */
@@ -200,10 +245,13 @@ export const breadcrumbSchema = (trail) => {
    absolute URLs appear only once ENV.siteOrigin is a verified production
    origin. This file decides indexability from the page's own content
    alone. */
-const build = ({ route, title, description, robots, image, imageAlt, ogType = "website", schema = [] }) => {
-  const canonical = robots === INDEX ? absoluteUrl(canonicalPath(route)) : null;
-  const ogImage = absoluteUrl(image);
-  const graph = schema.filter(Boolean);
+const build = ({ route, title, description, robots, image, imageAlt, ogType = "website", schema = [], areas = [] }) => {
+  const indexable = robots === INDEX;
+  const canonical = indexable ? absoluteUrl(canonicalPath(route)) : null;
+  /* A page that may not be indexed gets no share image and no structured
+     data either: both present it as finished, citable content. */
+  const ogImage = indexable ? absoluteUrl(image) : null;
+  const graph = indexable ? schema.filter(Boolean) : [];
   return {
     route,
     canonicalPath: canonicalPath(route),
@@ -224,6 +272,9 @@ const build = ({ route, title, description, robots, image, imageAlt, ogType = "w
     twitterImage: ogImage,
     schemaType: graph.map((s) => s["@type"]),
     schemaData: graph,
+    /* The approvals this page waits on — for the prerender gate's
+       message, never rendered. */
+    approvalAreas: areas,
   };
 };
 
@@ -233,7 +284,7 @@ export function routeMeta(pathname, overrides = {}) {
   const route = canonicalPath(pathname);
   const page = PAGE_BY_ROUTE.get(route);
   const rule = RULES[route] ?? {};
-  const indexable = Boolean(rule.index?.());
+  const indexable = Boolean(rule.index?.()) && allApproved(approvalAreas(route));
   const title = route === "/" ? undefined : (overrides.title ?? rule.title ?? page?.title ?? page?.label);
   const description = rule.description ?? page?.description ?? overrides.description ?? SITE.description;
 
@@ -249,8 +300,17 @@ export function routeMeta(pathname, overrides = {}) {
     description,
     robots: indexable ? INDEX : NOINDEX,
     schema: indexable ? [route === "/" ? organizationSchema() : breadcrumbSchema(trail)] : [],
+    areas: approvalAreas(route),
   });
 }
+
+/* A detail record (story, project, profile) may be indexed only when its
+   approval area is approved AND the record carries no working
+   placeholder. Otherwise it is a PREVIEW page: still rendered in full for
+   review, but `noindex`, no canonical, no share image, no structured data,
+   out of the sitemap — and its description is the neutral preview line,
+   never its excerpt, which would read as a real RBB fact in a snippet. */
+const detailIndexable = (area, record) => approved(area) && !isWorkingContent(record);
 
 /* The 404 — and every unknown or unapproved slug. Never indexed, never a
    canonical, and never the slug in the title. */
@@ -264,11 +324,15 @@ export function storyMeta(story) {
   const route = storyPath(story);
   const category = categoryById(story.category);
   const image = story.image?.src;
+  const indexable = detailIndexable("stories", story);
   return build({
     route,
+    areas: ["stories"],
     title: story.title,
-    description: story.excerpt ?? `${category ? `${category.label}: ` : ""}${story.title}.`,
-    robots: INDEX,
+    description: indexable
+      ? (story.excerpt ?? `${category ? `${category.label}: ` : ""}${story.title}.`)
+      : SITE.previewDescription,
+    robots: indexable ? INDEX : NOINDEX,
     image,
     imageAlt: story.image?.alt,
     ogType: "article",
@@ -295,12 +359,15 @@ export function storyMeta(story) {
 export function projectMeta(project) {
   const route = projectPath(project);
   const program = PROGRAMS.find((p) => p.slug === project.program);
+  const indexable = detailIndexable("programs", project);
   return build({
     route,
+    areas: ["programs"],
     title: project.title,
-    description:
-      project.description ?? `${project.title} — a ${program ? `${program.title} ` : ""}project of ${BRAND.fullName}.`,
-    robots: INDEX,
+    description: indexable
+      ? (project.description ?? `${project.title} — a ${program ? `${program.title} ` : ""}project of ${BRAND.fullName}.`)
+      : SITE.previewDescription,
+    robots: indexable ? INDEX : NOINDEX,
     image: project.image?.src,
     imageAlt: project.image?.alt,
     schema: [
@@ -318,11 +385,15 @@ export function projectMeta(project) {
    from their approved name, role and photograph — no contact details. */
 export function memberMeta(member) {
   const route = memberPath(member);
+  const indexable = detailIndexable("team", member);
   return build({
     route,
+    areas: ["team"],
     title: member.name,
-    description: member.shortBio ?? `${member.name}${member.role ? `, ${member.role}` : ""} — ${BRAND.fullName}.`,
-    robots: INDEX,
+    description: indexable
+      ? (member.shortBio ?? `${member.name}${member.role ? `, ${member.role}` : ""} — ${BRAND.fullName}.`)
+      : SITE.previewDescription,
+    robots: indexable ? INDEX : NOINDEX,
     image: member.image,
     imageAlt: member.imageAlt,
     ogType: "profile",
@@ -400,12 +471,14 @@ export const seoHeadHtml = (meta) =>
 export function sitemapRoutes() {
   const pages = ["/", ...PAGES.filter((p) => !p.section).map((p) => p.to), "/about-us/careers"];
   const indexable = pages.filter((to) => routeMeta(to).robots === INDEX);
+  /* Detail pages only when their own metadata says indexable — a
+     preview (working) record is never in the sitemap. */
   return [
     ...new Set([
       ...indexable,
-      ...published().map(storyPath),
-      ...PROJECTS.map(projectPath),
-      ...approvedMembers().filter(hasProfile).map(memberPath),
+      ...published().filter((s) => storyMeta(s).robots === INDEX).map(storyPath),
+      ...PROJECTS.filter((p) => projectMeta(p).robots === INDEX).map(projectPath),
+      ...approvedMembers().filter(hasProfile).filter((m) => memberMeta(m).robots === INDEX).map(memberPath),
     ]),
   ];
 }

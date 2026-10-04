@@ -25,7 +25,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 /* The patterns are shared with the content validator. */
-import { CREDENTIALS, WORKING_MARKERS, PLACEHOLDER_CONTACT } from "../src/lib/releaseMarkers.js";
+import { CREDENTIALS, WORKING_MARKERS, PLACEHOLDER_CONTACT, workingContentFindings } from "../src/lib/releaseMarkers.js";
 
 export { CREDENTIALS, WORKING_MARKERS, PLACEHOLDER_CONTACT };
 
@@ -83,6 +83,41 @@ export async function productionGate(dist, { routes = [] } = {}) {
   return problems;
 }
 
+/* INDEXING. A page that would be INDEXED while it still shows working
+   placeholder content, as { route, rules, approvals }. Empty = safe.
+
+   Working content is allowed in every build — it is how the site is
+   reviewed (Document 27) — but never on a page that says `index`. That
+   can only happen once an approval area has been marked approved in
+   release/approvals.mjs while its content still carries placeholders,
+   and on a build with a production domain it is a hard failure: the page
+   would be published to search engines as RBB's. `pages` are the rendered
+   pages: { route, robots, approvalAreas, html }. */
+export function indexingProblems(pages) {
+  return pages
+    .filter((page) => /^index\b/.test(page.robots ?? ""))
+    .map((page) => ({
+      route: page.route,
+      rules: workingContentFindings(page.html),
+      approvals: page.approvalAreas ?? [],
+    }))
+    .filter((problem) => problem.rules.length > 0);
+}
+
+/* The marker table ITSELF ships in the browser bundle (content/seo.js
+   and content/stories.js use it to tell working content from final), as
+   entries like ["demo address",/100 Demo Street|Demo City|Demo Country/].
+   Scanned as text, every entry matches its own pattern — so the scan
+   could never come back empty, and the release could never be READY,
+   however much real content RBB supplied. Each whole entry, name and
+   pattern together, is removed before scanning; nothing else is, so a
+   placeholder in actual content is still found. */
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
+const MARKER_TABLE_ENTRIES = [...WORKING_MARKERS, ...PLACEHOLDER_CONTACT].map(
+  ([name, re]) => new RegExp(`\\[\\s*["'\`]${escapeRe(name)}["'\`]\\s*,\\s*/${escapeRe(re.source)}/[a-z]*\\s*\\]`, "g")
+);
+export const withoutMarkerTable = (text) => MARKER_TABLE_ENTRIES.reduce((t, entry) => t.replace(entry, ""), text);
+
 /* READINESS. Where working placeholder content is still on show, as
    { file, rule }. Empty means the final production content is in — it
    does NOT mean the content is approved; release/approvals.mjs answers
@@ -96,7 +131,7 @@ export async function contentReadiness(dist, { routes = [] } = {}) {
     if (/(^|\/)demo-[\w-]+\.(jpg|jpeg|png|webp|pdf)$/.test(rel))
       findings.push({ file: rel, rule: "working placeholder photograph" });
     if (!TEXT.test(file)) continue;
-    const text = await readText(file);
+    const text = withoutMarkerTable(await readText(file));
     for (const [rule, re] of [...WORKING_MARKERS, ...PLACEHOLDER_CONTACT])
       if (re.test(text)) findings.push({ file: rel, rule });
   }

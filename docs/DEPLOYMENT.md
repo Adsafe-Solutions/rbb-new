@@ -188,7 +188,7 @@ Only `VITE_*` variables reach the browser — **never put a secret in one**.
 | `VITE_SITE_URL` | The production origin, e.g. `https://www.<domain>`. **Leave empty until RBB confirms the domain.** Only an https origin on a real host is accepted (`src/config/env.js`); `localhost`, `example.com` and other reserved names are ignored. Empty → no canonical tags, no `og:url`, no sitemap, no structured data URLs. Set it, rebuild, and all of them appear. |
 | `VITE_ENVIRONMENT` | `dev`, `preview` or `prod`. Optional measurement (none approved — Document 17) can only run in a production build with `prod` AND a verified `VITE_SITE_URL`; set `preview` on preview deployments. |
 | `VITE_FORM_ENDPOINT_*` | Public form endpoints (Document 12). Empty → forms stay disabled. |
-| `VITE_DONATIONS_API` | Public donation endpoints, `/api/donations` (Document 22). Empty → no checkout code in the build. Razorpay keys and secrets are server variables, never `VITE_*`. |
+| `VITE_DONATIONS_API` | Public donation endpoints, `/api/donations` (Document 22). Empty → no donation network code in the build (the form shows only as the no-payment preview while donations are pending). Razorpay keys and secrets are server variables, never `VITE_*`. |
 | `VITE_DESIGN_SYSTEM_ROUTE`, `VITE_COMPONENTS_ROUTE` | Dev tools; off in production unless set. |
 
 Files: `.env.development` (dev server), `.env.production` (production
@@ -228,19 +228,19 @@ build or the live site — never the dev server.
 
 ## Fonts
 
-Satoshi (brand) loads from Fontshare; DM Sans (fallback) from Google Fonts.
-Both are third-party requests on every page (see `TECHNOLOGY_AUDIT`).
+DM Sans (brand) loads from Google Fonts — one third-party request on every
+page (see `TECHNOLOGY_AUDIT`). It replaced Satoshi, and with it the second
+font provider: Fontshare is no longer contacted at all.
 
-- Satoshi's stylesheet is render-blocking, `font-display: swap`.
-- DM Sans is a fallback and loads without blocking rendering.
-- Dancing Script is no longer requested — no page uses it.
+- One stylesheet, render-blocking, `font-display: swap`.
+- The roman axis across 300–900, as a variable font: one file per subset
+  covering every weight the site uses. No italic — no page sets it.
+- Dancing Script is not requested — no page uses it.
 
-Self-hosting both families would remove the third-party requests and the
-cross-origin stylesheet. DM Sans is under the SIL Open Font License, which
-permits self-hosting. Satoshi is distributed by Fontshare under its own
-free font licence; **whether it permits self-hosting must be confirmed by
-RBB before the files are added to the repository.** Typography is unchanged
-either way.
+Self-hosting would remove the last cross-origin stylesheet and font
+request. DM Sans is under the SIL Open Font License, which permits it, so
+this is now a decision about build tooling rather than one waiting on a
+licence. Typography is unchanged either way.
 
 ## Images
 

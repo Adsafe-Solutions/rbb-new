@@ -18,18 +18,40 @@
   "documents": {
     "annualReports": 0,
     "financial": 0,
-    "governance": "approved"
+    "governance": "placeholder"
   },
   "programsWithDetail": 4,
   "projects": 10,
   "stories": 8,
   "team": 6,
-  "geography": "approved",
-  "contactMethods": 2,
+  "geography": "placeholder",
+  "contactMethods": 0,
   "policiesPublished": [
     "privacy",
-    "terms",
-    "accessibility"
+    "terms"
+  ],
+  "policiesFinal": [],
+  "socials": [
+    {
+      "platform": "instagram",
+      "homepageOnly": true
+    },
+    {
+      "platform": "facebook",
+      "homepageOnly": true
+    },
+    {
+      "platform": "x",
+      "homepageOnly": true
+    },
+    {
+      "platform": "linkedin",
+      "homepageOnly": true
+    },
+    {
+      "platform": "youtube",
+      "homepageOnly": true
+    }
   ],
   "forms": {
     "contact": "disabled",
@@ -40,6 +62,7 @@
   },
   "donation": {
     "state": "pending",
-    "checkoutReady": false
+    "checkoutReady": false,
+    "preview": true
   }
 }

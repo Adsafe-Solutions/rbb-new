@@ -29,18 +29,21 @@ served statically, all 48 pre-rendered routes at the time (28 since Document 19 
 
 | Origin | What | Owner | Purpose | Essential? | Notes |
 | --- | --- | --- | --- | --- | --- |
-| `api.fontshare.com` | stylesheet | Fontshare (Indian Type Foundry) | Satoshi, the brand typeface | Brand typography | Every page |
-| `cdn.fontshare.com` | font files | Fontshare | Satoshi font files | Brand typography | Loaded from the stylesheet above |
-| `fonts.googleapis.com` | stylesheet | Google | DM Sans fallback | Fallback only | Non-blocking (Document 15) |
-| `fonts.gstatic.com` | font files | Google | DM Sans files | Fallback only | Fetched only if Satoshi fails |
+| `fonts.googleapis.com` | stylesheet | Google | DM Sans, the brand typeface | Brand typography | Every page; render-blocking |
+| `fonts.gstatic.com` | font files | Google | DM Sans variable file | Brand typography | Loaded from the stylesheet above |
 
-These four are the only third-party origins the Content Security Policy
+These two are the only third-party origins the Content Security Policy
 allows (`APPROVED_ORIGINS` in `scripts/security-policy.mjs`, Document 20);
 the build fails if a page loads from any other.
 
-Each receives the visitor's IP address and browser details. Self-hosting
-both families would remove all four; DM Sans (SIL OFL) permits it, and
-Satoshi's licence must be confirmed by RBB first (Document 15).
+Fontshare (`api.fontshare.com`, `cdn.fontshare.com`) was the third-party
+font provider until Satoshi was replaced by DM Sans. It is no longer
+contacted, and no longer approved — a page that reaches for it fails the
+build.
+
+Each of the two receives the visitor's IP address and browser details.
+Self-hosting DM Sans would remove both; the SIL Open Font License permits
+it (Document 15).
 
 ### Server-side services (not browser origins)
 
@@ -146,5 +149,5 @@ pending RBB's Razorpay account and privacy review.
 | Uptime monitoring | Pending |
 | Form provider | Pending |
 | Donation / payment provider | **Razorpay selected** (Document 22); built, OFF — activation pending (`docs/DONATIONS.md`) |
-| Satoshi self-hosting | Pending licence confirmation |
-| Accessibility statement | Pending |
+| DM Sans self-hosting | Not done — permitted by the SIL OFL whenever RBB wants the last third-party request gone |
+| Accessibility statement | Not published — page removed at RBB's request |

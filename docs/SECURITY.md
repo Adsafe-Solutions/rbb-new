@@ -40,9 +40,9 @@ template. As of this review:
 ```
 default-src 'self';
 script-src 'self' 'sha256-…';              ← the one-line `js` class flag (Document 15)
-style-src 'self' https://api.fontshare.com https://fonts.googleapis.com
+style-src 'self' https://fonts.googleapis.com
           'unsafe-hashes' 'sha256-…' ×19;   ← the style="" attributes in the HTML
-font-src 'self' https://cdn.fontshare.com https://fonts.gstatic.com;
+font-src 'self' https://fonts.gstatic.com;
 img-src 'self'; connect-src 'self'; manifest-src 'self';
 media-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none';
 base-uri 'self'; form-action 'self';
@@ -60,8 +60,10 @@ frame-ancestors 'none'                      ← header only
   choice.
 - JSON-LD `<script type="application/ld+json">` blocks are data, not
   script, and are unaffected.
-- The DM Sans stylesheet's inline `onload` handler (Document 15) was
-  replaced by a switch in `src/main.jsx` so no inline handler is needed.
+- No inline `onload` on the font stylesheet. It once carried one, to
+  switch a deferred stylesheet on; that was replaced by a switch in
+  `src/main.jsx`, and since DM Sans became the brand face there is one
+  stylesheet, loaded normally, and neither is needed.
 - No `upgrade-insecure-requests`: every resource is same-origin or an
   approved https origin (the build enforces it), so it would add nothing,
   and it breaks plain-http previews.

@@ -6,18 +6,17 @@ import ProjectList from "../../components/ProjectList/ProjectList.jsx";
 import InvolvementPaths from "../../components/InvolvementPaths/InvolvementPaths.jsx";
 import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
 import LinkChips from "../../components/LinkChips/LinkChips.jsx";
-import useReveal from "../../hooks/useReveal.js";
 import { PROGRAMS, WORK, programByPath, projectsIn } from "../../content/index.js";
 
 /* The program page template — ONE page for all four program areas
    (Document 04), filled from the program's entry in content/work.js:
 
-     01  mist band  PageHeader        name, approved description, icon panel
-     02  white      ContentRows       Why this matters · What we do
-     04  white      ProjectList       this program's verified projects
-     05  white      ContentRows       Impact · Stories
-     07  white      InvolvementPaths  the ways to take part
-     08  mist band  ClosingCta        the other three programs, and support
+        paper   PageHeader        name, approved description, the icon poster
+     01–02 white ContentRows       Why this matters · What we do
+     —   ink    ProjectList       this program's verified projects
+     03–04 paper ContentRows      Impact · Stories
+     —   white  InvolvementPaths  the ways to take part
+         accent ClosingCta        the other three programs, and support
 
    Every detail section keeps its heading and, until RBB supplies its
    content, says so in the program's own words (`missing`) — never generic
@@ -26,7 +25,6 @@ import { PROGRAMS, WORK, programByPath, projectsIn } from "../../content/index.j
    The program is found by the URL, so the router can point all four
    paths at this one component (App.jsx). */
 export default function Program() {
-  useReveal();
   const { pathname } = useLocation();
   const program = programByPath(pathname);
   const t = WORK.program;
@@ -38,9 +36,9 @@ export default function Program() {
         title={program.title}
         parent={{ label: "Our Work", to: "/work" }}
         kicker={t.kicker}
-        aside={<IconPanel icons={[program.icon]} className="reveal" />}
+        aside={<IconPanel icons={[program.icon]} />}
       >
-        <p className="mt-5 max-w-prose text-[length:var(--text-subheading)] leading-subheading tracking-subheading text-graphite">
+        <p className="type-lead mt-7 max-w-[46ch] text-copy">
           {program.description}
         </p>
       </PageHeader>
@@ -60,21 +58,21 @@ export default function Program() {
         empty={WORK.projects.empty}
         cta={WORK.projects.cta}
         showProgram={false}
+        tone="ink"
       />
 
       <ContentRows
-        className="pt-0 md:pt-0"
+        tone="paper"
+        start={3}
         rows={[
           { id: "impact", heading: t.impact.heading, items: program.impact, empty: t.impact.empty },
           { id: "stories", heading: t.stories.heading, items: program.stories, empty: t.stories.empty },
         ]}
       />
 
-      <div className="pt-12 md:pt-16">
-        <InvolvementPaths {...t.getInvolved} />
-      </div>
+      <InvolvementPaths {...t.getInvolved} />
 
-      <ClosingCta heading={t.related.heading} ctas={t.related.ctas}>
+      <ClosingCta tone="accent" heading={t.related.heading} ctas={t.related.ctas}>
         <LinkChips className="mt-10" items={others} />
       </ClosingCta>
     </>

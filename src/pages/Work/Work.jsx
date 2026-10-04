@@ -4,15 +4,14 @@ import Button from "../../components/Button/Button.jsx";
 import ProgramIndex from "../../components/ProgramIndex/ProgramIndex.jsx";
 import ProjectList from "../../components/ProjectList/ProjectList.jsx";
 import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
-import useReveal from "../../hooks/useReveal.js";
 import { PROGRAMS, PROJECTS, WORK, programBySlug } from "../../content/index.js";
 
 /* /work — the Our Work overview (Document 04):
 
-     mist band   PageHeader     h1, the positioning line, Explore Projects
-     white       ProgramIndex   the four program areas — the primary content
-     mist band   ProjectList    featured projects, or the honest empty state
-     mist band   ClosingCta     onward to Get Involved and Impact
+         paper   PageHeader     h1, the positioning line, the icon cluster
+     01  white   ProgramIndex   the four program areas, as a numbered index
+     02  ink     ProjectList    featured projects, as pinned-up sheets
+         accent  ClosingCta     onward to Get Involved and Impact
 
    The four programs lead: Document 04 makes them the page's primary
    hierarchy, so they get full-width editorial rows, not the homepage's
@@ -22,7 +21,6 @@ import { PROGRAMS, PROJECTS, WORK, programBySlug } from "../../content/index.js"
 const programTitle = (slug) => programBySlug(slug)?.title;
 
 export default function Work() {
-  useReveal();
   const { overview, projects } = WORK;
   const featured = PROJECTS.filter((project) => project.featured);
 
@@ -30,18 +28,19 @@ export default function Work() {
     <>
       <PageHeader
         title={overview.heading}
+        highlight="Work"
         kicker={overview.kicker}
-        aside={<IconPanel icons={PROGRAMS.map((p) => p.icon)} className="reveal" />}
+        aside={<IconPanel icons={PROGRAMS.map((p) => p.icon)} />}
       >
-        <p className="mt-5 max-w-prose text-[length:var(--text-subheading)] leading-subheading tracking-subheading text-graphite">
+        <p className="type-lead mt-7 max-w-[46ch] text-copy">
           {overview.body}
         </p>
-        <Button to={overview.cta.to} className="mt-8">
+        <Button size="lg" to={overview.cta.to} className="mt-9">
           {overview.cta.label}
         </Button>
       </PageHeader>
 
-      <ProgramIndex {...overview.programs} programs={PROGRAMS} />
+      <ProgramIndex index={1} {...overview.programs} programs={PROGRAMS} />
 
       <ProjectList
         kicker={projects.kicker}
@@ -50,10 +49,11 @@ export default function Work() {
         empty={projects.empty}
         cta={projects.cta}
         programOf={programTitle}
-        surface="mist"
+        index={2}
+        tone="ink"
       />
 
-      <ClosingCta {...overview.closing} />
+      <ClosingCta tone="accent" {...overview.closing} />
     </>
   );
 }

@@ -22,20 +22,24 @@ import fieldKids from "../assets/rbb-field-kids.jpg";
 import fieldDistribution from "../assets/rbb-field-distribution.jpg";
 import fieldElder from "../assets/rbb-field-elder.jpg";
 
+/* ⚠ PENDING RBB VERIFICATION of ownership and authenticity (decision
+   register D32/D33). The alt text describes what is in the frame — a vest
+   printed with RBB's logo — and does not assert that the people are RBB
+   volunteers or that this is RBB's work; RBB has not confirmed that. */
 export const RBB_PHOTOS = {
   kids: {
     src: fieldKids,
-    alt: "A volunteer in a Rising Beyond Borders vest hands a wrapped package to a smiling girl, with other children gathered around",
+    alt: "A person in a vest printed with the Rising Beyond Borders logo hands a wrapped package to a smiling girl, with other children gathered around",
     focal: "72% 45%",
   },
   distribution: {
     src: fieldDistribution,
-    alt: "Volunteers in Rising Beyond Borders vests unloading a truck and packing boxes alongside families",
+    alt: "People in vests printed with the Rising Beyond Borders logo unloading a truck and packing boxes alongside families",
     focal: "45% 50%",
   },
   elder: {
     src: fieldElder,
-    alt: "A volunteer in a Rising Beyond Borders vest hands a package to a smiling older woman",
+    alt: "A person in a vest printed with the Rising Beyond Borders logo hands a package to a smiling older woman",
     focal: "60% 45%",
   },
 };
@@ -91,6 +95,8 @@ export const WORKING_PHOTOS = {
    exist at this organisation. Each alt says so, so no reader mistakes
    them for RBB staff. */
 export const TEAM_PORTRAITS = [teamPortrait1, teamPortrait2, teamPortrait3, teamPortrait4, teamPortrait5, teamPortrait6];
-export const TEAM_PORTRAIT_ALT = "Stock portrait used as a placeholder — not a member of Rising Beyond Borders";
+/* Neutral on purpose: a stock portrait beside a role, so the alt text
+   names no one and claims no identity. */
+export const TEAM_PORTRAIT_ALT = "Portrait photograph";
 
 export default RBB_PHOTOS;

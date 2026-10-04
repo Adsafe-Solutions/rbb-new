@@ -8,15 +8,15 @@
    STAFF MEMBER unless RBB has supplied AND approved it, with that
    person's consent.
 
-   The six people below are WORKING placeholders (Document 27), not real
-   staff: fictional names, stock portraits, and every card and biography
-   says so on its face ("· Demo profile", a biography that opens by
-   stating the person is fictional). They exist so the team grid, groups
-   and profile pages have something to review. Replace them — and each
-   real person's consent — before launch. */
+   The six profiles below are SAMPLE profiles (decision D16), not real
+   staff: each is a role, with a stock portrait, and every card and
+   biography says so on its face ("Sample profile"). They exist so the
+   team grid, groups and profile pages have something to review. Replace
+   them — with each real person's consent — before launch. */
 
 import { ABOUT } from "./about.js";
 import { pathCards } from "./getInvolved.js";
+import { isWorkingContent } from "../lib/releaseMarkers.js";
 import { TEAM_PORTRAITS, TEAM_PORTRAIT_ALT } from "./photos.js";
 
 /* One record per person:
@@ -39,109 +39,122 @@ import { TEAM_PORTRAITS, TEAM_PORTRAIT_ALT } from "./photos.js";
      }
    Personal contact details (email, phone) are never part of a record
    unless RBB explicitly approves them for public use. */
-const NOTE = "This is a working placeholder profile used to preview this page — a fictional person, not a member of Rising Beyond Borders.";
+/* Each sample profile is a ROLE, not a person: its `name` is the role
+   and its `role` line the area it covers. `releaseMarker` ("Sample
+   profile — …") is INTERNAL, never shown (content brief, 2026-10-04);
+   the release markers find it in the record, the bundle and the
+   `data-release-marker` attribute on cards and profile pages. No name, credential,
+   employer, location or years of experience — none has been supplied.
+   The slugs are unchanged so no address changes. */
+const NOTE = "Sample profile — this page shows how a team member's profile will appear. It describes a role, not a real person.";
 
 export const TEAM_MEMBERS = [
   {
-    /* WORKING placeholder (Document 27) — see NOTE, which opens the biography. */
     status: "approved",
     image: TEAM_PORTRAITS[0],
     imageAlt: TEAM_PORTRAIT_ALT,
     order: 0,
     id: "amara",
     slug: "amara-demo",
-    name: "Amara Demo",
-    role: "Executive Director · Demo profile",
+    name: "Executive Director",
+    role: "Leadership",
     category: "leadership",
     featured: true,
-    shortBio: "Leads the organisation's strategy and partnerships.",
+    shortBio: "Leads the organisation's direction, partnerships and team.",
+    releaseMarker: NOTE,
     biography: [
-      NOTE,
-      "Amara leads the organisation's strategy, partnerships and team, and works closely with community partners to shape new programmes.",
-      "Before this role she spent many years in community development and education.",
+      "The Executive Director leads Rising Beyond Borders' overall direction: setting priorities with the board and team, building relationships with partners and supporters, and making sure the organisation stays true to its mission.",
+      "A profile here will introduce the person in this role in their own words — what drew them to the work and what they hope it achieves.",
     ],
     relatedLinks: [{ label: "Our Work", to: "/work" }],
   },
   {
-    /* WORKING placeholder (Document 27) — see NOTE, which opens the biography. */
     status: "approved",
     image: TEAM_PORTRAITS[1],
     imageAlt: TEAM_PORTRAIT_ALT,
     order: 1,
     id: "grace",
     slug: "grace-demo",
-    name: "Grace Demo",
-    role: "Director of Programmes · Demo profile",
+    name: "Head of Programs",
+    role: "Programs",
     category: "leadership",
     featured: true,
-    shortBio: "Oversees the four programme areas and their teams.",
+    shortBio: "Oversees the four program areas and how they work together.",
+    releaseMarker: NOTE,
     biography: [
-      NOTE,"Grace oversees the education, health, livelihoods and community support programmes, and the teams who run them."],
+      "The Head of Programs oversees education, health and wellbeing, livelihoods and community support, and how the four connect in practice.",
+      "The role is about listening as much as planning: making sure each program starts from the priorities communities set, and learns from what does and does not work.",
+    ],
     relatedLinks: [{ label: "Our Impact", to: "/impact" }],
   },
   {
-    /* WORKING placeholder (Document 27) — see NOTE, which opens the biography. */
     status: "approved",
     image: TEAM_PORTRAITS[2],
     imageAlt: TEAM_PORTRAIT_ALT,
     order: 2,
     id: "samuel",
     slug: "samuel-demo",
-    name: "Samuel Demo",
-    role: "Volunteer Coordinator · Demo profile",
+    name: "Volunteer Coordinator",
+    role: "Volunteering",
     category: "team",
     featured: true,
-    shortBio: "Welcomes and supports volunteers across every project.",
+    shortBio: "Welcomes, prepares and supports volunteers.",
+    releaseMarker: NOTE,
     biography: [
-      NOTE,"Samuel recruits, trains and supports volunteers, and plans the packing days and community events they run."],
+      "The Volunteer Coordinator is the first point of contact for volunteers: matching people's time and skills to where they can help, preparing them well and making sure they feel supported.",
+      "Good volunteering depends on good coordination — clear roles, a named contact and a sense that every contribution counts.",
+    ],
     relatedLinks: [{ label: "Volunteer", to: "/get-involved/volunteer" }],
   },
   {
-    /* WORKING placeholder (Document 27) — see NOTE, which opens the biography. */
     status: "approved",
     image: TEAM_PORTRAITS[3],
     imageAlt: TEAM_PORTRAIT_ALT,
     order: 3,
     id: "leila",
     slug: "leila-demo",
-    name: "Leila Demo",
-    role: "Partnerships Manager · Demo profile",
+    name: "Partnerships Lead",
+    role: "Partnerships",
     category: "team",
-    shortBio: "Builds partnerships with organisations and communities.",
+    shortBio: "Builds working relationships with organisations and communities.",
+    releaseMarker: NOTE,
     biography: [
-      NOTE,"Leila works with organisations and community groups who want to partner on projects."],
+      "The Partnerships Lead works with organisations, institutions and community groups that want to collaborate, helping each partnership start from shared aims and stay accountable to the people it serves.",
+    ],
     relatedLinks: [{ label: "Partner With Us", to: "/get-involved/partner" }],
   },
   {
-    /* WORKING placeholder (Document 27) — see NOTE, which opens the biography. */
     status: "approved",
     image: TEAM_PORTRAITS[4],
     imageAlt: TEAM_PORTRAIT_ALT,
     order: 4,
     id: "daniel",
     slug: "daniel-demo",
-    name: "Daniel Demo",
-    role: "Finance Officer · Demo profile",
+    name: "Finance Lead",
+    role: "Finance",
     category: "team",
-    shortBio: "Looks after budgets, reporting and financial records.",
+    shortBio: "Looks after budgets, financial records and reporting.",
+    releaseMarker: NOTE,
     biography: [
-      NOTE,"Daniel manages budgets and financial reporting, and prepares the information published on the Transparency page."],
-    relatedLinks: [{ label: "Transparency", to: "/about/transparency" }],
+      "The Finance Lead manages budgets and financial records, and prepares the financial information Rising Beyond Borders publishes, so supporters can see how resources are used.",
+    ],
+    relatedLinks: [{ label: "Transparency", to: "/about#transparency" }],
   },
   {
-    /* WORKING placeholder (Document 27) — see NOTE, which opens the biography. */
     status: "approved",
     image: TEAM_PORTRAITS[5],
     imageAlt: TEAM_PORTRAIT_ALT,
     order: 5,
     id: "hannah",
     slug: "hannah-demo",
-    name: "Hannah Demo",
-    role: "Communications Officer · Demo profile",
+    name: "Communications Lead",
+    role: "Communications",
     category: "team",
     shortBio: "Shares stories and news from the work.",
+    releaseMarker: NOTE,
     biography: [
-      NOTE,"Hannah gathers stories and updates from the programmes and shares them on the website and in the newsletter."],
+      "The Communications Lead gathers stories and updates from across the programs and shares them — always with the consent of the people in them, and in a way that respects their dignity.",
+    ],
     relatedLinks: [{ label: "Stories", to: "/stories" }],
   },
 ];
@@ -166,6 +179,7 @@ export const memberPath = (member) => `/about/team/${member.slug}`;
 /* A person as TeamGrid draws them: only the fields they have. The card
    links to a profile only when a profile exists. */
 export const memberCard = (member) => ({
+  sample: isWorkingContent(member) ? "Sample profile" : undefined,
   name: member.name,
   role: member.role,
   bio: member.shortBio,
@@ -176,11 +190,12 @@ export const memberCard = (member) => ({
 /* The team members shown on /about — the approved, `featured` ones. */
 export const featuredMembers = () => approvedMembers().filter((m) => m.featured).map(memberCard);
 
-/* How the team relates to governance. WORKING placeholder text below,
-   self-labelled; replace with RBB's approved structure before launch. */
+/* How the team relates to governance. PLACEHOLDER — a reporting line or
+   a board is a fact about RBB, so nothing stands in for it; the section
+   is left out until RBB supplies its approved structure (decision D7). */
 export const TEAM_GOVERNANCE = {
-  body: "WORKING text — The staff team reports to a volunteer board, which sets strategy and oversees finances. Replace with Rising Beyond Borders' approved governance description.",
-  status: "approved",
+  body: null,
+  status: "placeholder",
 };
 
 /* ---------------- Page copy ----------------
@@ -201,7 +216,7 @@ export const TEAM_COPY = {
   governance: {
     id: "governance",
     heading: "Team and governance",
-    cta: { label: "Governance", to: "/about/transparency#governance" },
+    cta: { label: "Governance", to: "/about#governance" },
   },
   getInvolved: {
     kicker: "Get involved",

@@ -1,315 +1,165 @@
-import { Link } from "react-router-dom";
 import { cx } from "../../lib/cx.js";
-import Badge from "../../components/Badge/Badge.jsx";
 import Button from "../../components/Button/Button.jsx";
 import Container from "../../components/Container/Container.jsx";
+import HighlightText from "../../components/HighlightText/HighlightText.jsx";
+import MarkStamp from "../../components/Mark/MarkStamp.jsx";
+import OffsetCard from "../../components/OffsetCard/OffsetCard.jsx";
+import Section from "../../components/Section/Section.jsx";
+import SectionKicker from "../../components/SectionKicker/SectionKicker.jsx";
 
 /* The living token reference at /design-system.
 
    Not documentation ABOUT the system — the system itself, rendered. Every
-   swatch below is a real utility from theme.css, so a token that changes
-   changes here, and a swatch that looks wrong means the token is wrong.
-   That is the whole value: a written spec drifts from the code, this
-   cannot.
+   swatch is a real utility from theme.css and every band a real tone from
+   index.css, so a token that changes changes here, and a swatch that looks
+   wrong means the token is wrong.
 
-   Off in production builds by default (see config/sections.js). */
+   Off in production builds by default (see config/sections.js).
 
-/* ⚠ EVERY CLASS HERE IS WRITTEN OUT IN FULL, never assembled as
-   `bg-${token}`. Tailwind finds classes by scanning source files for
-   literal strings — it does not evaluate JavaScript — so an interpolated
-   name matches nothing, the utility is never generated, and the swatch
-   renders transparent. The duplication between `token` and `swatch` is
-   the price of the scanner seeing them. */
-const COLORS = [
-  {
-    name: "Bright Sky Blue",
-    token: "bg-bumble-honey",
-    swatch: "bg-bumble-honey",
-    use: "Bands, frames, highlights, icons, accents",
-  },
-  {
-    name: "Deep Trust Blue",
-    token: "bg-trust-blue",
-    swatch: "bg-trust-blue",
-    use: "Headlines, wordmark, navigation, links",
-  },
-  {
-    name: "Growth Green",
-    token: "bg-growth-green",
-    swatch: "bg-growth-green",
-    use: "The filled call-to-action button, success states",
-  },
-  {
-    name: "Charcoal",
-    token: "bg-bumble-ink",
-    swatch: "bg-bumble-ink",
-    use: "Body text, icons, borders, the dark card",
-  },
-  {
-    name: "Light Gray",
-    token: "bg-mist",
-    swatch: "bg-mist border border-graphite/20",
-    use: "Cards, sections, quiet surfaces (also bg-pollen)",
-  },
-  {
-    name: "White",
-    token: "bg-paper-white",
-    swatch: "bg-paper-white border border-mist",
-    use: "Page canvas, card surface, inverse text",
-  },
-  {
-    name: "Graphite",
-    token: "bg-graphite",
-    swatch: "bg-graphite",
-    use: "Helper text, low-emphasis labels",
-  },
+   ⚠ EVERY CLASS HERE IS WRITTEN OUT IN FULL, never assembled as
+   `bg-${token}`: Tailwind finds classes by scanning for literal strings,
+   so an interpolated name generates nothing and renders transparent. */
+const PALETTE = [
+  { name: "Deep Trust Blue", hex: "#10437C", swatch: "bg-trust-blue", role: "INK — dark bands, headings, borders, the secondary button" },
+  { name: "Bright Sky Blue", hex: "#00ADEF", swatch: "bg-bumble-honey", role: "ACCENT — highlight blocks, offset shadows, the primary button, one band a page. Never text on a light surface." },
+  { name: "Paper", hex: "#F5EFE6", swatch: "bg-paper border-2 border-trust-blue", role: "PAPER — the page's own ground (the `paper` tone). Pending approval." },
+  { name: "White", hex: "#FFFFFF", swatch: "bg-paper-white border-2 border-trust-blue", role: "Cards, prints, clean content bands" },
+  { name: "Night", hex: "#0A2647", swatch: "bg-night", role: "Contrast token: text ON Sky Blue only (5.95:1). Never a surface. Pending approval." },
+  { name: "Light Gray", hex: "#F5F7FA", swatch: "bg-mist border-2 border-trust-blue", role: "Quiet UI fills — hover states, placeholders" },
+  { name: "Charcoal", hex: "#3A3A3A", swatch: "bg-bumble-ink", role: "Body text on light surfaces" },
+  { name: "Growth Green", hex: "#5CB85C", swatch: "bg-growth-green", role: "Success states only" },
 ];
 
-/* Written out in full for the same reason as COLORS above. */
+const TONES = ["paper", "white", "ink", "accent"];
+
 const TYPE = [
-  {
-    name: "display",
-    cls: "text-display leading-display tracking-display",
-    sample: "Meet people",
-  },
-  {
-    name: "heading-lg",
-    cls: "text-heading-lg leading-heading-lg tracking-heading-lg",
-    sample: "Bring people closer",
-  },
-  {
-    name: "heading",
-    cls: "text-heading leading-heading tracking-heading",
-    sample: "Share your ideas",
-  },
-  {
-    name: "heading-sm",
-    cls: "text-heading-sm leading-heading-sm tracking-heading-sm",
-    sample: "Find your person",
-  },
-  {
-    name: "subheading",
-    cls: "text-subheading leading-subheading tracking-subheading",
-    sample: "A short supporting line",
-  },
-  {
-    name: "body",
-    cls: "text-body leading-body tracking-body",
-    sample: "Body copy runs at 17px with open tracking.",
-  },
-  {
-    name: "caption",
-    cls: "text-caption leading-caption tracking-caption",
-    sample: "Caption and badge text at 15px.",
-  },
+  { cls: "type-poster", name: "poster", sample: "Building hope." },
+  { cls: "type-billboard", name: "billboard", sample: "Together we rise." },
+  { cls: "type-title", name: "title", sample: "Where we focus our work" },
+  { cls: "type-card", name: "card", sample: "Health & wellbeing" },
+  { cls: "type-lead", name: "lead", sample: "The line under a headline: larger than body, medium weight." },
+  { cls: "text-[length:var(--text-body)]", name: "body", sample: "Body text, 18px on 1.5 — comfortable for long reading." },
+  { cls: "type-meta", name: "meta", sample: "01 / Kicker · label · metadata" },
 ];
 
-const SPACING = [
-  ["8px", "p-2"],
-  ["12px", "p-3"],
-  ["16px", "p-4"],
-  ["20px", "p-5"],
-  ["24px", "p-6"],
-  ["32px", "p-8"],
-  ["36px", "p-9"],
-  ["40px", "p-10"],
-  ["48px", "p-12"],
-];
-
-/* The card-gap rule. Full class strings, not built from `name`: Tailwind
-   only generates utilities it finds written out literally. */
 const GAPS = [
-  {
-    name: "cards",
-    cls: "gap-cards",
-    value: "16px → 24px from md",
-    use: "Separate cards side by side in a grid, row or carousel.",
-    count: 3,
-    tile: "h-20 rounded-3xl bg-mist",
-    layout: "grid grid-cols-3",
-  },
-  {
-    name: "tiles",
-    cls: "gap-tiles",
-    value: "12px → 16px from md",
-    use: "Pieces of one composition — the photos of a collage.",
-    count: 4,
-    tile: "h-12 rounded-2xl bg-bumble-honey/40",
-    layout: "grid grid-cols-2",
-  },
-  {
-    name: "stack",
-    cls: "gap-stack",
-    value: "12px",
-    use: "Full-width cards in a vertical list — FAQ, documents.",
-    count: 3,
-    tile: "h-8 rounded-2xl bg-mist",
-    layout: "flex flex-col",
-  },
+  { cls: "gap-cards", name: "gap-cards", use: "Sibling cards in a grid, row or carousel — 16px → 24px at md" },
+  { cls: "gap-tiles", name: "gap-tiles", use: "Pieces of one composition — 12px → 16px" },
+  { cls: "gap-stack", name: "gap-stack", use: "Full-width cards in a vertical list — 12px" },
 ];
 
-const RADII = [
-  { name: "small elements", value: "9px", cls: "rounded-lg" },
-  { name: "buttons / nav / photos", value: "16px", cls: "rounded-2xl" },
-  { name: "cards", value: "24px", cls: "rounded-3xl" },
-  { name: "badges", value: "1000px", cls: "rounded-full" },
-];
-
-function Section({ title, note, children }) {
+function Heading({ children, index }) {
   return (
-    <section className="py-12">
-      <h2 className="font-bold text-[length:var(--text-heading)] leading-heading tracking-heading">
-        {title}
-      </h2>
-      {note && <p className="mt-3 max-w-prose text-graphite">{note}</p>}
-      <div className="mt-8">{children}</div>
-    </section>
+    <div className="mb-10">
+      <SectionKicker index={index}>Tokens</SectionKicker>
+      <h2 className="type-title mt-4">{children}</h2>
+    </div>
   );
 }
 
 export default function DesignSystem() {
   return (
-    <Container className="py-12">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-        <h1 className="font-bold text-[length:var(--text-heading-lg)] leading-heading-lg tracking-heading-lg">
-          Design system
+    <>
+      <Section tone="paper" pad="lg" className="-mt-[var(--header-h)] pt-[calc(var(--header-h)+4rem)]" watermark="right">
+        <SectionKicker>Rising Beyond Borders</SectionKicker>
+        <h1 className="type-billboard mt-5">
+          The design <HighlightText>system</HighlightText>
         </h1>
-        <Link
-          to="/components"
-          className="text-[length:var(--text-caption)] tracking-caption text-graphite hover:underline"
-        >
-          Components →
-        </Link>
-      </div>
-      <p className="mt-4 max-w-prose text-graphite">
-        Every value below is rendered from a live utility in{" "}
-        <code>src/styles/theme.css</code>. If a swatch looks wrong, the token is wrong —
-        there is no second copy to check against.
-      </p>
+        <p className="type-lead mt-7 max-w-[54ch] text-copy">
+          Printed material, colour-blocked: ink, paper and one accent; display type as the main graphic device; hard
+          offset shadows; the mark as a graphic system. Source of truth: src/styles/theme.css and index.css.
+        </p>
+      </Section>
 
-      <Section
-        title="Colour"
-        note="Two blues, one green, three neutrals. The blues carry trust and the green is reserved for the call to action; token names are historical, read the swatch names for the role."
-      >
-        <ul className="grid gap-cards sm:grid-cols-2 lg:grid-cols-4">
-          {COLORS.map((color) => (
-            <li key={color.token}>
-              {/* The two lightest swatches carry a hairline — paper on
-                  paper is otherwise invisible. It is part of `swatch`. */}
-              <div className={cx("h-24 rounded-2xl", color.swatch)} />
-              <p className="mt-3 font-medium">{color.name}</p>
-              <p className="text-[length:var(--text-caption)] tracking-caption text-graphite">
-                {color.token}
-              </p>
-              <p className="mt-1 text-[length:var(--text-caption)] tracking-caption text-graphite">
-                {color.use}
-              </p>
+      <Section tone="white" pad="lg">
+        <Heading index={1}>Palette, by role</Heading>
+        <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {PALETTE.map((c) => (
+            <li key={c.name}>
+              <div className={cx("h-28 rounded-2xl", c.swatch)} />
+              <p className="mt-4 font-extrabold text-fg">{c.name}</p>
+              <p className="type-meta mt-1 text-quiet">{c.hex}</p>
+              <p className="mt-2 text-[15px] text-copy">{c.role}</p>
             </li>
           ))}
         </ul>
       </Section>
 
-      <Section
-        title="Typography"
-        note="Each size ships with its own leading and tracking — pair them. The positive tracking at every size is what gives the face its open cadence; never zero it out."
-      >
-        <ul className="flex flex-col gap-8">
-          {TYPE.map((row) => (
-            <li key={row.name} className="border-t border-mist pt-5">
-              <p className="text-[length:var(--text-caption)] tracking-caption text-graphite">
-                {row.cls}
+      <Section tone="paper" pad="lg">
+        <Heading index={2}>Tones — one attribute per band</Heading>
+        <div className="grid gap-6 lg:grid-cols-5">
+          {TONES.map((tone) => (
+            <div key={tone} data-tone={tone} className="rounded-2xl border-2 border-trust-blue p-6">
+              <p className="type-meta text-quiet">data-tone="{tone}"</p>
+              <p className="type-card mt-3">
+                A <HighlightText>headline</HighlightText>
               </p>
-              <p className={cx("mt-2 font-bold", row.cls)}>{row.sample}</p>
-            </li>
-          ))}
-        </ul>
-      </Section>
-
-      <Section
-        title="Spacing"
-        note="The base unit is 4px, which is also Tailwind's native scale — the px-named tokens map onto it directly rather than replacing it."
-      >
-        <ul className="flex flex-wrap items-end gap-6">
-          {SPACING.map(([label, cls]) => (
-            <li key={cls}>
-              <div className={cx("inline-block bg-trust-blue", cls)}>
-                <div className="h-2 w-2 bg-bumble-ink" />
+              <p className="mt-3 text-copy">Body text on this ground.</p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Button size="sm">Primary</Button>
+                <Button size="sm" variant="ink">
+                  Ink
+                </Button>
+                <Button size="sm" variant="outline">
+                  Outline
+                </Button>
               </div>
-              <p className="mt-2 text-[length:var(--text-caption)] tracking-caption text-graphite">
-                {label} · {cls}
-              </p>
+              <OffsetCard className="mt-6" pad="sm">
+                <p className="font-bold text-fg">A card on {tone}</p>
+              </OffsetCard>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section tone="white" pad="lg">
+        <Heading index={3}>Type — the brand face at full weight</Heading>
+        <ul className="grid gap-10">
+          {TYPE.map((t) => (
+            <li key={t.name} className="grid gap-3 border-t-2 border-edge pt-6 md:grid-cols-[10rem_1fr]">
+              <p className="type-meta text-quiet">{t.name}</p>
+              <p className={cx(t.cls, "text-fg")}>{t.sample}</p>
             </li>
           ))}
         </ul>
       </Section>
 
-      <Section
-        title="Card gaps"
-        note="Every gap between sibling cards on the site is one of these three, picked by what the cards are — never a number chosen by eye. Split layouts (a text column beside its photograph) are page layout, not card gaps, and keep their own gutters."
-      >
-        <ul className="grid gap-cards md:grid-cols-3">
-          {GAPS.map((gap) => (
-            <li key={gap.name}>
-              <div className={cx(gap.layout, gap.cls)}>
-                {Array.from({ length: gap.count }, (_, i) => (
-                  <div key={i} className={gap.tile} />
+      <Section tone="ink" pad="lg" watermark="left">
+        <Heading index={4}>Hard offsets and tilt</Heading>
+        <div className="grid gap-10 sm:grid-cols-3">
+          <OffsetCard cast="sm" pad="md">
+            <p className="type-meta">cast-sm · 3px</p>
+          </OffsetCard>
+          <OffsetCard cast="md" tilt="l" lift pad="md">
+            <p className="type-meta">cast · 6px · tilt-l · lift</p>
+          </OffsetCard>
+          <OffsetCard cast="lg" tilt="r-lg" pad="md">
+            <p className="type-meta">cast-lg · 10px · tilt-r-lg</p>
+            <MarkStamp className="mt-6 h-14 w-14" />
+          </OffsetCard>
+        </div>
+      </Section>
+
+      <Section tone="paper" pad="lg">
+        <Heading index={5}>Gaps between cards</Heading>
+        <ul className="grid gap-10">
+          {GAPS.map((g) => (
+            <li key={g.name}>
+              <p className="font-extrabold text-fg">{g.name}</p>
+              <p className="mt-1 text-copy">{g.use}</p>
+              <div className={cx("mt-4 flex", g.cls)}>
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className="h-16 flex-1 rounded-xl border-2 border-trust-blue bg-paper-white" />
                 ))}
               </div>
-              <p className="mt-4 font-medium">
-                {gap.name} · <code>{gap.cls}</code>
-              </p>
-              <p className="text-[length:var(--text-caption)] tracking-caption text-graphite">
-                {gap.value}
-              </p>
-              <p className="mt-1 text-[length:var(--text-caption)] tracking-caption text-graphite">
-                {gap.use}
-              </p>
             </li>
           ))}
         </ul>
       </Section>
 
-      <Section
-        title="Radius and elevation"
-        note="Nothing in this system has a sharp corner. One shadow only, a whisper at 12% — never stacked, never tinted."
-      >
-        <ul className="grid gap-cards sm:grid-cols-2 lg:grid-cols-4">
-          {RADII.map((r) => (
-            <li key={r.cls}>
-              <div className={cx("h-24 bg-trust-blue", r.cls)} />
-              <p className="mt-3 font-medium">{r.value}</p>
-              <p className="text-[length:var(--text-caption)] tracking-caption text-graphite">
-                {r.cls} · {r.name}
-              </p>
-            </li>
-          ))}
-        </ul>
-
-        <div className="mt-8 max-w-sm rounded-3xl bg-paper-white p-6 shadow-sm">
-          <p className="font-medium">shadow-sm</p>
-          <p className="mt-1 text-[length:var(--text-caption)] tracking-caption text-graphite">
-            The one approved elevation, for white cards lifting off white.
-          </p>
-        </div>
-      </Section>
-
-      <Section
-        title="Components"
-        note="One filled button in the system, and it is ink. Yellow is the brand's warmth, not its clickability."
-      >
-        <div className="flex flex-wrap items-center gap-4">
-          <Button>Filled action</Button>
-          <Button variant="pill">Active nav pill</Button>
-          <Button variant="ghost">Inactive nav link</Button>
-          <Button variant="link">Underlined card link</Button>
-        </div>
-
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <Badge>ID verified</Badge>
-          <Badge tone="honey">Outdoors</Badge>
-          <Badge tone="ink">98% verified</Badge>
-        </div>
-      </Section>
-    </Container>
+      <Container className="py-10">
+        <p className="type-meta text-quiet">Development route — not in production builds.</p>
+      </Container>
+    </>
   );
 }

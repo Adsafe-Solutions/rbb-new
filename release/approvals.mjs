@@ -30,7 +30,7 @@ export const APPROVALS = {
   forms: pending("Fields, consent wording, recipients, acknowledgement and success/error wording"),
   donation: pending("Currency, amounts, donor fields, donor wording, Razorpay account settings (or: launch without online donations)"),
   email: pending("From domain and sender, recipients, newsletter confirmation and unsubscribe process"),
-  policies: pending("Privacy, Terms, Accessibility, and a decision on Cookies"),
+  policies: pending("Privacy, Terms, and a decision on Cookies"),
   images: pending("Ownership, licences and permissions for every published image (docs/IMAGE_INVENTORY.md)"),
   infrastructure: pending("Domain, host, HTTPS, redirects, headers, and any scripts the host adds"),
 };

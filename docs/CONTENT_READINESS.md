@@ -55,7 +55,7 @@ left to replace.
 | Transparency | Annual reports, financial documents, governance | Missing | Placeholders |
 | Contact | Email, phone, address, hours, social | Missing | Placeholders; nothing invented |
 | Donation | Provider, currency, amounts, methods, tax/receipt/refund wording | Missing | Pending state; no payment |
-| Policies | Privacy, Terms, Accessibility | Missing | Pending pages (noindex); no footer links |
+| Policies | Privacy, Terms | Missing | Pending pages (noindex); no footer links |
 | Policies | Cookies | Not assessed | No page (404) until the host is audited |
 | Forms | All | Missing (no approved destination or privacy policy) | Disabled |
 
@@ -101,7 +101,7 @@ left to replace.
 12. **Contact**: official email, phone, address, office, social, hours.
 13. **Donation**: provider, currency, methods, recurring giving,
     tax/receipt/refund wording, the final process.
-14. **Policies**: reviewed Privacy, Terms and Accessibility text and dates;
+14. **Policies**: reviewed Privacy and Terms text and dates;
     the Cookies decision after the host audit.
 15. **Hero supporting line** and all **proposed interface copy** (headings,
     labels, pending lines, "Something went wrong").

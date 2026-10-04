@@ -21,7 +21,11 @@
 export const WORKING_MARKERS = [
   ["demo text", /Demo text —/],
   ["demo summary", /Demo summary —/],
-  ["demo prefix", /(^|[\s>(])Demo(nstration)? —/m],
+  /* "Demo — …", and the variants the working copy also uses: one word
+     after it ("Demo consent —", "Demo confirmation —", "Demo Partner —"),
+     or a colon ("Demo: …"); at a line start, after a tag, a bracket, a
+     space or an opening quote (a record read as JSON). */
+  ["demo prefix", /(^|[\s>("])Demo(nstration)?( [A-Za-z]+)?( —|:)/m],
   ["demo answer", /Demo answer —/],
   ["working text", /WORKING text —/],
   ["demo profile", /Demo profile/],
@@ -34,12 +38,24 @@ export const WORKING_MARKERS = [
   ["demo role", /\(demo role\)/],
   ["fictional team name", /\b(Amara|Grace|Samuel|Leila|Daniel|Hannah) Demo\b/],
   ["demo address", /100 Demo Street|Demo City|Demo Country/],
+  /* The visible labels sample records carry (content/work.js,
+     stories.js, team.js): one plain label per record instead of "demo"
+     on every line, so the preview reads as editorial — and the release
+     scan still finds every one. */
+  ["sample project", /\bSample project\b/],
+  ["sample story", /\bSample story\b/],
+  ["sample profile", /\bSample profile\b/],
+  ["sample video", /\bSample video\b/],
+  ["sample event", /\bSample event\b/],
 ];
 
 /* Placeholder contact values that must be replaced before release. */
 export const PLACEHOLDER_CONTACT = [
   ["example.* address or URL", /\b[\w.+-]*@?example\.(org|com|net)\b/i],
   ["fictional 555 phone number", /\+?1?[\s.-]?\(?555\)?[\s.-]?01\d\d\b/],
+  /* A social link that is only the platform's home page — a stand-in, not
+     an RBB account. An account URL ("…/risingbeyondborders") never matches. */
+  ["platform home page as social link", /https?:\/\/(www\.)?(instagram|facebook|linkedin|youtube|x|twitter|tiktok)\.com\/?(?=["'\s<)]|$)/],
 ];
 
 /* Credentials and test identifiers. Razorpay key ids are fetched from the
@@ -53,3 +69,26 @@ export const CREDENTIALS = [
   ["AWS access key", /\bAKIA[0-9A-Z]{16}\b/],
 ];
 
+
+/* A working placeholder PHOTOGRAPH, by its file name (`demo-*.jpg`) —
+   the same rule the readiness scan applies to the build output, here for
+   content records, whose image paths carry the name. */
+export const WORKING_PHOTOGRAPH = /(^|\/)demo-[\w-]+\.(jpg|jpeg|png|webp)/;
+
+/* Which placeholder rules a piece of content trips — a record, a policy,
+   a rendered page — as rule names, empty when there are none.
+
+   This is how the SEO rules (content/seo.js) and the policy pages tell
+   WORKING content from final content WITHOUT a second status field: the
+   records' own `status: "approved"` only means "renders" (Document 27),
+   and the self-labelling below is what actually marks a placeholder.
+   "name@example.com" is the email field's format hint, never a finding
+   (scripts/production-gate.mjs drops it the same way). */
+export function workingContentFindings(value) {
+  const text = (typeof value === "string" ? value : JSON.stringify(value ?? "")).replaceAll("name@example.com", "");
+  const found = [...WORKING_MARKERS, ...PLACEHOLDER_CONTACT].filter(([, re]) => re.test(text)).map(([rule]) => rule);
+  if (WORKING_PHOTOGRAPH.test(text)) found.push("working placeholder photograph");
+  return found;
+}
+
+export const isWorkingContent = (value) => workingContentFindings(value).length > 0;

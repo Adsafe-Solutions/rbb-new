@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { cx } from "../../lib/cx.js";
-import { isWithin } from "../../lib/paths.js";
+import { isCurrentEntry, isWithin, navTarget } from "../../lib/paths.js";
 import { ChevronIcon } from "./icons.jsx";
 
 /* One top-level item of the desktop nav, and the panel it opens.
@@ -23,11 +23,15 @@ import { ChevronIcon } from "./icons.jsx";
    Deep Trust Blue pill would swallow the Charcoal focus ring. */
 export function navItemClass({ active, open }) {
   return cx(
-    "inline-flex items-center gap-1.5 rounded-2xl px-3 py-2.5 xl:px-4",
-    "font-medium leading-none text-[length:var(--text-body)] tracking-body text-trust-blue",
+    "inline-flex items-center gap-1.5 rounded-full px-3 py-2 xl:px-3.5",
+    /* Scanned, not read: bold and a size under body, so the five items
+       sit in the pill with room either side of them. */
+    "text-[15px] font-bold leading-none text-trust-blue",
     "transition-colors hover:bg-mist",
     (active || open) && "bg-mist",
-    active && "underline decoration-2 underline-offset-[6px]"
+    /* The current section is marked by more than a tint — Light Gray
+       alone is too close to white to be the only signal. */
+    active && "underline decoration-bumble-honey decoration-[3px] underline-offset-[7px]"
   );
 }
 
@@ -40,7 +44,8 @@ export default function NavDropdown({
   onPointerEnter,
   onPointerLeave,
 }) {
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
   const panelId = useId();
   const triggerRef = useRef(null);
   const listRef = useRef(null);
@@ -137,31 +142,36 @@ export default function NavDropdown({
       {/* `pt-3` rather than `mt-3`: the padding is part of this element,
           so the pointer crossing from the trigger to the panel never
           leaves the item, and hover does not flicker shut in the gap. */}
-      <div id={panelId} hidden={!open} className="absolute left-0 top-full z-10 pt-3">
+      <div id={panelId} hidden={!open} className="absolute left-0 top-full z-10 pt-4">
         <ul
           ref={listRef}
           onKeyDown={onPanelKeyDown}
-          className="enter flex min-w-60 flex-col gap-0.5 rounded-3xl bg-paper-white p-2 shadow-sm"
+          data-tone="card"
+          className="enter flex min-w-60 flex-col gap-0.5 rounded-2xl border-rim bg-paper-white p-2 shadow-[6px_6px_0_var(--color-bumble-honey)]"
         >
-          {section.children.map((child) => (
-            <li key={child.to}>
-              <NavLink
-                to={child.to}
-                end
-                onClick={onClose}
-                className={({ isActive }) =>
-                  cx(
-                    "block whitespace-nowrap rounded-2xl px-4 py-3",
-                    "font-medium text-[length:var(--text-caption)] leading-caption tracking-caption text-trust-blue",
+          {/* Plain Links with a computed `aria-current`: NavLink ignores the
+              hash, so every /about#section entry would be "current" on
+              /about at once (lib/paths.js). */}
+          {section.children.map((child) => {
+            const current = isCurrentEntry(location, child);
+            return (
+              <li key={child.to}>
+                <Link
+                  to={navTarget(child)}
+                  aria-current={current ? (child.section ? "location" : "page") : undefined}
+                  onClick={onClose}
+                  className={cx(
+                    "block whitespace-nowrap rounded-xl px-4 py-3",
+                    "text-[15px] font-semibold leading-snug text-trust-blue",
                     "transition-colors hover:bg-mist",
-                    isActive && "bg-mist underline decoration-2 underline-offset-[6px]"
-                  )
-                }
-              >
-                {child.label}
-              </NavLink>
-            </li>
-          ))}
+                    current && "bg-mist underline decoration-bumble-honey decoration-[3px] underline-offset-[6px]"
+                  )}
+                >
+                  {child.label}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </li>

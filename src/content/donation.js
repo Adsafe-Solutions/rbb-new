@@ -54,7 +54,7 @@ const STATUS = "pending";
 /* The one line that says giving is not open yet — the hero's notice, and
    the legacy pages' whole message. */
 const PENDING_NOTICE =
-  "Online donations are not yet available. Donation details to be provided by Rising Beyond Borders.";
+  "Online donations are not open yet. Details will be published here once Rising Beyond Borders confirms them.";
 
 const MISSION = `Our mission is to ${ABOUT.missionVision.mission.statement.replace(/^E/, "e")}`;
 
@@ -66,7 +66,9 @@ export const DONATION = {
   hero: {
     kicker: "Get involved",
     heading: "Donate",
-    body: "Give financial support to the work of Rising Beyond Borders.",
+    /* PROPOSED (content brief, 2026-10-04). Says what giving supports, in
+       the four SOURCE program areas' terms; promises no outcome. */
+    body: "Support work that helps create opportunity, strengthen communities and build more sustainable futures.",
     notice: PENDING_NOTICE,
     /* The in-page route to the donation action, so a phone reader finds it
        without scrolling past everything else first. Labelled by state:
@@ -74,7 +76,7 @@ export const DONATION = {
     cta: {
       to: "#donate",
       labels: {
-        pending: "Donation details",
+        pending: "Make a donation",
         "approved-informational": "How to donate",
         "approved-live": "Donate",
       },
@@ -99,7 +101,7 @@ export const DONATION = {
     kicker: "How support helps",
     heading: "The work your support is part of",
     intro:
-      "Demo text — Rising Beyond Borders works across four program areas. How donations are allocated between them will be set out here.",
+      "Rising Beyond Borders works across four connected program areas — education, health and wellbeing, livelihoods and community support.",
     items: PROGRAMS.map((p) => ({ title: p.title, description: p.description, to: p.to, icon: p.icon })),
   },
 
@@ -135,7 +137,7 @@ export const DONATION = {
         "Rising Beyond Borders is finalising its donation details and payment options. They will appear here once they are confirmed.",
         "Nothing on this page takes a payment.",
       ],
-      cta: { label: "Contact Page", to: "/contact" },
+      cta: { label: "Contact Us", to: "/contact" },
       ctaIntro: "Questions about giving can go through the Contact page.",
     },
     /* APPROVED-INFORMATIONAL: { heading, body: [string] } from RBB. With
@@ -144,7 +146,7 @@ export const DONATION = {
     methodsOnly: {
       heading: "How to donate",
       body: ["The ways to give on this page are the ones Rising Beyond Borders currently offers."],
-      cta: { label: "Contact Page", to: "/contact" },
+      cta: { label: "Contact Us", to: "/contact" },
       ctaIntro: "Questions about giving can go through the Contact page.",
     },
     /* APPROVED-LIVE: { heading, body: [string], label, url, provider }
@@ -180,6 +182,36 @@ export const DONATION = {
         "Online donations are unavailable right now. Please try again later, or ask about giving through the Contact page.",
       testMode: "Test mode — no real payment will be taken.",
       amountLegend: "Amount",
+      /* The form's own head, frequency control, sections and help links
+         (components/DonationCheckout). PROPOSED interface copy, like the
+         rest of this block. "Secure" describes the arrangement stated in
+         `secureLine` — payment details go to Razorpay, not this site —
+         and nothing more: no certification, encryption or tax claim. */
+      secureHeading: "Secure online giving",
+      /* The payment-flow explanation is not shown at this stage (content
+         brief, 2026-10-04). */
+      secureLine: null,
+      frequency: {
+        legend: "How often",
+        once: "Give once",
+        /* Recurring donations are not offered (Document 22), so there is
+           no Monthly option at all — not a disabled one with a note. */
+        monthly: null,
+        monthlyNote: null,
+      },
+      detailsLegend: "Your details",
+      summaryLabel: "Your donation",
+      summaryEmpty: "Choose an amount",
+      /* Only routes that exist and say something true. No question is
+         listed here until RBB has approved its answer (tax, receipts,
+         recurring, refunds). */
+      help: {
+        heading: "Questions about giving",
+        links: [
+          { label: "How we report on our finances", to: "/about#transparency" },
+          { label: "Report a problem with a donation", to: "/contact" },
+        ],
+      },
       otherAmount: "Other amount",
       otherLabel: "Your amount",
       otherHint: (min, max) => `Between ${min} and ${max}.`,
@@ -228,10 +260,55 @@ export const DONATION = {
       },
       retry: "Try again",
       change: "Change amount or details",
-      contact: { label: "Contact Page", to: "/contact" },
+      contact: { label: "Contact Us", to: "/contact" },
       /* What Razorpay's window shows at the top. */
       checkoutName: "Rising Beyond Borders",
       checkoutDescription: "Donation",
+
+      /* PREVIEW — the form above, drawn while giving is "pending", so the
+         donation page shows the whole donation experience before it opens
+         (components/DonationCheckout, `preview`). It takes no payment and
+         makes no request. Every value here is a PLACEHOLDER, never a
+         proposal: the currency is ISO 4217 "XXX" ("no currency", shown
+         as ¤) and the amounts are round numbers in it, so nothing can be
+         read as RBB's currency or suggested gift (decisions D26, D27). The
+         badge is self-labelled ("Demo preview —"), so the release markers
+         count it, and the release gate blocks production while the
+         preview is on the page. The real amounts and currency come from
+         the server's configuration once donations are approved-live —
+         the preview is then never drawn. */
+      preview: {
+        /* The statement beside the preview form: the live checkout's
+           heading, with the state said first, in words. */
+        heading: "Make a difference today.",
+        body: ["Your support can help create opportunities, strengthen communities and build pathways toward a more inclusive future."],
+        /* No visible preview badge (content brief, 2026-10-04). The form
+           still carries `data-donation-preview`, which release:check
+           reads to keep production blocked. The amounts carry no currency
+           sign: none has been approved (D26, D27). */
+        badge: null,
+        amountLegend: "Choose an amount",
+        otherHint: () => "Enter the amount you would like to give.",
+        config: {
+          mode: "preview",
+          currency: "XXX",
+          /* Drawn by the component itself, not Intl: ICU builds disagree
+             on how to show "XXX", which would break hydration. */
+          symbol: "",
+          currencyLabel: "",
+          exponent: 2,
+          presets: [50000, 100000, 250000, 500000, 1000000, 2500000],
+          custom: true,
+          min: 10000,
+          max: 100000000,
+        },
+        /* What a submit shows: true — no payment is taken and nothing is
+           sent — without staging language, and never a success. */
+        result: {
+          heading: "We couldn't start your donation",
+          body: "Online giving is unavailable at the moment, so no payment has been taken. Please try again later, or get in touch through our Contact page.",
+        },
+      },
     },
   },
 
@@ -241,8 +318,8 @@ export const DONATION = {
     id: "transparency",
     kicker: "Transparency",
     heading: "Transparency matters.",
-    body: "Demo text — See our reports, financial information and governance on the Transparency page.",
-    cta: { label: "View Transparency", to: "/about/transparency" },
+    body: "Supporters should always be able to see how our work is run and how resources are used.",
+    cta: { label: "View Transparency", to: "/about#transparency" },
   },
   trustLinks: SITE.transparencyLinks,
   trustLinkMeta: SITE.transparencyLinkMeta,
@@ -277,6 +354,8 @@ export const DONATION = {
     body: ["How to give to Rising Beyond Borders is set out on our donation page."],
     onward: { label: "Go to Donate", to: "/get-involved/donate" },
   },
+  /* The legacy pages show `legacy.body` in every state — no "not open
+     yet" line (content brief, 2026-10-04). */
 
   /* 09 — Closing CTA. The site-wide close (content/homepage.js). Its
      supporting line is still pending, so it is left out here rather than
@@ -314,10 +393,18 @@ export const donationState = () => {
   return "pending";
 };
 
+/* Whether the donation page draws the checkout's PREVIEW: only while
+   giving is "pending" — never beside approved giving information, never
+   once the real checkout can show. The release gate reads this (via the
+   build's readiness facts) and blocks a production release while it is
+   true. */
+export const donationPreview = (state = donationState()) =>
+  state === "pending" && Boolean(DONATION.donationAction.checkout?.preview);
+
 /* The block the legacy giving pages show, in the current state. */
 export const legacyGivingBlock = () => {
-  const { heading, pendingBody, body } = DONATION.legacy;
-  return { heading, body: donationState() === "pending" ? pendingBody : body };
+  const { heading, body } = DONATION.legacy;
+  return { heading, body };
 };
 
 /* The copy for the state `donationState` reports. */
@@ -333,7 +420,14 @@ export const donationActionBlock = (state = donationState()) => {
         }
       : action.live;
   if (state === "approved-informational") return action.informational ?? action.methodsOnly;
-  return action.pending;
+  return donationPreview(state)
+    ? {
+        ...action.pending,
+        heading: action.checkout.preview.heading,
+        body: action.checkout.preview.body,
+        preview: { copy: action.checkout, ...action.checkout.preview },
+      }
+    : action.pending;
 };
 
 export default DONATION;

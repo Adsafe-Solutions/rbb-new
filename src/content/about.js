@@ -31,15 +31,18 @@ export const ABOUT = {
   },
 
   /* 02 — Who We Are. Heading: Document 03's. First paragraph: SOURCE, as
-     the annual report puts it. The second is PENDING: Document 03 calls
-     for an approved About introduction that has not been supplied. */
+     the annual report puts it. The rest: PROPOSED general copy from the
+     content brief (2026-10-04) — the four SOURCE program areas and RBB's
+     inclusive position, with no history, place, figure or person. RBB
+     confirms or rewrites it (decision D8). */
   whoWeAre: {
     id: "who-we-are",
     kicker: "Who we are",
     heading: "Empowering communities. Creating sustainable solutions.",
     body: [
       `${BRAND.fullName} is a non-profit dedicated to empowering communities and creating sustainable solutions to pressing challenges.`,
-      "Demo text — We started with a small group of volunteers and a simple idea: that lasting change comes from working with communities, not for them. Replace this paragraph with Rising Beyond Borders' approved introduction.",
+      "In practice, that means opening up access — to learning, to essential support, to fair ways of earning a living and to the connections that help a community through hard times. Our work spans four areas, education, health and wellbeing, livelihoods and community support, because the barriers people face rarely arrive one at a time.",
+      "Rising Beyond Borders is inclusive by design. We serve people regardless of religion, nationality, ethnicity, gender, background or belief, and we start from the priorities communities set for themselves.",
     ],
   },
 
@@ -63,37 +66,38 @@ export const ABOUT = {
     source: "Mission and vision from the Rising Beyond Borders annual report.",
   },
 
-  /* 04 — Our Values. PENDING. The supplied material has no approved list
-     of values, and Document 03 forbids inventing one. Each value is
-     { title, description? }; the list renders the moment it has entries. */
+  /* 04 — Our Values. PROPOSED. The supplied material has no list of
+     values; these are the themes the content brief (2026-10-04) asked
+     for, offered for RBB's approval (decision D10). Until approved they
+     are not presented as a formally adopted statement — the section is
+     headed "What guides our work", not "Our official values". Each value
+     is { title, description? }. */
   values: {
     id: "values",
     kicker: "Our values",
     heading: "What guides our work",
     items: [
-      { title: "Compassion", description: "Demo — We start from people's own experience and treat everyone with dignity." },
-      { title: "Partnership", description: "Demo — We work with communities and local organisations, not around them." },
-      { title: "Accountability", description: "Demo — We are open about what we do, what it costs and what it achieves." },
-      { title: "Sustainability", description: "Demo — We build things that keep working after a project ends." },
+      { title: "Dignity", description: "Everyone we work with is treated with respect, and has a say in the decisions that affect their life." },
+      { title: "Inclusion", description: "Our work is open to all, regardless of religion, nationality, ethnicity, gender, background or belief." },
+      { title: "Compassion", description: "We lead with empathy, and we listen before we act." },
+      { title: "Collaboration", description: "Change goes further when communities, supporters and organisations work towards it together." },
+      { title: "Accountability", description: "We act with integrity, are honest about what we do, and are open about how resources are used." },
+      { title: "Sustainability", description: "We favour solutions that people and communities can carry forward long after a project ends." },
     ],
     fallback: "Values to be provided by Rising Beyond Borders.",
   },
 
   /* 05 — How We Work. Foundation: the mission's own "sustainable growth and
-     lasting change". The detailed approach is PENDING — and the homepage's
-     proposed Listen → Partner → Act → Sustain is deliberately NOT shown
-     here, where it would read as RBB's official method. */
+     lasting change". Intro: PROPOSED general prose (decision D11). The
+     proposed Listen → Partner → Act → Sustain framework is deliberately
+     NOT here: it is not RBB's adopted method, and the one pending copy of
+     it lives in content/impact.js (`proposedFramework`), hidden. */
   approach: {
     id: "how-we-work",
     kicker: "How we work",
     heading: "Creating change that lasts.",
-    intro: "Demo text — Every project begins by listening to the community, is delivered with local partners, and is designed to be sustained locally.",
-    steps: [
-      { title: "Listen", body: "Demo — Understand what the community needs, in its own words." },
-      { title: "Partner", body: "Demo — Work with local people and organisations who know the context." },
-      { title: "Act", body: "Demo — Deliver practical support that responds to those needs." },
-      { title: "Sustain", body: "Demo — Hand over skills and ownership so the change lasts." },
-    ],
+    intro:
+      "We begin by listening, because communities understand their own priorities best. From there we work collaboratively — connecting people with resources, skills and opportunities, favouring solutions that can be sustained locally, and learning from what works and what does not.",
     cta: { label: "Explore Our Approach", to: "/impact/our-approach" },
   },
 
@@ -106,27 +110,31 @@ export const ABOUT = {
     kicker: "Our team",
     heading: "The people behind our work",
     fallback: "Team information to be provided by Rising Beyond Borders.",
-    cta: { label: "View Our Team", to: "/about/team" },
+    cta: { label: "Meet the Team", to: "/about/team" },
   },
 
-  /* 07 — Transparency & Governance. PENDING. The document rows are shared
-     with the homepage (SITE.transparencyLinks). */
+  /* 07 — Transparency & Governance. Body: PROPOSED; the documents are
+     PENDING. The document rows are shared with the homepage
+     (SITE.transparencyLinks). */
   transparency: {
     id: "transparency",
     kicker: "Transparency & governance",
     heading: "Transparency matters.",
-    body: "Demo text — We publish reports, financial information and governance details on our Transparency page.",
+    body: "Supporters, communities and partners should always be able to see how our work is run and how resources are used.",
     links: SITE.transparencyLinks,
     linkMeta: SITE.transparencyLinkMeta,
-    cta: { label: "View Transparency", to: "/about/transparency" },
+    cta: { label: "View Transparency", to: "/about#transparency" },
   },
 
   /* 08 — Closing CTA. Two ways onward, and neither is a donation ask. */
+  /* The page's way on: the people (the one About page that is not on
+     this page) and the invitation. "Explore Our Work" already sits in
+     the hero. */
   closingCta: {
-    heading: "See our work in action.",
+    heading: "Meet the people behind the work.",
     ctas: {
-      primary: { label: "Explore Our Work", to: "/work" },
-      secondary: { label: "Explore Our Impact", to: "/impact" },
+      primary: { label: "Get Involved", to: "/get-involved" },
+      secondary: { label: "Meet the Team", to: "/about/team" },
     },
   },
 };

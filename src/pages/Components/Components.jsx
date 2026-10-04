@@ -1,467 +1,178 @@
-import { Link } from "react-router-dom";
-import { cx } from "../../lib/cx.js";
-import useReveal from "../../hooks/useReveal.js";
-import Badge from "../../components/Badge/Badge.jsx";
-import Brand from "../../components/Brand/Brand.jsx";
-import Button from "../../components/Button/Button.jsx";
 import Container from "../../components/Container/Container.jsx";
-import Photo from "../../components/Photo/Photo.jsx";
-import PhoneMock from "../../components/PhoneMock/PhoneMock.jsx";
-import Seal from "../../components/Seal/Seal.jsx";
-import Sparkle from "../../components/Sparkle/Sparkle.jsx";
-import Header from "../../components/Header/Header.jsx";
-import Hero from "../../components/Hero/Hero.jsx";
-import HeroBleed from "../../components/HeroBleed/HeroBleed.jsx";
-import Mission from "../../components/Mission/Mission.jsx";
-import MemberCircle from "../../components/MemberCircle/MemberCircle.jsx";
-import Products from "../../components/Products/Products.jsx";
-import Story from "../../components/Story/Story.jsx";
-import GetApp from "../../components/GetApp/GetApp.jsx";
-import Footer from "../../components/Footer/Footer.jsx";
-import FeatureBanner from "../../components/FeatureBanner/FeatureBanner.jsx";
-import AccountabilityBand from "../../components/AccountabilityBand/AccountabilityBand.jsx";
-import AboutIntro from "../../components/AboutIntro/AboutIntro.jsx";
-import ImpactStats from "../../components/ImpactStats/ImpactStats.jsx";
-import DonateWidget from "../../components/DonateWidget/DonateWidget.jsx";
-import CampaignHero from "../../components/CampaignHero/CampaignHero.jsx";
+import Section from "../../components/Section/Section.jsx";
+import Surface from "../../components/Surface/Surface.jsx";
+import SectionKicker from "../../components/SectionKicker/SectionKicker.jsx";
+import DisplayHeading from "../../components/DisplayHeading/DisplayHeading.jsx";
+import HighlightText from "../../components/HighlightText/HighlightText.jsx";
+import MarkStamp from "../../components/Mark/MarkStamp.jsx";
+import OffsetCard from "../../components/OffsetCard/OffsetCard.jsx";
+import FlyerCard, { FlyerLinkCard } from "../../components/FlyerCard/FlyerCard.jsx";
+import PosterCard from "../../components/PosterCard/PosterCard.jsx";
 import ActionCard from "../../components/ActionCard/ActionCard.jsx";
-import GetInvolved from "../../components/GetInvolved/GetInvolved.jsx";
-import FightFor from "../../components/FightFor/FightFor.jsx";
-import AppealSpotlight from "../../components/AppealSpotlight/AppealSpotlight.jsx";
-import LegacyCollage from "../../components/LegacyCollage/LegacyCollage.jsx";
-import ImpactMosaic from "../../components/ImpactMosaic/ImpactMosaic.jsx";
-import PageHero from "../../components/PageHero/PageHero.jsx";
-import Faq from "../../components/Faq/Faq.jsx";
-import Newsletter from "../../components/Newsletter/Newsletter.jsx";
-import BannerHero from "../../components/BannerHero/BannerHero.jsx";
-import ProgramAreas from "../../components/ProgramAreas/ProgramAreas.jsx";
-import ApproachFlow from "../../components/ApproachFlow/ApproachFlow.jsx";
-import ImpactMetrics from "../../components/ImpactMetrics/ImpactMetrics.jsx";
-import FeaturedWork from "../../components/FeaturedWork/FeaturedWork.jsx";
-import StoriesOfChange from "../../components/StoriesOfChange/StoriesOfChange.jsx";
-import TrustPanel from "../../components/TrustPanel/TrustPanel.jsx";
-import InvolvementPaths from "../../components/InvolvementPaths/InvolvementPaths.jsx";
-import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
-import BrandPanel from "../../components/BrandPanel/BrandPanel.jsx";
-import StatementSplit from "../../components/StatementSplit/StatementSplit.jsx";
-import MissionVision from "../../components/MissionVision/MissionVision.jsx";
-import ValuesList from "../../components/ValuesList/ValuesList.jsx";
-import TeamGrid from "../../components/TeamGrid/TeamGrid.jsx";
-import Prose from "../../components/Prose/Prose.jsx";
-import SignupCard from "../../components/SignupCard/SignupCard.jsx";
-import Steps from "../../components/Steps/Steps.jsx";
-import Testimonials from "../../components/Testimonials/Testimonials.jsx";
-import ContactDetails from "../../components/ContactDetails/ContactDetails.jsx";
-import LinkCards from "../../components/LinkCards/LinkCards.jsx";
-import { ABOUT, HOMEPAGE, ZAKAT } from "../../content/index.js";
-/* Catalogue-only sample data, imported from its own modules rather than
-   through content/index.js: through the barrel it landed in every
-   visitor's bundle, although only this dev page uses it (Document 15). */
-import { NGO } from "../../content/ngo.js";
-import { VOLUNTEER, CONTACT } from "../../content/pages.js";
+import StatCard from "../../components/StatCard/StatCard.jsx";
+import StepCard from "../../components/StepCard/StepCard.jsx";
+import StoryCard from "../../components/StoryCard/StoryCard.jsx";
+import ProjectCard from "../../components/ProjectCard/ProjectCard.jsx";
+import TeamCard from "../../components/TeamCard/TeamCard.jsx";
+import TicketCard from "../../components/TicketCard/TicketCard.jsx";
+import EditorialImage from "../../components/EditorialImage/EditorialImage.jsx";
+import Marquee from "../../components/Marquee/Marquee.jsx";
+import Button from "../../components/Button/Button.jsx";
+import LinkChips from "../../components/LinkChips/LinkChips.jsx";
+import EmptyPanel from "../../components/EmptyPanel/EmptyPanel.jsx";
+import DonationCheckout from "../../components/DonationCheckout/DonationCheckout.jsx";
+import {
+  DONATION,
+  HOMEPAGE,
+  PROGRAMS,
+  PROJECTS,
+  SITE,
+  impactStats,
+  latestStories,
+  pathCards,
+  projectPath,
+  storyCard,
+} from "../../content/index.js";
+import { RBB_PHOTOS } from "../../content/photos.js";
 
-/* The live component catalog at /components — every component in
-   src/components/, rendered with its real variants rather than described
-   in prose. Companion to /design-system, which covers the tokens these
-   components are built from; this covers what's built out of them.
+/* The live component catalogue at /components — the poster system's
+   primitives, each rendered with RBB's own working content rather than
+   described in prose. Companion to /design-system, which covers the
+   tokens these are built from.
 
-   ⚠ Several page sections below (Mission, MemberCircle, Products, Story,
-   GetApp) render with a `.reveal` root that starts at opacity 0 until
-   hooks/useReveal.js's observer marks it `.in`. Home wires that observer up
-   itself; this page has to as well or every one of them sits invisible.
-
-   The page sections are also framed here rather than left full-bleed —
-   real usage runs edge to edge on the homepage, but boxing them lets more
-   than one fit on a screen at a time, which is the point of a catalog.
+   Every page section on the public site is composed from what is on
+   this page; a card that looks different somewhere else is a bug.
 
    Off in production builds by default, same as /design-system — see
    config/sections.js. */
-
-function Section({ title, note, children }) {
+function Block({ index, name, note, tone = "white", children }) {
   return (
-    <section className="py-12">
-      <h2 className="font-bold text-[length:var(--text-heading)] leading-heading tracking-heading">
-        {title}
-      </h2>
-      {note && <p className="mt-3 max-w-prose text-graphite">{note}</p>}
-      <div className="mt-8">{children}</div>
-    </section>
+    <Section tone={tone} pad="md">
+      <SectionKicker index={index}>{name}</SectionKicker>
+      {note && <p className="mt-3 max-w-[70ch] text-quiet">{note}</p>}
+      <div className="mt-10">{children}</div>
+    </Section>
   );
 }
-
-function Frame({ label, children }) {
-  return (
-    <div className="overflow-hidden rounded-3xl border border-mist bg-paper-white">
-      <p className="px-6 pt-5 font-medium">{label}</p>
-      <div className="mt-3">{children}</div>
-    </div>
-  );
-}
-
-const PHOTO_RATIOS = [
-  ["4/5", "portrait-seafront"],
-  ["3/4", "interest-outdoors"],
-  ["1/1", "member-circle-dinner"],
-  ["9/19", "app-list"],
-];
 
 export default function Components() {
-  useReveal();
+  const stats = impactStats();
+  const stories = latestStories(2).map(storyCard);
+  const project = PROJECTS[0];
+  const paths = pathCards();
 
   return (
-    <Container className="py-12">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-        <h1 className="font-bold text-[length:var(--text-heading-lg)] leading-heading-lg tracking-heading-lg">
-          Components
+    <>
+      <Section tone="paper" pad="lg" className="-mt-[var(--header-h)] pt-[calc(var(--header-h)+4rem)]" watermark="right">
+        <SectionKicker>Rising Beyond Borders</SectionKicker>
+        <h1 className="type-billboard mt-5">
+          The <HighlightText>components</HighlightText>
         </h1>
-        <Link
-          to="/design-system"
-          className="text-[length:var(--text-caption)] tracking-caption text-graphite hover:underline"
-        >
-          Design system tokens →
-        </Link>
-      </div>
-      <p className="mt-4 max-w-prose text-graphite">
-        Every component in <code>src/components/</code>, rendered with its real
-        variants. If one looks wrong here, the component is wrong — there is
-        no second copy to check against.
-      </p>
+      </Section>
 
-      <Section
-        title="Button"
-        note="One filled button in the system, and it is ink. Yellow is the brand's warmth, not its clickability — see the Don'ts in design/DESIGN.md before reaching for a second fill."
-      >
+      <Block index={1} name="Type & marks" note="DisplayHeading, HighlightText, SectionKicker, MarkStamp.">
+        <DisplayHeading as="p" size="title" highlight={2}>
+          Change begins with people.
+        </DisplayHeading>
+        <div className="mt-8 flex items-center gap-6">
+          <MarkStamp className="h-16 w-16" />
+          <SectionKicker index={3}>Our approach</SectionKicker>
+        </div>
+      </Block>
+
+      <Block index={2} name="Buttons" tone="paper" note="solid · ink · outline · link, in three sizes. The tones turn them around.">
         <div className="flex flex-wrap items-center gap-4">
-          <Button>Solid (default)</Button>
-          <Button variant="link" href="#components">
-            Underlined link
-          </Button>
+          <Button size="lg">Solid large</Button>
+          <Button>Solid</Button>
+          <Button variant="ink">Ink</Button>
+          <Button variant="outline">Outline</Button>
+          <Button variant="link">Text link</Button>
+          <Button disabled>Disabled</Button>
         </div>
+        <Surface tone="ink" className="mt-8 flex flex-wrap gap-4 rounded-2xl p-6">
+          <Button>Solid</Button>
+          <Button variant="ink">Ink</Button>
+          <Button variant="outline">Outline</Button>
+        </Surface>
+        <Surface tone="accent" className="mt-6 flex flex-wrap gap-4 rounded-2xl p-6">
+          <Button>Solid</Button>
+          <Button variant="ink">Ink</Button>
+          <Button variant="outline">Outline</Button>
+        </Surface>
+      </Block>
 
-        <div className="mt-6 inline-flex rounded-2xl bg-bumble-ink p-4">
-          <Button variant="inverse">Inverse</Button>
+      <Block index={3} name="Flyers" tone="ink" note="FlyerCard, FlyerLinkCard — tilted, straightening on hover.">
+        <div className="grid gap-10 md:grid-cols-3">
+          <FlyerLinkCard tilt="l" icon={PROGRAMS[0].icon} meta="01" title={PROGRAMS[0].title} to={PROGRAMS[0].to} label="Explore">
+            {PROGRAMS[0].description}
+          </FlyerLinkCard>
+          <FlyerCard tilt="r" title={PROGRAMS[1].title}>
+            {PROGRAMS[1].description}
+          </FlyerCard>
+          <FlyerCard tilt="r" number={3} title={PROGRAMS[2].title} />
         </div>
+      </Block>
 
-        <div className="mt-6 inline-flex items-center gap-1 rounded-2xl bg-mist p-1.5">
-          <Button variant="pill">Active pill</Button>
-          <Button variant="ghost">Inactive link</Button>
-        </div>
-      </Section>
-
-      <Section
-        title="Badge"
-        note="The only pill shape in the system — always metadata, never something to press."
-      >
-        <div className="flex flex-wrap items-center gap-3">
-          <Badge>Paper (default)</Badge>
-          <Badge tone="honey">Honey</Badge>
-          <Badge tone="ink">Ink</Badge>
-        </div>
-
-        <div className="relative mt-6 w-32">
-          <Photo label="interest-outdoors" ratio="3/4">
-            <Badge tone="honey" vertical className="absolute -right-3 top-6 shadow-sm">
-              Vertical
-            </Badge>
-          </Photo>
-        </div>
-      </Section>
-
-      <Section
-        title="Brand"
-        note="The wordmark, as live type rather than a logo file. `size` picks the treatment, not just a font size."
-      >
-        <div className="flex flex-col gap-6">
-          <div>
-            <p className="text-[length:var(--text-caption)] tracking-caption text-graphite">
-              nav
-            </p>
-            <Brand size="nav" as="span" />
-          </div>
-          <div>
-            <p className="text-[length:var(--text-caption)] tracking-caption text-graphite">
-              footer
-            </p>
-            <Brand size="footer" as="span" />
-          </div>
-          <div className="overflow-hidden">
-            <p className="text-[length:var(--text-caption)] tracking-caption text-graphite">
-              display
-            </p>
-            <Brand size="display" as="span" />
-          </div>
-        </div>
-      </Section>
-
-      <Section
-        title="Photo"
-        note="A photograph, or a tonal stand-in at the right aspect ratio when a real image hasn't landed yet — the layout holds its true shape either way."
-      >
-        <ul className="grid gap-cards sm:grid-cols-2 lg:grid-cols-4">
-          {PHOTO_RATIOS.map(([ratio, label]) => (
-            <li key={ratio}>
-              <Photo label={label} ratio={ratio} />
-              <p className="mt-2 text-[length:var(--text-caption)] tracking-caption text-graphite">
-                ratio={ratio}
+      <Block index={4} name="Posters, tickets, actions" note="PosterCard, TicketCard, ActionCard.">
+        <div className="grid gap-10 lg:grid-cols-3">
+          <PosterCard kicker="Mission" tone="ink">
+            <p className="type-card">{HOMEPAGE.whoWeAre.body[0]}</p>
+          </PosterCard>
+          <TicketCard
+            kicker="Transparency"
+            rows={SITE.transparencyLinks.map((l) => (
+              <p key={l.title} className="font-extrabold text-fg">
+                {l.title}
               </p>
-            </li>
-          ))}
-        </ul>
-      </Section>
-
-      <Section
-        title="PhoneMock"
-        note="A drawn bezel around a Photo, never an imported image, so the radius and the screen inside it change together."
-      >
-        <div className="flex flex-wrap items-end gap-6">
-          <PhoneMock label="app-list" className="w-28" />
-          <PhoneMock label="app-chat" className="w-36" />
+            ))}
+            foot={<p className="type-meta text-quiet">{SITE.transparencyLinkMeta}</p>}
+          />
+          <ActionCard tone="accent" title={paths[0].title} body={paths[0].description} to={paths[0].to} icon={paths[0].icon} label={paths[0].cta} />
         </div>
-      </Section>
+      </Block>
 
-      <Section
-        title="Seal"
-        note="The Member Circle mark. Drawn as SVG with the ring text on a `textPath` so it stays crisp at any size."
-      >
-        <Seal />
-      </Section>
-
-      <Section
-        title="Sparkle"
-        note="The one decorative mark. `currentColor`, so a `text-*` class picks the colour; size and placement come from `className`."
-      >
-        <div className="flex flex-wrap items-end gap-8">
-          <Sparkle className="w-24" />
-          <div className="rounded-3xl bg-bumble-ink p-6">
-            <Sparkle className="w-24 text-paper-white" />
-          </div>
-          <div className="relative h-32 w-48 overflow-hidden rounded-3xl bg-mist">
-            <Sparkle className="absolute -bottom-6 -right-6 w-28" />
-          </div>
+      <Block index={5} name="Stats & steps" tone="paper" note="StatCard carries its verification status on its face; StepCard never tilts.">
+        <div className="grid gap-10 md:grid-cols-2">
+          <StatCard {...stats[0]} tone="accent" pending={SITE.figurePending} />
+          <StepCard number={1} title="Amount" note="A numbered sheet for a step of a form, a clause of a policy.">
+            <p className="text-copy">Step content.</p>
+          </StepCard>
         </div>
+      </Block>
+
+      <Block index={6} name="Prints" note="EditorialImage, StoryCard, ProjectCard, TeamCard.">
+        <div className="grid gap-12 md:grid-cols-3">
+          <EditorialImage image={RBB_PHOTOS.kids} tilt="r-lg" label={PROGRAMS[3].title} />
+          {stories[0] && <StoryCard story={stories[0]} />}
+          {project && <ProjectCard project={project} href={projectPath(project)} tilt="l" />}
+        </div>
+        <div className="mt-12 grid gap-12 md:grid-cols-3">
+          <TeamCard name="Name to be supplied" role="Role to be supplied" tilt="r" />
+          <OffsetCard pad="md">
+            <LinkChips align="start" items={PROGRAMS.map((p) => ({ title: p.title, to: p.to, icon: p.icon }))} />
+          </OffsetCard>
+          <EmptyPanel text={SITE.placeholder} />
+        </div>
+      </Block>
+
+      {/* The checkout as the donation page draws it. It asks the donation
+          API for its configuration at run time: with VITE_DONATIONS_API
+          unset (the default) it says donations are unavailable, which is
+          the honest state to show here. Nothing on this page can create an
+          order unless a configured server is behind that variable. */}
+      <Block index={7} name="Donation checkout" tone="ink" note="DonationCheckout — Razorpay; UI only here.">
+        <div className="max-w-xl">
+          <DonationCheckout copy={DONATION.donationAction.checkout} />
+        </div>
+      </Block>
+
+      <Section tone="ink" pad="none" bare>
+        <Marquee items={PROGRAMS.map((p) => p.title)} />
       </Section>
 
-      <Section
-        title="Container"
-        note="The 1200px column and its side gutter. Full-bleed bands run edge to edge and put one of these inside themselves for their own copy — shown here against a honey band scaled to this page's own width rather than the viewport's."
-      >
-        <div className="rounded-2xl bg-mist py-6">
-          <Container>
-            <div
-              className={cx(
-                "rounded-lg border-2 border-dashed border-bumble-ink/40",
-                "bg-paper-white/60 py-4 text-center",
-                "text-[length:var(--text-caption)] tracking-caption"
-              )}
-            >
-              max-w-[var(--page-max-width)], px-5 md:px-8
-            </div>
-          </Container>
-        </div>
-      </Section>
-
-      <Section
-        title="Homepage sections"
-        note="The ten sections of the homepage (Document 02), in page order, with the homepage's own content."
-      >
-        <div className="flex flex-col gap-6">
-          <Frame label="Header">
-            <Header />
-          </Frame>
-          <Frame label="HeroBleed">
-            <HeroBleed {...HOMEPAGE.hero} />
-          </Frame>
-          <Frame label="AboutIntro · imageFirst">
-            <AboutIntro
-              {...HOMEPAGE.whoWeAre}
-              src={HOMEPAGE.whoWeAre.image.src}
-              alt={HOMEPAGE.whoWeAre.image.alt}
-              focal={HOMEPAGE.whoWeAre.image.focal}
-              imageFirst
-            />
-          </Frame>
-          <Frame label="ProgramAreas">
-            <ProgramAreas {...HOMEPAGE.programs} />
-          </Frame>
-          <Frame label="ApproachFlow">
-            <ApproachFlow {...HOMEPAGE.approach} />
-          </Frame>
-          <Frame label="ImpactMetrics">
-            <ImpactMetrics {...HOMEPAGE.impact} />
-          </Frame>
-          <Frame label="FeaturedWork · placeholder slots">
-            <FeaturedWork {...HOMEPAGE.featuredWork} />
-          </Frame>
-          <Frame label="StoriesOfChange · placeholder slots">
-            <StoriesOfChange {...HOMEPAGE.stories} />
-          </Frame>
-          <Frame label="TrustPanel">
-            <TrustPanel {...HOMEPAGE.transparency} />
-          </Frame>
-          <Frame label="InvolvementPaths">
-            <InvolvementPaths {...HOMEPAGE.getInvolved} />
-          </Frame>
-          <Frame label="ClosingCta">
-            <ClosingCta {...HOMEPAGE.finalCta} />
-          </Frame>
-          <Frame label="Footer">
-            <Footer />
-          </Frame>
-        </div>
-      </Section>
-
-      <Section
-        title="About page sections"
-        note="The sections of /about (Document 03), with the page's own content. Values and Team are shown in their empty states; ClosingCta without an image."
-      >
-        <div className="flex flex-col gap-6">
-          <Frame label="BrandPanel">
-            <div className="max-w-md p-6">
-              <BrandPanel />
-            </div>
-          </Frame>
-          <Frame label="StatementSplit">
-            <StatementSplit {...ABOUT.whoWeAre} id={undefined} />
-          </Frame>
-          <Frame label="MissionVision">
-            <MissionVision {...ABOUT.missionVision} id={undefined} />
-          </Frame>
-          <Frame label="ValuesList · empty">
-            <ValuesList {...ABOUT.values} id={undefined} />
-          </Frame>
-          <Frame label="ApproachFlow · no steps">
-            <ApproachFlow {...ABOUT.approach} id={undefined} />
-          </Frame>
-          <Frame label="TeamGrid · empty">
-            <TeamGrid {...ABOUT.team} members={[]} id={undefined} />
-          </Frame>
-          <Frame label="ClosingCta · no image">
-            <ClosingCta {...ABOUT.closingCta} />
-          </Frame>
-        </div>
-      </Section>
-
-      <Section
-        title="Earlier page sections"
-        note="Sections from earlier versions of the site, no longer on any page. Kept for reuse; their sample content is placeholder."
-      >
-        <div className="flex flex-col gap-6">
-          <Frame label="Hero">
-            <Hero />
-          </Frame>
-          <Frame label="Mission">
-            <Mission />
-          </Frame>
-          <Frame label="MemberCircle">
-            <MemberCircle />
-          </Frame>
-          <Frame label="Products">
-            <Products />
-          </Frame>
-          <Frame label="Story">
-            <Story />
-          </Frame>
-          <Frame label="GetApp">
-            <GetApp />
-          </Frame>
-        </div>
-      </Section>
-
-      <Section
-        title="NGO sections"
-        note="Sections that made up the previous homepage, kept for the inner pages that will need them. Each takes its content as props; AboutIntro is also on /about."
-      >
-        <div className="flex flex-col gap-6">
-          <Frame label="AccountabilityBand">
-            <AccountabilityBand {...NGO.accountability} />
-          </Frame>
-          <Frame label="AboutIntro">
-            <AboutIntro {...NGO.about} />
-          </Frame>
-          <Frame label="FeatureBanner">
-            <FeatureBanner {...NGO.about} />
-          </Frame>
-          <Frame label="ImpactStats · four, highlighted">
-            <ImpactStats {...NGO.overallStats} />
-          </Frame>
-          <Frame label="ImpactStats · three, on paper">
-            <ImpactStats {...NGO.overallStats} surface="paper" />
-          </Frame>
-          <Frame label="DonateWidget">
-            <DonateWidget {...NGO.donate} />
-          </Frame>
-          <Frame label="CampaignHero">
-            <CampaignHero {...NGO.campaign} />
-          </Frame>
-          <Frame label="CampaignHero · flip">
-            <CampaignHero {...NGO.yemen} flip />
-          </Frame>
-          <Frame label="ActionCard">
-            <ActionCard {...NGO.yemen} />
-          </Frame>
-          <Frame label="GetInvolved">
-            <GetInvolved {...NGO.getInvolved} />
-          </Frame>
-          <Frame label="LegacyCollage">
-            <LegacyCollage {...NGO.legacy} />
-          </Frame>
-          <Frame label="AppealSpotlight">
-            <AppealSpotlight {...NGO.gaza} />
-          </Frame>
-          <Frame label="FightFor">
-            <FightFor {...NGO.fightFor} />
-          </Frame>
-          <Frame label="ImpactMosaic">
-            <ImpactMosaic {...NGO.mosaic} />
-          </Frame>
-        </div>
-      </Section>
-
-      <Section
-        title="Zakat page sections"
-        note="The pieces that stack into /giving/zakat — a placeholder until RBB supplies its own Zakat information — plus the Faq it used to carry, shown with other pages' content. NisabCallout is not shown: there is no verified Nisab content to render it with."
-      >
-        <div className="flex flex-col gap-6">
-          <Frame label="PageHero">
-            <PageHero {...ZAKAT.hero} />
-          </Frame>
-          <Frame label="Faq">
-            <Faq {...VOLUNTEER.faq} />
-          </Frame>
-          <Frame label="Newsletter">
-            <Newsletter {...ZAKAT.newsletter} />
-          </Frame>
-        </div>
-      </Section>
-
-      <Section
-        title="Inner page sections"
-        note="The pieces that stack into /get-involved/volunteer, /stories and /contact."
-      >
-        <div className="flex flex-col gap-6">
-          <Frame label="BannerHero">
-            <BannerHero {...VOLUNTEER.hero} />
-          </Frame>
-          <Frame label="Prose">
-            <Prose {...VOLUNTEER.purpose} />
-          </Frame>
-          <Frame label="SignupCard">
-            <SignupCard {...VOLUNTEER.signup} />
-          </Frame>
-          <Frame label="Steps">
-            <Steps {...VOLUNTEER.steps} />
-          </Frame>
-          <Frame label="Testimonials">
-            <Testimonials {...VOLUNTEER.feedback} />
-          </Frame>
-          <Frame label="ContactDetails">
-            <ContactDetails {...CONTACT.details} />
-          </Frame>
-          <Frame label="LinkCards">
-            <LinkCards {...CONTACT.links} />
-          </Frame>
-        </div>
-      </Section>
-    </Container>
+      <Container className="py-10">
+        <p className="type-meta text-quiet">Development route — not in production builds.</p>
+      </Container>
+    </>
   );
 }

@@ -1,47 +1,35 @@
-import { cx } from "../../lib/cx.js";
 import Button from "../Button/Button.jsx";
-import Container from "../Container/Container.jsx";
-import Picture from "../Picture/Picture.jsx";
+import EditorialImage from "../EditorialImage/EditorialImage.jsx";
+import PageHeader from "../PageHeader/PageHeader.jsx";
 
-/* An inner-page hero: the same Light Gray band as the homepage's, with a
-   single photograph in place of the swipe deck.
+/* An inner-page hero WITH a photograph: PageHeader's poster band, the
+   photograph hung beside the headline as a tilted print.
 
-   Pulls itself up under the fixed header exactly as Hero does — see the
-   note there; all three offsets read `--header-h`. */
-export default function PageHero({ heading, body, cta, src, alt }) {
+   Props: { heading, body, cta?, src, alt, parent? }. The photograph is
+   the band's largest image — fetched early, never hidden; it only drifts
+   a few percent against the scroll once the motion system is up. */
+export default function PageHero({ heading, body, cta, src, alt, parent }) {
   return (
-    <section className="-mt-[var(--header-h)] bg-mist pt-[var(--header-h)]">
-      <Container className="grid items-center gap-12 py-20 md:py-28 lg:grid-cols-[6fr_5fr] lg:gap-20">
-        <div className="reveal">
-          <h1
-            className={cx(
-              "font-bold text-[length:var(--text-heading-lg)] leading-heading-lg tracking-heading-lg",
-              "md:text-[length:clamp(3.5rem,5vw,4.5rem)]"
-            )}
-          >
-            {heading}
-          </h1>
-          <p className="mt-4 max-w-prose text-[length:var(--text-subheading)] leading-subheading tracking-subheading">
-            {body}
-          </p>
-          {cta && (
-            <Button to={cta.to} className="mt-8">
-              {cta.label}
-            </Button>
-          )}
-        </div>
-
-        <div className="reveal aspect-[4/3] overflow-hidden rounded-3xl rounded-tr-[5rem] shadow-sm">
-          <Picture
-            sizes="(min-width: 1024px) 40vw, 100vw"
-            src={src}
-            alt={alt}
-            fetchpriority="high"
-            decoding="async"
-            className="h-full w-full object-cover"
-          />
-        </div>
-      </Container>
-    </section>
+    <PageHeader
+      title={heading}
+      parent={parent}
+      aside={
+        <EditorialImage
+          image={{ src, alt }}
+          tilt="r-lg"
+          cast="cast-lg"
+          priority
+          sizes="(min-width: 1024px) 40vw, 90vw"
+          data-parallax="5"
+        />
+      }
+    >
+      {body && <p className="type-lead mt-7 max-w-[46ch] text-copy">{body}</p>}
+      {cta && (
+        <Button size="lg" to={cta.to} className="mt-9">
+          {cta.label}
+        </Button>
+      )}
+    </PageHeader>
   );
 }

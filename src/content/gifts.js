@@ -18,7 +18,7 @@ import events from "../assets/ngo-events.jpg";
 export const GIFTS = {
   hero: {
     heading: "Major Giving",
-    body: SITE.placeholder,
+    body: "Find out how to give to Rising Beyond Borders on our donation page.",
     src: hero,
     alt: "Workers digging foundation trenches with shovels in a rural area",
   },

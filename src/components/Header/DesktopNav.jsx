@@ -3,12 +3,10 @@ import { NavLink, useLocation } from "react-router-dom";
 import NavDropdown, { navItemClass } from "./NavDropdown.jsx";
 import { NAV } from "../../content/index.js";
 
-/* The desktop nav: one white pill holding the five top-level items, four
-   of them dropdowns. Hidden below `lg`, where MobileNav takes over.
+/* The desktop nav: the five top-level items, four of them dropdowns.
+   Hidden below `lg`, where MobileNav takes over.
 
-   Solid white rather than the translucent pill it used to be: the home
-   hero puts Deep Trust Blue directly behind the header, and Deep Trust
-   Blue text on a 45%-white wash over Deep Trust Blue came out near 3:1.
+   The items are drawn inside the header's pill, in Deep Trust Blue.
 
    Opening works three ways, and none of them is required:
      click / Enter / Space   toggles, and the panel stays until dismissed
@@ -94,7 +92,7 @@ export default function DesktopNav() {
 
   return (
     <nav ref={navRef} aria-label="Primary" className="hidden lg:block">
-      <ul className="flex items-center rounded-2xl bg-paper-white p-1.5">
+      <ul className="flex items-center">
         {NAV.map((item) =>
           item.children ? (
             <NavDropdown

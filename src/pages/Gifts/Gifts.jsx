@@ -1,7 +1,6 @@
 import BannerHero from "../../components/BannerHero/BannerHero.jsx";
 import DonationAction from "../../components/DonationAction/DonationAction.jsx";
 import Newsletter from "../../components/Newsletter/Newsletter.jsx";
-import useReveal from "../../hooks/useReveal.js";
 import { DONATION, GIFTS, donationState, legacyGivingBlock } from "../../content/index.js";
 
 /* /gifts and /giving/major-giving — legacy addresses, kept so old links
@@ -14,7 +13,6 @@ import { DONATION, GIFTS, donationState, legacyGivingBlock } from "../../content
    The catalogue sections it used to stack named giving programs RBB has
    not supplied; see content/gifts.js. */
 export default function Gifts() {
-  useReveal();
 
   return (
     <>

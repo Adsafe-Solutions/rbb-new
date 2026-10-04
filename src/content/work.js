@@ -30,12 +30,17 @@ import { WORKING_PHOTOS as IMG } from "./photos.js";
 
    The program page template also reads:
      why         string | [string]  — "Why this matters"
-     activities  [string]           — "What we do"
-     impact      [string]           — program metrics, as text
+     activities  [string]           — "What we focus on"
+     impact      [string]           — "The change we work towards", in
+                                      words; never a figure until RBB
+                                      verifies one
      stories     [string]           — stories, as text
      image       { src, alt }       — a photograph
-   WORKING below until RBB supplies its own; `missing` is shown only for a
-   field genuinely not supplied in either source. */
+   `why`, `activities` and `impact` are PROPOSED general copy (content
+   brief, 2026-10-04; decision D12): what each area is about, with no
+   project, place, partner, beneficiary or outcome named. `stories` names the
+   SAMPLE stories (content/stories.js). `missing` is shown only for a field
+   genuinely not supplied. */
 export const PROGRAMS = [
   {
     slug: "education",
@@ -45,17 +50,22 @@ export const PROGRAMS = [
     description: "Access to quality education and skill-building opportunities.",
     missing: "Education program information to be provided by Rising Beyond Borders.",
     why: [
-      "WORKING text — Education opens doors that stay open for a lifetime. Children who can read, write and count confidently have more choices about their future, and adults who keep learning can adapt as their communities change.",
-      "This paragraph stands in for Rising Beyond Borders' own explanation of why education matters to its mission.",
+      "Education opens doors that stay open for a lifetime. Learning builds knowledge and skills, but also confidence — the belief that your choices matter and that your future is yours to shape.",
+      "Yet access to learning is still uneven. Cost, distance, disability, displacement and discrimination keep many children, young people and adults from the education they need. Our education work focuses on widening that access, so that learning becomes a real opportunity rather than a privilege.",
     ],
     activities: [
-      "WORKING — after-school reading and homework clubs",
-      "WORKING — classroom supplies and learning materials for partner schools",
-      "WORKING — training and mentoring for community teachers",
-      "WORKING — skills courses for young adults leaving school",
+      "Widening access to learning for children, young people and adults",
+      "Supporting inclusive learning environments where every learner is welcome",
+      "Building practical skills that lead towards further learning and work",
+      "Encouraging the confidence and curiosity to keep learning",
+      "Connecting learners with resources and long-term opportunity",
     ],
-    impact: ["Demo figure: 1,200 learners taking part in reading clubs", "Demo figure: 40 community teachers trained"],
-    stories: ["WORKING — “Learning to read, together”: a field story from a reading club", "WORKING — “A classroom with enough books”: an impact story"],
+    impact: [
+      "More people able to take part in learning, whatever their circumstances",
+      "Learners with the skills and confidence to take their next step",
+      "Learning environments that welcome and include everyone",
+    ],
+    stories: ["“Learning to read, together” — why confidence comes before fluency", "“When every learner has a book” — what changes when materials stop being the bottleneck"],
   },
   {
     slug: "health-wellbeing",
@@ -65,17 +75,22 @@ export const PROGRAMS = [
     description: "Improving health outcomes through care, awareness and support.",
     missing: "Health & Wellbeing program information to be provided by Rising Beyond Borders.",
     why: [
-      "WORKING text — Good health is the ground everything else stands on. When families can reach basic care, clean water and reliable health information, children stay in school and adults stay in work.",
-      "This paragraph stands in for Rising Beyond Borders' own explanation of why health and wellbeing matter to its mission.",
+      "Good health is the ground everything else stands on. When people can reach essential support and reliable information, children can keep learning, adults can keep working, and families can plan for the future.",
+      "Wellbeing is more than physical health. Mental and emotional wellbeing shape how people cope, connect and recover — and both deserve to be met with dignity. Our health and wellbeing work focuses on access, awareness and prevention, alongside the people and services communities already rely on.",
     ],
     activities: [
-      "WORKING — community health check days with local health workers",
-      "WORKING — clean water points and hygiene sessions",
-      "WORKING — health and nutrition awareness for parents",
-      "WORKING — referral support to local clinics",
+      "Improving access to essential health and wellbeing support",
+      "Promoting physical wellbeing and healthy everyday practices",
+      "Recognising mental and emotional wellbeing as part of good health",
+      "Raising awareness, so people can make informed choices about their health",
+      "Supporting prevention, so problems are met before they grow",
     ],
-    impact: ["Demo figure: 3,500 people reached by health check days", "Demo figure: 12 water points maintained"],
-    stories: ["WORKING — “Water close to home”: a community story"],
+    impact: [
+      "People able to reach the support they need, with dignity",
+      "Communities better informed about health and wellbeing",
+      "Mental and emotional wellbeing treated as part of everyday health",
+    ],
+    stories: ["“Water close to home” — what keeps a water point working", "“A health day, start to finish” — bringing care closer without replacing local services"],
   },
   {
     slug: "livelihoods",
@@ -85,17 +100,22 @@ export const PROGRAMS = [
     description: "Sustainable livelihoods and economic empowerment.",
     missing: "Livelihoods program information to be provided by Rising Beyond Borders.",
     why: [
-      "WORKING text — A steady income gives a family room to plan. Practical skills, access to markets and small starting capital help people build livelihoods that last beyond any single project.",
-      "This paragraph stands in for Rising Beyond Borders' own explanation of why livelihoods matter to its mission.",
+      "A steady livelihood gives people room to plan, to recover from setbacks and to invest in their families' futures. It is also a source of dignity and independence.",
+      "Our livelihoods work focuses on the foundations of economic opportunity: practical skills, employability and the confidence to start something of your own — so that people can build incomes that last beyond any single project.",
     ],
     activities: [
-      "WORKING — vocational training in tailoring and small trades",
-      "WORKING — support for small market traders",
-      "WORKING — farming inputs and training for smallholders",
-      "WORKING — savings groups and basic business skills",
+      "Building practical, market-relevant skills",
+      "Supporting employability and pathways into work",
+      "Encouraging enterprise and small-scale entrepreneurship",
+      "Strengthening resilience, so households can withstand setbacks",
+      "Favouring livelihoods that are sustainable over the long term",
     ],
-    impact: ["Demo figure: 260 people completing skills training", "Demo figure: 90 small businesses supported"],
-    stories: ["WORKING — “From one sewing machine to a workshop”: an impact story"],
+    impact: [
+      "People with the skills and confidence to earn a living",
+      "Fairer access to economic opportunity",
+      "Households better able to withstand setbacks",
+    ],
+    stories: ["“A skill you can practise at home” — earning around caring responsibilities", "“Keeping count on market day” — what record-keeping shows a small trader"],
   },
   {
     slug: "community-support",
@@ -105,17 +125,22 @@ export const PROGRAMS = [
     description: "Strengthening communities through advocacy, resources and partnerships.",
     missing: "Community Support program information to be provided by Rising Beyond Borders.",
     why: [
-      "WORKING text — Strong communities look after their own. Local volunteers, shared resources and good partnerships mean support reaches people quickly when they need it most.",
-      "This paragraph stands in for Rising Beyond Borders' own explanation of why community support matters to its mission.",
+      "Strong communities look after one another. When people are connected, informed and able to act together, support reaches those who need it — and challenges are met with shared strength.",
+      "Our community support work responds to the priorities communities set for themselves. It focuses on essential support in times of need, on inclusion, and on building the local capacity that helps communities stay resilient over time.",
     ],
     activities: [
-      "WORKING — food and essentials distributions with local volunteers",
-      "WORKING — community gatherings and information days",
-      "WORKING — partnerships with local organisations",
-      "WORKING — volunteer training and coordination",
+      "Responding to the priorities communities identify for themselves",
+      "Providing essential support when people need it most",
+      "Encouraging inclusion, so no one is left on the margins",
+      "Strengthening local capacity and community leadership",
+      "Building connection between people, groups and services",
     ],
-    impact: ["Demo figure: 1,800 households receiving essentials packs", "Demo figure: 150 volunteers trained"],
-    stories: ["WORKING — “Packing day”: a field story from a volunteer team"],
+    impact: [
+      "Communities more resilient in the face of challenges",
+      "People connected to the support and services around them",
+      "Local capacity that keeps working after a project ends",
+    ],
+    stories: ["“What goes into a packing day” — the planning behind essential support"],
   },
 ];
 
@@ -133,164 +158,214 @@ export const PROGRAMS = [
                     stage as RBB states it.
        slug:        URL segment — /work/projects/<slug>
        title, program, description, location, status, date, image,
-       context, activities, impact, partners, story, featured
+       context, activities, approach, outcomes, impact, partners, story,
+       featured
      }
 
-   The ten projects below are WORKING placeholders, not RBB's verified
-   catalogue: every location says "· demo", every figure says "(demo
-   figure)", every partner name says "Demo Partner". They exist so the
-   directory, filters, cards and detail pages have something to show;
-   replace them with RBB's approved projects before launch — nothing here
-   is presented as a real project or outcome. */
+   The ten projects below are SAMPLE projects, not RBB's catalogue
+   (decision D13). Each carries `releaseMarker: "Sample project"` — an
+   INTERNAL field, never shown to visitors (content brief, 2026-10-04),
+   that the release markers detect in the record, in the bundle and in
+   the `data-release-marker` attribute the cards and pages carry. They are written as editorial previews of how a project
+   page reads: no place, date, partner, figure or measured result,
+   because none has been supplied. `approach` and `outcomes` (intended
+   change, never a result) are the detail page's own sections. Replace
+   with RBB's approved projects before launch. */
+const SAMPLE = "Sample project";
 export const PROJECT_RECORDS = [
   {
     id: "reading-clubs",
     editorialStatus: "approved",
     slug: "community-reading-clubs",
-    date: "2026-08-27",
     title: "Community Reading Clubs",
     program: "education",
-    description: "After-school reading clubs where children practise reading with trained volunteers and a growing library of books.",
-    location: "South Asia · demo",
-    status: "Active",
+    description: "After-school reading clubs that give children regular, relaxed time with books and an encouraging adult.",
+    releaseMarker: SAMPLE,
     image: IMG.readingCircle,
-    context: ["WORKING text — Many children in the communities this project imagines finish primary school without reading fluently. Reading clubs give them regular, relaxed practice outside school hours."],
-    activities: ["Weekly reading sessions led by trained volunteers", "A lending library of age-appropriate books", "Reading games and storytelling days"],
-    impact: [
-      { value: "1,200", label: "children attending clubs (demo figure)" },
-      { value: "30", label: "clubs running (demo figure)" },
+    context: [
+      "Many children finish their first years of school still unsure of their reading. Classrooms are busy, books at home can be scarce, and a child who falls behind early often stays behind.",
+      "Reading clubs offer something simple: time, books and encouragement, away from the pressure of marks.",
     ],
-    partners: ["Demo Partner — local schools network"],
-    story: { title: "Learning to read, together (demo story)", excerpt: "How one reading club grew from ten children to sixty." },
+    activities: ["Regular reading time in a calm, welcoming space", "Books chosen for different ages and reading levels", "Reading aloud, storytelling and games that build confidence"],
+    approach: [
+      "Clubs are shaped with families and schools, so they fit around the school day and the languages children speak at home.",
+      "Volunteers are prepared to support reading without turning it into another lesson, and children help each other as they grow in confidence.",
+    ],
+    outcomes: ["Children who enjoy reading and choose to read", "More confidence in class", "Families more involved in their children's learning"],
     featured: true,
   },
   {
     id: "classroom-supplies",
     editorialStatus: "approved",
     slug: "classroom-supplies",
-    date: "2026-08-18",
-    title: "Classroom Supplies Programme",
+    title: "Learning Materials for Classrooms",
     program: "education",
-    description: "Books, notebooks and teaching materials for community schools that have too few.",
-    location: "East Africa · demo",
-    status: "Active",
+    description: "Books, notebooks and teaching materials for classrooms that have too few — chosen with the teachers who use them.",
+    releaseMarker: SAMPLE,
     image: IMG.ruralClassroom,
-    context: ["WORKING text — Classrooms with enough books and materials let teachers teach and children keep up."],
-    activities: ["Supply packs for each classroom", "Teacher guides for the materials", "Termly restocking"],
-    impact: [{ value: "85", label: "classrooms equipped (demo figure)" }],
+    context: [
+      "When learners share one book between several, lessons slow to the pace of the page-turn. Teachers spend their time copying onto the board instead of teaching, and the children who most need help get the least of it.",
+    ],
+    activities: ["Materials matched to what is being taught", "Guidance for teachers on using them well", "Replacing what wears out, so the difference lasts"],
+    approach: [
+      "Teachers decide what is needed — not a standard list chosen from far away.",
+      "Materials are sourced as close to the school as possible, and checked on later to make sure they are in use rather than in a cupboard.",
+    ],
+    outcomes: ["Every learner with the materials to take part", "More of the lesson spent teaching", "Teachers better equipped to support every child"],
   },
   {
     id: "teacher-mentoring",
     editorialStatus: "approved",
     slug: "teacher-mentoring",
-    date: "2026-09-15",
     title: "Teacher Mentoring Network",
     program: "education",
-    description: "Experienced teachers mentor newly trained community teachers through their first year.",
-    location: "East Africa · demo",
-    status: "Planned",
+    description: "Pairing newer teachers with experienced colleagues, for support through their first years in the classroom.",
+    releaseMarker: SAMPLE,
     image: IMG.teacherClassroom,
-    activities: ["Monthly mentoring visits", "Peer learning circles", "Lesson-planning workshops"],
+    context: [
+      "New teachers often start alone: a full classroom, little preparation time and no one to ask. Many leave the profession early — and their pupils lose a teacher just as they were getting to know them.",
+    ],
+    activities: ["Regular conversations between mentor and teacher", "Small peer groups to share what works", "Practical help with planning and inclusive teaching"],
+    approach: [
+      "Mentoring is built on trust, not inspection: teachers set their own goals and decide what they want help with.",
+      "What works in one classroom is shared with others, so good practice spreads between schools.",
+    ],
+    outcomes: ["Teachers who feel confident and supported", "Classrooms that include every learner", "Experienced teachers whose knowledge is passed on"],
   },
   {
     id: "health-days",
     editorialStatus: "approved",
     slug: "community-health-days",
-    date: "2026-08-12",
     title: "Community Health Days",
     program: "health-wellbeing",
-    description: "Regular health check days bringing local health workers, screening and advice to the community.",
-    location: "West Africa · demo",
-    status: "Active",
+    description: "Open days that bring basic health checks, information and advice closer to families who live far from a clinic.",
+    releaseMarker: SAMPLE,
     image: IMG.checkup,
-    context: ["WORKING text — Health check days bring basic screening and advice closer to families who live far from a clinic."],
-    activities: ["Basic health screening", "Nutrition advice for parents", "Referrals to local clinics"],
-    impact: [{ value: "3,500", label: "people screened (demo figure)" }],
-    partners: ["Demo Partner — district health volunteers"],
+    context: [
+      "Distance, cost and a day's lost earnings can all delay a visit to a clinic. Small health problems go unchecked until they become serious ones.",
+    ],
+    activities: ["Basic health checks in a familiar community setting", "Clear, practical health information", "Referrals to the services people can use afterwards"],
+    approach: [
+      "Health days are planned alongside the health services people already use, so they strengthen those services rather than replace them.",
+      "Checks are private and respectful, and anyone who needs more care leaves knowing where to go next.",
+    ],
+    outcomes: ["Health concerns noticed earlier", "Families better informed about their health", "Stronger links between communities and local services"],
     featured: true,
   },
   {
     id: "water-points",
     editorialStatus: "approved",
     slug: "clean-water-points",
-    date: "2026-07-22",
-    title: "Clean Water Points",
+    title: "Clean Water Close to Home",
     program: "health-wellbeing",
-    description: "Repairing and maintaining hand pumps so families have clean water close to home.",
-    location: "East Africa · demo",
-    status: "Completed",
+    description: "Keeping community water points working, so clean water stays close to home.",
+    releaseMarker: SAMPLE,
     image: IMG.waterPump,
-    activities: ["Pump repairs and maintenance", "Water committees trained to look after each point", "Hygiene sessions at schools"],
-    impact: [{ value: "12", label: "water points maintained (demo figure)" }],
+    context: [
+      "When a water point breaks, the walk for water gets longer — often for women and children — and some families turn to sources that are not safe to drink.",
+    ],
+    activities: ["Repair and regular maintenance of water points", "Communities caring for their own water points", "Hygiene awareness, especially in schools"],
+    approach: [
+      "A water point lasts when the people who use it can look after it, so communities are supported to organise its care and pay for small repairs.",
+      "Repairs use skills and parts that can be found locally, so the next breakdown does not have to wait for outside help.",
+    ],
+    outcomes: ["Water that is reliable and safe", "Time given back to the people who fetch it", "Fewer illnesses linked to unsafe water"],
   },
   {
     id: "tailoring",
     editorialStatus: "approved",
     slug: "tailoring-skills",
-    date: "2026-08-01",
     title: "Tailoring Skills Course",
     program: "livelihoods",
-    description: "A six-month tailoring course with a starter kit for graduates who want to set up on their own.",
-    location: "South Asia · demo",
-    status: "Active",
+    description: "A practical tailoring course for people who want to earn from a skill they can practise close to home.",
+    releaseMarker: SAMPLE,
     image: IMG.sewing,
-    context: ["WORKING text — Tailoring is a skill that can be practised from home and sold locally."],
-    activities: ["Six-month practical course", "Starter kit for graduates", "Business basics and pricing"],
-    impact: [{ value: "260", label: "graduates (demo figure)" }],
+    context: [
+      "For people with caring responsibilities, work far from home is often out of reach. A practical skill that can be used from home or nearby opens a door to earning that fits around the rest of life.",
+    ],
+    activities: ["Hands-on tailoring skills, learned by making", "The basics of pricing, costs and record-keeping", "Help with tools and getting started"],
+    approach: [
+      "Sessions are arranged around participants' other responsibilities, and learning happens through real pieces of work.",
+      "Those who complete the course are encouraged to share their skills with the next group.",
+    ],
+    outcomes: ["A skill that can earn an income", "Confidence to set prices and find customers", "A network of people who support one another"],
     featured: true,
   },
   {
     id: "market-traders",
     editorialStatus: "approved",
     slug: "market-traders",
-    date: "2026-06-30",
-    title: "Market Traders Support",
+    title: "Support for Small Traders",
     program: "livelihoods",
-    description: "Small grants and training for market traders to grow their stalls.",
-    location: "West Africa · demo",
-    status: "Active",
+    description: "Training and peer support that help small market traders keep records, plan ahead and grow.",
+    releaseMarker: SAMPLE,
     image: IMG.market,
-    activities: ["Small starting grants", "Record-keeping training", "Savings groups"],
+    context: [
+      "Small traders often work on thin margins, where a single bad week can wipe out savings. Without records, it is hard to see which goods make money and which quietly lose it.",
+    ],
+    activities: ["Simple record-keeping that fits a busy stall", "Planning for slow seasons", "Savings and peer groups"],
+    approach: [
+      "Training starts from traders' own experience of their market, not a textbook.",
+      "Peer groups let traders compare notes, solve problems together and keep each other going.",
+    ],
+    outcomes: ["Steadier incomes", "Savings to fall back on", "Traders able to plan rather than react"],
   },
   {
     id: "smallholders",
     editorialStatus: "approved",
     slug: "smallholder-farming",
-    date: "2026-09-20",
-    title: "Smallholder Farming",
+    title: "Resilient Smallholder Farming",
     program: "livelihoods",
-    description: "Seeds, tools and training for smallholder farmers to improve their harvests.",
-    location: "Latin America · demo",
-    status: "Planned",
+    description: "Practical support that helps small-scale farmers grow more reliably as seasons become harder to predict.",
+    releaseMarker: SAMPLE,
     image: IMG.harvest,
+    context: [
+      "Small farms feed families and local markets, but they have little margin for a failed season. Unpredictable rain and tired soil make every harvest a risk.",
+    ],
+    activities: ["Seeds and tools suited to local conditions", "Soil and water practices that protect the land", "Farmers learning from one another"],
+    approach: [
+      "Local knowledge comes first: farmers already know their land, and new practices are tested alongside what already works.",
+      "Farmer-to-farmer learning means good ideas travel further than any single training day.",
+    ],
+    outcomes: ["More reliable harvests", "Households better able to withstand a poor season", "Land kept productive for the next generation"],
   },
   {
     id: "essentials",
     editorialStatus: "approved",
     slug: "essentials-distribution",
-    date: "2026-09-05",
-    title: "Essentials Distribution",
+    title: "Essential Support Packs",
     program: "community-support",
-    description: "Volunteers pack and deliver food and essentials to households that need them most.",
-    location: "South Asia · demo",
-    status: "Active",
+    description: "Food and essentials for households facing a hard period, planned and delivered with local volunteers.",
+    releaseMarker: SAMPLE,
     image: IMG.packing,
-    context: ["WORKING text — Distributions are planned with local volunteers who know which households need support."],
-    activities: ["Packing days with volunteers", "Household deliveries", "Follow-up visits"],
-    impact: [{ value: "1,800", label: "households supported (demo figure)" }],
-    partners: ["Demo Partner — community volunteers"],
+    context: [
+      "Illness, the loss of work or a sudden emergency can leave a household without the basics. Support that arrives quickly — and respectfully — can stop a hard month from becoming a crisis.",
+    ],
+    activities: ["Packs of food and everyday essentials", "Delivery to households who cannot easily travel", "Connecting families with longer-term support"],
+    approach: [
+      "Support is given with dignity: discreetly, and with choice wherever possible.",
+      "Local volunteers, who know their neighbourhoods, help plan who is reached and follow up afterwards.",
+    ],
+    outcomes: ["Households supported through a difficult period", "Families connected to services that can help further", "A volunteer network ready to respond"],
   },
   {
     id: "community-days",
     editorialStatus: "approved",
     slug: "community-information-days",
-    date: "2026-07-10",
     title: "Community Information Days",
     program: "community-support",
-    description: "Open days where families can find out about local services, support and opportunities.",
-    location: "East Africa · demo",
-    status: "Completed",
+    description: "Open days where people can find out about the services, support and opportunities around them.",
+    releaseMarker: SAMPLE,
     image: IMG.gathering,
+    context: [
+      "Help often exists but goes unused: people do not know about it, cannot tell whether it is for them, or find it hard to approach. Information days bring it into one welcoming place.",
+    ],
+    activities: ["Clear information in everyday language", "A chance to meet local services face to face", "Space to ask questions without pressure"],
+    approach: [
+      "Each day is shaped by the questions residents raise beforehand.",
+      "Times, venues and languages are chosen so that the people most likely to miss out can take part.",
+    ],
+    outcomes: ["People who know where to turn", "Services that reach more of the people they are for", "Stronger connections within the community"],
   },
 ];
 
@@ -340,7 +415,7 @@ export const WORK = {
     heading: "Our Work",
     /* PROPOSED wording built only from SOURCE facts: the annual report's
        positioning and its four program areas. */
-    body: `${BRAND.fullName} works to empower communities and create sustainable solutions across four program areas.`,
+    body: `${BRAND.fullName} works to empower communities and create sustainable solutions across four connected areas: education, health and wellbeing, livelihoods and community support.`,
     cta: { label: "Explore Projects", to: "/work/projects" },
     programs: {
       kicker: "Program areas",
@@ -368,7 +443,7 @@ export const WORK = {
   directory: {
     kicker: "Our work",
     heading: "All Projects",
-    body: "WORKING text — Every project across our four program areas. Filter by program to narrow the list.",
+    body: "Projects across our four program areas. Filter by program to narrow the list.",
     listHeading: "Project directory",
     browse: "Browse by program area",
     /* The program filter — shown only once there are FILTER_MIN projects
@@ -386,10 +461,10 @@ export const WORK = {
   program: {
     kicker: "Program area",
     why: { heading: "Why this matters" },
-    what: { heading: "What we do" },
+    what: { heading: "What we focus on" },
     projectsHeading: "Featured projects",
     impact: {
-      heading: "Impact",
+      heading: "The change we work towards",
       empty: "Program impact information to be provided by Rising Beyond Borders.",
     },
     stories: {
@@ -404,7 +479,7 @@ export const WORK = {
     related: {
       heading: "Explore related work.",
       ctas: {
-        primary: { label: "Support Our Mission", to: "/get-involved" },
+        primary: { label: "Get Involved", to: "/get-involved" },
         secondary: { label: "All Program Areas", to: "/work" },
       },
     },
@@ -413,8 +488,13 @@ export const WORK = {
   /* The project detail template's labels. The summary is the project's
      own `description`, set under its title. */
   detail: {
-    context: "Context",
-    activities: "What we do",
+    context: "The challenge",
+    activities: "What this work focuses on",
+    approach: "How the work is approached",
+    /* Intended change, in words — a result is only ever `impact`, and
+       only once RBB has verified it. */
+    outcomes: "What it aims to change",
+    connection: "Part of our program area",
     impact: "Impact",
     partners: "Partners",
     story: "Story",
@@ -423,7 +503,7 @@ export const WORK = {
     location: "Location",
     status: "Status",
     closing: "Continue exploring.",
-    cta: { label: "Support Our Mission", to: "/get-involved" },
+    cta: { label: "Get Involved", to: "/get-involved" },
   },
 };
 

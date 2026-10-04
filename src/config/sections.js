@@ -15,6 +15,14 @@ export const SECTIONS = {
      variants. Same default as designSystemRoute above; the two are
      companion dev tools and ship (or don't) together. */
   componentsRoute: ENV.componentsRoute ?? import.meta.env.DEV,
+
+  /* The colour-theme switcher, bottom-left (components/ThemeSwitcher).
+     HIDDEN for now (RBB, Oct 2026): the themes are built (styles/
+     index.css) but no visitor can choose one until a deployment sets
+     VITE_THEME_SWITCHER=true. index.html applies a saved theme only
+     under the same switch, so with it off the site is always RBB's own
+     palette. */
+  themeSwitcher: ENV.themeSwitcher,
 };
 
 export default SECTIONS;

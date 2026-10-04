@@ -37,13 +37,15 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import {
   APPROVED_ORIGINS,
   CHECKOUT_ROUTE,
+  VIDEO,
+  VIDEO_ROUTE,
   RAZORPAY,
   approvedOriginList,
   collectInline,
   contentSecurityPolicy,
   securityHeaders,
 } from "./security-policy.mjs";
-import { productionGate, contentReadiness } from "./production-gate.mjs";
+import { productionGate, contentReadiness, indexingProblems } from "./production-gate.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
@@ -130,7 +132,8 @@ async function write(file, contents) {
 }
 
 /* A forwarding page for one redirect: meta refresh (no JavaScript),
-   noindex, and the target as canonical when the origin is known. */
+   noindex, and the target as canonical when the origin is known and the
+   target may be indexed. */
 function redirectPage(to, canonical) {
   const target = escapeAttr(to);
   return `<!doctype html>
@@ -190,8 +193,48 @@ try {
     if (page.meta.route === ssr.notFoundMeta().route)
       fail(`${route} rendered the not-found page`);
     if (!/<h1[\s>]/.test(page.html)) fail(`${route} rendered without an <h1>`);
-    pages.push({ route, file: fileFor(route), html: fill(template, { ...page, route }) });
+    pages.push({ route, file: fileFor(route), html: fill(template, { ...page, route }), meta: page.meta });
   }
+
+  /* With a production domain, nothing indexable may still show working
+     placeholder content (production-gate.mjs → indexingProblems). Fails
+     closed, naming the route, what was found and the approval it is
+     recorded under. Without a domain nothing is canonical or in a
+     sitemap, and preview content is expected. */
+  if (ssr.siteOrigin()) {
+    const indexing = indexingProblems(
+      pages.map((p) => ({ route: p.route, robots: p.meta.robots, approvalAreas: p.meta.approvalAreas, html: p.html }))
+    );
+    if (indexing.length)
+      fail(
+        `${indexing.length} indexable page(s) still show working placeholder content:\n` +
+          indexing
+            .map((p) => `    ${p.route}: ${p.rules.join(", ")} — approval: ${p.approvals.join(", ") || "none recorded"} (release/approvals.mjs)`)
+            .join("\n") +
+          `\n  Replace the content, or leave the approval pending so the page stays noindex.`
+      );
+  }
+
+  /* The SEO facts of every page as the build produced them — what
+     `npm run release:check` cross-checks against sitemap.xml and
+     robots.txt. Metadata only: no content, no secrets. */
+  await mkdir(metaDir, { recursive: true });
+  await writeFile(
+    join(metaDir, "seo-routes.json"),
+    JSON.stringify(
+      pages.map((p) => ({
+        route: p.route,
+        robots: p.meta.robots,
+        canonical: p.meta.canonical ?? null,
+        title: p.meta.title ?? null,
+        description: p.meta.description ?? null,
+        ogImage: p.meta.ogImage ?? null,
+        approvalAreas: p.meta.approvalAreas ?? [],
+      })),
+      null,
+      2
+    ) + "\n"
+  );
 
   /* 404.html — rendered at an address no route matches. */
   const missing = ssr.render("/__not-found__");
@@ -210,10 +253,15 @@ try {
   const checkout = ssr.donationCheckout();
   if (checkout.enabled && !routes.includes(CHECKOUT_ROUTE))
     fail(`donation checkout is on, but ${CHECKOUT_ROUTE} is not a published page`);
+  /* The homepage video's player origin (VIDEO) goes into the homepage's
+     policy only, and only when content has a video. */
+  const video = Boolean(ssr.featuredVideo?.());
   const metaCsp = contentSecurityPolicy(inline, { forMeta: true });
   const checkoutCsp = contentSecurityPolicy(inline, { forMeta: true, checkout: true });
+  const videoCsp = contentSecurityPolicy(inline, { forMeta: true, video: true });
   for (const { route, file, html } of pages) {
-    const policy = checkout.enabled && route === CHECKOUT_ROUTE ? checkoutCsp : metaCsp;
+    const policy =
+      checkout.enabled && route === CHECKOUT_ROUTE ? checkoutCsp : video && route === VIDEO_ROUTE ? videoCsp : metaCsp;
     const out = reportOnly
       ? html
       : html.replace(
@@ -226,7 +274,12 @@ try {
   }
 
   for (const { from, to } of redirects) {
-    await write(fileFor(from), redirectPage(to, ssr.absoluteUrl(to.split("#")[0])));
+    /* The target as canonical only when the target is itself indexable:
+       a canonical pointing at a `noindex` page is a contradiction. */
+    const target = to.split("#")[0];
+    const targetPage = pages.find((p) => p.route === target);
+    const canonical = targetPage && /^index\b/.test(targetPage.meta.robots) ? ssr.absoluteUrl(target) : null;
+    await write(fileFor(from), redirectPage(to, canonical));
   }
 
   await writeFile(join(dist, "robots.txt"), ssr.robotsTxt());
@@ -350,7 +403,8 @@ try {
         donationCheckout: checkout.enabled
           ? { page: CHECKOUT_ROUTE, script: RAZORPAY.script, frame: RAZORPAY.frame, connect: RAZORPAY.connect }
           : false,
-        headers: securityHeaders(inline, { reportOnly, checkout: checkout.enabled }),
+        video: video ? { page: VIDEO_ROUTE, frame: VIDEO.frame, features: VIDEO.features } : false,
+        headers: securityHeaders(inline, { reportOnly, checkout: checkout.enabled, video }),
       },
       null,
       2

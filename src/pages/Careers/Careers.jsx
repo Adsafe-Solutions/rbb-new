@@ -3,7 +3,6 @@ import ContentRows from "../../components/ContentRows/ContentRows.jsx";
 import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
 import useSeo from "../../hooks/useSeo.js";
 import { routeMeta } from "../../content/seo.js";
-import useReveal from "../../hooks/useReveal.js";
 import { CAREERS } from "../../content/index.js";
 
 /* /about-us/careers — the Careers page, at the address the site already
@@ -17,7 +16,6 @@ import { CAREERS } from "../../content/index.js";
    Supplied roles render as a list under Open opportunities. No job, salary,
    benefit, location, requirement or deadline is invented. */
 export default function Careers() {
-  useReveal();
   useSeo(routeMeta(CAREERS.to));
 
   const rows = CAREERS.sections
@@ -31,14 +29,14 @@ export default function Careers() {
   return (
     <>
       <PageHeader title={CAREERS.title} parent={{ label: "About Us", to: "/about" }} kicker={CAREERS.kicker}>
-        <p className="mt-5 max-w-prose text-[length:var(--text-subheading)] leading-subheading tracking-subheading text-graphite">
+        <p className="type-lead mt-7 max-w-[46ch] text-copy">
           {CAREERS.body}
         </p>
       </PageHeader>
 
       <ContentRows rows={rows} />
 
-      <ClosingCta {...CAREERS.closing} />
+      <ClosingCta tone="accent" {...CAREERS.closing} />
     </>
   );
 }

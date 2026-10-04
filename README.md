@@ -26,7 +26,8 @@ src/
   styles/
     theme.css      ← THE design system. Tailwind reads this.
     variables.css  the same tokens as plain custom properties
-    index.css      base layer: document styles and .reveal
+    index.css      base layer: document styles, Lenis, reveal states
+  animations/      the motion system: Lenis, GSAP, the attribute scanner
   content/         every string on the site
   components/      one folder per component
   pages/           one folder per route

@@ -6,19 +6,21 @@ import ContentRows from "../../components/ContentRows/ContentRows.jsx";
 import StoriesOfChange from "../../components/StoriesOfChange/StoriesOfChange.jsx";
 import TrustPanel from "../../components/TrustPanel/TrustPanel.jsx";
 import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
-import useReveal from "../../hooks/useReveal.js";
 import { IMPACT, IMPACT_PAGES, PROGRAMS, SITE, impactStats, metricsNote, storyBySlug, storyCard } from "../../content/index.js";
 
 /* /impact — Document 05, in its section order:
 
-     01  mist band  PageHeader       h1 and the positioning line
-     02  mist band  ImpactStats      the headline figures on branded cards (#at-a-glance)
-     03  white      ProgramIndex     the four programs → Our Work
-     04+05 white    TeaserPair       Where we work · Our approach
-     06  white      ContentRows      Evidence & measurement
-     07  mist band  StoriesOfChange  approved impact stories (#stories)
-     08  white      TrustPanel       reports → Transparency
-     09  mist band  ClosingCta       Get Involved · Our Work
+         paper   PageHeader       h1 and the positioning line
+     01  ink     ImpactStats      the headline figures, poster-size (#at-a-glance)
+     02  white   ProgramIndex     the four programs → Our Work
+     03  paper   TeaserPair       Where we work · Our approach, as two posters
+     04  white   ContentRows      Evidence & measurement
+     05  paper   StoriesOfChange  approved impact stories (#stories)
+     06  ink     TrustPanel       reports → Transparency
+         accent  ClosingCta       Get Involved · Our Work
+
+   Read like an impact report: numbered chapters, the figures as the
+   loudest thing on the page, each still stamped with its status.
 
    Everything factual comes from content/impact.js, which references the
    programs (content/work.js), the stories (content/stories.js) and the
@@ -39,7 +41,6 @@ const reportLinks = IMPACT.reports.length
   : SITE.transparencyLinks;
 
 export default function Impact() {
-  useReveal();
   const t = IMPACT_PAGES.overview;
   const { geography, approach, measurement } = IMPACT;
 
@@ -52,31 +53,40 @@ export default function Impact() {
 
   return (
     <>
-      <PageHeader title={t.heading} kicker={t.kicker}>
-        <p className="mt-5 max-w-prose text-[length:var(--text-subheading)] leading-subheading tracking-subheading text-graphite">
+      <PageHeader title={t.heading} kicker={t.kicker} highlight="Impact">
+        <p className="type-lead mt-7 max-w-[46ch] text-copy">
           {t.body}
         </p>
       </PageHeader>
 
       <ImpactStats
+        index={1}
         id={t.glance.id}
         kicker={t.glance.kicker}
         heading={t.glance.heading}
         stats={impactStats()}
         source={IMPACT.metricsSource}
         note={metricsNote()}
-        branded
       />
 
-      <ProgramIndex kicker={t.programs.kicker} heading={t.programs.heading} programs={programs} />
+      <ProgramIndex index={2} kicker={t.programs.kicker} heading={t.programs.heading} programs={programs} />
 
       <TeaserPair
-        first={{ ...t.teasers.whereWeWork, body: geography.summary ?? undefined }}
-        second={{ ...t.teasers.approach, body: approach.intro ?? undefined }}
+        /* Where We Work only once there is verified geography to point to. */
+        first={
+          geography.regions.length || geography.countries.length
+            ? { ...t.teasers.whereWeWork, body: geography.summary ?? undefined }
+            : { ...t.teasers.approach, body: approach.intro ?? undefined }
+        }
+        second={
+          geography.regions.length || geography.countries.length
+            ? { ...t.teasers.approach, body: approach.intro ?? undefined }
+            : t.teasers.work
+        }
       />
 
       <ContentRows
-        className="pt-0 md:pt-0"
+        start={4}
         rows={[
           {
             id: "measurement",
@@ -88,11 +98,11 @@ export default function Impact() {
         ]}
       />
 
-      <StoriesOfChange {...t.stories} items={impactStories} slots={1} />
+      <StoriesOfChange index={5} {...t.stories} items={impactStories} slots={1} />
 
-      <TrustPanel {...t.reports} links={reportLinks} />
+      <TrustPanel index={6} {...t.reports} links={reportLinks} />
 
-      <ClosingCta {...t.closing} />
+      <ClosingCta tone="accent" {...t.closing} />
     </>
   );
 }

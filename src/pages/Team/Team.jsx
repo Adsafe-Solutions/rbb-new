@@ -1,6 +1,6 @@
 import { useId } from "react";
 import PageHeader from "../../components/PageHeader/PageHeader.jsx";
-import Container from "../../components/Container/Container.jsx";
+import Section from "../../components/Section/Section.jsx";
 import SectionHeading from "../../components/SectionHeading/SectionHeading.jsx";
 import ContentRows from "../../components/ContentRows/ContentRows.jsx";
 import TeamGrid from "../../components/TeamGrid/TeamGrid.jsx";
@@ -8,7 +8,6 @@ import EmptyPanel from "../../components/EmptyPanel/EmptyPanel.jsx";
 import Button from "../../components/Button/Button.jsx";
 import InvolvementPaths from "../../components/InvolvementPaths/InvolvementPaths.jsx";
 import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
-import useReveal from "../../hooks/useReveal.js";
 import {
   TEAM_COPY,
   TEAM_GOVERNANCE,
@@ -36,7 +35,6 @@ import {
    people, blank frames read as placeholder people, which Document 10
    rules out. */
 export default function Team() {
-  useReveal();
   const t = TEAM_COPY;
   const emptyId = useId();
   const govId = useId();
@@ -46,15 +44,15 @@ export default function Team() {
   return (
     <>
       <PageHeader title={t.heading} parent={{ label: "About Us", to: "/about" }} kicker={t.kicker}>
-        <p className="mt-5 max-w-prose text-[length:var(--text-subheading)] leading-subheading tracking-subheading text-graphite">
+        <p className="type-lead mt-7 max-w-[46ch] text-copy">
           {t.body}
         </p>
       </PageHeader>
 
-      <ContentRows rows={[t.intro]} />
+      <ContentRows tone="white" rows={[t.intro]} />
 
       {anyone ? (
-        TEAM_GROUPS.map((group) => {
+        TEAM_GROUPS.filter((group) => membersIn(group.id).length > 0).map((group, i) => {
           const members = membersIn(group.id);
           return members.length > 0 ? (
             <TeamGrid
@@ -63,33 +61,31 @@ export default function Team() {
               kicker={group.kicker}
               heading={group.heading}
               members={members.map(memberCard)}
+              /* Alternating, so two groups never sit on one undivided band. */
+              tone={i % 2 ? "white" : "paper"}
             />
           ) : null;
         })
       ) : (
-        <section aria-labelledby={emptyId} className="pb-20 md:pb-28">
-          <Container>
-            <SectionHeading id={emptyId} {...t.emptySection} className="reveal" />
-            <EmptyPanel text={t.empty} className="reveal mt-10" />
-          </Container>
-        </section>
+        <Section tone="paper" pad="lg" aria-labelledby={emptyId}>
+          <SectionHeading id={emptyId} {...t.emptySection} />
+          <EmptyPanel text={t.empty} className="reveal mt-12" />
+        </Section>
       )}
 
       {governance && (
-        <section aria-labelledby={govId} className="pb-20 md:pb-28">
-          <Container>
-            <SectionHeading id={govId} heading={t.governance.heading} className="reveal" />
-            <p className="reveal mt-5 max-w-prose text-graphite">{TEAM_GOVERNANCE.body}</p>
-            <Button variant="outline" to={t.governance.cta.to} className="reveal mt-8">
-              {t.governance.cta.label}
-            </Button>
-          </Container>
-        </section>
+        <Section tone="ink" pad="lg" aria-labelledby={govId}>
+          <SectionHeading id={govId} heading={t.governance.heading} />
+          <p className="type-lead reveal mt-6 max-w-[54ch] text-copy">{TEAM_GOVERNANCE.body}</p>
+          <Button variant="ink" to={t.governance.cta.to} className="reveal mt-9">
+            {t.governance.cta.label}
+          </Button>
+        </Section>
       )}
 
-      <InvolvementPaths {...t.getInvolved} />
+      <InvolvementPaths tone="white" {...t.getInvolved} />
 
-      <ClosingCta {...t.closing} />
+      <ClosingCta tone="accent" {...t.closing} />
     </>
   );
 }

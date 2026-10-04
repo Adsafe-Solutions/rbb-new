@@ -16,15 +16,31 @@
 ========================================================= */
 @theme {
   /* ---------------- Colours ----------------
-     The RBB palette (design/DESIGN.md): two blues, one green, three
-     neutrals. The token NAMES are historical — they date from the
+     The RBB palette: two blues, one green, three neutrals, read as a
+     three-role print palette — INK (Deep Trust Blue: dark bands, headings,
+     borders), PAPER (white cards on a Light Gray page) and ACCENT (Sky
+     Blue: highlight blocks, offset shadows, one band per page).
+
+     PAPER is a warm off-white, not Light Gray. Light Gray against white
+     separates at 1.07:1, so a page of alternating gray and white bands
+     read as one pale strip and the only rhythm left was the blue. A warm
+     paper separates from white at 1.14:1 and gives the printed sheets —
+     every card and photograph is white — something to sit ON. It is
+     RBB's own value, not the reference site's (#F4E8D2 read as tan next
+     to Sky Blue), and every text colour on it clears AA: Deep Trust Blue
+     8.7:1, Charcoal 9.9:1, Graphite 6.4:1. PENDING RBB approval. The token NAMES are historical — they date from the
      Bumble-derived layout the site was built on — and are kept so the
      hundreds of utilities in components stay valid. Read them by role:
-       bumble-honey  → Bright Sky Blue   bands, frames, highlights, accents
+       bumble-honey  → Bright Sky Blue   bands, frames, accents, AND the
+                                         one filled call-to-action button
        pollen / mist → Light Gray        cards, sections, quiet surfaces
        bumble-ink    → Charcoal          body text, icons, borders
-       trust-blue    → Deep Trust Blue   headlines, wordmark, nav, links
-       growth-green  → Growth Green      the filled call-to-action button */
+       trust-blue    → Deep Trust Blue   headlines, wordmark, nav, links,
+                                         and the CTA button's hover
+       growth-green  → Growth Green      success states only. It was the
+                                         CTA fill until RBB asked for the
+                                         second brand colour there; it is
+                                         no longer a button colour. */
   --color-bumble-honey: #00adef;
   --color-pollen: #f5f7fa;
   --color-bumble-ink: #3a3a3a;
@@ -35,19 +51,34 @@
   --color-onyx: #3a3a3a;
   --color-trust-blue: #10437c;
   --color-growth-green: #5cb85c;
+  /* Night — Deep Trust Blue taken darker. A CONTRAST token, not a brand
+     colour and not a surface (PENDING RBB approval). It exists because
+     nothing in the palette can be read on Sky Blue: Deep Trust Blue type
+     there is 3.89:1 and Charcoal 4.45:1, both under the 4.5:1 body text
+     needs, where Night is 5.95:1. So Night is the ink ON Sky Blue — the
+     highlighted word, the primary button's label, the text of an accent
+     band — and nothing else. No band is Night; the footer is Deep Trust
+     Blue. */
+  --color-night: #0a2647;
+  --color-paper: #f5efe6;
   /* Functional, not brand: form errors only (Document 12). Never a fill
      or decoration. 6.5:1 on white, 6.1:1 on Light Gray; every error also carries the word
      "Error:" and an icon, so colour is never the only signal. */
   --color-alert: #b3261e;
 
   /* ---------------- Typography ----------------
-     Satoshi is the RBB brand face (loaded from Fontshare in index.html).
-     DM Sans, the face the layout was first tuned in, is the fallback.
-     The token keeps its historical name so every `font-bumblesans`
-     utility stays valid. The stack degrades to the system UI face, never
-     to Helvetica — DESIGN.md rules it out as too clinical. */
+     DM Sans is the RBB brand face (loaded from Google Fonts in
+     index.html), and the face the layout was first tuned in. The token
+     keeps its historical name so every `font-bumblesans` utility stays
+     valid. The stack degrades to the system UI face, never to Helvetica
+     — DESIGN.md rules it out as too clinical.
+
+     ⚠ 600 is a REAL weight in this family. Satoshi, which this replaced,
+     had none, so `font-semibold` used to resolve up to 700; every
+     `font-semibold` on the site is now a genuine semibold, and a step
+     lighter than it was. */
   --font-bumblesans:
-    "Satoshi", "DM Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "DM Sans", "DM Sans Fallback", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, sans-serif;
 
   /* The accent face — a signature, not a typeface the system sets text in.
@@ -83,6 +114,30 @@
   --leading-display: 1;
   --tracking-display: 1.36px;
 
+  /* The poster scale. Display type is the site's main graphic device —
+     set in the brand face at its heaviest, in capitals, on tight
+     leading — so these are fluid: a headline has to fill its column on
+     a phone and on a 1536px monitor alike, which no fixed size does.
+     They are used through the `type-*` utilities in index.css, which
+     carry the weight, case, leading and tracking that go with each
+     size; do not pair these with the sentence-case scale above.
+
+       poster     the homepage hero, and nothing else
+       billboard  a closing call to action
+       title      an inner page's <h1>; a section's <h2>
+       card       a card's heading
+       figure     an impact number
+       meta       kickers, labels, metadata — small tracked capitals.
+                  13px is the floor: the reference this language comes
+                  from sets its metadata at 10px, which is too small to
+                  read comfortably. */
+  --text-poster: clamp(2.75rem, 7.4vw, 6.5rem);
+  --text-billboard: clamp(2.5rem, 6.4vw, 5.25rem);
+  --text-title: clamp(2.125rem, 4.6vw, 3.75rem);
+  --text-card: clamp(1.375rem, 2.2vw, 1.875rem);
+  --text-figure: clamp(3.75rem, 9vw, 8rem);
+  --text-meta: 13px;
+
   /* ---------------- Spacing ----------------
      ⚠ DELIBERATELY NOT `--spacing-8: 8px` and friends, which is what the
      exported token file carried. In Tailwind v4 `--spacing-<key>` overrides
@@ -102,21 +157,70 @@
   --spacing: 4px;
 
   /* ---------------- Radius ----------------
-     Softness is non-negotiable: 16-24px on cards, buttons and nav,
-     1000px on badges, 9px on the small app-store chips. Nothing in this
-     system has a sharp corner. */
-  --radius-lg: 9px; /* small elements — store badges */
-  --radius-2xl: 16px; /* buttons, nav pills, photos */
-  --radius-3xl: 24px; /* cards */
-  --radius-full: 1000px; /* badges and pills */
+     Nothing has a sharp corner, and nothing is a blob either. Cards and
+     photographs are 16px; buttons and fields 12px (Tailwind's own
+     `rounded-xl`); stamps and highlighted words 9px; the header and
+     chips are full pills. The swooped corners the old layout cut into
+     its cards (`rounded-tr-[5rem]`) are gone — a flyer is a rectangle. */
+  --radius-lg: 9px; /* stamps, highlighted words, small elements */
+  --radius-2xl: 16px; /* cards, photographs, panels */
+  --radius-full: 1000px; /* the header pill, chips */
 
   /* ---------------- Shadow ----------------
-     One shadow, a whisper at 12%. Never stack it, never intensify it,
-     never tint it. */
-  --shadow-sm: rgba(58, 58, 58, 0.12) 0px 1px 8px 0px;
+     Depth is a HARD OFFSET — a flat block of colour down and to the
+     right, no blur — the way a sticker throws a shadow on a wall. The
+     colour comes from the surface the object sits on (see the tones in
+     index.css), which is why these are not `--shadow-*` tokens: the
+     `cast` utilities in index.css build them from the offsets in
+     variables.css. There is no soft shadow in the system. */
 
   /* ---------------- Layout ----------------
      The contained column. Full-bleed bands break out of it on purpose;
      everything else snaps back to it. */
   --container-page: 1320px;
+}
+
+/* ---------------- Tone colours ----------------
+   A second @theme block, `inline`, for the colours that depend on the
+   SURFACE an element is on rather than on what the element is.
+
+   Every full-width band and every card declares a tone
+   (`data-tone="paper" | "white" | "ink" | "accent" | "night" | "card"`,
+   defined in index.css), and the tone sets a handful of `--tone-*`
+   custom properties. The utilities below read them — so `text-fg` is
+   Deep Trust Blue on paper, white on an ink band and Night on a Sky
+   Blue one, and a component written once is correct on all of them.
+   That is the whole mechanism behind the site's colour-blocked rhythm:
+   a section changes colour by changing one attribute.
+
+   ⚠ `inline` is not optional. Without it Tailwind would emit
+   `--color-fg: var(--tone-fg)` on :root, where it resolves ONCE, to
+   the root's tone, and every band would inherit that fixed value.
+   Inline puts the `var()` in the utility itself, so it resolves on the
+   element that uses it.
+
+     fg       headings and strong ink
+     copy     body text
+     quiet    supporting text, captions
+     edge     the 2px border of a card or field
+     hair     hairlines and dividers
+     pop      the accent: highlight blocks, icon tiles, the primary button
+     on-pop   text sitting on `pop`
+     flip     the solid opposite of the ground: the secondary button, and
+              what the primary turns into on hover
+     on-flip  text sitting on `flip`
+     cast     the colour of a hard offset shadow on this surface
+     ground   the surface itself */
+@theme inline {
+  --color-fg: var(--tone-fg);
+  --color-copy: var(--tone-body);
+  --color-quiet: var(--tone-muted);
+  --color-edge: var(--tone-edge);
+  --color-hair: var(--tone-hair);
+  --color-pop: var(--tone-pop);
+  --color-on-pop: var(--tone-on-pop);
+  --color-flip: var(--tone-flip);
+  --color-on-flip: var(--tone-on-flip);
+  --color-cast: var(--tone-cast);
+  --color-ground: var(--tone-bg);
 }

@@ -8,7 +8,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { productionGate, contentReadiness } from "../production-gate.mjs";
+import { productionGate, contentReadiness, indexingProblems, WORKING_MARKERS, PLACEHOLDER_CONTACT } from "../production-gate.mjs";
 
 async function dist(files) {
   const dir = await mkdtemp(join(tmpdir(), "rbb-gate-"));
@@ -70,6 +70,16 @@ test("working placeholder content is found by the readiness scan", async () => {
   assert.deepEqual(await readiness({ "assets/app.js": 'const hint="like name@example.com";' }), []);
 });
 
+test("the marker table shipped in the bundle is not a finding — real placeholders still are", async () => {
+  /* As the minifier writes it: [["demo text",/Demo text —/],…]. */
+  const table = `const M=[${[...WORKING_MARKERS, ...PLACEHOLDER_CONTACT]
+    .map(([name, re]) => `["${name}",${re}]`)
+    .join(",")}];`;
+  assert.deepEqual(await readiness({ "assets/app.js": table }), []);
+  const found = await readiness({ "assets/app.js": `${table}const p="Demo text — x",c="Demo country A";` });
+  assert.ok(found.includes("demo text") && found.includes("demo country"), found.join(", "));
+});
+
 test("credentials and test identifiers are refused", async () => {
   const cases = {
     "Razorpay key id": 'key:"rzp_test_ABCDEF123456"',
@@ -95,4 +105,33 @@ test("development catalogue content, dev routes and test fixtures are refused", 
   assert.ok((await rules({ "assets/a.js": '"FeaturedWork · placeholder slots"' })).includes("development catalogue content"));
   assert.ok((await rules({ "assets/a.js": 'secret="test-key-secret-not-real"' })).includes("test fixture"));
   assert.ok((await rules({}, { routes: ["/design-system"] })).includes("development route"));
+});
+
+test("indexing gate: an INDEXED page showing working content fails, naming route, rule and approval", () => {
+  const problems = indexingProblems([
+    { route: "/stories/x", robots: "index, follow", approvalAreas: ["stories"], html: "<p>Demo text — a story</p>" },
+  ]);
+  assert.equal(problems.length, 1);
+  assert.equal(problems[0].route, "/stories/x");
+  assert.ok(problems[0].rules.includes("demo text"));
+  assert.deepEqual(problems[0].approvals, ["stories"]);
+});
+
+test("indexing gate: preview (noindex) pages may show working content", () => {
+  assert.deepEqual(
+    indexingProblems([
+      { route: "/privacy", robots: "noindex, follow", approvalAreas: ["policies"], html: "<p>Demo text — not a policy</p>" },
+      { route: "/about/team/amara-demo", robots: "noindex, follow", html: "<p>Amara Demo</p>" },
+    ]),
+    []
+  );
+});
+
+test("indexing gate: an indexed page with final content passes; contact placeholders and demo photos are caught", () => {
+  assert.deepEqual(indexingProblems([{ route: "/", robots: "index, follow", html: "<p>Final words.</p>" }]), []);
+  const [p] = indexingProblems([
+    { route: "/", robots: "index, follow", html: '<a href="mailto:hello@example.org">x</a><img src="/assets/demo-edu-x.jpg">' },
+  ]);
+  assert.ok(p.rules.includes("example.* address or URL"));
+  assert.ok(p.rules.includes("working placeholder photograph"));
 });

@@ -72,6 +72,9 @@ export const ENV = {
     env.VITE_COMPONENTS_ROUTE === undefined || env.VITE_COMPONENTS_ROUTE === ""
       ? undefined
       : bool(env.VITE_COMPONENTS_ROUTE),
+  /* The colour-theme switcher (components/ThemeSwitcher). Off unless a
+     deployment sets VITE_THEME_SWITCHER=true. */
+  themeSwitcher: bool(env.VITE_THEME_SWITCHER, false),
 
   /* Where each form submits — Document 12. A PUBLIC address only: a
      same-origin path ("/api/contact") or an https:// URL of RBB's own

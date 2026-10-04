@@ -40,12 +40,10 @@ export const ABOUT_SECTION = {
       to: "/about/team",
       description: "The people behind the work of Rising Beyond Borders.",
     },
-    {
-      label: "Transparency",
-      title: "Transparency & Financials",
-      to: "/about/transparency",
-      description: "Financial information, reports and governance for Rising Beyond Borders.",
-    },
+    /* A section of /about since the About pages were consolidated (two
+       pages: About and Our Team). The old address forwards to the
+       section, and so do its own anchors' old links. */
+    { label: "Transparency", title: "Transparency & Financials", to: "/about/transparency", section: "/about#transparency" },
   ],
 };
 

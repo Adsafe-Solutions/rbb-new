@@ -6,8 +6,7 @@ import LinkSection from "../../components/LinkSection/LinkSection.jsx";
 import TrustPanel from "../../components/TrustPanel/TrustPanel.jsx";
 import Newsletter from "../../components/Newsletter/Newsletter.jsx";
 import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
-import useReveal from "../../hooks/useReveal.js";
-import { CONTACT_COPY, FORMS, ORG_CONTACT, SITE, alternativeContact, pathCards } from "../../content/index.js";
+import { CONTACT_COPY, FORMS, ORG_CONTACT, SITE, alternativeContact, pathCards, verifiedOnly } from "../../content/index.js";
 
 /* /contact — Document 08:
 
@@ -32,21 +31,27 @@ import { CONTACT_COPY, FORMS, ORG_CONTACT, SITE, alternativeContact, pathCards }
    verified destination and RBB's own success and failure copy — until
    then the pending lines stay exactly as they are. */
 export default function Contact() {
-  useReveal();
   const t = CONTACT_COPY;
   const inquiry = ORG_CONTACT.generalInquiry;
+  /* With no verified channel the contact-details section is left out
+     (ContactMethods), so the bands after it shift one step to keep
+     neighbouring bands in different tones. */
+  const hasMethods = verifiedOnly(ORG_CONTACT.methods).length > 0 || verifiedOnly(ORG_CONTACT.social).length > 0;
+  const n = hasMethods ? 1 : 0;
 
   return (
     <>
       <PageHeader title={t.heading} kicker={t.kicker}>
-        <p className="mt-5 max-w-prose text-[length:var(--text-subheading)] leading-subheading tracking-subheading text-graphite">
+        <p className="type-lead mt-7 max-w-[46ch] text-copy">
           {t.body}
         </p>
       </PageHeader>
 
-      <ContactMethods kicker={t.methods.kicker} heading={t.methods.heading} labels={t.methods} />
+      <ContactMethods index={1} highlight="reach us" kicker={t.methods.kicker} heading={t.methods.heading} labels={t.methods} />
 
       <QuestionsPanel
+        index={1 + n}
+        tone={hasMethods ? "paper" : "white"}
         {...t.inquiry}
         intro={inquiry.description}
         contact={{
@@ -58,9 +63,9 @@ export default function Contact() {
         alternative={alternativeContact()}
       />
 
-      <InvolvementPaths {...t.getInvolved} items={pathCards()} />
+      <InvolvementPaths index={2 + n} tone={hasMethods ? "white" : "paper"} {...t.getInvolved} items={pathCards()} />
 
-      <LinkSection {...t.careers} />
+      <LinkSection index={3 + n} tone={hasMethods ? "paper" : "white"} {...t.careers} />
 
       <Newsletter
         kicker={t.newsletter.kicker}
@@ -72,9 +77,12 @@ export default function Contact() {
         form={FORMS.newsletter}
       />
 
-      <TrustPanel {...t.transparency} links={SITE.transparencyLinks} linkMeta={SITE.transparencyLinkMeta} />
+      {/* Paper, not the panel's default Deep Trust Blue: between the Sky
+          Blue newsletter and the Sky Blue close, a blue band made the end
+          of the page four alternating saturated stripes. */}
+      <TrustPanel tone="paper" {...t.transparency} links={SITE.transparencyLinks} linkMeta={SITE.transparencyLinkMeta} />
 
-      <ClosingCta {...t.closing} />
+      <ClosingCta tone="accent" {...t.closing} />
     </>
   );
 }

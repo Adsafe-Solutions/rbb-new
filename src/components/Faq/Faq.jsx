@@ -1,48 +1,54 @@
-import Container from "../Container/Container.jsx";
+import { useId } from "react";
+import Mark from "../Mark/Mark.jsx";
+import Section from "../Section/Section.jsx";
+import SectionHeading from "../SectionHeading/SectionHeading.jsx";
 
 /* An FAQ accordion on native <details>. No state, no ARIA to get wrong:
    the browser handles open/close, keyboard and the accessible name.
-   `name` groups them so opening one closes the others. */
+   `name` groups them so opening one closes the others.
 
-function Chevron() {
+   Each question is a full-width sheet in a stack (`gap-stack`); the open
+   one takes the accent shadow and its marker turns from a plus into a
+   minus. Questions are display weight, answers body text. */
+function Marker() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      aria-hidden="true"
-      className="h-6 w-6 shrink-0 transition-transform group-open:rotate-180"
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
+    <span aria-hidden="true" className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-flip text-on-flip transition-colors group-open:bg-pop group-open:text-on-pop">
+      <span className="absolute h-0.5 w-4 rounded bg-current" />
+      <span className="absolute h-4 w-0.5 rounded bg-current transition-transform duration-200 group-open:scale-y-0" />
+    </span>
   );
 }
 
-export default function Faq({ heading, items }) {
-  return (
-    <section className="bg-mist py-20 md:py-32">
-      <Container>
-        <h2 className="reveal text-center font-bold text-[length:var(--text-heading-lg)] leading-heading-lg tracking-heading-lg">
-          {heading}
-        </h2>
+export default function Faq({ id, index, kicker, heading, items, tone = "paper", highlight }) {
+  const headingId = useId();
 
-        <div className="reveal mx-auto mt-14 flex max-w-4xl flex-col gap-stack">
+  return (
+    <Section id={id} tone={tone} pad="lg" aria-labelledby={headingId}>
+      <div className="grid gap-12 lg:grid-cols-[4fr_8fr] lg:gap-16">
+        <div className="lg:sticky lg:top-[calc(var(--header-h)+2rem)] lg:self-start">
+          <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} highlight={highlight} />
+          <Mark className="mt-10 hidden h-24 w-24 text-pop lg:block" />
+        </div>
+        <div data-anim-stagger className="flex flex-col gap-stack">
           {items.map((item) => (
-            <details key={item.q} name="faq" className="group rounded-3xl bg-paper-white">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 px-8 py-6 font-semibold text-[length:var(--text-subheading)] leading-subheading tracking-subheading [&::-webkit-details-marker]:hidden">
+            <details
+              key={item.q}
+              name="faq"
+              data-tone="card"
+              className="group rounded-2xl border-rim bg-paper-white transition-shadow duration-300 open:cast"
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 rounded-2xl px-6 py-5 text-[20px] font-extrabold leading-snug text-fg md:px-8 md:py-6 [&::-webkit-details-marker]:hidden">
                 {item.q}
-                <Chevron />
+                <Marker />
               </summary>
-              <div className="px-8 pb-8 text-graphite">
+              <div className="px-6 pb-7 text-copy md:px-8">
                 {(Array.isArray(item.a) ? item.a : [item.a]).map((text) => (
-                  <p key={text} className="mt-2 first:mt-0">
+                  <p key={text} className="mt-3 max-w-[64ch] first:mt-0">
                     {text}
                   </p>
                 ))}
                 {item.list && (
-                  <ul className="mt-3 list-disc space-y-1 pl-6">
+                  <ul className="mt-4 list-disc space-y-1.5 pl-6 marker:text-trust-blue">
                     {item.list.map((li) => (
                       <li key={li}>{li}</li>
                     ))}
@@ -52,7 +58,7 @@ export default function Faq({ heading, items }) {
             </details>
           ))}
         </div>
-      </Container>
-    </section>
+      </div>
+    </Section>
   );
 }

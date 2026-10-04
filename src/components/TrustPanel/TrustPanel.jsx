@@ -1,84 +1,66 @@
 import { useId } from "react";
 import { Link } from "react-router-dom";
 import Button from "../Button/Button.jsx";
-import Container from "../Container/Container.jsx";
 import LineIcon from "../LineIcon/LineIcon.jsx";
+import Section from "../Section/Section.jsx";
 import SectionHeading from "../SectionHeading/SectionHeading.jsx";
+import TicketCard from "../TicketCard/TicketCard.jsx";
 
-/* The trust layer: one quiet Light Gray panel — the statement on the
-   left, the documents a donor would check on the right, one route to the
-   full Transparency page. Deliberately small. The detail lives on
-   /about/transparency; this only has to prove the path exists.
+/* The trust layer: the statement on Deep Trust Blue, and beside it the
+   documents a donor would check, as a ticket — the kind of thing you
+   could be handed and keep.
 
-   `links` are { title, to } for a page on the site, or { title, href } for
-   a file (a report PDF) — the one a plain <a>, the other a router link.
-   A link's own `meta` is the line under it; `linkMeta` is the fallback.
-   Until RBB supplies the documents that line says they are to come, and
-   each row still goes to the Transparency page, never to a file that does
-   not exist. Icons cycle in a fixed order so each row reads as a different
-   kind of thing. */
+   Deliberately short. The detail lives in the Transparency section of /about; this has
+   to prove the path exists and name what will be there.
+
+   `links` are { title, to } for a page on the site, or { title, href }
+   for a file (a report PDF). A link's own `meta` is the line under it;
+   `linkMeta` is the fallback — until RBB supplies the documents it says
+   they are to come, and each row still goes to the Transparency page,
+   never to a file that does not exist. No figure, registration or audit
+   claim is made here. */
 const ICONS = ["document", "chart", "shield"];
 
-export default function TrustPanel({ id, kicker, heading, body, links, linkMeta, cta }) {
+export default function TrustPanel({ id, index, kicker, heading, body, links, linkMeta, cta, tone = "ink", highlight }) {
   const headingId = useId();
 
   return (
-    <section
-      id={id}
-      aria-labelledby={headingId}
-      className="scroll-mt-[var(--header-h)] py-20 md:py-28"
-    >
-      <Container>
-        <div className="reveal grid gap-10 rounded-3xl rounded-tr-[5rem] bg-mist p-5 sm:p-10 md:p-14 lg:grid-cols-[5fr_6fr] lg:items-center lg:gap-16">
-          <div>
-            <SectionHeading
-              id={headingId}
-              kicker={kicker}
-              heading={heading}
-              intro={body}
-            />
-            {cta && (
-              <Button variant="outline" to={cta.to} className="mt-8">
-                {cta.label}
-              </Button>
-            )}
-          </div>
+    <Section id={id} tone={tone} pad="lg" watermark="left" aria-labelledby={headingId}>
+      <div className="grid items-center gap-14 lg:grid-cols-[6fr_5fr] lg:gap-20">
+        <div>
+          <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} intro={body} highlight={highlight} size="billboard" />
+          {cta && (
+            <Button data-anim="soft" variant="solid" to={cta.to} className="mt-9">
+              {cta.label}
+            </Button>
+          )}
+        </div>
 
-          <ul className="flex flex-col gap-stack">
-            {links.map((link, i) => {
+        <div className="reveal lg:pl-6">
+          <TicketCard
+            kicker={kicker}
+            rows={links.map((link, i) => {
               const Row = link.href ? "a" : Link;
               const target = link.href ? { href: link.href } : { to: link.to };
               const meta = link.meta ?? linkMeta;
               return (
-                <li key={link.title}>
-                  <Row
-                    {...target}
-                    className="group flex items-center gap-4 rounded-2xl bg-paper-white p-4 transition-colors sm:gap-5 sm:p-5 hover:bg-paper-white/70"
-                  >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-bumble-honey/12 text-trust-blue sm:h-12 sm:w-12">
-                      <LineIcon name={ICONS[i % ICONS.length]} />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block font-bold text-trust-blue underline-offset-4 group-hover:underline">
-                        {link.title}
-                      </span>{" "}
-                      {meta && (
-                        <span className="mt-0.5 block text-[length:var(--text-caption)] leading-caption tracking-caption text-graphite">
-                          {meta}
-                        </span>
-                      )}
-                    </span>
-                    <LineIcon
-                      name="arrow"
-                      className="h-5 w-5 text-trust-blue transition-transform group-hover:translate-x-1"
-                    />
-                  </Row>
-                </li>
+                <Row {...target} className="group flex items-center gap-4 rounded-lg">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-pop text-on-pop">
+                    <LineIcon name={ICONS[i % ICONS.length]} className="h-5 w-5" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[19px] font-extrabold leading-tight text-fg underline-offset-4 group-hover:underline">
+                      {link.title}
+                    </span>{" "}
+                    {meta && <span className="type-note mt-1 block font-medium text-quiet">{meta}</span>}
+                  </span>
+                  <LineIcon name="arrow" className="h-5 w-5 text-fg transition-transform group-hover:translate-x-1" />
+                </Row>
               );
             })}
-          </ul>
+          />
         </div>
-      </Container>
-    </section>
+      </div>
+    </Section>
   );
 }

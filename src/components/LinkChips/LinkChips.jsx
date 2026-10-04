@@ -2,31 +2,27 @@ import { Link } from "react-router-dom";
 import { cx } from "../../lib/cx.js";
 import LineIcon from "../LineIcon/LineIcon.jsx";
 
-/* A row of small pill links, each with its icon — the "other pages like
-   this one" under a closing call to action: the other three programs on a
+/* A row of sticker links, each with its icon — the "other pages like this
+   one" under a closing call to action: the other three programs on a
    program page, the other three paths on a Get Involved page.
 
-   Items are { title, to, icon? }. Each is an ordinary link named by its
-   title; the icon is decoration. `align` is "center" (under a centred
-   closing heading) or "start". `surface` is the ground the chips sit on —
-   "mist" gets white chips, "paper" gets Light Gray ones — so a chip never
-   disappears into its section. */
-export default function LinkChips({ items, align = "center", surface = "mist", className = "" }) {
+   A sticker: white, the 2px border of the band's ink, a small hard
+   shadow; it steps up and out on hover. Items are { title, to, icon? };
+   each is an ordinary link named by its title, the icon decoration.
+   `align` is "center" or "start". (`surface` is accepted and ignored —
+   the sticker takes its colours from the band.) */
+export default function LinkChips({ items, align = "center", className = "" }) {
   return (
-    <ul
-      className={cx(
-        "flex flex-wrap gap-3",
-        align === "start" ? "justify-start" : "justify-center",
-        className
-      )}
-    >
+    <ul className={cx("flex flex-wrap gap-4", align === "start" ? "justify-start" : "justify-center", className)}>
       {items.map((item) => (
         <li key={item.to}>
           <Link
             to={item.to}
+            data-tone="card"
             className={cx(
-              "group inline-flex items-center gap-2.5 rounded-full px-5 py-3 font-medium text-trust-blue transition-colors hover:bg-bumble-honey/15",
-              surface === "paper" ? "bg-mist" : "bg-paper-white"
+              "inline-flex items-center gap-2.5 rounded-full border-rim bg-paper-white px-5 py-3 font-bold text-fg cast-sm",
+              "transition duration-200 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-bumble-honey hover:text-night",
+              "motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0"
             )}
           >
             {item.icon && <LineIcon name={item.icon} className="h-5 w-5" />}

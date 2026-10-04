@@ -13,7 +13,7 @@ import FieldError from "../FieldError/FieldError.jsx";
    has an error; `required` is the native attribute, so assistive
    technology announces it. The form itself sets `noValidate`, so the
    browser's own bubbles do not compete with these messages. */
-export default function FormField({ formId, field, value, error, onChange, onBlur, disabled, copy }) {
+export default function FormField({ formId, field, value, error, onChange, onBlur, disabled, copy, number }) {
   const id = `${formId}-${field.name}`;
   const hintId = field.hint ? `${id}-hint` : null;
   const errorId = error ? `${id}-error` : null;
@@ -51,12 +51,20 @@ export default function FormField({ formId, field, value, error, onChange, onBlu
 
   return (
     <div>
-      <label htmlFor={id} className="block font-semibold text-bumble-ink">
-        {field.label}{" "}
-        <span className="font-normal text-graphite">({field.required ? copy.required : copy.optional})</span>
+      <label htmlFor={id} className="flex items-baseline gap-2.5 font-bold text-fg">
+        {/* The field's place in the form, stamped like a step number.
+            Decoration: the label is the field's name. */}
+        {number != null && (
+          <span aria-hidden="true" className="type-meta rounded-md bg-pop px-1.5 py-0.5 text-on-pop">
+            {String(number).padStart(2, "0")}
+          </span>
+        )}
+        <span>
+          {field.label} <span className="font-normal text-quiet">({field.required ? copy.required : copy.optional})</span>
+        </span>
       </label>
       {field.hint && (
-        <p id={hintId} className="mt-1 text-[length:var(--text-caption)] leading-caption tracking-caption text-graphite">
+        <p id={hintId} className="mt-1 text-[15px] leading-snug text-quiet">
           {field.hint}
         </p>
       )}

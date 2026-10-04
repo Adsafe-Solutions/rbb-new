@@ -20,7 +20,7 @@ const ICONS = {
 const SubmissionStatus = forwardRef(function SubmissionStatus({ state, message, alternative, alternativeLead }, ref) {
   if (state === "submitting") {
     return (
-      <p role="status" className="font-medium text-graphite">
+      <p role="status" className="font-medium text-quiet">
         {message}
       </p>
     );
@@ -35,7 +35,8 @@ const SubmissionStatus = forwardRef(function SubmissionStatus({ state, message, 
       role={error ? "alert" : "status"}
       className={cx(
         "flex items-start gap-4 rounded-2xl border-2 bg-paper-white p-5 sm:p-6",
-        error ? "border-alert" : "border-growth-green"
+        /* Growth Green's one job in the system: a thing that succeeded. */
+        error ? "border-alert" : "border-growth-green shadow-[6px_6px_0_var(--color-growth-green)]"
       )}
     >
       <svg

@@ -18,12 +18,14 @@ import {
 import { observabilityReport } from "./config/observability.js";
 import { EVENTS } from "./lib/analytics.js";
 import { validateContent } from "./content/validate.js";
-import { DONATION, checkoutReady, donationState } from "./content/donation.js";
+import { DONATION, checkoutReady, donationPreview, donationState } from "./content/donation.js";
+import { HOMEPAGE } from "./content/homepage.js";
 import { ENV } from "./config/env.js";
 import { IMPACT } from "./content/impact.js";
 import { TRANSPARENCY, publishedDocuments } from "./content/transparency.js";
 import { ORG_CONTACT, verifiedOnly } from "./content/contact.js";
-import { isPublished } from "./content/policies.js";
+import { SOCIALS } from "./content/footer.js";
+import { isFinalPolicy, isPublished } from "./content/policies.js";
 import { FORMS } from "./content/forms.js";
 import { formState } from "./lib/forms.js";
 import { PROGRAMS } from "./content/work.js";
@@ -119,6 +121,10 @@ export const publicImages = () =>
    pre-renderer's third-party origin check. */
 export const siteOrigin = () => ENV.siteOrigin;
 
+/* Whether the homepage has a video — its page policy then allows the
+   player's frame (scripts/security-policy.mjs VIDEO). */
+export const featuredVideo = () => Boolean(HOMEPAGE.video?.youtubeId);
+
 export const donationCheckout = () => ({
   enabled: donationState() === "approved-live" && checkoutReady(),
   api: ENV.donationsApi,
@@ -143,8 +149,15 @@ export const readiness = () => ({
   geography: IMPACT.geography.status,
   contactMethods: verifiedOnly(ORG_CONTACT.methods).length,
   policiesPublished: POLICIES.filter(isPublished).map((p) => p.id),
+  /* Published AND not working text — what a launch needs (release:check). */
+  policiesFinal: POLICIES.filter(isFinalPolicy).map((p) => p.id),
+  /* Social links shown, and whether each is only the platform's home page
+     (a placeholder, not an RBB account). URLs only — no secrets here. */
+  socials: SOCIALS.map((s) => ({ platform: s.icon, homepageOnly: /^https:\/\/(www\.)?[^/]+\/?$/.test(s.href ?? "") })),
   forms: Object.fromEntries(Object.entries(FORMS).map(([id, f]) => [id, formState(f)])),
-  donation: { state: donationState(), checkoutReady: checkoutReady() },
+  /* `preview`: the donation page draws the checkout's no-payment preview
+     (content/donation.js) — release:check refuses production while it is. */
+  donation: { state: donationState(), checkoutReady: checkoutReady(), preview: donationPreview() },
 });
 
 /* What this build would measure (Document 17): each stream's approval

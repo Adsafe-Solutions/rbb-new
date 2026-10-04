@@ -7,9 +7,12 @@ import {
   useParams,
 } from "react-router-dom";
 import { Suspense, lazy, useEffect } from "react";
+import MotionProvider from "./animations/MotionProvider.jsx";
+import { jumpTo } from "./animations/lenis.js";
 import Header from "./components/Header/Header.jsx";
 import Footer from "./components/Footer/Footer.jsx";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary.jsx";
+import MarkSprite from "./components/Mark/MarkSprite.jsx";
 import Home from "./pages/Home/Home.jsx";
 import Giving from "./pages/Giving/Giving.jsx";
 import Zakat from "./pages/Zakat/Zakat.jsx";
@@ -32,7 +35,6 @@ import Policy from "./pages/Policy/Policy.jsx";
 import StoriesHub from "./pages/StoriesHub/StoriesHub.jsx";
 import StoryDetail from "./pages/StoryDetail/StoryDetail.jsx";
 import Careers from "./pages/Careers/Careers.jsx";
-import Transparency from "./pages/Transparency/Transparency.jsx";
 import Team from "./pages/Team/Team.jsx";
 import TeamProfile from "./pages/TeamProfile/TeamProfile.jsx";
 import useSeo from "./hooks/useSeo.js";
@@ -40,6 +42,7 @@ import { canonicalPath, routeMeta } from "./content/seo.js";
 import { pageView } from "./lib/analytics.js";
 import { GET_INVOLVED, PAGES, POLICIES, PROGRAMS, SITE } from "./content/index.js";
 import { SECTIONS } from "./config/sections.js";
+import ThemeSwitcher from "./components/ThemeSwitcher/ThemeSwitcher.jsx";
 import { DEV_TOOLS_IN_BUILD } from "./config/env.js";
 import { LEGACY_PATHS, REDIRECTS, STUB_PATHS } from "./config/routes.js";
 
@@ -49,7 +52,8 @@ import { LEGACY_PATHS, REDIRECTS, STUB_PATHS } from "./config/routes.js";
    footer, breadcrumbs and title all follow on their own. */
 const BUILT = {
   "/about": About,
-  "/about/transparency": Transparency,
+  /* /about/transparency is a section of /about now (content/nav.js),
+     forwarded like the other About sections. */
   "/about/team": Team,
   "/contact": Contact,
   "/stories": StoriesHub,
@@ -122,26 +126,32 @@ function PostRedirect() {
    The browser restores the previous scroll position on a client-side route
    change, which lands you halfway down a page you have never seen.
 
-   ⚠ "instant", NOT "auto". `auto` means "whatever the document's CSS
-   says", and styles/index.css sets `scroll-behavior: smooth` — so `auto`
-   animated every page change, and a jump to a section was still gliding
-   when the page settled. A page change should be instant.
+   ⚠ INSTANT, never animated. The document's own `scroll-behavior:
+   smooth` used to animate every page change, and a jump to a section
+   was still gliding when the page settled.
+
+   ⚠ Through `jumpTo` (animations/lenis.js), not `window.scrollTo`.
+   With smooth scrolling on, a native jump lands the page somewhere
+   Lenis is still animating TOWARDS, and it carries on and undoes it.
+   `jumpTo` hands Lenis the destination instead — and is the plain
+   native call when Lenis is not running, which is what a reader with
+   reduced motion gets. It honours the section's `scroll-mt` either
+   way, which is what keeps a heading clear of the fixed header.
 
    Keyed on `key`, not `pathname`: choosing "Values" while already on
    /about#values is a new navigation to the same URL, and should still
-   bring the section back into view. The section's own `scroll-mt` keeps
-   its heading clear of the fixed header. */
+   bring the section back into view. */
 function ScrollToTop() {
   const { key, hash } = useLocation();
 
   useEffect(() => {
     const target = hash && document.getElementById(decodeURIComponent(hash.slice(1)));
     if (!target) {
-      window.scrollTo({ top: 0, behavior: "instant" });
+      jumpTo(0);
       return undefined;
     }
 
-    const align = () => target.scrollIntoView({ behavior: "instant", block: "start" });
+    const align = () => jumpTo(target);
     align();
 
     /* On a cold load the web font lands AFTER this jump and reflows
@@ -175,6 +185,11 @@ export function Shell() {
   return (
     <>
       <ScrollToTop />
+      {/* The mark's geometry, defined once for the whole document. Every
+          <Mark> and the hero's LogoFrame are <use> references to it, and
+          a <use> with no target in the document draws nothing at all —
+          so this stays ABOVE the router, not inside a page. */}
+      <MarkSprite />
       <Header />
       {/* The landmark the skip link and screen-reader rotor look for. */}
       <main id="main" tabIndex={-1} className="pt-[var(--header-h)] focus:outline-none">
@@ -301,6 +316,18 @@ export function Shell() {
         </ErrorBoundary>
       </main>
       <Footer />
+      {/* Hidden unless switched on (config/sections.js themeSwitcher). */}
+      {SECTIONS.themeSwitcher && <ThemeSwitcher />}
+      {/* The motion system (src/animations). Renders nothing; it starts
+          smooth scrolling and binds each page's reveals.
+
+          ⚠ LAST in the Shell on purpose. React runs effects in tree
+          order, so by the time this one scans the page, ScrollToTop has
+          already put the window where the new route starts — scan
+          first and every trigger on the new page would be created
+          already scrolled past, fire at once, and the page would
+          arrive with its animations spent. */}
+      <MotionProvider />
     </>
   );
 }

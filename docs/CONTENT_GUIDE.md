@@ -19,7 +19,7 @@ login, database or content API** — see *Future CMS* at the end.
 | `transparency.js` | Financial overview, reports, governance |
 | `team.js` | Team records and groups |
 | `donation.js` | Donation page, giving methods, donation FAQs |
-| `policies.js` | Privacy, terms, accessibility |
+| `policies.js` | Privacy, terms |
 | `forms.js` | Form configurations (all disabled) |
 | `seo.js` | Page metadata rules (derived from the files above) |
 

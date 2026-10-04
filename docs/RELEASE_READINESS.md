@@ -20,7 +20,44 @@ placeholders — which the build counts for you.
 ```sh
 npm run build            # the site, and the readiness scan of its output
 npm run release:status   # state + every blocker → build-meta/release-status.json
+npm run release:check    # THE go / no-go: READY or BLOCKED → build-meta/release-check.json
 ```
+
+## The final gate: `npm run release:check`
+
+One command answers "is THIS build, with THIS production environment, safe
+to deploy publicly?" It builds and prerenders, runs content validation and
+the release and server tests, then checks the artifact and prints
+**READY** or **BLOCKED**, with every blocker as what / why / what is
+needed. Blockers are grouped by category: APPROVAL, CONTENT, SEO, ROUTES,
+LEGAL, CONTACT, IMAGES, FORMS, EMAIL, DONATIONS, SECURITY, INFRASTRUCTURE,
+ACCESSIBILITY, PERFORMANCE. It exits 0 only when READY.
+
+```sh
+# Run in the environment the release is built in (VITE_SITE_URL etc.):
+npm run release:check -- --env-file=<production server env>   # values never printed
+npm run release:check -- --url=https://<preview or production> # + browser smoke
+```
+
+- **Sources it reads and never changes:** `release/approvals.mjs` (APPROVALS
+  and EVIDENCE), the build's own records in `build-meta/`, the placeholder
+  markers (`src/lib/releaseMarkers.js`), the safety and indexing gates
+  (`scripts/production-gate.mjs`), and the server's own config loaders.
+- **Fails closed:** anything it cannot confirm is a blocker. That includes a
+  build from uncommitted source, a deployment that has not been
+  smoke-tested, and release evidence not yet recorded.
+- **Online donations:** if `donation` is approved and the page is not live,
+  that is reported as *donations disabled by approved launch decision*. If
+  the page is live, Razorpay must be live and verified. Forms work the same
+  way with `forms`.
+- **`release:status`** remains the progress view (which state the project
+  has reached). It shares one calculation with this gate
+  (`scripts/lib/release-state.mjs`).
+- **Tests:** `scripts/test/release-check.test.mjs` proves the gate can say
+  READY when everything is final, and that each kind of break says BLOCKED.
+
+**Expected today: BLOCKED.** RBB's content, approvals, domain and production
+configuration do not exist yet. That is the correct answer.
 
 ## Release states (§22)
 
@@ -139,7 +176,7 @@ Run `npm run release:status` for the live list. As of this phase:
    - projects, team and geography
    - stories
    - contact details
-   - Privacy, Terms and Accessibility text
+   - Privacy and Terms text
 3. **Integrations:**
    - Resend: a new key is needed (the planning key is compromised and must
      be revoked), plus a verified sending domain and approved From address

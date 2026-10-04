@@ -2,15 +2,26 @@
   "mode": "enforce",
   "inlineHashed": {
     "scripts": 1,
-    "styleAttributes": 25
+    "styleAttributes": 21
   },
   "donationCheckout": false,
+  "video": {
+    "page": "/",
+    "frame": [
+      "https://www.youtube-nocookie.com"
+    ],
+    "features": [
+      "autoplay",
+      "fullscreen",
+      "picture-in-picture"
+    ]
+  },
   "headers": {
     "/*": {
-      "Content-Security-Policy": "default-src 'self'; script-src 'self' 'sha256-qOhFsq0QMV2REqNwk5hGH5bZE9SkX6gt6yeyKdYPv+U='; style-src 'self' https://api.fontshare.com https://fonts.googleapis.com 'unsafe-hashes' 'sha256-6Fpge0ng38Ce78yGFDvvHAFtShB5od1d4sYE8A+Sa8Y=' 'sha256-H4xHKtAfqm8xvPYJco4yqiKBCddx1I0maL0PXYu0mQc=' 'sha256-RgfBrYF/K9kVa6i3o/T6qiQKCegUHfhq8b3AtSqc1Mw=' 'sha256-STwxemzHNNn6ZJZubokbm/PJNpkz3w0xExj9gpdmByc=' 'sha256-3NqsnknOP+0ptkXPJ8XTwtmZoWJmnTYkmkzE4ZHwzt8=' 'sha256-mfO2zTkf4pSKQP31zAIk+N7zvZBoYLFNux6sl7lxxlk=' 'sha256-ahctpT93zlX9NEF1AnfWHiiHD1hbFQaOGA8GEjuW2lE=' 'sha256-f1H6om7+EAR3StcVKLn6ZANnTsqCNxxBE7M1bFPDrkE=' 'sha256-sPzj6UnUAO1CuN8KqkuiuC54cleeEf7zdq+SsMuazM8=' 'sha256-o5o7C3m44zCFBkBdyyejD1YTCo8aD9fhmZq9rFeC9ss=' 'sha256-XSuy6kOo7ze+LF6aFy5R9sVvfVXnr7+o6ZWuj6d1STY=' 'sha256-b3KQ08LQwG8DC0EYszgB1kxCklCEuzV75Fygjc2tpkQ=' 'sha256-znj0NEVhwILfxeu7V7vtJVK6DtTBhxUVS49mgpuCsZs=' 'sha256-Ier4RDYwnv0/Zsqu6cu9dw9by/PI9G3KtZ4rWlsM/t4=' 'sha256-0iYGQ4M2G4t5h6oxvJsgyG1I9XVp/3p41YtfRAcJcZw=' 'sha256-frV0g/BaglNbLLJOoByv4lxC31y3Nu8c/F1ahTh9t5I=' 'sha256-vBdyEeHyZoZdVCrvopxITXyiQtgg0dW2WsEc3EyEbhc=' 'sha256-G0/jk4BHawmHO6hPamUO6la0oaHZ68cj5wYRykm+XYw=' 'sha256-cTX69RKlP1Fi53fcP/aikKnbo10vfxmMvs7vesToqhE=' 'sha256-WMKADywZ8D1LV0wSpvNMy/rVV9lkXNT450B+AI0T6rI=' 'sha256-Ilv+j3j9Fn4CVEAPE3Z4GBmMsTbPCDHqQoMgVDvtDX8=' 'sha256-7pzE+WxfWIKLG+p7rGkii0bT+ONdYmPPsuLzPd9umuU=' 'sha256-UvyJEYrqSpXEwK01/MWobLXg259xIRtYdIIIbvOtqko=' 'sha256-ezR+VYf5xK0dvYqD4sEzeYv3tBDZxFCvuIjrfiJhmic=' 'sha256-CptADf6tG44oZyQODKKIt4zoCz8mPrAJhG+aI9BHcns='; font-src 'self' https://cdn.fontshare.com https://fonts.gstatic.com; img-src 'self'; connect-src 'self'; manifest-src 'self'; media-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+      "Content-Security-Policy": "default-src 'self'; script-src 'self' 'sha256-I+/0X3BpLzMbcdOPCZ6Vwk/WdXN0weKB2DrhNgPKugU='; style-src 'self' https://fonts.googleapis.com 'unsafe-hashes' 'sha256-KhxCkFKksZSxllMD4HX+Gi34mqgSeoA4IfLuXOKxxls=' 'sha256-quOn95J/t/osrIMcAvuSrhWgdTKXvro/9wr6W67ufcI=' 'sha256-DCaCrJk8NURuxUavuD1YiRksINGmCNFyzG8ivrKHLGM=' 'sha256-TGmLlgSs2VvvZqPiQNljeO7WctJCbVK1OfxsB+VZqSM=' 'sha256-kJTzzmMEC7qQEceSJZIdK2xk6whDLoITOF5DtRqYtn4=' 'sha256-YrQfprEKPJ+zAYrOlym5JGmDsZTP03bW9ChOEFN1Yf4=' 'sha256-bYL1OasoSTXdFwEg7qWWYlnpyoT+8dMR/rCnPRyHCUM=' 'sha256-2OTYMWdU7htz8DLKDxNKOtFCP9HFkKZ6swAo/W4CeZ4=' 'sha256-6Fpge0ng38Ce78yGFDvvHAFtShB5od1d4sYE8A+Sa8Y=' 'sha256-8+E0xaBrRZRWXDtVF9PizVYIiRKHOC1Skfbiaa0xTxk=' 'sha256-Ph2LVY9s2LOarRhyZV4zWi1FzZvRhAFWur0jlp3ptqc=' 'sha256-Hlnp1Lk9rgN8zMZrcPkkSXSgnB1qzxy1S4ZiEeo8Hco=' 'sha256-f1H6om7+EAR3StcVKLn6ZANnTsqCNxxBE7M1bFPDrkE=' 'sha256-sPzj6UnUAO1CuN8KqkuiuC54cleeEf7zdq+SsMuazM8=' 'sha256-o5o7C3m44zCFBkBdyyejD1YTCo8aD9fhmZq9rFeC9ss=' 'sha256-qSJ4K82vV6yW3qvQtvGQZLJ50DUZDv1OaxCHNRutHZQ=' 'sha256-XSuy6kOo7ze+LF6aFy5R9sVvfVXnr7+o6ZWuj6d1STY=' 'sha256-b3KQ08LQwG8DC0EYszgB1kxCklCEuzV75Fygjc2tpkQ=' 'sha256-lSc+GLyW71JIGs1W1mEArhSUDiXzAv0RsLEcta8Qro8=' 'sha256-cTX69RKlP1Fi53fcP/aikKnbo10vfxmMvs7vesToqhE=' 'sha256-0Ont9ZQC4ocHWeREpVvAmls9WguJuhHpFQ2tvcWJrp8='; font-src 'self' https://fonts.gstatic.com; img-src 'self'; connect-src 'self'; manifest-src 'self'; media-src 'none'; object-src 'none'; frame-src https://www.youtube-nocookie.com; worker-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
       "X-Content-Type-Options": "nosniff",
       "Referrer-Policy": "strict-origin-when-cross-origin",
-      "Permissions-Policy": "accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), usb=(), xr-spatial-tracking=()",
+      "Permissions-Policy": "accelerometer=(), autoplay=(self \"https://www.youtube-nocookie.com\"), camera=(), display-capture=(), encrypted-media=(), fullscreen=(self \"https://www.youtube-nocookie.com\"), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(self \"https://www.youtube-nocookie.com\"), publickey-credentials-get=(), screen-wake-lock=(), usb=(), xr-spatial-tracking=()",
       "X-Frame-Options": "DENY",
       "Cross-Origin-Opener-Policy": "same-origin",
       "Cross-Origin-Resource-Policy": "same-origin",

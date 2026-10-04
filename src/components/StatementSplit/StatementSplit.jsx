@@ -1,32 +1,34 @@
 import { useId } from "react";
-import Container from "../Container/Container.jsx";
+import Section from "../Section/Section.jsx";
 import SectionHeading from "../SectionHeading/SectionHeading.jsx";
 
-/* An editorial two-column statement: the heading large on the left, the
-   paragraphs that expand on it on the right — the layout of a feature
-   opening rather than a card. No picture: this is where the page says
-   something in words, and it has the room to.
+/* An editorial two-column statement: the heading set large on the left,
+   the paragraphs that expand on it on the right, the first of them as a
+   pull-quote — Sky Blue rule, display weight. The layout of a feature
+   opening. No picture: this is where the page says something in words.
 
-   `id` is the section's anchor (the nav's "Who We Are" lands here);
-   `scroll-mt` keeps the fixed header off its heading when it does. */
-export default function StatementSplit({ id, kicker, heading, body }) {
+   `id` is the section's anchor (the nav's "Who We Are" lands here). */
+export default function StatementSplit({ id, index, kicker, heading, body, tone = "white", highlight }) {
   const headingId = useId();
+  const [first, ...rest] = body;
 
   return (
-    <section id={id} aria-labelledby={headingId} className="scroll-mt-[var(--header-h)] py-20 md:py-28">
-      <Container className="grid gap-8 lg:grid-cols-[7fr_5fr] lg:gap-20">
-        <SectionHeading id={headingId} kicker={kicker} heading={heading} className="reveal" />
-        <div className="reveal lg:pt-12">
-          {body.map((text) => (
-            <p
-              key={text}
-              className="mt-5 text-[length:var(--text-subheading)] leading-subheading tracking-subheading text-graphite first:mt-0 first:text-bumble-ink"
-            >
+    <Section id={id} tone={tone} pad="lg" aria-labelledby={headingId}>
+      <div className="grid gap-12 lg:grid-cols-[6fr_5fr] lg:gap-20">
+        <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} highlight={highlight} size="billboard" />
+        <div data-anim="sequence" className="lg:pt-12">
+          {first && (
+            <p data-anim-item data-anim="soft" className="border-l-[6px] border-pop pl-6 text-[clamp(1.375rem,2.2vw,1.75rem)] font-bold leading-snug text-fg">
+              {first}
+            </p>
+          )}
+          {rest.map((text) => (
+            <p key={text} data-anim-item data-anim="soft" className="mt-6 max-w-[58ch] text-[19px] leading-relaxed text-copy">
               {text}
             </p>
           ))}
         </div>
-      </Container>
-    </section>
+      </div>
+    </Section>
   );
 }

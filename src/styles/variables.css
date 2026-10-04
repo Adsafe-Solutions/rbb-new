@@ -21,11 +21,13 @@
   --color-onyx: #3a3a3a;
   --color-trust-blue: #10437c;
   --color-growth-green: #5cb85c;
+  --color-night: #0a2647; /* ink ON Sky Blue only — see theme.css */
+  --color-paper: #f5efe6; /* the page's ground — see theme.css */
   --color-alert: #b3261e; /* form errors only — see theme.css */
 
   /* Typography — families */
   --font-bumblesans:
-    "Satoshi", "DM Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "DM Sans", "DM Sans Fallback", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, sans-serif;
 
   /* The accent face. One line of copy uses it — the signature beside the
@@ -55,12 +57,21 @@
   --leading-display: 1;
   --tracking-display: 1.36px;
 
+  /* The poster scale — see theme.css. */
+  --text-poster: clamp(2.75rem, 7.4vw, 6.5rem);
+  --text-billboard: clamp(2.5rem, 6.4vw, 5.25rem);
+  --text-title: clamp(2.125rem, 4.6vw, 3.75rem);
+  --text-card: clamp(1.375rem, 2.2vw, 1.875rem);
+  --text-figure: clamp(3.75rem, 9vw, 8rem);
+  --text-meta: 13px;
+
   /* Typography — weights. 400/500 body and nav, 600 emphasis, 700 display.
      There is no 300 in this system and no size below 15px. */
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
+  --font-weight-black: 900; /* display type only — the `type-*` utilities */
 
   /* Spacing. Named in px here because these are safe as plain custom
      properties — it is only `--spacing-<key>` INSIDE @theme that redefines
@@ -83,31 +94,57 @@
   --card-padding: 32px;
   --element-gap: 24px;
 
+  /* Hard offsets — how far a card's flat shadow sits down and to the
+     right of it, and the border that goes with it. Three sizes, by how
+     much the object matters: a chip or stamp, a card, a feature. The
+     `cast` utilities in index.css are the only things that read these. */
+  --offset-sm: 3px;
+  --offset: 6px;
+  --offset-lg: 10px;
+  --edge: 2px;
+
   /* Radius */
   --radius-lg: 9px;
   --radius-2xl: 16px;
-  --radius-3xl: 24px;
   --radius-full: 1000px;
 
-  /* Named radii — the element each value belongs to, so a component can be
-     read back against design/DESIGN.md without decoding the t-shirt size. */
-  --radius-nav: 16px;
-  --radius-cards: 24px;
-  --radius-badges: 1000px;
-  --radius-buttons: 16px;
+  /* Named radii. Cards and photographs 16px (--radius-2xl), buttons and
+     fields 12px (Tailwind's rounded-xl), stamps and highlighted words
+     9px, the header pill and chips full. Hand-written CSS reads this one;
+     the rest are utilities. */
   --radius-small-elements: 9px;
 
-  /* Shadow — the one approved elevation */
-  --shadow-sm: rgba(58, 58, 58, 0.12) 0px 1px 8px 0px;
+  /* No soft shadow: depth is a hard offset (--offset-*, above). Surfaces
+     are the tones in index.css (`data-tone`), not tokens here. */
 
-  /* Surfaces, in the order they step forward from the page */
-  --surface-page-canvas: #ffffff;
-  --surface-soft-card: #f5f7fa;
-  --surface-pollen-frame: #f5f7fa;
-  --surface-honey-band: #00adef;
+  /* Header height, read by the hero's top padding and by scroll offsets —
+     nothing sets a header height of its own, so this is the only place it
+     changes. The header is a floating pill: 60px of bar with 12px of
+     page showing above and below it, so the space it needs is 84px. */
+  --header-h: 84px;
 
-  /* Header height, read by the hero's top padding and by scroll offsets. */
-  --header-h: 96px;
+  /* Motion. The CSS half of the vocabulary in src/animations/config.js
+     — the hover and focus transitions that are plain CSS, where the
+     JavaScript half covers scroll, text and image motion. The two
+     mirror each other: change a value and change it in both.
+
+     ⚠ NOT in theme.css, and NOT named `--ease-*` or `--duration-*`.
+     Tailwind v4 owns both namespaces: `--ease-out` inside @theme
+     silently redefines the `ease-out` UTILITY for the whole app, the
+     same trap `--spacing-8` sets for `p-8` (see theme.css). The
+     `--motion-` prefix collides with nothing.
+
+     One curve for the site. It is the shape the reveal and the panel
+     entrance have always used — a long, soft settle with no overshoot
+     — and GSAP's `power3.out` is the same curve, so hand-written CSS
+     and the animation engine agree. */
+  --motion-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  /* The print pass only (index.css): quicker off the mark, so the bar
+     reads as a stroke rather than a slide. */
+  --motion-ease-print: cubic-bezier(0.3, 1, 0.4, 1);
+  --motion-micro: 200ms; /* a control acknowledging a pointer */
+  --motion-hover: 350ms; /* a card answering a hover */
+  --motion-reveal: 700ms; /* a block of content arriving */
 
   /* Gaps between cards — THE rule for the space between sibling cards,
      used through the gap-cards / gap-tiles / gap-stack utilities in

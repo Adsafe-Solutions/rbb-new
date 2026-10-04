@@ -29,8 +29,8 @@ import { createHash } from "node:crypto";
 /* Third-party origins the published pages may use, by what for. From the
    technology audit (docs/TECHNOLOGY_AUDIT.md): fonts only. */
 export const APPROVED_ORIGINS = {
-  style: ["https://api.fontshare.com", "https://fonts.googleapis.com"],
-  font: ["https://cdn.fontshare.com", "https://fonts.gstatic.com"],
+  style: ["https://fonts.googleapis.com"],
+  font: ["https://fonts.gstatic.com"],
   /* Form endpoints (Document 21) are same-origin (/api/forms) and need
      nothing here. A cross-origin endpoint would be listed — after
      approval — and the build refuses one that is not. Resend is called
@@ -84,6 +84,25 @@ export function razorpayOrigins() {
 /* The page whose policy may carry RAZORPAY. */
 export const CHECKOUT_ROUTE = "/get-involved/donate";
 
+/* YouTube's privacy-enhanced player — the homepage video (content/
+   homepage.js `video`, components/VideoFeature). Allowed as a FRAME only,
+   and in only the homepage's own <meta> policy; the site-wide header
+   carries it too, because a browser enforces BOTH and a header cannot be
+   per page (the same arrangement as RAZORPAY).
+   Nothing loads from it until a visitor presses play: the page shows a
+   local poster and a button, and the iframe is created on click — so no
+   third-party request or cookie on page load (smoke test, Document 17).
+   `features` are what the player needs to work as a player (autoplay
+   after the click, fullscreen, and picture-in-picture, which it probes
+   for and logs a console violation without); Permissions-Policy grants
+   exactly those
+   to this origin and still denies them to every other one. */
+export const VIDEO = {
+  frame: ["https://www.youtube-nocookie.com"],
+  features: ["autoplay", "fullscreen", "picture-in-picture"],
+};
+export const VIDEO_ROUTE = "/";
+
 const sha256 = (text) =>
   `'sha256-${createHash("sha256").update(text, "utf8").digest("base64")}'`;
 
@@ -123,8 +142,9 @@ export function collectInline(htmlDocuments) {
    `checkout` adds RAZORPAY (the donation page, when checkout is on). */
 export function contentSecurityPolicy(
   { scripts, styles },
-  { forMeta = false, checkout = false } = {}
+  { forMeta = false, checkout = false, video = false } = {}
 ) {
+  const frames = [...(checkout ? RAZORPAY.frame : []), ...(video ? VIDEO.frame : [])];
   const directives = [
     ["default-src", "'self'"],
     ["script-src", "'self'", ...scripts.map(sha256), ...(checkout ? RAZORPAY.script : [])],
@@ -153,7 +173,7 @@ export function contentSecurityPolicy(
     ["manifest-src", "'self'"],
     ["media-src", "'none'"],
     ["object-src", "'none'"],
-    ["frame-src", ...(checkout ? RAZORPAY.frame : ["'none'"])],
+    ["frame-src", ...(frames.length ? frames : ["'none'"])],
     ["worker-src", "'none'"],
     ["base-uri", "'self'"],
     ["form-action", "'self'"],
@@ -199,15 +219,17 @@ const PERMISSIONS = [
    before. Also with checkout: Cross-Origin-Opener-Policy relaxes to
    same-origin-allow-popups, because some payment methods open a window
    from Checkout that must be able to report back. */
-export function securityHeaders(inline, { reportOnly = false, checkout = false } = {}) {
-  const csp = contentSecurityPolicy(inline, { checkout });
+export function securityHeaders(inline, { reportOnly = false, checkout = false, video = false } = {}) {
+  const csp = contentSecurityPolicy(inline, { checkout, video });
+  const permission = (f) =>
+    video && VIDEO.features.includes(f) ? `${f}=(self "${VIDEO.frame[0]}")` : `${f}=()`;
   return {
     "/*": {
       [reportOnly ? "Content-Security-Policy-Report-Only" : "Content-Security-Policy"]:
         csp,
       "X-Content-Type-Options": "nosniff",
       "Referrer-Policy": "strict-origin-when-cross-origin",
-      "Permissions-Policy": PERMISSIONS.map((f) => `${f}=()`).join(", "),
+      "Permissions-Policy": PERMISSIONS.map(permission).join(", "),
       "X-Frame-Options": "DENY",
       "Cross-Origin-Opener-Policy": checkout ? "same-origin-allow-popups" : "same-origin",
       "Cross-Origin-Resource-Policy": "same-origin",

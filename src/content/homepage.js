@@ -28,30 +28,46 @@ import { RBB_PHOTOS as PHOTOS, WORKING_PHOTOS } from "./photos.js";
 
 export const HOMEPAGE = {
   /* 01 — Hero.
-     Headline: SOURCE (presentation and annual report).
-     Supporting copy: WORKING. "Support Our Mission" goes to the Get
+     Headline and supporting line: PROPOSED — the direction given in the
+     site owner's content brief (2026-10-04), written as general copy: no
+     place, figure or programme is named. The brief's own wording,
+     "Creating opportunities. Strengthening communities. Changing lives.",
+     does not fit the poster scale: OPPORTUNITIES. and STRENGTHENING are
+     each wider than a 320px screen, and a word cannot wrap — so the same
+     three ideas, in words that fit. The annual report's own
+     headline, "Building Hope. Creating Change. Transforming Lives.", is
+     the SOURCE alternative; RBB chooses between them (decision D8).
+     "Get Involved" goes to the Get
      Involved hub rather than straight to Donate: the hero should not open
      on a donation-only message. */
   hero: {
-    headline: ["Building Hope.", "Creating Change.", "Transforming Lives."],
-    body: "Demo text — We work alongside communities to open up education, health, livelihoods and support, so that every person has the chance to thrive.",
+    /* The eyebrow over the headline. RBB's own name and nothing else —
+       an editorial masthead line, not a claim. Deliberately not a
+       strapline: the supplied materials carry none, and a hero is the
+       last place to put words nobody has approved. */
+    kicker: BRAND.fullName,
+    headline: ["Opportunity for all.", "Stronger communities.", "Changing lives."],
+    body: "Rising Beyond Borders works alongside communities to widen access to learning, wellbeing and fair livelihoods — so that every person has a real chance to build a safer, healthier future.",
     ctas: {
       primary: { label: "Explore Our Work", to: "/work" },
-      secondary: { label: "Support Our Mission", to: "/get-involved" },
+      secondary: { label: "Get Involved", to: "/get-involved" },
     },
     image: PHOTOS.kids,
   },
 
   /* 02 — Who We Are.
-     Body: SOURCE — the annual report's own description, as Document 02
-     quotes it. Mission, vision, values and team belong on /about. */
+     First paragraph: SOURCE — the annual report's own description, as
+     Document 02 quotes it. Second: PROPOSED — RBB's inclusive, non-
+     religious position as the content brief states it; no place or
+     figure. Mission, vision, values and team belong on /about. */
   whoWeAre: {
     kicker: "Who we are",
     heading: "Change begins with people.",
     body: [
       `${BRAND.fullName} is a non-profit dedicated to empowering communities and creating sustainable solutions to pressing challenges.`,
+      "We serve people and communities regardless of religion, nationality, ethnicity, gender, background or belief — because where someone starts in life should never decide how far they can go.",
     ],
-    cta: { label: "Learn About Us", to: "/about" },
+    cta: { label: "About Us", to: "/about" },
     image: PHOTOS.distribution,
     /* The collage presentation (components/LegacyCollage). The headline is
        the heading above, split only for its two-colour setting. No badge:
@@ -75,11 +91,16 @@ export const HOMEPAGE = {
     heading: "Where we focus our work",
     /* Straight from the Our Work data, so a description is written once
        and the homepage and the program pages cannot disagree. */
-    items: PROGRAMS.map(({ title, description, to, icon }) => ({ title, description, to, icon })),
+    items: PROGRAMS.map(({ title, description, to, icon }) => ({
+      title,
+      description,
+      to,
+      icon,
+    })),
   },
 
   /* 04 — Our Approach.
-     PENDING. Listen → Partner → Act → Sustain is a structure Document 02
+     Intro: PROPOSED general copy. Listen → Partner → Act → Sustain is a structure Document 02
      suggested, not a framework RBB has published, and Document 19 forbids
      presenting it as RBB's methodology before approval. The steps live
      once, in content/impact.js (`proposedFramework`), and appear here only
@@ -87,7 +108,8 @@ export const HOMEPAGE = {
   approach: {
     kicker: "Our approach",
     heading: "Creating change that lasts.",
-    intro: "Demo text — We listen first, work with local partners, act on what communities ask for, and build things that last after we step back.",
+    intro:
+      "Lasting change is built with communities, not for them. We start by listening, respond to the priorities people set for themselves, and favour solutions that keep working long after a project ends.",
     steps: approachSteps(),
     cta: { label: "Learn How We Work", to: "/impact/our-approach" },
   },
@@ -97,6 +119,9 @@ export const HOMEPAGE = {
   impact: {
     kicker: "Our impact",
     heading: "Together, we create impact.",
+    /* PROPOSED — qualitative, so the section says something true while
+       every figure beside it is still pending verification. */
+    body: "Impact begins with listening, continues through collaboration, and grows when people have the opportunity to shape their own futures.",
     /* The same figures /impact shows, from content/impact.js — one copy,
        with their verification status recorded there. */
     metrics: IMPACT.metrics,
@@ -119,9 +144,13 @@ export const HOMEPAGE = {
     /* The projects content/work.js marks `featured` — the same records the
        project pages show, never a second copy of their facts. */
     items: PROJECTS.filter((project) => project.featured).map((project) => ({
+      slug: project.slug,
+      releaseMarker: project.releaseMarker,
       title: project.title,
       description: project.description,
       location: project.location,
+      status: project.status,
+      program: project.program,
       image: project.image,
       to: projectPath(project),
     })),
@@ -133,6 +162,95 @@ export const HOMEPAGE = {
     fallback: "Featured work to be provided by Rising Beyond Borders.",
     placeholderLabel: "Featured work",
     cta: { label: "Explore All Projects", to: "/work/projects" },
+  },
+
+  /* 05 — Progress timeline (components/ProgressTimeline): the events so
+     far, oldest first, as cards that travel along a timeline as the page
+     scrolls. Each card is a YouTube Short (played in place) with its
+     date, program and one line. Replaces the featured-work grid on the
+     homepage. PROPOSED heading copy.
+
+     ⚠ SAMPLE EVENTS. Every event, date and line below is a stand-in
+     (decision D13), and every video is a NASA public Short chosen only
+     because it is vertical and implies no organisation's endorsement —
+     not RBB footage. `releaseMarker` is INTERNAL (never shown) and keeps
+     release:check blocked until RBB supplies its real milestones and
+     Shorts. Posters are local photographs, so nothing loads from YouTube
+     until a visitor presses play. */
+  timeline: {
+    kicker: "Our progress",
+    heading: "Work that reaches communities.",
+    cta: { label: "Explore All Projects", to: "/work/projects" },
+    playLabel: "Play video",
+    viewportLabel: "Timeline of events — scroll sideways for more",
+    events: [
+      {
+        id: "reading-clubs-open",
+        date: "2026-03-14",
+        program: "education",
+        title: "Reading clubs open their doors",
+        summary: "Weekly after-school sessions begin, with books for every reading level.",
+        youtubeId: "QP5Fs3AYuWE",
+        videoTitle: "2026 Total Solar Eclipse Over Spain (NASA)",
+        poster: WORKING_PHOTOS.readingCircle,
+        releaseMarker: "Sample event — stand-in milestone and video",
+      },
+      {
+        id: "first-health-day",
+        date: "2026-04-22",
+        program: "health-wellbeing",
+        title: "A first community health day",
+        summary: "Basic checks, practical advice and referrals, brought closer to home.",
+        youtubeId: "myZ9kn9MIWQ",
+        videoTitle: "2026 Solar Eclipse at 50,000 Feet (NASA)",
+        poster: WORKING_PHOTOS.checkup,
+        releaseMarker: "Sample event — stand-in milestone and video",
+      },
+      {
+        id: "tailoring-course",
+        date: "2026-05-18",
+        program: "livelihoods",
+        title: "The tailoring course welcomes its first group",
+        summary: "Hands-on skills that can be practised close to home.",
+        youtubeId: "MT8tg5b3b8E",
+        videoTitle: "Artemis II Watches Earth Set Behind the Moon (NASA)",
+        poster: WORKING_PHOTOS.sewing,
+        releaseMarker: "Sample event — stand-in milestone and video",
+      },
+      {
+        id: "support-packs",
+        date: "2026-06-09",
+        program: "community-support",
+        title: "Essential support packs reach households",
+        summary: "Volunteers plan and deliver support for families facing a hard month.",
+        youtubeId: "l6PAhdKxa2c",
+        videoTitle: "Six Years of NASA's Mars Curiosity Rover (NASA)",
+        poster: WORKING_PHOTOS.packing,
+        releaseMarker: "Sample event — stand-in milestone and video",
+      },
+      {
+        id: "water-points",
+        date: "2026-07-15",
+        program: "health-wellbeing",
+        title: "Water points back in use",
+        summary: "Repairs and community care keep clean water close to home.",
+        youtubeId: "yuT7iQC-yro",
+        videoTitle: "Our Shared Spaceship: Earth (NASA)",
+        poster: WORKING_PHOTOS.waterPump,
+        releaseMarker: "Sample event — stand-in milestone and video",
+      },
+      {
+        id: "information-day",
+        date: "2026-08-27",
+        program: "community-support",
+        title: "A community information day",
+        summary: "Local services and families meet in one welcoming place.",
+        youtubeId: "43mvpb1Ujpo",
+        videoTitle: "Artemis II Crew's First Images from Space (NASA)",
+        poster: WORKING_PHOTOS.gathering,
+        releaseMarker: "Sample event — stand-in milestone and video",
+      },
+    ],
   },
 
   /* 07 — Stories of Change.
@@ -151,17 +269,38 @@ export const HOMEPAGE = {
     cta: { label: "Explore All Stories", to: "/stories" },
   },
 
+  /* Video — a film in a tilted card, played in place (components/
+     VideoFeature). PROPOSED copy.
+
+     ⚠ SAMPLE: the film is "Big Buck Bunny" (Blender Foundation, openly
+     licensed), a stand-in chosen because it implies no organisation's
+     endorsement — not an RBB film. Replace `youtubeId`, `title` and
+     `poster` with RBB's own video; `releaseMarker` is INTERNAL (never
+     shown) and keeps release:check blocked until then. The poster is a
+     local photograph, so nothing loads from YouTube until a visitor
+     presses play. */
+  video: {
+    kicker: "Watch",
+    heading: "See the work up close.",
+    body: "Short films about the people and communities at the heart of our work.",
+    youtubeId: "aqz-KE-bpKQ",
+    title: "Big Buck Bunny",
+    playLabel: "Play video",
+    poster: WORKING_PHOTOS.gathering,
+    releaseMarker: "Sample video — stand-in film until RBB supplies its own",
+  },
+
   /* 08 — Transparency & Trust.
-     PENDING. The three rows are the kinds of document Document 02 names;
+     Body: PROPOSED. The three rows are the kinds of document Document 02 names;
      each says "to be provided" until the document exists. No registration,
      audit, percentage or policy claim goes here until RBB confirms it. */
   transparency: {
     kicker: "Transparency",
     heading: "Trust matters.",
-    body: "Demo text — Reports, financial information and governance, published so supporters can see how the work is run.",
+    body: "Supporters should always be able to see how our work is run and how resources are used.",
     links: SITE.transparencyLinks,
     linkMeta: SITE.transparencyLinkMeta,
-    cta: { label: "View Transparency", to: "/about/transparency" },
+    cta: { label: "View Transparency", to: "/about#transparency" },
   },
 
   /* 09 — Get Involved. The paths themselves, and their approval status
@@ -182,18 +321,23 @@ export const HOMEPAGE = {
       heading: path.title,
       body: path.shortDescription,
       cta: { label: path.ctaLabel, to: path.to },
-      ...{ donate: WORKING_PHOTOS.aidBoxes, volunteer: WORKING_PHOTOS.packing, partner: WORKING_PHOTOS.gathering, fundraise: WORKING_PHOTOS.foodPrep }[path.id],
+      ...{
+        donate: WORKING_PHOTOS.aidBoxes,
+        volunteer: WORKING_PHOTOS.packing,
+        partner: WORKING_PHOTOS.gathering,
+        fundraise: WORKING_PHOTOS.foodPrep,
+      }[path.id],
     })),
   },
 
   /* 10 — Final CTA.
      Heading: Document 02's, adapted from the annual report's "Together, we
-     rise beyond borders for a better tomorrow." Supporting copy: WORKING. */
+     rise beyond borders for a better tomorrow." Supporting copy: PROPOSED. */
   finalCta: {
     heading: "Together, we can rise beyond borders.",
-    body: "Demo text — Give, volunteer, partner or fundraise — every contribution moves the work forward.",
+    body: "Give, volunteer, partner or fundraise — there is a place for everyone in work that opens up opportunity and strengthens communities.",
     ctas: {
-      primary: { label: "Support Our Mission", to: "/get-involved" },
+      primary: { label: "Get Involved", to: "/get-involved" },
       secondary: { label: "Explore Our Work", to: "/work" },
     },
     image: PHOTOS.elder,

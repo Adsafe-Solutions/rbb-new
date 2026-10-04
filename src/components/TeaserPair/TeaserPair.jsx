@@ -1,60 +1,46 @@
 import { useId } from "react";
-import { cx } from "../../lib/cx.js";
 import Button from "../Button/Button.jsx";
-import Container from "../Container/Container.jsx";
-import SectionHeading from "../SectionHeading/SectionHeading.jsx";
+import PosterCard from "../PosterCard/PosterCard.jsx";
+import Section from "../Section/Section.jsx";
 
-/* Two short sections side by side, each pointing to a page of its own —
-   on /impact, "Where we work" and "Our approach". Each panel is its own
-   <section> with its own <h2>, so the page outline lists both; they share
-   a row because each is a doorway, not a destination.
+/* Two doorways side by side, each a poster pointing to a page of its own
+   — on /impact, "Where we work" and "Our approach". Each poster is its
+   own <section> with its own <h2>, so the page outline lists both; they
+   share a row because each is a doorway, not a destination.
+
+   One on Deep Trust Blue, one on Sky Blue — the same object in the two
+   brand inks — and the second sits lower, so the pair reads as two
+   posters pasted up rather than two columns.
 
    A teaser is { kicker, heading, body?, empty, cta }: `body` when RBB has
-   supplied the summary, `empty` until then. The first panel sits on Deep
-   Trust Blue, the second on Light Gray. */
-function Teaser({ teaser, tone }) {
+   supplied the summary, `empty` until then. */
+function Teaser({ teaser, tone, tilt }) {
   const headingId = useId();
-  const blue = tone === "blue";
 
   return (
-    <section
-      aria-labelledby={headingId}
-      className={cx(
-        /* `min-w-0`: a grid item will not shrink below its content by
-           default, and on a 320px phone that content includes a button. */
-        "reveal flex min-w-0 flex-col rounded-3xl p-6 sm:p-10 md:p-12",
-        blue ? "rounded-tl-[5rem] bg-trust-blue" : "rounded-br-[5rem] bg-mist"
-      )}
-    >
-      <SectionHeading
-        id={headingId}
-        kicker={teaser.kicker}
-        heading={teaser.heading}
-        tone={blue ? "invert" : "default"}
-      />
-      <p className={cx("mt-5 flex-1 text-[length:var(--text-body)]", blue ? "text-paper-white/85" : "text-graphite")}>
-        {teaser.body ?? teaser.empty}
-      </p>
-      <Button
-        variant={blue ? "inverse" : "outline"}
-        to={teaser.cta.to}
-        /* Allowed to wrap: the site's buttons are nowrap, and "Explore
-           Where We Work" is wider than this panel on the narrowest phones. */
-        className="mt-8 self-start whitespace-normal! text-center"
-      >
+    <PosterCard as="section" aria-labelledby={headingId} tone={tone} tilt={tilt} kicker={teaser.kicker} className="flex min-w-0 flex-col">
+      <h2 id={headingId} className="type-title">
+        {teaser.heading}
+      </h2>
+      <p className="mt-5 max-w-[46ch] text-copy">{teaser.body ?? teaser.empty}</p>
+      <Button variant="ink" to={teaser.cta.to} className="mt-8 self-start whitespace-normal! text-left">
         {teaser.cta.label}
       </Button>
-    </section>
+    </PosterCard>
   );
 }
 
-export default function TeaserPair({ first, second }) {
+export default function TeaserPair({ first, second, tone = "paper" }) {
   return (
-    <div className="py-20 md:py-28">
-      <Container className="grid gap-cards lg:grid-cols-2">
-        <Teaser teaser={first} tone="blue" />
-        <Teaser teaser={second} tone="mist" />
-      </Container>
-    </div>
+    <Section tone={tone} pad="lg">
+      <div className="grid gap-12 lg:grid-cols-2 lg:gap-10">
+        <div className="reveal">
+          <Teaser teaser={first} tone="ink" tilt="l" />
+        </div>
+        <div className="reveal lg:mt-16">
+          <Teaser teaser={second} tone="accent" tilt="r" />
+        </div>
+      </div>
+    </Section>
   );
 }

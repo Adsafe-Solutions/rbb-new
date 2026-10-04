@@ -18,12 +18,12 @@ configuration. Each fails closed when either is missing.
 
 - [ ] The production domain and host are selected and recorded (docs/DEPLOYMENT.md → Ownership).
 - [ ] HTTPS, HTTP → HTTPS, host security headers, permanent redirects and a true 404 are verified with `npm run smoke`.
-- [ ] Required RBB content and the Privacy, Terms and Accessibility policies are approved and published.
+- [ ] Required RBB content and the Privacy and Terms policies are approved and published.
 - [ ] Image ownership and licensing are resolved (docs/IMAGE_INVENTORY.md).
 - [ ] Resend: the planning key has been **revoked**; a new key is stored only in the host's secrets; the sending domain, From address and recipients are verified; a staging delivery has been received.
 - [ ] Razorpay (only if donations launch): test flows and webhooks pass, the Checkout CSP has been re-verified, and live keys are in the host's secrets only.
 - [ ] Rate limiting suits the host (shared limiter, or a confirmed single instance).
-- [ ] `npm run build` passes the release gate, the artifact contains no demo content, and `npm run release:status` shows the target state.
+- [ ] `npm run release:check` reports **READY** for the release candidate (it builds, tests and checks the artifact, the production environment and the approvals).
 - [ ] The production smoke test passes.
 
 ## Launch-day sequence (§15)
@@ -37,7 +37,7 @@ configuration. Each fails closed when either is missing.
 | 5 | Production secrets and variables set in the host's secret store — never in the repo or in `VITE_*` | `server/env.example` for names | — |
 | 6 | Resend domain, sender and recipients verified | Resend dashboard; staging delivery received | — |
 | 7 | Razorpay configured, if donations launch | docs/DONATIONS.md checklist | — |
-| 8 | Build the release candidate with `VITE_SITE_URL=https://<domain>`, then run every gate | `npm ci && npm run build && npm run validate:content && npm run test:server && npm run test:release && npm run release:status` | all pass |
+| 8 | Build the release candidate with `VITE_SITE_URL=https://<domain>` and run the final gate | `npm ci && npm run release:check -- --env-file=<production server env>` | **READY** |
 | 9 | Package and deploy **that** artifact | `npm run release:package` → upload `dist/` | artifact digest |
 | 10 | Production smoke test | `npm run smoke -- --url=https://<domain>` then again with `--browser` (via `npx -p playwright`) | pass |
 | 11 | Robots, sitemap and canonicals point at the domain | covered by the smoke test | — |

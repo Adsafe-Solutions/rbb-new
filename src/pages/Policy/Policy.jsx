@@ -1,23 +1,26 @@
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import PageHeader from "../../components/PageHeader/PageHeader.jsx";
-import Container from "../../components/Container/Container.jsx";
+import Section from "../../components/Section/Section.jsx";
+import StepCard from "../../components/StepCard/StepCard.jsx";
+import LinkChips from "../../components/LinkChips/LinkChips.jsx";
 import EmptyPanel from "../../components/EmptyPanel/EmptyPanel.jsx";
-import useReveal from "../../hooks/useReveal.js";
 import {
   POLICY_COPY,
+  isFinalPolicy,
   isPublished,
   policyById,
   policyByRoute,
   policyContact,
 } from "../../content/index.js";
 
-/* /privacy, /terms, /accessibility — one template, filled from the
+/* /privacy and /terms — one template, filled from the
    policy's record in content/policies.js (Document 13):
 
-     pending    mist band  PageHeader  the title
-                white      EmptyPanel  the neutral pending line
-     published  mist band  PageHeader  title and RBB's own dates
-                white      contents + the sections, as supplied
+     pending    paper  PageHeader  the title
+                white  EmptyPanel  the neutral pending line
+     published  paper  PageHeader  title and RBB's own dates
+                white  a sticky contents rail + the sections as numbered
+                       sheets, as supplied
                            the verified contact, if the policy names one
                            links to the other PUBLISHED policies
 
@@ -33,20 +36,21 @@ const formatDate = (iso) =>
   );
 
 export default function Policy() {
-  useReveal();
   const { pathname } = useLocation();
   const policy = policyByRoute(pathname);
   const t = POLICY_COPY;
 
-  if (!isPublished(policy)) {
+  /* Pending — or published but still WORKING text (isFinalPolicy): the
+     demo Privacy and Terms text is never shown as if it were RBB's
+     policy. The page keeps its route and its links; it shows the neutral
+     pending line, and content/seo.js keeps it out of the index. */
+  if (!isFinalPolicy(policy)) {
     return (
       <>
         <PageHeader title={policy.title} kicker={t.kicker} />
-        <section aria-label={policy.title} className="py-20 md:py-28">
-          <Container>
-            <EmptyPanel text={policy.pending} className="reveal" />
-          </Container>
-        </section>
+        <Section tone="white" pad="lg" aria-label={policy.title}>
+          <EmptyPanel text={policy.pending} className="reveal" />
+        </Section>
       </>
     );
   }
@@ -62,10 +66,10 @@ export default function Policy() {
     <>
       <PageHeader title={policy.title} kicker={t.kicker}>
         {dates.length > 0 && (
-          <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-graphite">
+          <dl className="type-meta mt-8 flex flex-wrap gap-x-8 gap-y-2 text-quiet">
             {dates.map(([label, iso]) => (
               <div key={label} className="flex gap-2">
-                <dt className="font-semibold text-bumble-ink">{label}</dt>
+                <dt className="text-fg">{label}</dt>
                 <dd>
                   <time dateTime={iso}>{formatDate(iso)}</time>
                 </dd>
@@ -75,85 +79,90 @@ export default function Policy() {
         )}
       </PageHeader>
 
-      <Container className="grid gap-12 py-20 md:py-28 lg:grid-cols-[3fr_8fr] lg:gap-16">
-        <nav aria-label={t.contents} className="lg:sticky lg:top-[calc(var(--header-h)+2rem)] lg:self-start">
-          <p className="text-[length:var(--text-caption)] font-semibold uppercase tracking-[0.16em] text-trust-blue">
-            {t.contents}
-          </p>
-          <ol className="mt-4 grid gap-2">
-            {policy.sections.map((s) => (
-              <li key={s.id}>
-                <a href={`#${s.id}`} className="text-trust-blue underline-offset-4 hover:underline">
-                  {s.heading}
-                </a>
-              </li>
-            ))}
-          </ol>
-        </nav>
-
-        <article className="min-w-0 max-w-prose">
-          {policy.intro?.map((text) => (
-            <p key={text} className="mt-4 text-[length:var(--text-subheading)] leading-subheading tracking-subheading first:mt-0">
-              {text}
-            </p>
-          ))}
-
-          {policy.sections.map((s) => (
-            <section key={s.id} id={s.id} aria-labelledby={`${s.id}-heading`} className="mt-12 scroll-mt-[var(--header-h)] first:mt-0">
-              <h2
-                id={`${s.id}-heading`}
-                className="font-bold text-[length:var(--text-heading-sm)] leading-heading-sm tracking-heading-sm"
-              >
-                {s.heading}
-              </h2>
-              {(s.body ?? []).map((text) => (
-                <p key={text} className="mt-4">
-                  {text}
-                </p>
-              ))}
-              {s.items?.length > 0 && (
-                <ul className="mt-4 list-disc space-y-2 pl-6">
-                  {s.items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          ))}
-
-          {contact && (
-            <section aria-labelledby="policy-contact" className="mt-12 rounded-3xl bg-mist p-6 sm:p-8">
-              <h2 id="policy-contact" className="font-bold">
-                {t.contact}
-              </h2>
-              <p className="mt-2">
-                {contact.href ? (
-                  <a href={contact.href} className="break-words font-semibold text-trust-blue underline underline-offset-4">
-                    {contact.value}
+      <Section tone="white" pad="lg">
+        <div className="grid gap-12 lg:grid-cols-[3fr_8fr] lg:gap-16">
+          <nav aria-label={t.contents} className="lg:sticky lg:top-[calc(var(--header-h)+2rem)] lg:self-start">
+            <p className="type-meta text-fg">{t.contents}</p>
+            <ol className="mt-5 grid gap-1 border-l-2 border-edge">
+              {policy.sections.map((s, i) => (
+                <li key={s.id}>
+                  <a href={`#${s.id}`} className="-ml-0.5 flex gap-3 border-l-2 border-transparent py-1.5 pl-4 text-fg transition-colors hover:border-bumble-honey">
+                    <span aria-hidden="true" className="type-meta pt-0.5 text-quiet">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="underline-offset-4 hover:underline">{s.heading}</span>
                   </a>
-                ) : (
-                  contact.value
-                )}
-              </p>
-            </section>
-          )}
+                </li>
+              ))}
+            </ol>
+          </nav>
 
-          {related.length > 0 && (
-            <nav aria-label={t.related} className="mt-12 border-t border-mist pt-8">
-              <p className="font-semibold">{t.related}</p>
-              <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-2">
-                {related.map((p) => (
-                  <li key={p.id}>
-                    <Link to={p.route} className="text-trust-blue underline underline-offset-4">
-                      {p.title}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          )}
-        </article>
-      </Container>
+          {/* The policy as a stack of numbered sheets — the clauses of a
+              document, each on its own page — square to the page and at a
+              reading measure: this is text people read closely. */}
+          <article className="min-w-0 max-w-[46rem]">
+            {policy.intro?.map((text) => (
+              <p key={text} className="type-lead mt-4 border-l-4 border-pop pl-5 text-copy first:mt-0">
+                {text}
+              </p>
+            ))}
+
+            <div className="mt-10 grid gap-8">
+              {policy.sections.map((s, i) => (
+                <StepCard
+                  key={s.id}
+                  as="section"
+                  number={i + 1}
+                  id={s.id}
+                  aria-labelledby={`${s.id}-heading`}
+                  title={s.heading}
+                  headingAs="h2"
+                  headingId={`${s.id}-heading`}
+                  cast="sm"
+                  className="scroll-mt-[calc(var(--header-h)+1rem)]"
+                >
+                  {(s.body ?? []).map((text) => (
+                    <p key={text} className="mt-4 leading-relaxed text-copy first:mt-0">
+                      {text}
+                    </p>
+                  ))}
+                  {s.items?.length > 0 && (
+                    <ul className="mt-4 list-disc space-y-2 pl-6 text-copy marker:text-trust-blue">
+                      {s.items.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  )}
+                </StepCard>
+              ))}
+            </div>
+
+            {contact && (
+              <section aria-labelledby="policy-contact" data-tone="ink" className="mt-12 rounded-2xl p-6 sm:p-8">
+                <h2 id="policy-contact" className="type-meta">
+                  {t.contact}
+                </h2>
+                <p className="mt-3 text-[20px] font-extrabold">
+                  {contact.href ? (
+                    <a href={contact.href} className="break-words text-fg underline decoration-bumble-honey decoration-[3px] underline-offset-4">
+                      {contact.value}
+                    </a>
+                  ) : (
+                    contact.value
+                  )}
+                </p>
+              </section>
+            )}
+
+            {related.length > 0 && (
+              <nav aria-label={t.related} className="mt-12 border-t-2 border-edge pt-8">
+                <p className="type-meta text-fg">{t.related}</p>
+                <LinkChips className="mt-5" align="start" items={related.map((p) => ({ title: p.title, to: p.route }))} />
+              </nav>
+            )}
+          </article>
+        </div>
+      </Section>
     </>
   );
 }

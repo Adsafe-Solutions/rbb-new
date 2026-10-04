@@ -7,46 +7,78 @@
          reveal (.reveal in styles/index.css) only hides content under
          .js, so the pre-rendered HTML reads in full without JavaScript,
          and with it the fade-in starts from the same frame as before. -->
-    <script>document.documentElement.classList.add("js")</script>
+    <script>
+      document.documentElement.classList.add("js");
+      /* The visitor's saved colour theme, before first paint so the page
+         never flashes RBB's palette first — only while the theme switcher
+         is switched on (config/sections.js, VITE_THEME_SWITCHER). */
+      if ("%VITE_THEME_SWITCHER%" === "true") {
+        try {
+          var t = localStorage.getItem("rbb-theme");
+          if (t === "poster" || t === "midnight") document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      }
+    </script>
     <!-- The one description the supplied annual report confirms. Mirrors
          BRAND.summary in src/content/brand.js — change both together. -->
     <meta
       name="description"
       content="Rising Beyond Borders is a non-profit focused on empowering communities and creating sustainable solutions."
     />
-    <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+    <!-- The RBB mark as the browser's icon. Vite copies public/ to the
+         site root, so every path here is ABSOLUTE: the routes are nested
+         (/about-us/, /work/…), and a relative href would be looked for
+         inside whichever one the visitor landed on.
+
+         Four files because no single one covers the field: .ico is what
+         a legacy browser and some feed readers still ask for by name,
+         the SVG is what a current browser prefers (one file, crisp at
+         every size, from the tab to a pinned shortcut), the 96px PNG is
+         the fallback for anything that reads neither, and the
+         apple-touch-icon is what iOS uses when the site is saved to a
+         home screen — it ignores the others.
+
+         The manifest carries the installable-app icons and names, and
+         is a separate request, so it goes last. Both it and the images
+         are same-origin, which is all `img-src`/`manifest-src` allow
+         (scripts/security-policy.mjs). -->
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-96x96.png" type="image/png" sizes="96x96" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <!-- iOS reads this, not the manifest's short_name, for the label
+         under a saved home-screen icon. Mirrors BRAND.name. -->
+    <meta name="apple-mobile-web-app-title" content="RBB" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Satoshi is the brand typeface (RBB brand guidelines), free from
-         Fontshare. 900 is for the footer wordmark; there is no 600 in the
-         family, so `font-semibold` resolves to 700. -->
+    <!-- DM Sans is the RBB brand face, from Google Fonts. ONE request:
+         it used to be the fallback behind Satoshi, loaded off the
+         critical path, and both were being fetched on every page.
+
+         Render-blocking on purpose, as the brand face was: it is what
+         the whole site is set in, and `display=swap` means a slow
+         response shows the system fallback rather than nothing.
+
+         The roman axis only — no page sets italic — across 300–900,
+         which is every weight the site uses: `font-light` once,
+         `font-black` for the footer wordmark, the rest in between.
+         Google answers this with a single variable file per subset, so
+         the range costs no more than one static weight would.
+
+         ⚠ 600 is a REAL weight in this family. Satoshi had none, so
+         `font-semibold` used to resolve up to 700; it is genuinely
+         semibold now, and a step lighter than it was.
+
+         Dancing Script is not requested either: the one line that used
+         it (the bleed hero's signature) is not on any page, and a font
+         no page shows is third-party traffic for nothing. --font-script
+         in theme.css keeps its system fallbacks if the line returns. -->
     <link
-      href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300..900&display=swap"
       rel="stylesheet"
     />
-    <!-- DM Sans is the fallback the site was built on, kept next in the
-         stack in theme.css so a blocked Fontshare request still lands on
-         the geometric sans the layout was tuned for. A FALLBACK, so it no
-         longer blocks rendering: `media="print"` loads it at low priority
-         and src/main.jsx switches it on (`data-deferred-style`). Not an
-         inline onload handler: the Content Security Policy (Document 20)
-         allows no inline event handlers.
-         Dancing Script is no longer requested: the one line that used it
-         (the bleed hero's signature) is not on any page, and a font no
-         page shows is third-party traffic for nothing. --font-script in
-         theme.css keeps its system fallbacks if the line returns. -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;900&display=swap"
-      rel="stylesheet"
-      media="print"
-      data-deferred-style
-    />
-    <noscript>
-      <link
-        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;900&display=swap"
-        rel="stylesheet"
-      />
-    </noscript>
+    <!-- <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet"> -->
     <title>Rising Beyond Borders</title>
   </head>
   <body>

@@ -1,6 +1,5 @@
 import PageHero from "../../components/PageHero/PageHero.jsx";
 import Newsletter from "../../components/Newsletter/Newsletter.jsx";
-import useReveal from "../../hooks/useReveal.js";
 import { ZAKAT } from "../../content/index.js";
 
 /* /giving/zakat — a placeholder until RBB supplies and reviews its own
@@ -14,7 +13,6 @@ import { ZAKAT } from "../../content/index.js";
    components (FeatureGrid, ProjectGrid, NisabCallout, GetInvolved, Faq)
    are all still in the codebase for the redesign. */
 export default function Zakat() {
-  useReveal();
 
   return (
     <>

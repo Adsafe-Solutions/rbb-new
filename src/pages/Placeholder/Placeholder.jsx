@@ -38,7 +38,7 @@ export default function Placeholder({ page }) {
   return (
     <>
       <PageHeader title={title} parent={page?.parent}>
-        <p className="mt-4 max-w-prose text-[length:var(--text-subheading)] leading-subheading tracking-subheading text-graphite">
+        <p className="type-lead mt-7 max-w-[46ch] text-copy">
           {SITE.placeholder}
         </p>
       </PageHeader>

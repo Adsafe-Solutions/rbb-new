@@ -21,10 +21,11 @@
    claim; no volunteer eligibility, ages, locations, schedules, screening
    or training that claims to be RBB's real process; no partnership
    packages, tiers, named partners, benefits or pricing; no fundraising
-   platforms, rules, targets or approvals. The section text below is a
-   WORKING placeholder (Document 27), self-labelled "Demo —" throughout,
-   kept so each path's page has something to review; it is not RBB's
-   approved process. Donate itself stays "pending-review": giving is real
+   platforms, rules, targets or approvals. The "why" text and the general
+   lists below are PROPOSED copy (content brief, 2026-10-04) — what each
+   path is, never how it operates. Every operational section (roles,
+   eligibility, what to expect, how it works, rules, FAQs) shows its
+   pending line until RBB supplies it (decision D20). Donate itself stays "pending-review": giving is real
    money, and content/donation.js keeps it gated until RBB and the
    payment provider are verified (Document 22).
 
@@ -42,8 +43,6 @@ import { ORG_CONTACT } from "./contact.js";
    is left out entirely when `hideWhenEmpty` is set. */
 const section = (id, heading, empty, extra = {}) => ({ id, heading, empty, ...extra });
 
-const D = "Demo — ";
-
 export const GET_INVOLVED = {
   /* The four paths. Titles and addresses are the approved architecture;
      `shortDescription` is Document 06's own line for each (PENDING-REVIEW:
@@ -56,7 +55,7 @@ export const GET_INVOLVED = {
       slug: "donate",
       to: "/get-involved/donate",
       title: "Donate",
-      shortDescription: "Give financial support.",
+      shortDescription: "Support work that helps create opportunity, strengthen communities and build more sustainable futures.",
       icon: "donate",
       ctaLabel: "Donate",
       featured: true,
@@ -70,31 +69,35 @@ export const GET_INVOLVED = {
       slug: "volunteer",
       to: "/get-involved/volunteer",
       title: "Volunteer",
-      shortDescription: "Give time and skills.",
+      shortDescription: "Share your time, skills and experience to support meaningful community-focused work.",
       icon: "volunteer",
       ctaLabel: "Volunteer",
       status: "pending-review",
       metaDescription: "How to volunteer your time and skills with Rising Beyond Borders.",
       sections: [
         section("why", "Why volunteer", "Information on volunteering to be provided by Rising Beyond Borders.", {
-          body: `${D}Volunteers are at the heart of every project, from packing days to reading clubs.`,
+          body: "Volunteering is one of the most direct ways to support community-focused work. Volunteers bring time, energy and experience — and often find that they learn as much as they give. Whatever your background, your skills can help open up opportunity for others.",
         }),
-        section("ways", "Ways to volunteer", "Volunteer roles to be provided by Rising Beyond Borders.", {
-          items: [`${D}Packing and distribution days`, `${D}Reading club helpers`, `${D}Event support`, `${D}Skills-based volunteering (design, finance, IT)`],
-        }),
-        section("who", "Who can volunteer", "Volunteer eligibility to be provided by Rising Beyond Borders.", {
-          body: `${D}Anyone aged 18 or over; some roles welcome younger volunteers with a parent or guardian.`,
-        }),
-        section("expect", "What to expect", "Information on what volunteering involves to be provided by Rising Beyond Borders.", {
-          body: `${D}A short welcome session, a named contact, and roles that fit around your time.`,
-        }),
-        section("apply", "How to apply", null, { hideWhenEmpty: true }),
-        section("faq", "Frequently asked questions", "Volunteer questions and answers to be provided by Rising Beyond Borders.", {
-          faqs: [
-            { q: "How much time do I need to give? (demo)", a: "Demo answer — as little as one afternoon; many volunteers help once a month." },
-            { q: "Do I need experience? (demo)", a: "Demo answer — no; we explain everything on the day." },
+        /* Future-facing on purpose: no volunteer program has been
+           confirmed, so nothing here is an open role, a requirement, a
+           deadline or a response time. */
+        section("ways", "Opportunities may include", "Volunteer roles to be provided by Rising Beyond Borders.", {
+          body: "Depending on Rising Beyond Borders' programs and needs, volunteering could take several forms:",
+          items: [
+            "Practical help at community events and activities",
+            "Support for learning and reading activities",
+            "Skills-based help, such as communications, design, finance or planning",
+            "Helping to organise awareness and fundraising events",
           ],
         }),
+        section("who", "Who could take part", "Volunteer eligibility to be provided by Rising Beyond Borders.", {
+          body: "Rising Beyond Borders welcomes interest from people of every background. Anything a particular role needs — skills, time or location — will be set out with that role when it is published.",
+        }),
+        section("expect", "What happens next", "Information on what volunteering involves to be provided by Rising Beyond Borders.", {
+          body: "Each volunteer opportunity sets out what it involves and how to express interest. If you have a question in the meantime, get in touch through our Contact page.",
+        }),
+        section("apply", "How to apply", null, { hideWhenEmpty: true }),
+        section("faq", "Frequently asked questions", null, { hideWhenEmpty: true }),
       ],
     },
     {
@@ -102,28 +105,42 @@ export const GET_INVOLVED = {
       slug: "partner",
       to: "/get-involved/partner",
       title: "Partner With Us",
-      shortDescription: "Explore organizational and community partnership.",
+      shortDescription: "Work with Rising Beyond Borders to explore practical ways of contributing skills, resources and expertise.",
       icon: "partner",
       ctaLabel: "Partner With Us",
       status: "pending-review",
       metaDescription: "How organizations and communities can explore partnership with Rising Beyond Borders.",
       sections: [
         section("why", "Why partner with us", "Information on partnership to be provided by Rising Beyond Borders.", {
-          body: `${D}Partners bring skills, reach and resources that help projects go further.`,
+          body: "Lasting change is rarely achieved alone. Partnership lets organisations, institutions and community groups combine their skills, resources and expertise around shared aims. We welcome conversations about practical ways of working together.",
         }),
         section("areas", "Potential partnership areas", "Partnership areas to be provided by Rising Beyond Borders.", {
-          items: [`${D}Programme partnerships`, `${D}Employee volunteering`, `${D}In-kind support`, `${D}Community partnerships`],
+          items: [
+            "Sharing professional skills and expertise",
+            "Contributing resources in kind",
+            "Collaborating on community-focused work",
+            "Raising awareness of shared causes",
+          ],
         }),
-        section("who", "Who can partner", "Information on who can partner to be provided by Rising Beyond Borders.", {
-          body: `${D}Businesses, foundations, schools, community groups and other non-profits.`,
+        /* Kinds of partner, not partners: nothing here says Rising Beyond
+           Borders works with any of them today. */
+        section("who", "Who could partner with us", "Information on who can partner to be provided by Rising Beyond Borders.", {
+          body: "Partnerships could bring together many kinds of organisation, including:",
+          items: [
+            "Community organisations and local groups",
+            "Nonprofit organisations",
+            "Schools, colleges and other educational institutions",
+            "Health organisations",
+            "Businesses",
+            "Philanthropic supporters",
+            "Technical and professional contributors",
+          ],
         }),
-        section("how", "How partnership works", "Information on how partnership works to be provided by Rising Beyond Borders.", {
-          body: `${D}We agree shared goals, a simple plan and how we will report back to each other.`,
+        section("how", "How a partnership could start", "Information on how partnership works to be provided by Rising Beyond Borders.", {
+          body: "Every partnership begins with a conversation about shared aims, what each side can bring, and how the people the work serves will have a say.",
         }),
         section("inquiry", "Partnership inquiries", null, { hideWhenEmpty: true }),
-        section("faq", "Questions and next steps", "Partnership questions and answers to be provided by Rising Beyond Borders.", {
-          faqs: [{ q: "Is there a minimum commitment? (demo)", a: "Demo answer — no; partnerships are shaped around what works for both sides." }],
-        }),
+        section("faq", "Questions and next steps", null, { hideWhenEmpty: true }),
       ],
     },
     {
@@ -131,28 +148,32 @@ export const GET_INVOLVED = {
       slug: "fundraise",
       to: "/get-involved/fundraise",
       title: "Fundraise",
-      shortDescription: "Raise support for Rising Beyond Borders.",
+      shortDescription: "Bring your community together to raise awareness and support for causes that matter.",
       icon: "fundraise",
       ctaLabel: "Fundraise",
       status: "placeholder",
       metaDescription: "How to raise support for the work of Rising Beyond Borders.",
       sections: [
         section("why", "Why fundraise", "Information on fundraising to be provided by Rising Beyond Borders.", {
-          body: `${D}Fundraising events and challenges raise money and spread the word.`,
+          body: "Fundraising brings people together around a cause. Whether you organise something with friends, colleagues or your wider community, you raise awareness as well as support — and help more people discover the work.",
         }),
-        section("how", "How it works", "Information on how fundraising works to be provided by Rising Beyond Borders.", {
-          items: [`${D}Choose your activity`, `${D}Tell us about it using the form below`, `${D}Share your page and collect support`, `${D}Send in what you raise`],
+        section("ideas", "Ways you could fundraise", "Fundraising ideas to be provided by Rising Beyond Borders.", {
+          items: [
+            "Community events — a gathering, a shared meal or a sports day",
+            "Peer-to-peer fundraising — a personal challenge supported by friends, family and colleagues",
+            "Workplace, school and community-group initiatives",
+            "Celebrations and birthday fundraisers",
+          ],
         }),
-        section("ideas", "Fundraising ideas", "Fundraising ideas to be provided by Rising Beyond Borders.", {
-          items: [`${D}Sponsored run or walk`, `${D}Bake sale`, `${D}Birthday fundraiser`, `${D}Quiz night`],
+        /* What has to exist before anyone is invited to fundraise — said
+           plainly, so the page never implies a platform or rules that do
+           not exist. */
+        section("how", "Planning a fundraiser", "Information on how fundraising works to be provided by Rising Beyond Borders.", {
+          body: "Before you start, get in touch through our Contact page so we can talk through your idea — including how funds raised are received and how our name and logo may be used.",
         }),
-        section("rules", "Rules and guidelines", "Fundraising guidelines to be provided by Rising Beyond Borders.", {
-          body: `${D}Keep collections safe and legal, and use our name and logo as we agree with you.`,
-        }),
+        section("rules", "Rules and guidelines", null, { hideWhenEmpty: true }),
         section("start", "Start a fundraiser", null, { hideWhenEmpty: true }),
-        section("faq", "Frequently asked questions", "Fundraising questions and answers to be provided by Rising Beyond Borders.", {
-          faqs: [{ q: "Can you send me materials? (demo)", a: "Demo answer — yes; tell us about your event and we will send what we have." }],
-        }),
+        section("faq", "Frequently asked questions", null, { hideWhenEmpty: true }),
       ],
     },
   ],
@@ -163,7 +184,7 @@ export const GET_INVOLVED = {
   contact: {
     label: ORG_CONTACT.generalInquiry.label,
     url: ORG_CONTACT.generalInquiry.status === "verified" ? ORG_CONTACT.generalInquiry.href : null,
-    pending: ORG_CONTACT.pending,
+    pending: ORG_CONTACT.pending, /* null: the panel shows the Contact Us button alone */
     status: ORG_CONTACT.generalInquiry.status,
   },
 };
@@ -188,18 +209,20 @@ export const GET_INVOLVED_PAGES = {
     kicker: "Get involved",
     heading: "Get Involved",
     /* Document 02's approved section heading, reused as the invitation. */
-    body: "There are many ways to make a difference.",
+    body: "There are many ways to make a difference. Whether you give, volunteer, partner or fundraise, you become part of work that opens up opportunity and strengthens communities.",
     ways: { kicker: "Four ways to get involved", heading: "Choose how you take part." },
     choose: {
       kicker: "Choose your path",
       heading: "What each path involves",
       pending: "Details to be provided by Rising Beyond Borders.",
-      /* WORKING placeholder line per path (Document 27), self-labelled. */
+      /* PROPOSED line per path — what it is, never how it operates. */
+      /* Shown INSTEAD of the card line above it on the page, so the two
+         sections never say the same sentence twice. */
       notes: {
-        donate: `${D}Give online through Razorpay, choosing an amount that suits you.`,
-        volunteer: `${D}Give an afternoon, a month or a skill: packing days, reading clubs, events.`,
-        partner: `${D}Organisations and communities working with us on shared goals.`,
-        fundraise: `${D}Run a challenge, event or birthday fundraiser for the work.`,
+        donate: "Financial support sustains work across education, health and wellbeing, livelihoods and community support.",
+        volunteer: "Give time, a professional skill or practical help — the volunteer page explains what volunteering can involve.",
+        partner: "For organisations, institutions and community groups that want to combine skills, resources or expertise around shared aims.",
+        fundraise: "Organise an event, a personal challenge or a celebration that raises awareness and support among the people you know.",
       },
       linkPrefix: "Go to",
     },
@@ -213,7 +236,7 @@ export const GET_INVOLVED_PAGES = {
       work: { kicker: "Our work", heading: "See the work you support", cta: { label: "Explore Our Work", to: "/work" } },
       impact: { kicker: "Our impact", heading: "See the difference it makes", cta: { label: "Explore Our Impact", to: "/impact" } },
     },
-    questions: { kicker: "Questions", heading: "Get in touch", cta: { label: "Contact Page", to: "/contact" } },
+    questions: { kicker: "Questions", heading: "Get in touch", cta: { label: "Contact Us", to: "/contact" } },
     closing: {
       heading: "Ready to take the next step?",
       ctas: {
@@ -224,7 +247,7 @@ export const GET_INVOLVED_PAGES = {
   },
   path: {
     kicker: "Get involved",
-    questions: { kicker: "Questions", heading: "Get in touch", cta: { label: "Contact Page", to: "/contact" } },
+    questions: { kicker: "Questions", heading: "Get in touch", cta: { label: "Contact Us", to: "/contact" } },
     closing: {
       heading: "Other ways to get involved.",
       ctas: {

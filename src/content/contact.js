@@ -13,12 +13,13 @@
    information (see `verifiedOnly`). Nothing else reaches the page — not a
    pending email, not a half-confirmed address.
 
-   ⚠ WORKING PLACEHOLDER VALUES (Document 27): the email/phone/address
-   below use RESERVED, unreachable values — example.org is reserved for
-   documentation (RFC 2606) and 555-01xx numbers are fictional — so
-   nothing invented here can reach a real person or be mistaken for RBB's
-   actual details. Each is labelled "Demo contact detail — replace before
-   launch". None of RBB's real contact details exists yet: real email
+   ⚠ PENDING (content brief, 2026-10-04): the reserved demo values that
+   stood in here (example.org, 555-01xx, "Demo Street", platform home
+   pages) are gone. A contact detail is not something a placeholder can
+   stand in for — a visitor may try to use it — so every entry below is
+   empty and every contact surface shows its pending line until RBB
+   supplies the real value (decisions D17–D19). None of RBB's real
+   contact details exists yet: real email
    addresses, phone numbers, office or mailing addresses, map locations,
    social accounts, office hours, response times, departments, form
    recipients or careers/hiring contacts must all come from RBB. The site
@@ -34,58 +35,64 @@ export const verifiedOnly = (entries) =>
   entries.filter((entry) => entry.status === "verified" && (entry.value || entry.url));
 
 export const ORG_CONTACT = {
-  status: "verified",
+  status: "placeholder",
 
   /* Public contact methods. Add one per verified channel:
        { id, type: "email" | "phone" | "other", label, value, href?,
          description?, status }
      `href` defaults to mailto:/tel: from `value` for email and phone. */
-  methods: [
-    { id: "demo-email", type: "email", label: "Email", value: "hello@example.org", description: "Demo contact detail — replace before launch.", status: "verified" },
-    { id: "demo-phone", type: "phone", label: "Phone", value: "+1 555 0100", description: "Demo contact detail — replace before launch.", status: "verified" },
-  ],
+  methods: [],
 
   /* Where general questions go — a page, a mailto: or a real, tested form
      service. */
   generalInquiry: {
     title: "General inquiries",
-    description: "For general questions about Rising Beyond Borders and its work.",
-    href: "mailto:hello@example.org",
-    label: "hello@example.org",
-    status: "verified",
+    description: "Whether your question is about our work, volunteering, partnership, fundraising or giving, we would be glad to hear from you.",
+    href: null,
+    label: null,
+    status: "placeholder",
   },
 
   /* Office or mailing address. Rendered only when verified; a map link
      only if RBB supplies one — never inferred coordinates. */
   office: {
-    address: "100 Demo Street",
-    city: "Demo City",
+    address: null,
+    city: null,
     region: null,
-    country: "Demo Country",
+    country: null,
     mapUrl: null,
-    status: "verified",
+    status: "placeholder",
   },
 
   /* Official social accounts. `icon` keys map to the glyphs in
-     components/Footer/SocialIcon.jsx. Working placeholders below link to
-     each platform's own home page, not an account — no demo link can land
-     on a real person's or organisation's profile. */
+     components/Footer/SocialIcon.jsx. Each stays empty until RBB supplies
+     its real account URL — never a platform's home page (decision D18). */
+  /* ⚠ TEMPORARY (RBB's call, Oct 2026): the platforms' ROOT addresses,
+     so the footer's icons show while RBB's real account URLs are found.
+     Replace each `url` with the RBB account ("https://www.instagram.com/
+     <handle>"). Until then the release markers flag every one ("platform
+     home page as social link") and release:check stays BLOCKED, so they
+     cannot reach production by accident. TikTok stays off until RBB
+     says it has an account. */
   social: [
     { platform: "instagram", icon: "instagram", label: "Instagram", url: "https://www.instagram.com/", status: "verified" },
     { platform: "facebook", icon: "facebook", label: "Facebook", url: "https://www.facebook.com/", status: "verified" },
-    { platform: "x", icon: "x", label: "X", url: null, status: "placeholder" },
+    { platform: "x", icon: "x", label: "X", url: "https://x.com/", status: "verified" },
     { platform: "linkedin", icon: "linkedin", label: "LinkedIn", url: "https://www.linkedin.com/", status: "verified" },
     { platform: "youtube", icon: "youtube", label: "YouTube", url: "https://www.youtube.com/", status: "verified" },
     { platform: "tiktok", icon: "tiktok", label: "TikTok", url: null, status: "placeholder" },
   ],
 
   /* Shown only if RBB supplies them and wants them displayed. */
-  hours: { value: "Demo — Monday to Friday, 9:00–17:00", status: "verified" },
-  responseTime: { value: "Demo — within three working days", status: "verified" },
+  hours: { value: null, status: "placeholder" },
+  responseTime: { value: null, status: "placeholder" },
 
   /* What every contact surface says while nothing above is verified. */
-  pending: "Contact information to be provided by Rising Beyond Borders.",
-  inquiryPending: "A general inquiry route will be provided by Rising Beyond Borders.",
+  /* No visitor-facing pending line: with no verified channel, the
+     contact surfaces leave the slot out (Footer, ContactMethods,
+     QuestionsPanel) rather than announce what is missing. */
+  pending: null,
+  inquiryPending: null,
 };
 
 /* A method's link: its own `href`, else mailto:/tel: from its value. */
@@ -113,9 +120,9 @@ export const officeLines = () => {
 
 /* Careers — reconciled at the existing /about-us/careers (Document 08
    keeps that address rather than opening a second careers page). Not in
-   the main navigation. Working placeholder roles/sections below (Document
-   27), self-labelled "(demo role)"; replace with RBB's approved process
-   before launch. */
+   the main navigation. No roles and no application route until RBB
+   supplies them (decision D19): an invented vacancy or careers inbox is
+   something a real applicant would act on. */
 export const CAREERS = {
   to: "/about-us/careers",
   title: "Careers",
@@ -123,16 +130,11 @@ export const CAREERS = {
   body: "Opportunities to work with Rising Beyond Borders.",
   metaDescription: "Careers and opportunities with Rising Beyond Borders.",
   sections: [
-    { id: "why", heading: "Why work with us", body: ["Demo text — Work with a small, committed team alongside communities and partners. Replace with Rising Beyond Borders' approved careers information."] },
-    { id: "opportunities", heading: "Open opportunities", empty: "There are no opportunities listed at this time. Careers information to be provided by Rising Beyond Borders." },
-    { id: "apply", heading: "How to apply", body: ["Demo — Send a short cover letter and CV to the careers contact below, quoting the role title."] },
-    { id: "careers-contact", heading: "Careers contact", body: ["Demo — careers@example.org"] },
+    { id: "why", heading: "Why work with us", body: ["Working with Rising Beyond Borders means contributing to work in education, health and wellbeing, livelihoods and community support — work that is inclusive by design and shaped by the communities it serves."] },
+    { id: "opportunities", heading: "Open opportunities", empty: "There are no open opportunities at the moment." },
+    { id: "apply", heading: "How to apply", body: ["Each opportunity sets out what the role involves and how to apply."] },
   ],
-  roles: [
-    { id: "demo-role-1", title: "Programme Officer — Education (demo role)", status: "approved" },
-    { id: "demo-role-2", title: "Volunteer Coordinator (demo role)", status: "approved" },
-    { id: "demo-role-3", title: "Finance Assistant, part-time (demo role)", status: "approved" },
-  ],
+  roles: [],
   closing: {
     heading: "Explore Rising Beyond Borders.",
     ctas: {
@@ -155,7 +157,7 @@ export const CONTACT_COPY = {
   careers: {
     kicker: "Careers",
     heading: "Work with us",
-    empty: "Demo text — See open roles and how to apply on our Careers page.",
+    empty: "Opportunities to work with Rising Beyond Borders will be listed on the Careers page.",
     cta: { label: "Careers", to: CAREERS.to },
   },
   /* The newsletter card (components/Newsletter): a working placeholder
@@ -164,8 +166,8 @@ export const CONTACT_COPY = {
   transparency: {
     kicker: "Transparency",
     heading: "Reports and accountability",
-    body: "Demo text — Reports and accountability information on the Transparency page.",
-    cta: { label: "View Transparency", to: "/about/transparency" },
+    body: "How our work is run, and how resources are used.",
+    cta: { label: "View Transparency", to: "/about#transparency" },
   },
   closing: {
     heading: "Learn more about our work.",

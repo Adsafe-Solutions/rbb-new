@@ -4,11 +4,11 @@
    the browser's. */
 export default function CheckboxField({ id, label, required, requiredText, ...rest }) {
   return (
-    <div className="flex items-start gap-3">
+    <div className="flex items-start gap-3 rounded-xl border-2 border-hair bg-paper-white p-4 has-[:checked]:border-trust-blue">
       <input
         id={id}
         type="checkbox"
-        className="mt-1 h-5 w-5 shrink-0 cursor-pointer accent-trust-blue"
+        className="mt-0.5 h-6 w-6 shrink-0 cursor-pointer accent-trust-blue"
         {...rest}
       />
       <label htmlFor={id} className="cursor-pointer text-bumble-ink">

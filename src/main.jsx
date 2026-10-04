@@ -10,13 +10,6 @@ import App from "./App.jsx";
    is not — 404.html answering an unknown address, or the dev server's
    empty shell — React renders from scratch instead, so a page is never
    hydrated against markup made for a different URL. */
-/* The deferred stylesheet (index.html, `data-deferred-style`): loaded as
-   `media="print"` so it never blocks rendering, switched on here. Done in
-   the bundle, not in an inline onload handler, which the Content Security
-   Policy forbids (Document 20). */
-for (const link of document.querySelectorAll("link[data-deferred-style]"))
-  link.media = "all";
-
 const root = document.getElementById("root");
 const path = window.location.pathname.replace(/\/+$/, "") || "/";
 const app = (

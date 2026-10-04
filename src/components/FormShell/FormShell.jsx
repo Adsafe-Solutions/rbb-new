@@ -69,8 +69,8 @@ function InlineEmail({ formId, field, value, error, onChange, onBlur, submitting
       <FieldError id={errorId} prefix={FORM_COPY.errorPrefix}>{error}</FieldError>
       <div
         className={cx(
-          "flex items-center gap-3 rounded-2xl border bg-paper-white p-2 pl-6 focus-within:border-bumble-ink",
-          error ? "mt-3 border-2 border-alert" : "border-bumble-ink/45"
+          "flex items-center gap-3 rounded-xl border-2 bg-paper-white p-1.5 pl-5 focus-within:shadow-[4px_4px_0_var(--color-bumble-honey)]",
+          error ? "mt-3 border-alert" : "border-trust-blue"
         )}
       >
         <label htmlFor={id} className="sr-only">
@@ -98,8 +98,10 @@ function InlineEmail({ formId, field, value, error, onChange, onBlur, submitting
           aria-label={submitting ? busyLabel : submitLabel}
           aria-disabled={submitting || undefined}
           className={cx(
-            "grid h-14 w-16 shrink-0 cursor-pointer place-items-center rounded-2xl",
-            "bg-growth-green text-bumble-ink transition-colors hover:bg-trust-blue hover:text-paper-white",
+            "grid h-12 w-14 shrink-0 cursor-pointer place-items-center rounded-lg",
+            /* The same treatment as Button's `solid` — this is the one
+               filled button of its form, so it moves with it. */
+            "bg-bumble-honey text-night transition-colors hover:bg-trust-blue hover:text-paper-white",
             "aria-disabled:cursor-wait aria-disabled:opacity-70"
           )}
         >
@@ -223,10 +225,19 @@ export default function FormShell({
       noValidate
       onSubmit={onSubmit}
       aria-busy={submitting || undefined}
-      className={`relative ${className}`}
+      /* The stacked form is printed on a sheet: white, the 2px border, the
+         band's hard shadow, square to the page — a form is something you
+         fill in, and a form on a slant feels unreliable. The inline
+         layout (one field and a button) sits straight on its band. */
+      data-tone={layout === "inline" ? undefined : "card"}
+      className={cx(
+        "relative",
+        layout !== "inline" && "rounded-2xl border-rim bg-paper-white p-6 cast sm:p-8 md:p-10",
+        className
+      )}
     >
       <noscript>
-        <p className="mb-6 rounded-2xl bg-mist px-5 py-4 font-medium text-bumble-ink">
+        <p className="mb-6 rounded-xl border-2 border-dashed border-hair px-5 py-4 font-medium text-copy">
           {FORM_COPY.needsJavaScript}
         </p>
       </noscript>
@@ -269,7 +280,7 @@ export default function FormShell({
             />
           )}
 
-          {fields.map((field) =>
+          {fields.map((field, i) =>
             layout === "inline" && field.type === "email" ? (
               <InlineEmail
                 key={field.name}
@@ -294,15 +305,16 @@ export default function FormShell({
               onBlur={blur}
               disabled={submitting}
               copy={FORM_COPY}
+              number={layout === "inline" ? undefined : i + 1}
             />
             )
           )}
 
           {config.privacyLink?.to && (
-            <p className="text-[length:var(--text-caption)] leading-caption tracking-caption text-graphite">
+            <p className="text-[15px] text-quiet">
               <Link
                 to={config.privacyLink.to}
-                className="font-semibold text-trust-blue underline underline-offset-4"
+                className="font-semibold text-fg underline underline-offset-4"
               >
                 {config.privacyLink.label}
               </Link>

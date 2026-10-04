@@ -2,8 +2,50 @@
 
 How online donations work on the Rising Beyond Borders site, what is built,
 and what must happen before they go live. **Donations are OFF.** The page
-at `/get-involved/donate` still shows "Donations are not open yet", and a
-default build contains no checkout code at all.
+at `/get-involved/donate` says that online donations are not open yet.
+
+## The preview (while donations are pending)
+
+While `DONATION.status` is `pending`, the donation page draws the donation
+form as a **preview** (`checkout.preview` in `src/content/donation.js`).
+It sits directly under the page header: the statement is on the left and
+the white form card is on the right. On a phone the statement comes first
+and the form follows it. The preview shows:
+
+- the frequency choice (Give once; Monthly shown disabled, "Not available
+  online");
+- six amount tiles and an "other amount" field;
+- name, email and phone;
+- "Continue to payment".
+
+What the preview does and does not do:
+
+- **It takes no payment and makes no request.** There is no `/config`
+  call, no order, and the Razorpay script is never loaded.
+- **Submitting** runs the form's own checks, then shows "Preview only — no
+  payment was started". It never shows success and never shows a
+  reference.
+- **Typed details are not kept.** They live in page state only: nothing
+  is stored, logged or emailed.
+- **The submit button is disabled until the page hydrates.** Without
+  JavaScript, a native submit would send the typed details to the page's
+  URL.
+- **The amounts and currency are placeholders.** The currency is ISO 4217
+  `XXX` ("no currency"), shown as ¤. These are not proposals: the real
+  values come from the server once donations are live (D26, D27). The
+  card's badge reads "Demo preview — …", so the placeholder count
+  includes it.
+- **`npm run release:check` blocks production** while the preview is on
+  the page. It reads both `readiness.donation.preview` and the page's
+  `data-donation-preview` marker. To launch, either open donations
+  (approved-live) or remove `checkout.preview` to launch without online
+  donations (D31).
+
+A build without `VITE_DONATIONS_API` still contains no donation **network**
+code. `vite.config.js` replaces `src/lib/donations.js` (the endpoint calls
+and the Razorpay loader) with an inert module. It used to replace the whole
+`DonationCheckout` component, which is why no build ever showed a donation
+form.
 
 ## Architecture
 

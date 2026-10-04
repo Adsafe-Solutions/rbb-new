@@ -1,78 +1,62 @@
 import { useId } from "react";
-import { cx } from "../../lib/cx.js";
 import Button from "../Button/Button.jsx";
-import Container from "../Container/Container.jsx";
+import MarkStamp from "../Mark/MarkStamp.jsx";
+import Section from "../Section/Section.jsx";
 import SectionHeading from "../SectionHeading/SectionHeading.jsx";
+import StepCard from "../StepCard/StepCard.jsx";
 
-/* A short sequence of steps, read left to right: the "how we work" row.
+/* How the work is done — a band of Sky Blue with the statement set at
+   billboard size, the line that expands on it, and the way on.
 
-   An <ol>, because the order IS the content — a screen reader announces
-   "list, 4 items" and each step's number, with no arrows to describe. The
-   joining rule between steps is drawn by CSS and is decoration only.
+   `steps` render as numbered StepCards ONLY when they are given, and the
+   content layer gives them only once RBB has approved the framework
+   (content/impact.js `approachSteps`). Until then this is the statement,
+   the line and the link — Listen → Partner → Act → Sustain is never
+   presented as RBB's method because a layout had room for it.
 
-   Steps carry a `title` and, optionally, a `body`. Titles alone are a
-   complete layout: the homepage's steps have no descriptions until RBB
-   writes them (see content/homepage.js), and a line of placeholder under
-   each of four words would be noise.
-
-   With no steps at all it is a heading, an intro and a call to action —
-   how /about uses it, where the proposed steps must not appear as RBB's
-   official method. `id` is the section's anchor. */
-export default function ApproachFlow({ id, kicker, heading, intro, steps = [], cta }) {
+   Sky Blue, so everything on it is Night (the `accent` tone): Deep Trust
+   Blue type on this blue is 3.89:1, and the tone makes that impossible to
+   get wrong. The mark stamp is the band's one object when there are no
+   steps. `id` is the section's anchor. */
+export default function ApproachFlow({ id, index, kicker, heading, intro, steps = [], cta, tone = "accent" }) {
   const headingId = useId();
-  const last = steps.length - 1;
 
   return (
-    <section
-      id={id}
-      aria-labelledby={headingId}
-      className="scroll-mt-[var(--header-h)] py-20 md:py-28"
-    >
-      <Container>
-        <div className="reveal flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-          <SectionHeading
-            id={headingId}
-            kicker={kicker}
-            heading={heading}
-            intro={intro}
-          />
+    <Section id={id} tone={tone} pad="lg" watermark="right" aria-labelledby={headingId}>
+      <div className="grid gap-12 lg:grid-cols-[7fr_5fr] lg:items-end lg:gap-20">
+        <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} size="billboard" />
+        <div data-anim="sequence" className="relative">
+          {/* Wrapped: the stamp's tilt is a `rotate`, and on the element
+              the motion system reveals GSAP would fold it away. */}
+          <div data-anim-item className="mb-8">
+            <MarkStamp className="h-20 w-20 -rotate-6 md:h-24 md:w-24" front="text-night" back="text-paper-white" />
+          </div>
+          {intro && (
+            <p data-anim-item data-anim="soft" className="type-lead max-w-[42ch]">
+              {intro}
+            </p>
+          )}
           {cta && (
-            <Button variant="outline" to={cta.to} className="self-start lg:self-auto">
-              {cta.label}
-            </Button>
+            <div data-anim-item data-anim="soft" className="mt-8">
+              <Button variant="ink" to={cta.to}>
+                {cta.label}
+              </Button>
+            </div>
           )}
         </div>
+      </div>
 
-        {steps.length > 0 && (
-          <ol className="mt-14 grid gap-4 sm:grid-cols-2 md:mt-16 lg:grid-cols-4 lg:gap-0">
-            {steps.map((step, i) => (
-              <li
-                key={step.title}
-                style={{ transitionDelay: `${i * 90}ms` }}
-                className={cx(
-                  "reveal relative flex items-center gap-5 rounded-3xl bg-mist p-6",
-                  "lg:flex-col lg:items-start lg:gap-0 lg:rounded-none lg:bg-transparent lg:p-0 lg:pr-8",
-                  /* The rule from this step's number to the next one's, from
-                   `lg` where the steps sit in a row. Full class strings, not
-                   built ones — Tailwind only generates what it can read. */
-                  i < last &&
-                    "lg:after:absolute lg:after:left-20 lg:after:right-4 lg:after:top-8 lg:after:h-0.5 lg:after:rounded-full lg:after:bg-bumble-honey/40"
-                )}
-              >
-                <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-trust-blue font-bold text-[length:var(--text-subheading)] text-paper-white lg:bg-paper-white lg:text-trust-blue lg:ring-2 lg:ring-bumble-honey">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <div className="lg:mt-7">
-                  <h3 className="font-bold text-[length:var(--text-heading-sm)] leading-heading-sm tracking-heading-sm">
-                    {step.title}
-                  </h3>
-                  {step.body && <p className="mt-3 text-graphite">{step.body}</p>}
-                </div>
-              </li>
-            ))}
-          </ol>
-        )}
-      </Container>
-    </section>
+      {steps.length > 0 && (
+        <ol data-anim-stagger className="mt-16 grid gap-cards sm:grid-cols-2 lg:grid-cols-4">
+          {steps.map((step, i) => (
+            <li key={step.title}>
+              <StepCard number={i + 1} title={step.title} className="h-full">
+                {step.body && <p className="text-quiet">{step.body}</p>}
+              </StepCard>
+            </li>
+          ))}
+        </ol>
+      )}
+    </Section>
   );
 }

@@ -41,24 +41,41 @@ function omitDevTools(included) {
   };
 }
 
-/* The on-page donation checkout (Document 22) in a build without
-   VITE_DONATIONS_API: its component is replaced by one that renders
-   nothing, so no checkout code and no Razorpay address ship in a build
-   that cannot use them. Same condition as DONATIONS_IN_BUILD in
-   src/config/env.js. */
-function omitDonationCheckout(included) {
-  const CHECKOUT = /\/components\/DonationCheckout\/DonationCheckout\.jsx$/;
-  const STUB = "\0rbb-donation-checkout-omitted";
+/* The donation checkout's NETWORK side (Document 22) in a build without
+   VITE_DONATIONS_API: src/lib/donations.js — the fetch calls to the
+   donation endpoints and the Razorpay Checkout loader — is replaced by an
+   inert module that never makes a request, so no endpoint code and no
+   Razorpay address ship in a build that cannot use them. Same condition
+   as DONATIONS_IN_BUILD in src/config/env.js.
+
+   Only the network module is replaced, not the DonationCheckout
+   component: while giving is pending the donation page draws the form as
+   a no-payment PREVIEW (content/donation.js `donationPreview`), and that
+   needs the component's markup. Replacing the whole component here was
+   why no build ever showed a donation form. */
+const INERT_DONATIONS = `
+export const CHECKOUT_SRC = null;
+export const validApi = () => false;
+export const donationConfig = async () => null;
+export const createOrder = async () => ({ outcome: "error" });
+export const verifyPayment = async () => "unknown";
+export const donationStatus = async () => "unknown";
+export const loadCheckout = async () => null;
+export const newAttemptKey = () => "";
+`;
+function omitDonationNetwork(included) {
+  const NETWORK = /\/src\/lib\/donations\.js$/;
+  const STUB = "\0rbb-donation-network-omitted";
   return {
-    name: "rbb-omit-donation-checkout",
+    name: "rbb-omit-donation-network",
     apply: "build",
     enforce: "pre",
     async resolveId(source, importer, options) {
       if (included || !importer) return null;
       const resolved = await this.resolve(source, importer, { ...options, skipSelf: true });
-      return resolved && CHECKOUT.test(resolved.id) ? STUB : null;
+      return resolved && NETWORK.test(resolved.id) ? STUB : null;
     },
-    load: (id) => (id === STUB ? "export default function Omitted() { return null; }" : null),
+    load: (id) => (id === STUB ? INERT_DONATIONS : null),
   };
 }
 
@@ -71,7 +88,7 @@ export default defineConfig(({ command, mode }) => {
   return {
     plugins: [
       omitDevTools(devTools),
-      omitDonationCheckout(command === "serve" || Boolean(env.VITE_DONATIONS_API)),
+      omitDonationNetwork(command === "serve" || Boolean(env.VITE_DONATIONS_API)),
       contentPublishing({ root: import.meta.dirname }),
       react(),
       tailwindcss(),

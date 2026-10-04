@@ -1,58 +1,54 @@
 import { cx } from "../../lib/cx.js";
+import DisplayHeading from "../DisplayHeading/DisplayHeading.jsx";
+import SectionKicker from "../SectionKicker/SectionKicker.jsx";
 
-/* The heading block every homepage section opens with: a small eyebrow,
-   the <h2>, and an optional intro line.
+/* The heading block a section opens with: the chapter kicker, the <h2>
+   in display type, and an optional intro line.
 
-   The eyebrow is Deep Trust Blue text behind a short Sky Blue rule, NOT
-   Sky Blue text. Sky Blue on white is about 2.6:1 — fine for a rule, a
-   fail for 16px type — so the brand colour carries the accent and the
-   type stays readable.
+     index      the section's number on its page — "02 / Our work"
+     highlight  put the heading's last word on the accent block
+                (`true`, or a number of words). Use it on the headings
+                that carry the page, not on every one.
+     size       title (default) | billboard | card
 
-   `id` goes on the <h2> so the section can point `aria-labelledby` at it.
-   `tone="invert"` is for Deep Trust Blue grounds. */
-const TONES = {
-  default: { eyebrow: "text-trust-blue", heading: "text-trust-blue", intro: "text-graphite" },
-  invert: { eyebrow: "text-paper-white/85", heading: "text-paper-white", intro: "text-paper-white/80" },
-};
+   Colour comes from the band it is in (`data-tone`), so there is no tone
+   prop any more; `tone` is accepted and ignored for the pages that still
+   pass it.
 
+   ---------------- Motion ----------------
+
+   THE heading reveal for the site, so no section duplicates it: the
+   block is a `sequence` (src/animations/reveals.js) — kicker, heading,
+   intro, a hundred milliseconds apart, in the order the eye reads them.
+
+   ⚠ Callers must NOT add `.reveal` here: that hides the container whose
+   whole job is to stay visible while the three things inside it arrive. */
 export default function SectionHeading({
   id,
+  index,
   kicker,
   heading,
   intro,
   align = "left",
-  tone = "default",
+  highlight = false,
+  size = "title",
+  as = "h2",
   className = "",
 }) {
-  const t = TONES[tone] ?? TONES.default;
   const centred = align === "center";
 
   return (
-    <div className={cx(centred && "mx-auto text-center", "max-w-3xl", className)}>
+    <div data-anim="sequence" className={cx(centred && "mx-auto text-center", "max-w-4xl", className)}>
       {kicker && (
-        <p
-          className={cx(
-            "flex items-center gap-3 text-[length:var(--text-caption)] font-semibold uppercase tracking-[0.16em]",
-            centred && "justify-center",
-            t.eyebrow
-          )}
-        >
-          <span aria-hidden="true" className="h-0.5 w-6 rounded-full bg-bumble-honey" />
+        <SectionKicker data-anim-item data-anim="soft" index={index} className={cx(centred && "justify-center")}>
           {kicker}
-        </p>
+        </SectionKicker>
       )}
-      <h2
-        id={id}
-        className={cx(
-          "mt-4 font-bold text-[length:var(--text-heading)] leading-heading tracking-heading",
-          "md:text-[length:var(--text-heading-lg)] md:leading-heading-lg md:tracking-heading-lg",
-          t.heading
-        )}
-      >
+      <DisplayHeading data-anim-item as={as} id={id} size={size} highlight={highlight} className={cx(kicker && "mt-5")}>
         {heading}
-      </h2>
+      </DisplayHeading>
       {intro && (
-        <p className={cx("mt-5 max-w-prose text-[length:var(--text-body)]", centred && "mx-auto", t.intro)}>
+        <p data-anim-item data-anim="soft" className={cx("type-lead mt-6 max-w-[54ch] text-copy", centred && "mx-auto")}>
           {intro}
         </p>
       )}

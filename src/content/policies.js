@@ -1,14 +1,18 @@
 /* Privacy, legal & site policies — Document 13. ONE source for every
-   policy the site may publish: the /privacy, /terms and /accessibility
-   pages, the footer's legal links and the forms' privacy link all read
-   from here.
+   policy the site may publish: the /privacy and /terms pages, the
+   footer's legal links and the forms' privacy link all read from here.
+
+   There is no accessibility statement. RBB asked for the page and its
+   footer link to be taken out; Document 13 §7 still describes one, so if
+   that decision is revisited the record goes back here and the route,
+   the title, the footer link and the page come back with it.
 
    ⚠ Nothing here is legal text, and none may be written on RBB's behalf:
    no privacy wording, rights, retention periods, service providers,
    cookie behaviour, security promises, governing law, jurisdiction,
-   charity or tax status, registration numbers, audit or certification,
-   or accessibility-conformance claim. Policy text comes from RBB, reviewed
-   by counsel, and is pasted in as supplied.
+   charity or tax status, registration numbers, or audit or
+   certification claim. Policy text comes from RBB, reviewed by counsel,
+   and is pasted in as supplied.
 
    ⚠ Dates are RBB's. `effectiveDate` and `lastUpdated` are ISO dates
    ("YYYY-MM-DD") that RBB states — never the day the site was deployed.
@@ -35,6 +39,7 @@
                          expects once text is supplied; never rendered
      } */
 
+import { isWorkingContent } from "../lib/releaseMarkers.js";
 import { ORG_CONTACT, methodHref, verifiedOnly } from "./contact.js";
 
 /* WORKING placeholder policy text (Document 27). Each page is structured
@@ -68,11 +73,6 @@ const WORKING_POLICIES = {
     { id: "external-links", heading: "External links", body: ["Demo — We are not responsible for other websites we link to."] },
     { id: "changes", heading: "Changes to these terms", body: ["Demo — We may update these terms; the date above shows the latest version."] },
   ]),
-  accessibility: working([
-    { id: "commitment", heading: "Our commitment", body: ["Demo — We want this website to be usable by everyone."] },
-    { id: "limitations", heading: "Known limitations", body: ["Demo — Some older documents may not be fully accessible."] },
-    { id: "feedback", heading: "Feedback and contact", body: ["Demo — Tell us about any problem at hello@example.org."] },
-  ]),
   /* No `cookies` entry on purpose — see the cookies record below. */
 };
 
@@ -87,10 +87,10 @@ const POLICY_RECORDS = [
     intro: [],
     sections: [],
     contactReference: null,
-    relatedPolicies: ["terms", "accessibility"],
+    relatedPolicies: ["terms"],
     metaDescription: "The Rising Beyond Borders privacy policy.",
     /* Document 13's own wording for this state. */
-    pending: "Privacy policy information will be provided and reviewed by Rising Beyond Borders.",
+    pending: "Our privacy policy is being updated. If you have a question about how your information is handled, please visit our Contact page.",
     /* Document 13 §4. "transfers" only if RBB / counsel confirm it applies.
        "forms" must match what the site actually collects — content/forms.js. */
     outline: [
@@ -118,9 +118,9 @@ const POLICY_RECORDS = [
     intro: [],
     sections: [],
     contactReference: null,
-    relatedPolicies: ["privacy", "accessibility"],
+    relatedPolicies: ["privacy"],
     metaDescription: "The terms of use for the Rising Beyond Borders website.",
-    pending: "Website terms will be provided and reviewed by Rising Beyond Borders.",
+    pending: "Our website terms are being updated. If you have a question about using this website, please visit our Contact page.",
     /* Document 13 §5 — structural headings only. NOT authority to publish
        any of these provisions. "governing-law" in particular states a
        jurisdiction, which nothing supplied establishes. */
@@ -133,28 +133,6 @@ const POLICY_RECORDS = [
       { id: "liability", heading: "Limitation of liability" },
       { id: "governing-law", heading: "Governing law" },
       { id: "changes", heading: "Changes to these terms" },
-    ],
-  },
-  {
-    id: "accessibility",
-    route: "/accessibility",
-    title: "Accessibility",
-    status: "placeholder",
-    effectiveDate: null,
-    lastUpdated: null,
-    intro: [],
-    sections: [],
-    contactReference: null,
-    relatedPolicies: ["privacy", "terms"],
-    metaDescription: "Accessibility and the Rising Beyond Borders website.",
-    pending: "Accessibility information will be provided and reviewed by Rising Beyond Borders.",
-    /* Document 13 §7. No standard, conformance level or certification is
-       claimed unless RBB verifies and approves it. */
-    outline: [
-      { id: "commitment", heading: "Our commitment" },
-      { id: "limitations", heading: "Known limitations" },
-      { id: "feedback", heading: "Feedback and contact" },
-      { id: "updates", heading: "Updates to this statement" },
     ],
   },
   /* Cookies — NO ROUTE (`route: null`). Document 13 §6: a cookie page is
@@ -193,12 +171,12 @@ export const POLICIES = POLICY_RECORDS.map((p) => (WORKING_POLICIES[p.id] ? { ..
        IndexedDB, no analytics, no tracking pixels, no embedded maps or
        video. Forms (content/forms.js) send with `credentials: "omit"`
        and are all disabled.
-     - third-party requests on every page: Fontshare (api.fontshare.com
-       stylesheet, cdn.fontshare.com font files, for Satoshi) and Google
-       Fonts (fonts.googleapis.com stylesheet, for the DM Sans fallback —
-       its font files on fonts.gstatic.com load only if Satoshi fails).
-       Each receives the visitor's IP address and browser details.
-       Dancing Script is no longer requested (Document 15).
+     - third-party requests on every page: Google Fonts only
+       (fonts.googleapis.com stylesheet, fonts.gstatic.com font files,
+       for DM Sans, the brand face). It receives the visitor's IP address
+       and browser details. Fontshare is no longer contacted — Satoshi
+       was replaced by DM Sans, and with it the second font provider.
+       Dancing Script is not requested either (Document 15).
      - hosting / CDN: not yet chosen, so not assessed.
    Document 17 re-checked this by crawling all 48 pre-rendered routes of a
    local production build in a clean browser (scripts/audit-technology.mjs):
@@ -210,7 +188,7 @@ export const POLICIES = POLICY_RECORDS.map((p) => (WORKING_POLICIES[p.id] ? { ..
 export const TECHNOLOGY_AUDIT = {
   checked: "Document 17 (local production build; host not yet assessed)",
   firstParty: { cookies: false, webStorage: false, serviceWorker: false, analytics: false, embeds: false },
-  thirdPartyRequests: ["Fontshare", "Google Fonts"],
+  thirdPartyRequests: ["Google Fonts"],
   hosting: "not assessed",
 };
 
@@ -220,6 +198,15 @@ export const policyByRoute = (route) => POLICIES.find((p) => p.route === route);
 
 export const isPublished = (policy) =>
   Boolean(policy?.route) && ["approved", "verified"].includes(policy?.status) && policy.sections.length > 0;
+
+/* Published AND final: approved text that is not a working placeholder.
+   Only a final policy shows its text and may be indexed (content/seo.js,
+   pages/Policy). A published-but-working policy — the demo Privacy and
+   Terms text — keeps its route and its links, so the forms that require a
+   privacy link stay as they are (`policyLink`), but the page shows its
+   neutral pending line instead of text that reads as a real policy. */
+export const isFinalPolicy = (policy) =>
+  isPublished(policy) && !isWorkingContent([policy.intro, policy.sections]);
 
 /* Policies that have a page at all — published or pending. The router
    reads this; the footer does not. */

@@ -1,120 +1,51 @@
 import { useId } from "react";
-import { Link } from "react-router-dom";
-import { cx } from "../../lib/cx.js";
 import Button from "../Button/Button.jsx";
-import Container from "../Container/Container.jsx";
-import LineIcon from "../LineIcon/LineIcon.jsx";
-import MediaPlaceholder from "../MediaPlaceholder/MediaPlaceholder.jsx";
+import EmptyPanel from "../EmptyPanel/EmptyPanel.jsx";
+import ProjectCard from "../ProjectCard/ProjectCard.jsx";
+import Section from "../Section/Section.jsx";
 import SectionHeading from "../SectionHeading/SectionHeading.jsx";
-import Picture from "../Picture/Picture.jsx";
 
-/* A small selection of projects, as an editorial spread rather than an
-   even grid: the first piece large on the left, the next two stacked
-   beside it.
+/* Projects as an editorial spread: the first across the full width with
+   its photograph beside the copy, the rest as a pair of printed sheets
+   under it, square to the page.
 
-   `items` are verified projects: { title, description, location?, image:
-   { src, alt }, to }. With none, `slots` placeholder cards hold the same
-   spread and say what is to come (`fallback`, under `placeholderLabel`). A placeholder has no link
-   and no heading — there is nowhere true to send anyone, and three
-   identical headings would clutter the outline for no reader's benefit. */
-function WorkCard({ item, fallback, label, lead }) {
-  const media = cx(
-    "w-full overflow-hidden rounded-3xl",
-    lead ? "aspect-[16/9] sm:aspect-[4/3] lg:aspect-auto lg:flex-1" : "aspect-[16/9]"
-  );
+     projects  records from content/work.js, already chosen by the caller
+               (the homepage passes the `featured` ones)
+     href      project → its page
+     programOf slug → the program's title, for the card's label
+     empty     shown when there are none — never placeholder cards
+     cta       the way to every project
 
-  if (!item) {
-    return (
-      <div className={cx("flex h-full flex-col", lead && "lg:min-h-[30rem]")}>
-        <MediaPlaceholder className={cx(media, lead && "lg:rounded-tl-[6rem]")} />
-        <p className="mt-5 text-[length:var(--text-caption)] font-semibold uppercase tracking-[0.16em] text-trust-blue">
-          {label}
-        </p>
-        <p className="mt-2 text-graphite">{fallback}</p>
-      </div>
-    );
-  }
-
-  return (
-    <article className="group relative flex h-full flex-col">
-      {/* A verified project may not have an approved photograph yet; it
-          gets the empty frame rather than no frame, so the spread holds. */}
-      {item.image ? (
-        <div className={cx(media, lead && "lg:rounded-tl-[6rem]")}>
-          <Picture
-            sizes="(min-width: 1024px) 50vw, 100vw"
-            src={item.image.src}
-            alt={item.image.alt}
-            loading="lazy"
-            decoding="async"
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-          />
-        </div>
-      ) : (
-        <MediaPlaceholder className={cx(media, lead && "lg:rounded-tl-[6rem]")} />
-      )}
-      {item.location && (
-        <p className="mt-5 text-[length:var(--text-caption)] font-semibold uppercase tracking-[0.16em] text-trust-blue">
-          {item.location}
-        </p>
-      )}
-      <h3
-        className={cx(
-          "mt-2 font-bold",
-          lead
-            ? "text-[length:var(--text-heading-sm)] leading-heading-sm tracking-heading-sm"
-            : "text-[length:var(--text-subheading)] leading-subheading tracking-subheading"
-        )}
-      >
-        <Link
-          to={item.to}
-          className="underline-offset-4 after:absolute after:inset-0 group-hover:underline"
-        >
-          {item.title}
-        </Link>
-      </h3>
-      {item.description && <p className="mt-2 text-graphite">{item.description}</p>}
-    </article>
-  );
-}
-
-export default function FeaturedWork({
-  kicker,
-  heading,
-  items,
-  slots = 3,
-  fallback,
-  placeholderLabel,
-  cta,
-}) {
+   Only the fields a project has are drawn (ProjectCard). */
+export default function FeaturedWork({ id, index, kicker, heading, projects, href, programOf, empty, cta, tone = "white", highlight }) {
   const headingId = useId();
-  const cards = items.length ? items.slice(0, 3) : Array.from({ length: slots }, () => null);
-  const [lead, ...rest] = cards;
+  const [lead, ...rest] = projects;
 
   return (
-    <section aria-labelledby={headingId} className="py-20 md:py-28">
-      <Container>
-        <div className="reveal flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-          <SectionHeading id={headingId} kicker={kicker} heading={heading} />
-          {cta && (
-            <Button variant="outline" to={cta.to} className="group gap-2 self-start md:self-auto">
-              {cta.label}
-              <LineIcon name="arrow" className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </Button>
-          )}
-        </div>
+    <Section id={id} tone={tone} pad="lg" aria-labelledby={headingId}>
+      <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+        <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} highlight={highlight} />
+        {cta && projects.length > 0 && (
+          <Button data-anim="soft" variant="outline" to={cta.to} className="self-start md:self-auto">
+            {cta.label}
+          </Button>
+        )}
+      </div>
 
-        <div className="reveal mt-12 grid gap-cards md:mt-14 lg:grid-cols-[7fr_5fr]">
-          <WorkCard item={lead} fallback={fallback} label={placeholderLabel} lead />
-          {rest.length > 0 && (
-            <div className="grid gap-cards sm:grid-cols-2 lg:grid-cols-1">
-              {rest.map((item, i) => (
-                <WorkCard key={item?.to ?? i} item={item} fallback={fallback} label={placeholderLabel} />
-              ))}
-            </div>
-          )}
-        </div>
-      </Container>
-    </section>
+      {lead ? (
+        <ul data-anim-stagger className="mt-14 grid gap-x-10 gap-y-12 md:mt-16 md:grid-cols-2">
+          <li className="md:col-span-2">
+            <ProjectCard wide project={lead} href={href(lead)} program={programOf?.(lead.program)} />
+          </li>
+          {rest.slice(0, 4).map((project) => (
+            <li key={project.slug}>
+              <ProjectCard project={project} href={href(project)} program={programOf?.(project.program)} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <EmptyPanel text={empty} cta={cta} className="reveal mt-14" />
+      )}
+    </Section>
   );
 }

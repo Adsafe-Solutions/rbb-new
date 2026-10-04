@@ -12,6 +12,43 @@
 @import "./theme.css";
 @import "./variables.css";
 
+/* ---------------- DM Sans fallback ----------------
+   DM Sans arrives from Google Fonts with `display=swap`, so the first
+   paint uses a fallback and swaps when the font lands. The old fallback
+   (the system UI face) set the homepage poster headline wider, and the
+   swap rewrapped it: CLS 0.305 at 1280px, 0.168 at 768px.
+
+   "DM Sans Fallback" is local Arial, scaled to DM Sans's measured widths
+   (width ÷ Arial, same text, same tracking — Chrome, Oct 2026) and given
+   DM Sans's vertical metrics (ascent 0.99em, descent 0.31em, no line
+   gap), so the swap no longer moves anything. Two faces, because the
+   ratio differs by weight: regular text ≈ 0.92–0.945 against Arial,
+   the 600–900 headings ≈ 0.90 against Arial Bold. Each override is the
+   DM Sans metric divided by that face's size-adjust.
+
+   With DM Sans loaded nothing here applies — the typography is
+   unchanged. Where Arial is not installed (most Android phones) the
+   face does not load and the stack falls through to the system UI
+   face, exactly as before; the phone widths did not shift anyway. */
+@font-face {
+  font-family: "DM Sans Fallback";
+  src: local("Arial"), local("ArialMT");
+  font-weight: 100 549;
+  size-adjust: 93%;
+  ascent-override: 106.45%;
+  descent-override: 33.33%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "DM Sans Fallback";
+  src: local("Arial Bold"), local("Arial-BoldMT");
+  font-weight: 550 1000;
+  size-adjust: 90.3%;
+  ascent-override: 109.63%;
+  descent-override: 34.33%;
+  line-gap-override: 0%;
+}
+
 /* The card-gap rule as utilities — see the tokens in variables.css for
    which one to use when. `@utility` rather than a class so the variants
    work (`md:gap-cards`, `gap-x-cards` is not needed — the rule is the
@@ -26,9 +63,254 @@
   gap: var(--gap-stack);
 }
 
+/* ---------------- Display type ----------------
+
+   The poster scale as ONE utility per role, because a display size is
+   never just a size: it is the brand face at its heaviest, in capitals,
+   on leading tight enough that the lines lock into a block. Five
+   utilities a component would otherwise have to repeat in step, and get
+   one wrong.
+
+   Typography is the site's main graphic device — the headline is the
+   picture — so these are what make a page look like the system. Sizes
+   are the fluid tokens in theme.css.
+
+   ⚠ Capitals are set here, in CSS, never typed into the content. A
+   screen reader reads "Building hope", not "B-U-I-L-D-I-N-G", and the
+   copy in src/content stays ordinary sentence case that anyone can edit.
+
+   `text-wrap: balance` evens out the lines of a multi-line headline, so
+   one never ends on a single short word.
+
+   `overflow-wrap: anywhere` + `hyphens: auto`: one word in capitals at
+   these sizes can be wider than a 320px screen ("ACCOUNTABILITY",
+   "COMMUNICATIONS"). Without them the word pushed its column wider than
+   the screen and the band's clip cut it off — unreadable at the width
+   WCAG's reflow criterion tests. A word now breaks only when it cannot
+   fit on a line of its own; every other headline sets exactly as
+   before. */
+@utility type-poster {
+  font-size: var(--text-poster);
+  font-weight: 900;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+@utility type-billboard {
+  font-size: var(--text-billboard);
+  font-weight: 900;
+  line-height: 0.94;
+  letter-spacing: -0.028em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+@utility type-title {
+  font-size: var(--text-title);
+  font-weight: 900;
+  line-height: 0.98;
+  letter-spacing: -0.022em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+/* ⚠ SENTENCE CASE, unlike the three sizes above. A page has one poster,
+   a handful of section titles and dozens of cards; with every card in
+   capitals too, the whole page shouted and the capitals stopped meaning
+   "this is the headline". Cards read as editorial headings instead. */
+@utility type-card {
+  font-size: var(--text-card);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.018em;
+  text-wrap: balance;
+}
+/* An impact number. Lining, tabular digits: a figure that counts up
+   must not change width as it goes. */
+@utility type-figure {
+  font-size: var(--text-figure);
+  font-weight: 900;
+  line-height: 0.88;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+/* The line under a headline: larger than body, medium weight, sentence
+   case. The one supporting size, so a hero and a section intro agree. */
+@utility type-lead {
+  font-size: clamp(1.1875rem, 1.9vw, 1.4375rem);
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+/* Kickers, labels, metadata: small tracked capitals. There is no mono
+   face in RBB's approved typography, so the "printed label" voice is
+   made from the brand face — bold, wide-tracked, tabular figures. */
+@utility type-meta {
+  font-size: var(--text-meta);
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+/* A NOTE: a full sentence set small — a pending line, a source, a state.
+   `type-meta` is for labels of a few words; a sentence in tracked
+   capitals is slow to read and reads as a warning sign, so anything that
+   is a sentence uses this instead. */
+@utility type-note {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: 0;
+}
+
+/* ---------------- Hard offset shadows ----------------
+
+   A flat block of colour down and to the right of an object, no blur:
+   how a sticker or a flyer throws a shadow. The colour is the surface's
+   (`--tone-cast`): Sky Blue on paper and on Deep Trust Blue, Night on a
+   Sky Blue band — so a card never casts a shadow the colour of the
+   ground it is on.
+
+   Three sizes, by how much the object matters. Used on OBJECTS — cards,
+   photographs, tickets — not on every box; a section of rows separated
+   by hairlines has none. */
+/* A card's border: the band's ink, at the one border weight. */
+@utility border-rim {
+  border: var(--edge) solid var(--tone-rim);
+}
+@utility cast-sm {
+  box-shadow: var(--offset-sm) var(--offset-sm) 0 var(--tone-cast);
+}
+@utility cast {
+  box-shadow: var(--offset) var(--offset) 0 var(--tone-cast);
+}
+@utility cast-lg {
+  box-shadow: var(--offset-lg) var(--offset-lg) 0 var(--tone-cast);
+}
+
+/* ---------------- The flyer ----------------
+
+   An object stuck up by hand: it sits a degree or two off square, and
+   straightens and lifts when you reach for it.
+
+   ⚠ `rotate` and `translate`, the INDIVIDUAL properties, never
+   `transform`. The motion system reveals elements by tweening
+   `transform` and then clearing it (animations/reveals.js); a tilt
+   written as `transform: rotate()` would be overwritten for the length
+   of the reveal and snap back after it.
+
+   ⚠ And for the same reason, NEVER on an element that also carries a
+   motion attribute (`.reveal`, `data-anim`, a child of
+   `data-anim-stagger`). GSAP folds an element's individual transform
+   properties into the transform it manages and sets them to `none`, so
+   the hover below would stop working. The tilt goes on the card; the
+   reveal goes on the wrapper around it. OffsetCard does this for you.
+
+   `--tilt` comes from the `tilt-*` utilities. Subtle on purpose: under
+   two degrees, and less on a phone, where a tilted card is most of the
+   screen's width and the corners start to crowd the gutter.
+
+   Reduced motion keeps the tilt — it is how the object sits, not
+   something that moves — and drops the movement on hover. The shadow
+   and colour changes stay: a reader who asked for stillness still needs
+   to see what is interactive. */
+@utility flyer {
+  rotate: calc(var(--tilt, 0deg) * var(--tilt-k, 1));
+  transition:
+    rotate var(--motion-hover) var(--motion-ease-out),
+    translate var(--motion-hover) var(--motion-ease-out),
+    box-shadow var(--motion-hover) var(--motion-ease-out);
+
+  @media (max-width: 47.999rem) {
+    --tilt-k: 0.55;
+  }
+}
+/* The answer to a pointer or to keyboard focus inside the card. A
+   separate utility because not every tilted object is interactive: a
+   photograph in a frame keeps its tilt and stays put. */
+@utility flyer-lift {
+  &:hover,
+  &:focus-within {
+    rotate: 0deg;
+    translate: 0 -5px;
+    box-shadow: var(--offset-lg) var(--offset-lg) 0 var(--tone-cast);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:hover,
+    &:focus-within {
+      rotate: calc(var(--tilt, 0deg) * var(--tilt-k, 1));
+      translate: none;
+    }
+  }
+}
+@utility tilt-l {
+  --tilt: -1.1deg;
+}
+@utility tilt-r {
+  --tilt: 0.9deg;
+}
+@utility tilt-l-lg {
+  --tilt: -2deg;
+}
+@utility tilt-r-lg {
+  --tilt: 1.7deg;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
+  }
+
+  /* ---------------- Lenis ----------------
+     Smooth scrolling (animations/lenis.js). Lenis puts these classes
+     on <html> itself — `lenis` while it is installed, `lenis-smooth`
+     while it is actually smoothing, `lenis-stopped` while something
+     has frozen the page — and these four rules are what it needs from
+     the stylesheet. Written here rather than imported from the
+     package so they can carry their reasons, and so every line of CSS
+     the site ships is in src/styles.
+
+     Nothing below applies until the library is running, so a reader
+     with reduced motion, or without JavaScript, never meets any of
+     it. */
+
+  /* Lenis measures the scrollable height itself; a percentage height
+     inherited down from <html> would fight that measurement. */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  /* ⚠ THE IMPORTANT ONE. `scroll-behavior: smooth` above and Lenis
+     are two different animations of the same scroll position, and
+     with both on, every programmatic jump — a route change, an anchor
+     — is a fight one of them wins halfway. The browser's own
+     smoothing steps aside while Lenis is smoothing, and comes back
+     the moment it is not. */
+  html.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+
+  /* A scrollable panel INSIDE the page (the mobile menu sheet, a
+     horizontal card row) marked `data-lenis-prevent` scrolls on its
+     own, and must not hand the overscroll up to a page Lenis is
+     driving. */
+  html.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+
+  /* While the page is frozen behind an overlay. Header.jsx sets the
+     same thing inline for the mobile menu; this covers anything that
+     stops Lenis without knowing about the menu. */
+  html.lenis-stopped {
+    overflow: hidden;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -42,6 +324,10 @@
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
+      /* The delay too: a staggered entrance with its duration removed
+         but its delay kept is content that stays hidden for half a
+         second and then pops. */
+      animation-delay: 0s !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
@@ -56,68 +342,489 @@
      viewport on small screens; this is what stops them scrolling the page
      sideways. */
   body {
-    @apply overflow-x-clip bg-paper-white font-bumblesans text-bumble-ink antialiased;
+    @apply overflow-x-clip font-bumblesans antialiased;
     font-size: var(--text-body);
     line-height: var(--leading-body);
     letter-spacing: var(--tracking-body);
   }
 
-  /* Headlines are Deep Trust Blue, body is Charcoal — the palette's
-     split between "primary communication" and "body text". `:where()`
-     keeps this at zero specificity, so any utility on a heading (white
-     on a dark card, graphite in the footer) still wins. */
+  /* ---------------- Tones ----------------
+
+     The site is colour-blocked: full-width bands of paper, Deep Trust
+     Blue and Sky Blue, one after another, with white cards on them. A
+     TONE is what a surface tells everything on it about colour, and
+     every band and every card declares one with `data-tone`:
+
+       paper   the page's own ground, warm paper   (the default)
+       white   a band in white, for clean content areas
+       card    a white object sitting on any of the others
+       ink     Deep Trust Blue — strong statements, the footer
+       accent  Sky Blue — one band a page, at most two
+
+     The properties below are read through the `text-fg` / `bg-pop` /
+     `border-edge` … utilities (theme.css), so a heading, a button or an
+     icon tile written once is right on every one of them, and the
+     contrast decisions are made HERE, once, instead of in sixty
+     components:
+
+       · Sky Blue is never a text colour on a light surface (2.55:1 on
+         white). On paper, emphasis is Night type on a Sky Blue block.
+       · On Sky Blue everything is Night (5.95:1). Deep Trust Blue there
+         is 3.89:1 and Charcoal 4.45:1 — both fail for body text.
+       · On Deep Trust Blue, Sky Blue type is 3.89:1: display sizes
+         only. Body text is a tint of white, never Sky Blue.
+       · A card inverts with its band: a Sky Blue shadow on paper and on
+         ink, a Night shadow on Sky Blue (`--tone-cast`).
+
+     ⚠ `card` deliberately does NOT set `--tone-cast` or `--tone-rim` (a
+     card's border). A card's shadow and border are the colours of the
+     band it sits ON, and a custom property declared
+     on the card itself would be the one its own `box-shadow` reads.
+     `border-rim` is the utility for that border. */
+  :root,
+  [data-tone="paper"],
+  [data-tone="white"],
+  [data-tone="card"] {
+    --tone-bg: var(--color-paper);
+    --tone-fg: var(--color-trust-blue);
+    --tone-body: var(--color-bumble-ink);
+    --tone-muted: var(--color-graphite);
+    --tone-edge: var(--color-trust-blue);
+    --tone-hair: color-mix(in srgb, var(--color-trust-blue) 18%, transparent);
+    --tone-pop: var(--color-bumble-honey);
+    --tone-on-pop: var(--color-night);
+    --tone-flip: var(--color-trust-blue);
+    --tone-on-flip: var(--color-paper-white);
+    --tone-ring: var(--color-night);
+  }
+  :root,
+  [data-tone="paper"],
+  [data-tone="white"] {
+    --tone-cast: var(--color-bumble-honey);
+    --tone-rim: var(--color-trust-blue);
+  }
+  [data-tone="white"],
+  [data-tone="card"] {
+    --tone-bg: var(--color-paper-white);
+  }
+  [data-tone="ink"] {
+    --tone-bg: var(--color-trust-blue);
+    --tone-fg: var(--color-paper-white);
+    /* Tints of white mixed with the ground rather than white at an
+       opacity, so the values are solid colours with a contrast that can
+       be stated: 88% is 8.1:1 on Deep Trust Blue, 72% is 5.9:1. */
+    --tone-body: color-mix(in srgb, var(--color-paper-white) 88%, var(--color-trust-blue));
+    --tone-muted: color-mix(in srgb, var(--color-paper-white) 72%, var(--color-trust-blue));
+    --tone-edge: var(--color-paper-white);
+    --tone-hair: color-mix(in srgb, var(--color-paper-white) 24%, transparent);
+    --tone-pop: var(--color-bumble-honey);
+    --tone-on-pop: var(--color-night);
+    --tone-flip: var(--color-paper-white);
+    --tone-on-flip: var(--color-trust-blue);
+    --tone-cast: var(--color-bumble-honey);
+    --tone-rim: var(--color-trust-blue);
+    --tone-ring: var(--color-paper-white);
+  }
+  [data-tone="accent"] {
+    --tone-bg: var(--color-bumble-honey);
+    --tone-fg: var(--color-night);
+    --tone-body: var(--color-night);
+    --tone-muted: var(--color-night);
+    --tone-edge: var(--color-night);
+    --tone-hair: color-mix(in srgb, var(--color-night) 30%, transparent);
+    --tone-pop: var(--color-night);
+    --tone-on-pop: var(--color-paper-white);
+    --tone-flip: var(--color-paper-white);
+    --tone-on-flip: var(--color-night);
+    --tone-cast: var(--color-night);
+    --tone-rim: var(--color-night);
+    --tone-ring: var(--color-night);
+  }
+
+  body,
+  [data-tone] {
+    background-color: var(--tone-bg);
+    color: var(--tone-body);
+  }
+
+  /* Headings take the surface's ink. `:where()` keeps this at zero
+     specificity, so any utility on a heading still wins. */
   :where(h1, h2, h3, h4) {
-    color: var(--color-trust-blue);
+    color: var(--tone-fg);
   }
 
   /* Never #000. The palette's Charcoal is the darkest value; a true
      black next to it reads as a mistake. */
   ::selection {
     background: var(--color-bumble-honey);
-    color: var(--color-bumble-ink);
+    color: var(--color-night);
   }
 
-  /* One focus ring for the site, on the ink so it reads on both the white
-     canvas and the honey bands. Keyboard only — `:focus-visible`, so a
-     mouse click on a card does not light it up. */
+  /* One focus ring for the site, in the colour its surface says reads on
+     it: Night on the light surfaces and on Sky Blue, white on Deep Trust
+     Blue and the footer (WCAG 1.4.11 asks 3:1 of a focus indicator; the
+     lowest of these is 5.95:1). 3px and offset, so it is a ring around
+     the control and never a recolouring of it. Keyboard only —
+     `:focus-visible`, so a mouse click on a card does not light it up.
+
+     ⚠ Never the accent colour. The reference this language is drawn
+     from rings its fields in its accent, which disappears on its accent
+     block; a ring that takes the surface's ink cannot. */
   :focus-visible {
-    outline: 2px solid var(--color-bumble-ink);
+    outline: 3px solid var(--tone-ring);
     outline-offset: 3px;
     border-radius: var(--radius-small-elements);
-  }
-
-  /* On the Deep Trust Blue grounds — the heroes, the impact band, the
-     donation panel, the footer — the ink ring measured 1.15:1 against the
-     blue and all but vanished (WCAG 1.4.11 asks 3:1 for a focus
-     indicator). There it turns white (9.9:1). A white or light card
-     sitting on the blue (the donation checkout) gets the ink ring back. */
-  .bg-trust-blue :focus-visible {
-    outline-color: var(--color-paper-white);
-  }
-  .bg-trust-blue :is(.bg-paper-white, .bg-mist) :focus-visible {
-    outline-color: var(--color-bumble-ink);
   }
 }
 
 @layer components {
-  /* Scroll-reveal. The element sits shifted and transparent until the
-     IntersectionObserver in useReveal adds `.in`.
+  /* ---------------- The page entrance ----------------
 
-     ⚠ Applied by a hook that scans the DOM on mount — content rendered
-     LATER never gets observed unless the hook re-runs. Anything async
-     should carry its own CSS animation instead. */
-  /* Only under `.js` (set in index.html before first paint): pre-rendered
-     HTML read without JavaScript must not sit at opacity 0 with nothing
-     to fade it in (Document 15). */
-  .js .reveal {
-    @apply translate-y-6 opacity-0;
-    transition:
-      opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
-      transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+     The whole of <main> settles in, once, at first paint.
+
+     ⚠ FROM 0.55, NOT FROM 0. Two reasons, and they are the same
+     reason. A browser does not count an element it paints at opacity 0
+     towards Largest Contentful Paint, so fading the page in from
+     nothing would hand back half a second of the measurement the
+     pre-rendering exists to win — and the reader would be looking at a
+     blank screen for exactly as long. From 0.55 the text is legible in
+     the first frame and the page merely arrives.
+
+     ⚠ CSS, not GSAP, and not gated on `.js`. It runs at first paint,
+     before React has hydrated and whether or not JavaScript ever
+     arrives. An entrance that waits for a bundle is not an entrance.
+
+     ⚠ Opacity only. A transform here would make <main> the containing
+     block for everything inside it for half a second, which is how a
+     sticky panel or an absolutely placed decoration quietly lands in
+     the wrong place on load. The vertical movement the eye reads is in
+     the hero's own sequence, where it belongs.
+
+     Once, on load, and never on a route change: a page transition is a
+     separate decision, and not one this makes for us. */
+  #main {
+    animation: page-enter 500ms var(--motion-ease-out) both;
   }
 
-  .js .reveal.in {
-    @apply translate-y-0 opacity-100;
+  @keyframes page-enter {
+    from {
+      opacity: 0.55;
+    }
+  }
+
+  /* ---------------- The hero entrance ----------------
+
+     A hero's opening — its eyebrow, headline, supporting line and
+     buttons — arrives in CSS, at first paint, with no JavaScript
+     involved at any point.
+
+     ⚠ THIS IS NOT A STYLE PREFERENCE, IT IS THE MEASUREMENT. The motion
+     system binds after React hydrates, and on a throttled phone that is
+     around 1.9 SECONDS after the first paint. Anything the scanner is
+     responsible for therefore cannot appear before then — which is
+     survivable for a section you scroll to, and completely wrong for the
+     largest thing on the first screen. Run as a GSAP sequence, this
+     hero's supporting paragraph became the page's Largest Contentful
+     Paint at 2.3s; as the CSS below it is 1.3s, and the pre-rendering
+     that the whole build exists to do is not being thrown away again on
+     the way in.
+
+     So: above the fold, CSS. Below the fold, the scanner
+     (src/animations). The two never touch the same element — these
+     attributes are `data-enter-*` and the scanner's are `data-anim-*`.
+
+     ⚠ EVERY KEYFRAME STATES ITS `to`. With `animation-fill-mode: both`
+     and a `from`-only keyframe, the implied `to` is the element's
+     computed value — which, if it ever picked up the `opacity: 0` rule
+     below, would animate 0 → 0 and leave the hero permanently blank.
+
+     Reduced motion needs no rule of its own here: the site-wide rule in
+     the base layer collapses every animation to 0.01ms, and because the
+     end state is stated, collapsing it lands on the finished hero. Nor
+     does no-JS: a CSS animation does not need a bundle to arrive. */
+  [data-enter-item] {
+    animation: enter-item 620ms var(--motion-ease-out) both;
+    animation-delay: calc(var(--enter-i, 0) * 90ms);
+  }
+
+  @keyframes enter-item {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* The same entrance for TEXT on the first screen — a heading, an
+     intro — which never starts invisible.
+
+     ⚠ MEASURED, NOT TASTE. Chrome does not count an element painted at
+     opacity 0 towards Largest Contentful Paint, and a CSS opacity
+     animation then runs on the compositor without painting again — so
+     the text is not "painted" for LCP until the next main-thread paint,
+     which is hydration. With the hero intro on `data-enter-item`,
+     LCP on a throttled phone moved from 1.4s (first paint) to 2.4s.
+     Starting at 0.4 the text is a contentful paint in the first frame
+     and still visibly arrives. */
+  [data-enter-text] {
+    animation: enter-text 620ms var(--motion-ease-out) both;
+    animation-delay: calc(var(--enter-i, 0) * 90ms);
+  }
+
+  @keyframes enter-text {
+    from {
+      opacity: 0.4;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ---------------- The highlighted word ----------------
+
+     The system's signature: one key word of a headline sitting on a flat
+     block of the accent, like a word run over with a marker.
+
+     The block is BEHIND the word and never the word's colour. Sky Blue
+     type on a light surface is 2.55:1 and fails at any size; Night type
+     on a Sky Blue block is 5.95:1. On a Sky Blue band the block turns
+     Night and the word white (`--tone-pop` / `--tone-on-pop`), so the
+     device survives every surface.
+
+     `inline-block` with its own leading: display type is set on leading
+     under 1, and an inline background would paint over the line above.
+     The price is that a highlighted phrase cannot wrap — which is right:
+     it is one or two words, never a clause. The half-degree of tilt is
+     the same hand that stuck the flyers up.
+
+     ⚠ One per headline, and not on every headline. HighlightText is the
+     component; a heading opts in. */
+  .hl {
+    display: inline-block;
+    padding: 0.04em 0.16em 0.07em;
+    margin-inline: -0.03em;
+    border-radius: var(--radius-small-elements);
+    background-color: var(--tone-pop);
+    color: var(--tone-on-pop);
+    line-height: 1;
+    rotate: -1deg;
+  }
+
+  /* The cycling variant (animations/marks.js moves `data-marked` from one
+     word to the next). The transition is the whole animation, so the
+     site-wide reduced-motion rule switches it off without that file
+     knowing. No live page uses it; kept for the catalogue. */
+  [data-mark] {
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    border-radius: var(--radius-small-elements);
+    padding-inline: 0.12em;
+    margin-inline: -0.12em;
+    background-color: transparent;
+    transition: background-color 520ms var(--motion-ease-out);
+  }
+
+  [data-mark][data-marked] {
+    background-color: var(--tone-pop);
+    color: var(--tone-on-pop);
+  }
+
+  /* ---------------- The print pass ----------------
+
+     The homepage hero's entrance, and the one signature move of the
+     motion system: a bar of the accent sweeps across each line of the
+     headline and the type is there behind it when it leaves — the way a
+     squeegee lays down a colour.
+
+     Two animations per line. The BAR (`::after`) grows from the left
+     edge, then retracts towards the right. The TEXT is unclipped left to
+     right underneath it, starting a moment after the bar does, so the
+     bar always leads.
+
+     CSS, at first paint — see the hero entrance above for why nothing
+     on the first screen may wait for JavaScript. Every keyframe states
+     its end, so the site-wide reduced-motion rule (which collapses the
+     duration and the delay) lands on the finished headline with no bar.
+
+     Per WORD (PosterHero), inline-block, so the bar is exactly as long
+     as its word and a headline line that wraps never gets one bar two
+     rows tall. */
+  [data-enter-ribbon] {
+    position: relative;
+    display: inline-block;
+  }
+
+  [data-enter-ribbon] > * {
+    display: inline-block;
+    animation: ribbon-text 600ms var(--motion-ease-out) both;
+    animation-delay: calc(var(--enter-i, 0) * 80ms + 160ms);
+  }
+
+  [data-enter-ribbon]::after {
+    content: "";
+    position: absolute;
+    inset: 6% -0.08em 2%;
+    border-radius: var(--radius-small-elements);
+    background-color: var(--tone-pop);
+    animation: ribbon-bar 1000ms var(--motion-ease-print) both;
+    animation-delay: calc(var(--enter-i, 0) * 80ms);
+    pointer-events: none;
+  }
+
+  @keyframes ribbon-text {
+    from {
+      clip-path: inset(-15% 100% -15% -5%);
+    }
+    to {
+      clip-path: inset(-15% -5% -15% -5%);
+    }
+  }
+
+  @keyframes ribbon-bar {
+    0% {
+      transform: scaleX(0);
+      transform-origin: left;
+    }
+    46% {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+    54% {
+      transform: scaleX(1);
+      transform-origin: right;
+    }
+    100% {
+      transform: scaleX(0);
+      transform-origin: right;
+    }
+  }
+
+  /* ---------------- The marquee ----------------
+
+     One strip of display type running slowly along the bottom of a band
+     (components/Marquee). The track holds its items TWICE and travels
+     exactly half its own width, so the loop has no seam.
+
+     Decoration: the strip is `aria-hidden` and everything it says is
+     said elsewhere on the page. It does not pause on hover because
+     nothing in it is a control.
+
+     ⚠ Reduced motion stops it outright — `animation: none`, not the
+     site-wide collapse, which would leave an infinite animation parked
+     at its end. Still, it is a row of words. */
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee var(--marquee-seconds, 40s) linear infinite;
+  }
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+      animation: none;
+    }
+  }
+
+  /* The hero's scroll cue: a hairline with a segment of the accent
+     falling through it. Says "there is more below", which stays true for
+     as long as the hero is on screen — the one other loop on the site.
+     The reduced-motion rule parks it; the line itself remains. */
+  .scroll-cue {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--tone-hair);
+  }
+
+  .scroll-cue::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: var(--tone-fg);
+    animation: scroll-cue-fall 1.8s cubic-bezier(0.6, 0, 0.4, 1) infinite;
+  }
+
+  @keyframes scroll-cue-fall {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(100%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-cue::after {
+      animation: none;
+      transform: translateY(-55%);
+    }
+  }
+
+  /* ---------------- The pre-hidden state ----------------
+
+     Everything the motion system reveals starts invisible, and it
+     starts invisible HERE — in CSS, before the first frame is
+     painted — not from JavaScript.
+
+     That ordering is the whole rule. The page arrives pre-rendered
+     (Document 15), so its content paints before React has hydrated;
+     an element hidden by JavaScript would therefore appear, vanish,
+     and come back, which is worse than not animating it at all.
+
+     ⚠ Only under `.js`, set by an inline script in index.html before
+     first paint. Pre-rendered HTML read WITHOUT JavaScript must never
+     sit at opacity 0 with nothing to bring it back.
+
+     `.reveal` keeps its original meaning — fade up on arrival — on
+     every element that already carries it. The `data-anim` attributes
+     are the richer vocabulary; animations/reveals.js documents all of
+     them, and decides what each one does.
+
+     The one exception is a group container: a `sequence` does not
+     animate itself, it animates the items inside it, and hiding the
+     container would hide them all behind one opacity that never
+     changes. */
+  .js :is(
+      .reveal,
+      [data-anim]:not([data-anim="sequence"]),
+      [data-anim-item],
+      [data-anim-stagger] > *
+    ) {
+    opacity: 0;
+  }
+
+  /* Reduced motion: nothing above ever gets revealed, because nothing
+     is ever bound (MotionProvider does not scan). So the content has
+     to be visible on its own — in CSS, with no JavaScript involved in
+     the promise. This is the rule that makes "animation is an
+     enhancement" true rather than aspirational.
+
+     ⚠ THE SELECTOR IS REPEATED CHARACTER FOR CHARACTER, `:not()` and
+     all. It has to be: `:is()` takes the specificity of its most
+     specific argument, so dropping the `:not(…)` — which is what the
+     shorter, more readable version of this rule did — quietly makes it
+     ONE CLASS less specific than the rule above, and every element on
+     the page stays invisible for the reader who least wants a
+     surprise. Same specificity, later in the file, so it wins with no
+     `!important` anywhere. */
+  @media (prefers-reduced-motion: reduce) {
+    .js :is(
+        .reveal,
+        [data-anim]:not([data-anim="sequence"]),
+        [data-anim-item],
+        [data-anim-stagger] > *
+      ) {
+      opacity: 1;
+    }
   }
 
   /* Entrance for content swapped in place (a tab panel, a carousel slot).
@@ -134,4 +841,129 @@
       transform: translateY(12px);
     }
   }
+}
+
+/* The homepage hero's headline on a laptop screen: six poster lines at
+   7.4vw pushed the hero's buttons below a 1280×900 window, so the first
+   screen had no action on it. From lg up the size is also capped by the
+   window's HEIGHT; on a tall screen nothing changes. Unlayered, so it
+   wins over the type-poster utility. */
+@media (min-width: 64rem) {
+  .poster-fit {
+    font-size: min(var(--text-poster), 9.2svh);
+  }
+}
+
+/* ======================= Colour themes =======================
+   Two alternative palettes beside RBB's own, chosen by the visitor
+   (components/ThemeSwitcher) and set on <html data-theme="…"> — before
+   first paint, by the inline script in index.html, from the visitor's
+   own browser storage. No attribute = RBB's palette, exactly as above.
+
+   Both come from the reference site's two palettes (docs/REFERENCE_
+   WEBSITE_REVERSE_ENGINEERING.md §4.1 and the dark "glass" theme), on
+   RBB's request (Oct 2026):
+     poster    ink #28282B, ivory #FAF4E8 cards on a #F4E8D2 page,
+               electric cyan #0FF0FC accent, muted #625E56
+     midnight  near-black #070A09 page, charcoal #2E2E33 bands, ivory
+               text, the same cyan, muted #A9A395
+
+   A theme re-maps the colour TOKENS, so every utility and tone follows.
+   Poster keeps the default structure (light ground, dark ink), so tokens
+   alone are enough. Midnight inverts it: Deep Trust Blue's two jobs —
+   heading ink on light ground AND the colour of the dark bands — part
+   ways, so the light tones get light text by the token swap and the ink
+   and accent tones are re-stated below. Unlayered, so they win over the
+   tones in @layer base. */
+:root {
+  /* The navbar Donate button's text (RBB's #f5efe6), per theme so it
+     stays legible on each theme's accent. */
+  --nav-cta-fg: #f5efe6;
+}
+
+:root[data-theme="poster"] {
+  --color-paper: #f4e8d2;
+  --color-paper-white: #faf4e8;
+  --color-trust-blue: #28282b;
+  --color-bumble-honey: #0ff0fc;
+  --color-night: #28282b;
+  --color-bumble-ink: #28282b;
+  --color-charcoal: #28282b;
+  --color-onyx: #28282b;
+  --color-graphite: #625e56;
+  --color-mist: #fdf8ee;
+  --color-pollen: #fdf8ee;
+  --nav-cta-fg: #28282b;
+}
+
+:root[data-theme="midnight"] {
+  color-scheme: dark;
+  --color-paper: #070a09;
+  --color-paper-white: #18191c;
+  /* "Ink" becomes the light foreground: every heading, border and
+     `text-trust-blue` reads ivory on the dark ground. */
+  --color-trust-blue: #faf4e8;
+  --color-bumble-honey: #0ff0fc;
+  --color-night: #070a09;
+  --color-bumble-ink: #e7e1d5;
+  --color-charcoal: #e7e1d5;
+  --color-onyx: #e7e1d5;
+  --color-graphite: #a9a395;
+  --color-mist: #232528;
+  --color-pollen: #232528;
+  --color-alert: #ff6b6b;
+  --nav-cta-fg: #070a09;
+}
+
+/* Midnight, light tones (page, white bands, cards): borders softened —
+   full ivory at 2px on near-black glared — and a cyan focus ring, since
+   the default Night ring vanishes on a dark ground. */
+:root[data-theme="midnight"],
+:root[data-theme="midnight"] [data-tone="paper"],
+:root[data-theme="midnight"] [data-tone="white"],
+:root[data-theme="midnight"] [data-tone="card"] {
+  --tone-edge: color-mix(in srgb, #faf4e8 62%, transparent);
+  --tone-ring: #0ff0fc;
+}
+:root[data-theme="midnight"] [data-tone="paper"],
+:root[data-theme="midnight"] [data-tone="white"] {
+  --tone-rim: color-mix(in srgb, #faf4e8 62%, transparent);
+}
+
+/* Midnight, ink bands: a charcoal panel instead of the (now ivory) ink. */
+:root[data-theme="midnight"] [data-tone="ink"] {
+  --tone-bg: #2e2e33;
+  --tone-fg: #faf4e8;
+  --tone-body: #e7e1d5;
+  --tone-muted: #a9a395;
+  --tone-edge: #faf4e8;
+  --tone-hair: color-mix(in srgb, #faf4e8 22%, transparent);
+  --tone-flip: #faf4e8;
+  --tone-on-flip: #070a09;
+  --tone-rim: color-mix(in srgb, #faf4e8 62%, transparent);
+  --tone-ring: #0ff0fc;
+}
+
+/* Midnight, accent bands: the inverse button keeps ivory type on its
+   dark fill (by default it would be near-black on near-black). */
+:root[data-theme="midnight"] [data-tone="accent"] {
+  --tone-on-pop: #faf4e8;
+  --tone-on-flip: #faf4e8;
+}
+
+/* The logo is supplied artwork, not recolourable: on Midnight's dark
+   surfaces the light-ground cut swaps for RBB's reversed one
+   (components/Logo renders both; the reversed one loads lazily).
+   `!important` so the swap beats display utilities on the logo — and the
+   shown cut uses `revert-layer`, which hands display BACK to those
+   utilities, so a logo the header hides at a breakpoint (`hidden
+   sm:block`) stays hidden in every theme. */
+.logo-for-dark {
+  display: none !important;
+}
+:root[data-theme="midnight"] .logo-for-light {
+  display: none !important;
+}
+:root[data-theme="midnight"] .logo-for-dark {
+  display: revert-layer !important;
 }

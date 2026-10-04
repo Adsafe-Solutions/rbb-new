@@ -53,7 +53,7 @@ they were before any placeholder existed, and only RBB can fill them:
 | Donate | Support intro and transparency line only — the page state, ways to give and FAQs are NOT placeholders | `content/donation.js` |
 | Contact · Careers | Email, phone, address, hours, response time, social links, careers sections and 3 roles | `content/contact.js` |
 | Transparency | Governance intro and sections (no documents) | `content/transparency.js` |
-| Policies | Privacy, Terms and Accessibility page text | `content/policies.js` |
+| Policies | Privacy and Terms page text | `content/policies.js` |
 | Forms | Success / error messages and the newsletter consent wording | `content/forms.js` |
 
 ## Temporary photographs (Pexels)
@@ -125,7 +125,7 @@ between files.
 - [ ] Replace stories (`content/stories.js`).
 - [ ] Replace contact details, social accounts and careers (`content/contact.js`).
 - [ ] Replace photographs and confirm licences (`docs/IMAGE_INVENTORY.md`).
-- [ ] Publish approved Privacy, Terms and Accessibility text; decide on a Cookies page.
+- [ ] Publish approved Privacy and Terms text; decide on a Cookies page.
 - [ ] Add the real reports, financial documents and governance material (`content/transparency.js`).
 - [ ] Approve donation amounts, currency, fields and copy; configure Razorpay test, then live (`docs/DONATIONS.md`).
 - [ ] Configure Resend: production domain, From address and recipients (`docs/FORMS_AND_EMAIL.md`).

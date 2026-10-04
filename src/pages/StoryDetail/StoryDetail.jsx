@@ -1,6 +1,8 @@
 import { useParams } from "react-router-dom";
 import PageHeader from "../../components/PageHeader/PageHeader.jsx";
-import Container from "../../components/Container/Container.jsx";
+import Section from "../../components/Section/Section.jsx";
+import EditorialImage from "../../components/EditorialImage/EditorialImage.jsx";
+import Mark from "../../components/Mark/Mark.jsx";
 import SectionHeading from "../../components/SectionHeading/SectionHeading.jsx";
 import ContentRows from "../../components/ContentRows/ContentRows.jsx";
 import LinkChips from "../../components/LinkChips/LinkChips.jsx";
@@ -9,7 +11,6 @@ import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
 import NotFound from "../NotFound/NotFound.jsx";
 import useSeo from "../../hooks/useSeo.js";
 import { notFoundMeta, storyMeta } from "../../content/seo.js";
-import useReveal from "../../hooks/useReveal.js";
 import {
   PROJECTS,
   STORIES_PAGES,
@@ -19,7 +20,6 @@ import {
   storyBySlug,
   storyCard,
 } from "../../content/index.js";
-import Picture from "../../components/Picture/Picture.jsx";
 
 /* /stories/:slug — one approved story (Document 07's detail template),
    built entirely from its entry in content/stories.js.
@@ -34,7 +34,6 @@ import Picture from "../../components/Picture/Picture.jsx";
    related stories. The body runs at a readable measure — a story is read,
    not scanned. */
 function Detail({ story }) {
-  useReveal();
   const t = STORIES_PAGES.detail;
   const category = categoryById(story.category);
   const program = story.programId && programBySlug(story.programId);
@@ -59,29 +58,29 @@ function Detail({ story }) {
         kicker={category?.label}
         aside={
           story.image && (
-            <figure className="reveal">
-              <div className="aspect-[4/3] overflow-hidden rounded-3xl rounded-tr-[6rem]">
-                <Picture sizes="(min-width: 1024px) 40vw, 90vw" src={story.image.src} alt={story.image.alt} className="h-full w-full object-cover" />
-              </div>
-              {story.image.caption && (
-                <figcaption className="mt-3 text-[length:var(--text-caption)] leading-caption text-graphite">
-                  {story.image.caption}
-                </figcaption>
-              )}
-            </figure>
+            <EditorialImage
+              image={story.image}
+              caption={story.image.caption}
+              tilt="r-lg"
+              cast="cast-lg"
+              priority
+              label={category?.label}
+              sizes="(min-width: 1024px) 40vw, 90vw"
+              data-parallax="5"
+            />
           )
         }
       >
         {story.excerpt && (
-          <p className="mt-5 max-w-prose text-[length:var(--text-subheading)] leading-subheading tracking-subheading text-graphite">
+          <p className="type-lead mt-7 max-w-[46ch] text-copy">
             {story.excerpt}
           </p>
         )}
         {(story.date || story.author) && (
-          <p className="mt-6 flex flex-wrap gap-x-4 text-[length:var(--text-caption)] leading-caption tracking-caption text-graphite">
+          <p className="type-meta mt-8 flex flex-wrap gap-x-5 gap-y-1 text-quiet">
             {story.author && (
               <span>
-                {t.byline} <span className="font-semibold text-bumble-ink">{story.author}</span>
+                {t.byline} <span className="text-fg">{story.author}</span>
               </span>
             )}
             {story.date && <time dateTime={story.date}>{formatDate(story.date)}</time>}
@@ -89,68 +88,65 @@ function Detail({ story }) {
         )}
       </PageHeader>
 
+      {/* The article: a reading measure, a drop-cap opening paragraph, and
+          each quote as a pull-quote — display weight on a Sky Blue rule,
+          the mark beside it. */}
       {(story.body?.length > 0 || story.quotes?.length > 0) && (
-        <article className="py-16 md:py-24">
-          <Container>
-            <div className="reveal mx-auto max-w-[68ch]">
-              {(story.body ?? []).map((paragraph) => (
-                <p key={paragraph} className="mt-6 text-[length:var(--text-body)] leading-[1.7] first:mt-0">
-                  {paragraph}
-                </p>
-              ))}
-              {story.quotes?.map((quote) => (
-                <figure key={quote.text} className="mt-10 border-l-4 border-bumble-honey pl-6">
-                  <blockquote className="font-semibold text-[length:var(--text-subheading)] leading-subheading tracking-subheading text-trust-blue">
-                    {quote.text}
-                  </blockquote>
-                  {quote.attribution && (
-                    <figcaption className="mt-3 text-graphite">— {quote.attribution}</figcaption>
-                  )}
-                </figure>
-              ))}
-            </div>
-          </Container>
-        </article>
+        <Section as="article" tone="white" pad="lg">
+          <div className="reveal mx-auto max-w-[68ch]">
+            {/* The release marker, for HTML scans only: `hidden` keeps it
+                off the screen and out of the accessibility tree. */}
+            {story.releaseMarker && <span hidden data-release-marker={story.releaseMarker} />}
+            {(story.body ?? []).map((paragraph, i) => (
+              <p
+                key={paragraph}
+                className={
+                  i === 0
+                    ? "text-[20px] leading-[1.7] text-copy first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:rounded-lg first-letter:bg-bumble-honey first-letter:px-2.5 first-letter:text-[3.4em] first-letter:font-black first-letter:leading-[0.95] first-letter:text-night"
+                    : "mt-6 text-[length:var(--text-body)] leading-[1.75] text-copy"
+                }
+              >
+                {paragraph}
+              </p>
+            ))}
+            {story.quotes?.map((quote) => (
+              <figure key={quote.text} className="my-12 border-l-[6px] border-pop pl-6 md:-mx-10 md:pl-10">
+                <Mark className="h-8 w-8 text-pop" />
+                <blockquote className="type-card mt-4 normal-case">{quote.text}</blockquote>
+                {quote.attribution && <figcaption className="type-meta mt-4 text-quiet">— {quote.attribution}</figcaption>}
+              </figure>
+            ))}
+          </div>
+        </Section>
       )}
 
-      {rows.length > 0 && <ContentRows rows={rows} />}
+      {rows.length > 0 && <ContentRows tone="paper" rows={rows} />}
 
       {relatedWork.length > 0 && (
-        <section className="pb-16 md:pb-24">
-          <Container>
-            <SectionHeading heading={t.related} className="reveal" />
-            <LinkChips items={relatedWork} align="start" surface="paper" className="reveal mt-8" />
-          </Container>
-        </section>
+        <Section tone="white" pad="md">
+          <SectionHeading heading={t.related} size="card" />
+          <LinkChips items={relatedWork} align="start" className="reveal mt-8" />
+        </Section>
       )}
 
       {story.media?.length > 0 && (
-        <section className="pb-16 md:pb-24">
-          <Container>
-            <SectionHeading heading={t.media} className="reveal" />
-            <div className="reveal mt-8 grid gap-tiles sm:grid-cols-2 lg:grid-cols-3">
-              {story.media.map((item) => (
-                <figure key={item.src}>
-                  <Picture sizes="(min-width: 768px) 33vw, 90vw" src={item.src} alt={item.alt} loading="lazy" className="aspect-[4/3] w-full rounded-2xl object-cover" />
-                  {item.caption && (
-                    <figcaption className="mt-2 text-[length:var(--text-caption)] leading-caption text-graphite">
-                      {item.caption}
-                    </figcaption>
-                  )}
-                </figure>
-              ))}
-            </div>
-          </Container>
-        </section>
+        <Section tone="paper" pad="md">
+          <SectionHeading heading={t.media} size="card" />
+          <div data-anim-stagger className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {story.media.map((item, i) => (
+              <div key={item.src}>
+                <EditorialImage image={item} caption={item.caption} tilt={i % 2 ? "r" : "l"} sizes="(min-width: 768px) 33vw, 90vw" />
+              </div>
+            ))}
+          </div>
+        </Section>
       )}
 
       {related.length > 0 && (
-        <section className="pb-16 md:pb-24">
-          <Container>
-            <SectionHeading heading={t.relatedStories} className="reveal" />
-            <StoryList stories={related} className="reveal mt-10" />
-          </Container>
-        </section>
+        <Section tone="white" pad="lg">
+          <SectionHeading heading={t.relatedStories} />
+          <StoryList stories={related} className="reveal mt-14" />
+        </Section>
       )}
 
       <ClosingCta {...t.closing} />

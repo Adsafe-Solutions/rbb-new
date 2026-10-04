@@ -1,13 +1,12 @@
 import { Link, useParams } from "react-router-dom";
 import PageHeader from "../../components/PageHeader/PageHeader.jsx";
-import Container from "../../components/Container/Container.jsx";
+import Section from "../../components/Section/Section.jsx";
+import EditorialImage from "../../components/EditorialImage/EditorialImage.jsx";
 import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
 import NotFound from "../NotFound/NotFound.jsx";
 import useSeo from "../../hooks/useSeo.js";
 import { memberMeta, notFoundMeta } from "../../content/seo.js";
-import useReveal from "../../hooks/useReveal.js";
 import { TEAM_COPY, hasProfile, memberBySlug } from "../../content/index.js";
-import Picture from "../../components/Picture/Picture.jsx";
 
 /* /about/team/:slug — one person's profile (Document 10's optional
    individual profile).
@@ -18,7 +17,6 @@ import Picture from "../../components/Picture/Picture.jsx";
    out with filler to look complete. Every other field renders only if
    present. */
 function Profile({ member }) {
-  useReveal();
   const t = TEAM_COPY.profile;
 
   return (
@@ -29,33 +27,40 @@ function Profile({ member }) {
         kicker={member.role}
         aside={
           member.image && (
-            <div className="reveal aspect-[4/5] overflow-hidden rounded-3xl rounded-tr-[6rem] lg:max-w-sm lg:justify-self-end">
-              <Picture sizes="(min-width: 1024px) 24rem, 90vw" src={member.image} alt={member.imageAlt ?? ""} className="h-full w-full object-cover" />
-            </div>
+            <EditorialImage
+              image={{ src: member.image, alt: member.imageAlt ?? "" }}
+              ratio="aspect-[4/5]"
+              tilt="r-lg"
+              cast="cast-lg"
+              priority
+              sizes="(min-width: 1024px) 24rem, 90vw"
+              className="mx-auto max-w-sm"
+            />
           )
         }
       >
         {(member.departmentOrArea || member.location) && (
-          <p className="mt-5 text-graphite">
+          <p className="type-meta mt-8 text-quiet">
             {[member.departmentOrArea, member.location].filter(Boolean).join(" · ")}
           </p>
         )}
       </PageHeader>
 
-      <article className="py-16 md:py-24">
-        <Container>
+      <Section as="article" tone="white" pad="lg">
           <div className="reveal mx-auto max-w-[68ch]">
+            {/* The release marker, for HTML scans only (never shown). */}
+            {member.releaseMarker && <span hidden data-release-marker={member.releaseMarker} />}
             {member.biography.map((paragraph) => (
-              <p key={paragraph} className="mt-6 leading-[1.7] first:mt-0">
+              <p key={paragraph} className="mt-6 leading-[1.75] text-copy first:mt-0 first:type-lead">
                 {paragraph}
               </p>
             ))}
 
             {member.relatedLinks?.length > 0 && (
               <p className="mt-10 flex flex-wrap gap-x-6 gap-y-2">
-                <span className="font-semibold text-bumble-ink">{t.links}:</span>
+                <span className="type-meta text-quiet">{t.links}:</span>
                 {member.relatedLinks.map((l) => (
-                  <Link key={l.to} to={l.to} className="font-semibold text-trust-blue underline underline-offset-4">
+                  <Link key={l.to} to={l.to} className="font-bold text-fg underline decoration-2 underline-offset-4">
                     {l.label}
                   </Link>
                 ))}
@@ -64,9 +69,9 @@ function Profile({ member }) {
 
             {member.socialLinks?.length > 0 && (
               <p className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
-                <span className="font-semibold text-bumble-ink">{t.social}:</span>
+                <span className="type-meta text-quiet">{t.social}:</span>
                 {member.socialLinks.map((l) => (
-                  <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer" className="font-semibold text-trust-blue underline underline-offset-4">
+                  <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer" className="font-bold text-fg underline decoration-2 underline-offset-4">
                     {l.label}
                     <span className="sr-only"> (opens in a new tab)</span>
                   </a>
@@ -74,8 +79,7 @@ function Profile({ member }) {
               </p>
             )}
           </div>
-        </Container>
-      </article>
+      </Section>
 
       <ClosingCta {...TEAM_COPY.closing} />
     </>

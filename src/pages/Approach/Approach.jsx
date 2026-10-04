@@ -1,7 +1,6 @@
 import PageHeader from "../../components/PageHeader/PageHeader.jsx";
 import ContentRows from "../../components/ContentRows/ContentRows.jsx";
 import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
-import useReveal from "../../hooks/useReveal.js";
 import { ABOUT, IMPACT, IMPACT_PAGES } from "../../content/index.js";
 
 /* /impact/our-approach — how RBB works towards sustainable growth and
@@ -18,14 +17,13 @@ import { ABOUT, IMPACT, IMPACT_PAGES } from "../../content/index.js";
    method, which Document 05 forbids until RBB approves it. They are kept
    in content/impact.js (approach.proposedFramework) for that day. */
 export default function Approach() {
-  useReveal();
   const t = IMPACT_PAGES.approach;
   const { approach } = IMPACT;
 
   return (
     <>
       <PageHeader title={t.heading} parent={{ label: "Our Impact", to: "/impact" }} kicker={t.kicker}>
-        <p className="mt-5 max-w-prose text-[length:var(--text-subheading)] leading-subheading tracking-subheading text-graphite">
+        <p className="type-lead mt-7 max-w-[46ch] text-copy">
           {t.body}
         </p>
       </PageHeader>
@@ -52,7 +50,7 @@ export default function Approach() {
         ]}
       />
 
-      <ClosingCta {...t.closing} />
+      <ClosingCta tone="accent" {...t.closing} />
     </>
   );
 }

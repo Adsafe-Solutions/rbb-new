@@ -45,13 +45,14 @@ export const IMPACT = {
   ],
   metricsSource: "Figures from the Rising Beyond Borders annual report.",
 
-  /* Impact per program, by Our Work slug. WORKING summaries below, until
-     RBB supplies its own. */
+  /* Impact per program, by Our Work slug. PROPOSED qualitative summaries:
+     the change each area works towards, in words — no activity, place or
+     figure (decision D12). `metrics` stays empty until RBB verifies one. */
   programImpact: [
-    { programId: "education", summary: "Demo summary — reading clubs, classroom supplies and teacher mentoring.", metrics: [], status: "approved" },
-    { programId: "health-wellbeing", summary: "Demo summary — health check days, clean water and hygiene sessions.", metrics: [], status: "approved" },
-    { programId: "livelihoods", summary: "Demo summary — skills training, market traders and smallholder farming.", metrics: [], status: "approved" },
-    { programId: "community-support", summary: "Demo summary — essentials distributions and community information days.", metrics: [], status: "approved" },
+    { programId: "education", summary: "Working towards wider access to learning, and the skills and confidence to keep learning.", metrics: [], status: "approved" },
+    { programId: "health-wellbeing", summary: "Working towards better access to essential support, and to physical, mental and emotional wellbeing.", metrics: [], status: "approved" },
+    { programId: "livelihoods", summary: "Working towards practical skills, fairer economic opportunity and livelihoods that last.", metrics: [], status: "approved" },
+    { programId: "community-support", summary: "Working towards resilient, connected communities that can meet their own priorities.", metrics: [], status: "approved" },
   ],
 
   /* Where RBB works. `countries` are verified country names; `regions` are
@@ -59,20 +60,20 @@ export const IMPACT = {
      — every name says "(demo)" — kept so the page/map layout can be
      reviewed; replace with RBB's verified coverage before launch. */
   geography: {
-    summary: "Demo geography for review. These regions and countries are placeholders, NOT Rising Beyond Borders' verified locations.",
-    regions: [
-      { name: "East Africa (demo)", countries: ["Demo country A", "Demo country B"] },
-      { name: "West Africa (demo)", countries: ["Demo country C"] },
-      { name: "South Asia (demo)", countries: ["Demo country D", "Demo country E"] },
-      { name: "Latin America (demo)", countries: ["Demo country F"] },
-    ],
+    summary: null,
+    regions: [],
     countries: [],
-    status: "approved",
+    /* No geography is shown until RBB supplies verified countries and
+       regions (decision D14) — no placeholder regions either (content
+       brief, 2026-10-04). release/approvals.mjs `geography` stays
+       pending, which keeps the release blocked. */
+    status: "placeholder",
   },
 
   /* How RBB works. The foundation is SOURCE: the mission's own words
-     (content/about.js). The detailed approach below is a WORKING
-     placeholder.
+     (content/about.js). The intro and principles below are PROPOSED
+     general prose (decision D11) — how the work is meant to be done, not
+     a named method and not a claim about any project.
 
      `proposedFramework` is the Listen → Partner → Act → Sustain structure
      Document 02 suggested for the homepage. It is kept here, not shown on
@@ -81,13 +82,15 @@ export const IMPACT = {
      unaffected by the working-content merge (this is a claimed
      methodology, not a self-labelled placeholder). */
   approach: {
-    intro: "Demo text — We listen to communities, work through local partners, act on the needs they identify, and plan every project to be sustained locally.",
+    intro:
+      "The people closest to a challenge usually understand it best. Our work is shaped with the communities it is meant to serve, and designed to keep going after any single project ends.",
     principles: [
-      "Demo — Communities lead: projects start from local priorities",
-      "Demo — Local partners: we work through people who know the context",
-      "Demo — Dignity: support is offered with respect and choice",
-      "Demo — Learning: we measure, listen and adapt",
-      "Demo — Sustainability: skills and ownership stay local",
+      "Listening first — work starts from the priorities communities name for themselves",
+      "Working together — we collaborate with communities, supporters and organisations who share our aims",
+      "Dignity and choice — support is offered with respect, and people keep control over decisions that affect them",
+      "Connecting people with opportunity — we help people reach the resources, skills and services that open up new options",
+      "Building for the long term — we favour solutions that communities can sustain",
+      "Learning and improving — we reflect on what works, and change course when something does not",
     ],
     status: "approved",
     proposedFramework: {
@@ -96,12 +99,20 @@ export const IMPACT = {
     },
   },
 
-  /* How impact is measured. WORKING placeholders below; no measurement
-     system is described as RBB's own until RBB supplies one. */
+  /* How impact is measured. PROPOSED: RBB's INTENDED approach, in words.
+     No measurement system, survey, review cycle or report is described as
+     existing until RBB supplies one (decision D12). */
   measurement: {
-    intro: "Demo text — Each project sets a small number of outcomes at the start and tracks them through simple, regular reporting.",
-    methods: ["Demo — attendance and participation records", "Demo — before-and-after surveys", "Demo — community feedback sessions"],
-    evidence: ["Demo — annual programme reviews published on the Transparency page"],
+    intro:
+      "Impact begins with listening, continues through collaboration, and grows when people have the opportunity to shape their own futures. Counting activities is not the same as knowing what changed, so we aim to look at four things:",
+    /* What RBB INTENDS to look at — aims, not a system in use. */
+    methods: [
+      "Clear aims, agreed with the people involved before work begins",
+      "What changed for people, in their own words as well as in numbers",
+      "What did not work, reported as plainly as what did",
+      "What we learned, and how it shapes the next piece of work",
+    ],
+    evidence: [],
     status: "approved",
   },
 
@@ -121,7 +132,7 @@ export const IMPACT = {
    SOURCE, a pending-review figure, or a placeholder. */
 /* The verification note shown with the headline figures wherever they
    appear (Home, /impact) — present while ANY figure is unverified, exactly
-   as the financial overview on /about/transparency is treated (Document
+   as the financial overview in the Transparency section of /about is treated (Document
    19). Verify every figure and it disappears on its own. */
 export const metricsNote = () =>
   IMPACT.metrics.every((m) => ["verified", "approved"].includes(m.status)) ? null : SITE.figuresPending;
@@ -138,10 +149,23 @@ export const approachSteps = () =>
 
 /* The headline figures as branded cards (components/ImpactStats, Home and
    /impact): each figure's own label and value, and a glyph chosen by its
-   id. Nothing is added to the figures. */
+   id. Nothing is added to the figures.
+
+   `status` travels with each one — the same editorial status recorded
+   above, not a new fact about it. The card reads it to decide whether
+   the figure may COUNT UP when it arrives on screen: a count-up is a
+   small flourish of confidence, and a figure RBB has not verified yet
+   has not earned it (src/animations/counters.js). Today every figure is
+   pending-review, so nothing counts; each one starts on its own the day
+   its status here changes. */
 const STAT_ICONS = { lives: "people", countries: "globe", partners: "partners" };
 export const impactStats = () =>
-  IMPACT.metrics.map((m) => ({ label: m.label, value: m.value, icon: STAT_ICONS[m.id] }));
+  IMPACT.metrics.map((m) => ({
+    label: m.label,
+    value: m.value,
+    icon: STAT_ICONS[m.id],
+    status: m.status,
+  }));
 
 export const IMPACT_PAGES = {
   overview: {
@@ -149,7 +173,7 @@ export const IMPACT_PAGES = {
     heading: "Our Impact",
     /* PROPOSED wording, built from SOURCE: the annual report's positioning
        and the mission's "sustainable growth and lasting change". */
-    body: `${BRAND.fullName} works with communities towards sustainable growth and lasting change.`,
+    body: `${BRAND.fullName} works with communities towards sustainable growth and lasting change — measured honestly, and reported only once it is verified.`,
     glance: { id: "at-a-glance", kicker: "Impact at a glance", heading: "Together, we create impact." },
     programs: {
       kicker: "Impact across our work",
@@ -169,6 +193,13 @@ export const IMPACT_PAGES = {
         empty: "Approach information to be provided and reviewed by Rising Beyond Borders.",
         cta: { label: "Explore Our Approach", to: "/impact/our-approach" },
       },
+      /* Stands in for Where We Work while there is no verified geography. */
+      work: {
+        kicker: "Our work",
+        heading: "See the work in action.",
+        body: "Four connected program areas: education, health and wellbeing, livelihoods and community support.",
+        cta: { label: "Explore Our Work", to: "/work" },
+      },
     },
     measurement: {
       heading: "Evidence & measurement",
@@ -185,10 +216,10 @@ export const IMPACT_PAGES = {
     },
     reports: {
       kicker: "Reports & transparency",
-      heading: "See the evidence.",
-      body: "Reports and transparency information to be provided by Rising Beyond Borders.",
+      heading: "Reporting what we learn.",
+      body: "Open reporting is part of how we hold ourselves accountable — to supporters, partners and the communities we work with.",
       linkMeta: SITE.transparencyLinkMeta,
-      cta: { label: "View Transparency", to: "/about/transparency" },
+      cta: { label: "View Transparency", to: "/about#transparency" },
     },
     closing: {
       heading: "Be part of the impact.",
@@ -202,7 +233,7 @@ export const IMPACT_PAGES = {
   whereWeWork: {
     kicker: "Our impact",
     heading: "Where We Work",
-    body: "Where We Work information to be provided and reviewed by Rising Beyond Borders.",
+    body: "Our work is shaped by the communities we work with and the priorities they set — across education, health and wellbeing, livelihoods and community support.",
     listHeading: "Countries and regions",
     empty: "Verified country and region information to be provided by Rising Beyond Borders.",
     /* Document 05's empty-state pattern: a way on to something that exists. */

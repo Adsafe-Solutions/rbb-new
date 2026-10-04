@@ -273,6 +273,60 @@ if (process.argv.includes("--browser")) {
         await page.waitForTimeout(400);
         check("mobile menu opens with its links", await page.getByRole("link", { name: "Stories" }).last().isVisible());
       }
+
+      /* Regression guards for three fixed defects and the footer (Oct 2026). */
+      /* 1. The web font swapping in must not move the homepage: a size-
+            matched "DM Sans Fallback" (styles/index.css) took CLS from
+            0.305 to ~0.01 at 1280px. Fresh page, cache off, so the swap
+            really happens after first paint. */
+      {
+        const fresh = await ctx.newPage();
+        const cdp = await ctx.newCDPSession(fresh);
+        await cdp.send("Network.setCacheDisabled", { cacheDisabled: true });
+        await fresh.addInitScript(() => {
+          window.__cls = 0;
+          new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__cls += e.value; }).observe({ type: "layout-shift", buffered: true });
+        });
+        await fresh.goto(base + "/", { waitUntil: "load" });
+        await fresh.waitForTimeout(2500);
+        const cls = await fresh.evaluate(() => window.__cls);
+        check(`@${width}px: homepage layout shift under 0.1`, cls < 0.1, cls.toFixed(3));
+        await fresh.close();
+      }
+      /* 2. The featured story image is /stories' largest element and, on
+            a phone, in the first screen: never lazy. Every other story
+            image stays lazy. */
+      await page.goto(base + "/stories", { waitUntil: "domcontentloaded" });
+      const storyImages = await page.evaluate(() => [...document.querySelectorAll("main article img")].map((img) => img.getAttribute("loading")));
+      check(
+        `@${width}px: /stories lead image eager, the rest lazy`,
+        storyImages.length > 1 && storyImages[0] !== "lazy" && storyImages.slice(1).every((l) => l === "lazy"),
+        storyImages.join(",")
+      );
+      /* 3. The 78 / 12 / 10 figures are a valid definition list: only
+            <div> groups inside the <dl>, each holding <dt>/<dd> directly. */
+      await page.goto(base + "/about", { waitUntil: "domcontentloaded" });
+      const dl = await page.evaluate(() => {
+        const list = document.querySelector("#financial-overview dl, [id='financial-overview'] ~ * dl, section dl");
+        if (!list) return "no <dl>";
+        const bad = [...list.children].filter((g) => g.tagName !== "DIV" || ![...g.children].every((c) => c.tagName === "DT" || c.tagName === "DD"));
+        return bad.length ? bad.map((g) => g.tagName).join(",") : "ok";
+      });
+      check(`@${width}px: /about financial figures are a valid <dl>`, dl === "ok", dl);
+      /* 4. The footer's full-name wordmark stays inside the footer. */
+      const wordmark = await page.evaluate(() => {
+        const mark = document.querySelector("footer [aria-hidden='true'] p");
+        if (!mark) return { ok: false, detail: "no wordmark" };
+        const box = mark.parentElement.getBoundingClientRect();
+        let right = -Infinity;
+        const walk = document.createTreeWalker(mark, NodeFilter.SHOW_TEXT);
+        for (let n; (n = walk.nextNode()); ) { const r = document.createRange(); r.selectNodeContents(n); for (const c of r.getClientRects()) right = Math.max(right, c.right); }
+        /* …and the RBB mark set in place of BEYOND's "O". */
+        for (const svg of mark.querySelectorAll("svg")) right = Math.max(right, svg.getBoundingClientRect().right);
+        return { ok: right <= box.right + 1, detail: `${Math.round(right)} ≤ ${Math.round(box.right)}` };
+      });
+      check(`@${width}px: footer wordmark fits its column`, wordmark.ok, wordmark.detail);
+
       await ctx.close();
     }
     await browser.close();

@@ -34,6 +34,7 @@ export {
   approvedDonationFaqs,
   donationState,
   donationActionBlock,
+  donationPreview,
   checkoutReady,
   legacyGivingBlock,
 } from "./donation.js";
@@ -44,6 +45,7 @@ export {
   policyById,
   policyByRoute,
   isPublished,
+  isFinalPolicy,
   policyLink,
   policyContact,
   publishedPolicyLinks,

@@ -18,7 +18,14 @@ import {
 import { publishedPolicyLinks } from "./policies.js";
 
 const child = (section, to) => section.children.find((c) => c.to === to);
-const link = ({ label, to }) => ({ label, to });
+/* A page that lives as a section of its parent links straight to the
+   section, not through the old address's redirect. */
+const link = ({ label, to, section }) => ({ label, to: section ?? to });
+
+/* Legal pages that exist, under their short footer names. */
+const LEGAL_SHORT = { "/privacy": "Privacy", "/terms": "Terms" };
+const legalLinks = () =>
+  publishedPolicyLinks().map((l) => ({ label: LEGAL_SHORT[l.to] ?? l.label, to: l.to }));
 
 export const FOOTER_COLUMNS = [
   {
@@ -34,13 +41,22 @@ export const FOOTER_COLUMNS = [
       child(GET_INVOLVED_SECTION, "/get-involved/fundraise"),
     ].map(link),
   },
+  /* Chapters of the one About page — links to its sections, not new
+     pages. Transparency stays here too: it was in the footer before, and
+     for a charity it is a link people look for. */
   {
-    heading: "Organization",
+    heading: "About",
     links: [
-      child(ABOUT_SECTION, "/about/team"),
-      child(ABOUT_SECTION, "/about/transparency"),
-      CONTACT_PAGE,
-    ].map(link),
+      { label: "Who We Are", to: "/about#who-we-are" },
+      { label: "Mission & Vision", to: "/about#mission-vision" },
+      { label: "Our Values", to: "/about#values" },
+      link(child(ABOUT_SECTION, "/about/transparency")),
+      { label: "Meet the Team", to: "/about/team" },
+    ],
+  },
+  {
+    heading: "Information",
+    links: [{ label: "Contact Us", to: CONTACT_PAGE.to }, ...legalLinks()],
   },
 ];
 
@@ -53,7 +69,7 @@ export const FOOTER_COLUMNS = [
    13). None yet, so the row is empty — no placeholder legal links. */
 export const FOOTER_LEGAL = {
   copyright: `${BRAND.fullName}. All rights reserved.`,
-  links: publishedPolicyLinks(),
+  links: legalLinks(),
   backToTop: "Back to top",
 };
 

@@ -6,9 +6,10 @@ import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
 import NotFound from "../NotFound/NotFound.jsx";
 import useSeo from "../../hooks/useSeo.js";
 import { notFoundMeta, projectMeta } from "../../content/seo.js";
-import useReveal from "../../hooks/useReveal.js";
 import { SITE, WORK, programBySlug, projectBySlug, projectsIn } from "../../content/index.js";
-import Picture from "../../components/Picture/Picture.jsx";
+import EditorialImage from "../../components/EditorialImage/EditorialImage.jsx";
+import TicketCard from "../../components/TicketCard/TicketCard.jsx";
+import Button from "../../components/Button/Button.jsx";
 
 /* /work/projects/:slug — one verified project (Document 04's detail
    template), built entirely from its entry in content/work.js.
@@ -24,7 +25,6 @@ import Picture from "../../components/Picture/Picture.jsx";
    project page exists because its facts do. Status is text, never colour
    alone. */
 function Detail({ project }) {
-  useReveal();
   const t = WORK.detail;
   const program = programBySlug(project.program);
 
@@ -37,6 +37,8 @@ function Detail({ project }) {
   const rows = [
     project.context && { id: "context", heading: t.context, body: project.context },
     project.activities?.length && { id: "what-we-do", heading: t.activities, items: project.activities },
+    project.approach?.length && { id: "approach", heading: t.approach, body: project.approach },
+    project.outcomes?.length && { id: "outcomes", heading: t.outcomes, items: project.outcomes },
     project.impact?.length && {
       id: "impact",
       heading: t.impact,
@@ -44,6 +46,9 @@ function Detail({ project }) {
     },
     project.partners?.length && { id: "partners", heading: t.partners, items: project.partners },
     project.story && { id: "story", heading: t.story, body: [project.story.title, project.story.excerpt] },
+    /* Where the project sits: its program, in the program's own approved
+       description. */
+    program && { id: "program", heading: t.connection, body: [`${program.title} — ${program.description}`] },
   ].filter(Boolean);
 
   const related = projectsIn(project.program).filter((p) => p.slug !== project.slug);
@@ -56,35 +61,59 @@ function Detail({ project }) {
         kicker={program?.title}
         aside={
           project.image && (
-            <div className="reveal aspect-[4/3] overflow-hidden rounded-3xl rounded-tr-[6rem]">
-              <Picture sizes="(min-width: 1024px) 40vw, 90vw" src={project.image.src} alt={project.image.alt} className="h-full w-full object-cover" />
-            </div>
+            <EditorialImage image={project.image} tilt="r-lg" cast="cast-lg" priority sizes="(min-width: 1024px) 40vw, 90vw" label={program?.title} />
           )
         }
       >
         {project.description && (
-          <p className="mt-5 max-w-prose text-[length:var(--text-subheading)] leading-subheading tracking-subheading text-graphite">
+          <p className="type-lead mt-7 max-w-[46ch] text-copy">
             {project.description}
           </p>
         )}
         {meta.length > 0 && (
-          <dl className="mt-8 flex flex-wrap gap-x-10 gap-y-4">
+          <dl className="mt-9 inline-flex flex-wrap gap-px overflow-hidden rounded-xl border-2 border-edge bg-[var(--tone-edge)]">
             {meta.map((m) => (
-              <div key={m.label}>
-                <dt className="text-[length:var(--text-caption)] font-semibold uppercase tracking-[0.16em] text-trust-blue">
-                  {m.label}
-                </dt>
-                <dd className="mt-1 font-medium text-bumble-ink">{m.value}</dd>
+              <div key={m.label} className="bg-ground px-5 py-3">
+                <dt className="type-meta text-quiet">{m.label}</dt>
+                <dd className="mt-1 font-extrabold text-fg">{m.value}</dd>
               </div>
             ))}
           </dl>
         )}
       </PageHeader>
 
-      {rows.length > 0 && <ContentRows rows={rows} />}
+      {/* The release marker, for HTML scans only (never shown). */}
+      {project.releaseMarker && <span hidden data-release-marker={project.releaseMarker} />}
+
+      {rows.length > 0 && (
+        <ContentRows
+          rows={rows}
+          /* The project's facts, as a ticket in a sticky rail beside the
+             long-form rows — only the facts the record has. */
+          aside={
+            meta.length > 0 && (
+              <TicketCard
+                kicker={project.title}
+                tilt="l"
+                rows={meta.map((m) => (
+                  <div key={m.label}>
+                    <p className="type-meta text-quiet">{m.label}</p>
+                    <p className="mt-1 text-[20px] font-extrabold leading-snug text-fg">{m.value}</p>
+                  </div>
+                ))}
+                foot={
+                  <Button to={t.cta.to} className="w-full">
+                    {t.cta.label}
+                  </Button>
+                }
+              />
+            )
+          }
+        />
+      )}
 
       {related.length > 0 && (
-        <ProjectList heading={t.related} projects={related} showProgram={false} empty={SITE.placeholder} />
+        <ProjectList heading={t.related} projects={related} showProgram={false} empty={SITE.placeholder} tone="paper" />
       )}
 
       <ClosingCta

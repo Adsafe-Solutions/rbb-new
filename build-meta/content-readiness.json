@@ -1,24 +1,17 @@
 {
-  "placeholders": 312,
+  "placeholders": 205,
   "rules": [
-    "demo address",
-    "demo answer",
-    "demo author",
-    "demo country",
-    "demo figure",
-    "demo location",
     "demo prefix",
-    "demo profile",
-    "demo quotation",
-    "demo role",
-    "demo summary",
     "demo text",
     "example.* address or URL",
-    "fictional 555 phone number",
-    "fictional team name",
+    "platform home page as social link",
+    "sample event",
+    "sample profile",
+    "sample project",
+    "sample story",
+    "sample video",
     "working placeholder photograph",
-    "working placeholder team profile",
-    "working text"
+    "working placeholder team profile"
   ],
   "files": [
     "/about/team/amara-demo",
@@ -37,8 +30,6 @@
     "about/team/index.html",
     "about/team/leila-demo/index.html",
     "about/team/samuel-demo/index.html",
-    "about/transparency/index.html",
-    "accessibility/index.html",
     "assets/demo-comm-aid-boxes-1200-Cdcq9AJA.webp",
     "assets/demo-comm-aid-boxes-1600-DLL5_4_d.webp",
     "assets/demo-comm-aid-boxes-480-CMYhiNKS.webp",
@@ -120,6 +111,8 @@
     "assets/demo-live-sewing-800-DTb2vo1v.webp",
     "assets/demo-live-sewing-BTvGFsc8.jpg",
     "assets/demo-live-vegetable-seller-1200-BxV2_gM9.webp",
-    "assets/demo-live-vegetable-seller-1600-DKiIbPYW.webp"
+    "assets/demo-live-vegetable-seller-1600-DKiIbPYW.webp",
+    "assets/demo-live-vegetable-seller-480-DuNlJjyq.webp",
+    "assets/demo-live-vegetable-seller-800-DmoobHCt.webp"
   ]
 }

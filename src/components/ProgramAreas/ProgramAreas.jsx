@@ -1,58 +1,53 @@
 import { useId } from "react";
-import { Link } from "react-router-dom";
-import Container from "../Container/Container.jsx";
-import LineIcon from "../LineIcon/LineIcon.jsx";
+import { FlyerLinkCard } from "../FlyerCard/FlyerCard.jsx";
+import Marquee from "../Marquee/Marquee.jsx";
+import { tiltAt } from "../OffsetCard/OffsetCard.jsx";
+import Section from "../Section/Section.jsx";
 import SectionHeading from "../SectionHeading/SectionHeading.jsx";
 
-/* The four program areas, as four equal cards on the Light Gray band.
+/* The four program areas as four flyers pinned up on a Deep Trust Blue
+   wall, each leaning its own way — then the program names running along
+   the bottom of the band.
 
-   Each card is ONE link, stretched over the card by its `after:` box, and
-   the link's own text is the visible "Explore Education". So a click
-   anywhere on the card goes to the program page, a screen reader lists
-   four links named for their programs rather than four "Learn more"s, and
-   a voice user can say exactly what they see. The title is the card's
-   <h3>, outside the link, so the heading outline stays clean.
+   Each flyer is one link (FlyerLinkCard): its title, stretched over the
+   card, with "Explore" added for assistive tech — so a screen reader
+   lists four destinations, not four "Learn more"s.
 
-   Icons, not photographs: the only photographs available are of relief
-   distributions, and a picture of one under "Education" would claim an
-   education project nobody has described. */
-export default function ProgramAreas({ kicker, heading, items }) {
+   The flyers are offset in a staggered 2 × 2 from `md` (the second
+   column sits lower — by MARGIN: a `translate` utility on an element the
+   motion system reveals is folded into GSAP's transform and lost), which is what makes this a wall of paper rather
+   than a table of four equal cells.
+
+   Icons, not photographs: the only photographs RBB has supplied are of
+   relief distributions, and a picture of one under "Education" would
+   claim an education project nobody has described. */
+export default function ProgramAreas({ index, kicker, heading, items, tone = "ink", highlight }) {
   const headingId = useId();
 
   return (
-    <section aria-labelledby={headingId} className="bg-mist py-20 md:py-28">
-      <Container>
-        <SectionHeading id={headingId} kicker={kicker} heading={heading} className="reveal" />
+    <Section tone={tone} pad="none" aria-labelledby={headingId} bare>
+      <div className="relative mx-auto w-full max-w-[var(--page-max-width)] px-5 pt-20 md:px-8 md:pt-32">
+        <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} highlight={highlight} />
 
-        <ul className="reveal mt-12 grid gap-cards sm:grid-cols-2 lg:grid-cols-4 md:mt-14">
-          {items.map((item) => (
-            <li
-              key={item.to}
-              className="group relative flex flex-col rounded-3xl rounded-tr-[3rem] bg-paper-white p-7 transition-shadow duration-300 hover:shadow-sm md:p-8"
-            >
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-bumble-honey/12 text-trust-blue transition-colors duration-300 group-hover:bg-bumble-honey group-hover:text-paper-white">
-                <LineIcon name={item.icon} className="h-7 w-7" />
-              </span>
-
-              <h3 className="mt-7 font-bold text-[length:var(--text-subheading)] leading-subheading tracking-subheading">
-                {item.title}
-              </h3>
-              <p className="mt-3 flex-1 text-graphite">{item.description}</p>
-
-              <Link
+        <ul data-anim-stagger className="mt-14 grid gap-x-8 gap-y-10 md:mt-16 md:grid-cols-2 md:gap-x-10 md:gap-y-12">
+          {items.map((item, i) => (
+            <li key={item.to} className={i % 2 === 1 ? "md:mt-14" : "md:mb-14"}>
+              <FlyerLinkCard
+                tilt={tiltAt(i)}
+                icon={item.icon}
+                meta={String(i + 1).padStart(2, "0")}
+                title={item.title}
                 to={item.to}
-                className="mt-7 inline-flex items-center gap-2 self-start font-semibold text-trust-blue underline-offset-4 after:absolute after:inset-0 after:rounded-3xl group-hover:underline"
+                label="Explore"
               >
-                Explore {item.title}
-                <LineIcon
-                  name="arrow"
-                  className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-                />
-              </Link>
+                {item.description}
+              </FlyerLinkCard>
             </li>
           ))}
         </ul>
-      </Container>
-    </section>
+      </div>
+
+      <Marquee items={items.map((item) => item.title)} className="mt-20 border-t-2 border-hair md:mt-36" />
+    </Section>
   );
 }

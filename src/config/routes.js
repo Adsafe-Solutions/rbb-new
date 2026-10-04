@@ -19,8 +19,9 @@ export const REDIRECTS = {
      the old address forwards to it rather than competing with it. */
   "/donate": "/get-involved/donate",
   "/fundraise": "/get-involved/fundraise",
-  /* Reports are what Transparency & Financials will publish. */
-  "/reports": "/about/transparency",
+  /* Reports are what Transparency & Financials will publish — a section
+     of /about since the About pages were consolidated. */
+  "/reports": "/about#transparency",
 };
 
 /* Older addresses with no page — RETIRED (Document 19).

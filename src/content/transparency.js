@@ -1,5 +1,5 @@
 /* Transparency & Financials — Document 09. ONE source for everything
-   /about/transparency shows. Other pages link here (through the shared
+   the Transparency section of /about shows. Other pages link here (through the shared
    rows in content/site.js) rather than repeating any of it.
 
    Editorial status, for the people maintaining this file — never shown:
@@ -56,27 +56,25 @@ export const TRANSPARENCY = {
   /* PLACEHOLDER — no financial statements or summaries supplied. */
   financialDocuments: [],
 
-  /* WORKING placeholder governance text (Document 27), self-labelled
-     "(demo)" — kept so the section can be reviewed; it is NOT Rising
-     Beyond Borders' governance structure. `documents` stays empty for the
-     same reason as the report lists above. */
+  /* PLACEHOLDER — no governance information supplied (decision D7). A
+     board, its duties or its policies are facts about RBB, so nothing
+     stands in for them: the section shows its pending line until RBB
+     supplies an approved statement. `documents` stays empty for the same
+     reason as the report lists above. */
   governance: {
-    intro: "Demo text — How the organisation is governed. Replace with Rising Beyond Borders' approved governance information.",
-    sections: [
-      { heading: "Board (demo)", body: "Demo — A volunteer board sets strategy, approves the annual budget and oversees the executive team." },
-      { heading: "Policies (demo)", body: "Demo — Key policies, such as safeguarding and conflict of interest, are reviewed by the board each year." },
-      { heading: "Reporting (demo)", body: "Demo — The board receives programme and financial reports every quarter." },
-    ],
+    intro: null,
+    sections: [],
     documents: [],
-    status: "approved",
+    status: "placeholder",
   },
 
-  /* How the page works. PROPOSED wording describing the site's own
-     practice — not a claim about audits, standards or compliance. */
+  /* Why transparency matters, and how the page works. PROPOSED wording
+     describing the site's own practice — not a claim about audits,
+     standards or compliance. */
   accountability: {
     intro: [
-      `This page publishes only information supplied and approved by ${BRAND.fullName}.`,
-      "Reports, financial documents and governance information will be added here as they are approved.",
+      "Transparency is how trust is earned. Supporters, partners and the communities we work with should be able to see how the work is run and how resources are used.",
+      "Our aim is to report openly on our finances and our work — including what did not go as planned, as well as what did.",
     ],
     status: "pending-review",
   },
@@ -101,29 +99,29 @@ export const TRANSPARENCY_COPY = {
   reports: {
     id: "annual-reports",
     kicker: "Reports",
-    heading: "Annual Reports",
-    empty: "Annual reports to be provided and reviewed by Rising Beyond Borders.",
+    heading: "Annual reports",
+    empty: "Annual reports will be published here once they are approved.",
   },
   financial: {
     id: "financial-information",
     kicker: "Financials",
-    heading: "Financial Information",
-    empty: "Financial information to be provided and reviewed by Rising Beyond Borders.",
+    heading: "Financial information",
+    empty: "Financial statements will be published here once they are approved.",
   },
   governance: {
     id: "governance",
     kicker: "Governance",
     heading: "Governance",
-    empty: "Governance information to be provided and reviewed by Rising Beyond Borders.",
+    empty: "Information on how Rising Beyond Borders is governed will be published here once it is approved.",
   },
-  accountability: { id: "accountability", heading: "How information is presented" },
+  accountability: { id: "accountability", heading: "How we report" },
   related: {
     impact: { kicker: "Our impact", heading: "See what the work achieves", cta: { label: "Explore Our Impact", to: "/impact" } },
     involve: {
       kicker: "Get involved",
       heading: "There are many ways to make a difference.",
       body: "Donate, volunteer, partner with us or fundraise.",
-      cta: { label: "Ways to Get Involved", to: "/get-involved" },
+      cta: { label: "Get Involved", to: "/get-involved" },
     },
   },
   documentLabel: "Download",

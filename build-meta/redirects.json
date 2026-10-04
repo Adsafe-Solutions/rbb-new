@@ -31,7 +31,7 @@
   },
   {
     "from": "/reports",
-    "to": "/about/transparency",
+    "to": "/about#transparency",
     "status": 301
   },
   {
@@ -47,6 +47,11 @@
   {
     "from": "/about/values",
     "to": "/about#values",
+    "status": 301
+  },
+  {
+    "from": "/about/transparency",
+    "to": "/about#transparency",
     "status": 301
   },
   {

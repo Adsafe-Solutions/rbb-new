@@ -1,7 +1,6 @@
 import PageHero from "../../components/PageHero/PageHero.jsx";
 import DonationAction from "../../components/DonationAction/DonationAction.jsx";
 import Newsletter from "../../components/Newsletter/Newsletter.jsx";
-import useReveal from "../../hooks/useReveal.js";
 import { DONATION, GIVING, donationState, legacyGivingBlock } from "../../content/index.js";
 
 /* /giving — a legacy address, kept so old links land (Document 11):
@@ -13,7 +12,6 @@ import { DONATION, GIVING, donationState, legacyGivingBlock } from "../../conten
    It offers no giving routes of its own; see content/giving.js for why
    the six it used to list are gone. */
 export default function Giving() {
-  useReveal();
 
   return (
     <>

@@ -3,19 +3,11 @@
     "stories": 8,
     "projects": 10,
     "team": 6,
-    "policies": 3,
+    "policies": 2,
     "givingMethods": 0,
     "donationFaqs": 0
   },
   "heldBackByFilter": {
-    "donation.js:givingMethods": {
-      "kept": 0,
-      "removed": 0
-    },
-    "donation.js:faqs": {
-      "kept": 0,
-      "removed": 0
-    },
     "work.js:PROJECT_RECORDS": {
       "kept": 10,
       "removed": 0
@@ -26,6 +18,14 @@
     },
     "team.js:TEAM_MEMBERS": {
       "kept": 6,
+      "removed": 0
+    },
+    "donation.js:givingMethods": {
+      "kept": 0,
+      "removed": 0
+    },
+    "donation.js:faqs": {
+      "kept": 0,
       "removed": 0
     }
   },

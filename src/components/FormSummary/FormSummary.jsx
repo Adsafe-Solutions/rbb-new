@@ -14,7 +14,7 @@ const FormSummary = forwardRef(function FormSummary({ heading, errors, fields, f
       tabIndex={-1}
       role="alert"
       aria-labelledby={`${formId}-summary`}
-      className="rounded-2xl border-2 border-alert bg-paper-white p-5 sm:p-6"
+      className="rounded-2xl border-2 border-alert bg-paper-white p-5 shadow-[6px_6px_0_color-mix(in_srgb,var(--color-alert)_25%,transparent)] sm:p-6"
     >
       <h3 id={`${formId}-summary`} className="font-bold text-alert">
         {heading}

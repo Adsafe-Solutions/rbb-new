@@ -14,7 +14,9 @@ import hero from "../assets/zakat-hero.jpg"; /* Shkraba Anthony, 7345444 */
 import classroom from "../assets/ngo-classroom.jpg";
 import { SITE } from "./site.js";
 
-const PLACEHOLDER = "Zakat information to be provided and reviewed by Rising Beyond Borders.";
+/* No visitor-facing "to be provided" line, and nothing religious added
+   (content brief, 2026-10-04): the page points to the one donation page. */
+const PLACEHOLDER = "Find out how to give to Rising Beyond Borders on our donation page.";
 
 export const ZAKAT = {
   hero: {

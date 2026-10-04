@@ -33,7 +33,6 @@
     "cta_interaction": "proposed"
   },
   "thirdPartyOrigins": [
-    "https://api.fontshare.com",
     "https://fonts.googleapis.com",
     "https://fonts.gstatic.com"
   ]

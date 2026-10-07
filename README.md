@@ -7,9 +7,9 @@ the admin and API are foundations only (M0).
 apps/web/       the public website — Vite + React (JavaScript), pre-rendered.
                 Its own guide: apps/web/README.md, apps/web/CLAUDE.md, apps/web/docs/
 apps/admin/     admin foundation — Vite + React + TypeScript (boots only)
-apps/api/       API foundation — Node + TypeScript (GET /health only)
-packages/       content-schema — the content contract (Zod); forms, money —
-                boundaries, empty until a milestone needs them
+apps/api/       the API — Node + TypeScript + MongoDB (see apps/api/README.md)
+packages/       content-schema — the content contract (Zod); forms — the form
+                domain; money — boundary, empty until needed
 docs/           platform docs — start with docs/MONOREPO.md
 ```
 
@@ -31,9 +31,11 @@ pnpm web:smoke -- --url=http://localhost:5190
 
 pnpm admin:dev            # http://localhost:5174
 pnpm admin:build
-pnpm api:dev              # http://localhost:4000/health
-pnpm api:build
-pnpm api:test
+pnpm api:dev              # http://localhost:4000/api/v1/health
+pnpm api:build            # typecheck + bundle into apps/api/dist
+pnpm api:test             # unit tests
+MONGODB_TEST_URI=… pnpm api:test:integration   # disposable MongoDB only
+pnpm api:db:indexes       # create missing indexes (non-destructive)
 pnpm schema:test          # content contract tests
 pnpm typecheck            # content-schema + admin + api
 ```

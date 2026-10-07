@@ -2,5 +2,10 @@
   "name": "@rbb/forms",
   "private": true,
   "version": "0.0.0",
-  "type": "module"
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.js",
+    "./schema": "./src/schema.js"
+  }
 }

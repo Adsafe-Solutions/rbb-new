@@ -23,6 +23,8 @@
     "api:start": "pnpm --filter @rbb/api run start",
     "api:typecheck": "pnpm --filter @rbb/api run typecheck",
     "api:test": "pnpm --filter @rbb/api run test",
+    "api:test:integration": "pnpm --filter @rbb/api run test:integration",
+    "api:db:indexes": "pnpm --filter @rbb/api run db:indexes",
     "schema:test": "pnpm --filter @rbb/content-schema run test",
     "schema:typecheck": "pnpm --filter @rbb/content-schema run typecheck",
     "typecheck": "pnpm run schema:typecheck && pnpm run admin:typecheck && pnpm run api:typecheck"

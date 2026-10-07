@@ -1,18 +1,16 @@
 /* Server-side validation — Document 21 §5. The browser's checks are for
    the person filling the form in; these are the ones that count. Every
-   rule comes from the shared schema (src/lib/formSchema.js).
+   rule comes from the shared schema (./schema.js).
 
    Returns either { ok: true, data } — the normalised fields, and nothing
    else — or { ok: false, status, error, fields? } where `fields` maps a
    field name to a short code ("required", "format", "too-long",
    "invalid"). Codes, never the submitted text: nothing a visitor typed is
-   ever echoed back. */
-import {
-  EMAIL_PATTERN,
-  FIELD_RULES,
-  FORM_SCHEMA,
-  HONEYPOT_FIELD,
-} from "../src/lib/formSchema.js";
+   ever echoed back.
+
+   Pure domain logic: no HTTP, no email, no storage — the endpoint that
+   calls it decides what a result means for its response. */
+import { EMAIL_PATTERN, FIELD_RULES, FORM_SCHEMA, HONEYPOT_FIELD } from "./schema.js";
 
 /* The only keys a request body may have. */
 const BODY_KEYS = new Set([

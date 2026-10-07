@@ -9,9 +9,10 @@ resolve from their own location (`scripts/*.mjs`, `server/dev-server.mjs`,
 | --- | --- | --- |
 | `apps/web/` | Public website | `src/`, `public/`, `index.html`, `vite.config.js`, `scripts/`, `server/` (the form endpoint, until M2), `release/`, `docs/` (RBB specifications and runbooks), `.prettierrc.json` |
 | `apps/admin/` | Admin foundation | Vite + React + TypeScript; one screen |
-| `apps/api/` | API foundation | Node + TypeScript; `GET /health` |
+| `apps/api/` | The API (M2) | Node + TypeScript + MongoDB, for Vercel. Health, readiness, the internal appeal read. See its README |
 | `packages/content-schema` | The content contract (M1) | Zod schemas for every content record; see its README |
-| `packages/forms`, `packages/money` | Shared-code boundaries | Empty until M2 — each README names the code that will move there |
+| `packages/forms` | The form domain (M2) | Form schema and `validateSubmission`, shared by the web's forms, its form endpoint and the API |
+| `packages/money` | Shared-code boundary | Empty until server-side donation code needs it |
 | `docs/` | Platform docs | This file |
 | root | `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `.gitignore` | |
 
@@ -28,8 +29,9 @@ Nothing changed except the directory they sit in.
 | `apps/web/server/.env.local` (git-ignored) | `pnpm web:serve`, loaded after `local.env` | local server secrets |
 | `apps/web/server/env.example` | people (template) | server variable names for the host's secret store |
 
-`apps/admin` reads no environment yet. `apps/api` reads only `PORT`
-(default 4000).
+`apps/admin` reads no environment yet. `apps/api` has its own: `apps/api/.env.example`
+(placeholders) → `apps/api/.env.local` (git-ignored) locally, Vercel's
+Environment Variables in deployment — see `apps/api/README.md`.
 
 ## Dependencies
 

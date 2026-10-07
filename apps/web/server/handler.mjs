@@ -19,9 +19,9 @@ import {
   HONEYPOT_FIELD,
   MAX_BODY_BYTES,
   MIN_FILL_MS,
-} from "../src/lib/formSchema.js";
+  validateSubmission,
+} from "@rbb/forms";
 import { formAvailable } from "./config.mjs";
-import { validateSubmission } from "./validate.mjs";
 import { createMemoryRateLimiter, rateKey, rateLimitProblem } from "./rate-limit.mjs";
 import { createDeliverer } from "./email/deliver.mjs";
 import { isJson, json, newReference, readBody } from "./http.mjs";

@@ -9,12 +9,21 @@ import { MediaPicker } from "../../media/MediaPicker";
 import type { PageProps } from "../../routes";
 import { slugify } from "../posts/slug";
 import styles from "../../content/content.module.css";
+import { nextSeo } from "../../content/seo";
+import { NoIndexField } from "../../content/NoIndexField";
+import { ProgramSelect } from "../../content/pickers";
+import { SCHEDULE_MAX, scheduleProblems, zoneOptions, type ScheduleStep } from "../../content/eventFields";
+import { ItemList } from "../../blocks/fields";
 
 /* One event. Date and times are what the event says, in its own time
-   zone — nothing is converted. The API checks the end is after the start
-   and that the zone is real. */
+   zone — nothing is converted, and the zone is chosen here, never taken
+   from the browser. The API checks the end is after the start, the zone is
+   real, the start happens in that zone on that day, and every timed
+   schedule step falls within the event, in order (content/eventFields
+   shows the same problems beside each step first). Milestone 4: the
+   program area (None = open to all) and the day's schedule. */
 
-const FIELDS = ["title", "slug", "subtitle", "summary", "about", "date", "startTime", "endTime", "timezone", "venue", "address", "mapUrl", "registrationUrl", "imageId", "seo"] as const;
+const FIELDS = ["title", "slug", "subtitle", "summary", "about", "date", "startTime", "endTime", "timezone", "programId", "schedule", "venue", "address", "mapUrl", "registrationUrl", "imageId", "seo"] as const;
 
 export default function EventEditorPage({ params }: PageProps) {
   const canEdit = useCan(params.id === "new" ? "content:create" : "content:update");
@@ -22,8 +31,10 @@ export default function EventEditorPage({ params }: PageProps) {
   const canApprove = useCan("content:approve");
   const editor = useContentEditor<Event>({ api: eventsApi, id: params.id!, base: "events", fields: FIELDS, initial: { status: "draft" }, kind: "event" });
   const [slugTouched, setSlugTouched] = useState(params.id !== "new");
-  const zones = useMemo(() => [{ value: "", label: "Choose a time zone" }, ...Intl.supportedValuesOf("timeZone").map((z) => ({ value: z, label: z.replace(/_/g, " ") }))], []);
   const d = editor.draft;
+  const zones = useMemo(() => zoneOptions(d.timezone, Intl.supportedValuesOf("timeZone")), [d.timezone]);
+  const schedule: ScheduleStep[] = d.schedule ?? [];
+  const stepProblems = scheduleProblems(d.startTime, d.endTime, schedule);
   const err = (path: string) => editor.errors.get(path);
   const readOnly = !canEdit || isLocked(editor.view?.record.status);
   const timeOrder = d.startTime && d.endTime && toTimeInput(d.endTime) <= toTimeInput(d.startTime) ? "The end must be after the start." : undefined;
@@ -38,8 +49,8 @@ export default function EventEditorPage({ params }: PageProps) {
 
   const seo = d.seo ?? {};
   const setSeo = (changes: Partial<NonNullable<Event["seo"]>>) => {
-    const next = Object.fromEntries(Object.entries({ ...seo, ...changes }).filter(([, v]) => v !== undefined && v !== ""));
-    editor.set({ seo: Object.keys(next).length ? next : undefined });
+    const next = nextSeo(seo, changes);
+    editor.set({ seo: next });
   };
 
   return (
@@ -62,6 +73,7 @@ export default function EventEditorPage({ params }: PageProps) {
             <FormField label="Summary" required helper="One or two sentences shown in lists." disabled={readOnly} error={err("summary")}>
               <Textarea rows={2} maxLength={400} value={d.summary ?? ""} onChange={(e) => editor.set({ summary: e.target.value })} />
             </FormField>
+            <ProgramSelect helper="None means the event is open to all." value={d.programId ?? undefined} onChange={(programId) => editor.set({ programId: programId ?? null })} error={err("programId")} disabled={readOnly} />
           </div>
         </Panel>
         <Panel title="Date & time" as="h2" description="As the event is advertised, in its own time zone.">
@@ -77,10 +89,33 @@ export default function EventEditorPage({ params }: PageProps) {
                 <Input type="time" value={toTimeInput(d.endTime)} onChange={(e) => editor.set({ endTime: fromTimeInput(e.target.value) })} />
               </FormField>
             </div>
-            <FormField label="Time zone" required helper="Where the times above apply, for example Europe/London." disabled={readOnly} error={err("timezone")}>
+            <FormField label="Time zone" required helper="Where the times above apply, for example Europe/London. The website shows the times exactly as entered, naming this zone." disabled={readOnly} error={err("timezone")}>
               <Select options={zones} value={d.timezone ?? ""} onChange={(e) => editor.set({ timezone: e.target.value || undefined })} />
             </FormField>
           </div>
+        </Panel>
+        <Panel title="Schedule" as="h2" description="How the day runs, in order (optional). A time is optional; a timed step falls between the start and the end.">
+          <ItemList<ScheduleStep>
+            label="Schedule steps"
+            items={schedule}
+            onChange={(steps) => editor.set({ schedule: steps })}
+            make={() => ({ item: "" })}
+            max={SCHEDULE_MAX}
+            disabled={readOnly}
+            itemLabel={(i) => `Step ${i + 1}`}
+            addLabel="Add a step"
+            error={err("schedule")}
+            render={(step, set, i) => (
+              <div className={styles.row}>
+                <FormField label="Time" helper="Optional." disabled={readOnly} error={err(`schedule.${i}.time`) ?? stepProblems.get(i)?.time}>
+                  <Input type="time" value={toTimeInput(step.time)} onChange={(e) => set({ item: step.item, ...(fromTimeInput(e.target.value) && { time: fromTimeInput(e.target.value) }) })} />
+                </FormField>
+                <FormField label="What happens" required disabled={readOnly} error={err(`schedule.${i}.item`) ?? stepProblems.get(i)?.item}>
+                  <Input maxLength={200} value={step.item} onChange={(e) => set({ ...step, item: e.target.value })} />
+                </FormField>
+              </div>
+            )}
+          />
         </Panel>
         <Panel title="Location" as="h2">
           <div className={styles.fields}>
@@ -115,6 +150,7 @@ export default function EventEditorPage({ params }: PageProps) {
               <Textarea rows={2} maxLength={200} value={seo.description ?? ""} onChange={(e) => setSeo({ description: e.target.value })} />
             </FormField>
             <MediaPicker label="Social image" helper="Shown when the event is shared. Defaults to the featured image." value={seo.ogImageId} onChange={(ogImageId) => setSeo({ ogImageId })} disabled={readOnly} error={err("seo.ogImageId")} />
+            <NoIndexField value={seo.noIndex} onChange={(noIndex) => setSeo({ noIndex })} disabled={readOnly} noun="event" />
           </div>
         </Panel>
         <Panel title="Publishing" as="h2">

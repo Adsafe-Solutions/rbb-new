@@ -40,6 +40,7 @@
      } */
 
 import { isWorkingContent } from "../lib/releaseMarkers.js";
+import { withoutTrailingSlash } from "../lib/paths.js";
 import { ORG_CONTACT, methodHref, verifiedOnly } from "./contact.js";
 
 /* WORKING placeholder policy text (Document 27). Each page is structured
@@ -235,7 +236,7 @@ export const TECHNOLOGY_AUDIT = {
 
 /* ---------------- Lookups ---------------- */
 export const policyById = (id) => POLICIES.find((p) => p.id === id);
-export const policyByRoute = (route) => POLICIES.find((p) => p.route === route);
+export const policyByRoute = (route) => POLICIES.find((p) => p.route === withoutTrailingSlash(route));
 
 export const isPublished = (policy) =>
   Boolean(policy?.route) && ["approved", "verified"].includes(policy?.status) && policy.sections.length > 0;

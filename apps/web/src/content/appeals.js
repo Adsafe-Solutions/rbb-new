@@ -30,6 +30,7 @@
 
 import { ORG_ID } from "../contract/org.js";
 import { appealView } from "../contract/appeals.js";
+import { withoutTrailingSlash } from "../lib/paths.js";
 
 export const APPEAL_KINDS = [
   {
@@ -276,10 +277,10 @@ export const storyAppeals = () =>
     }));
 
 export const appealKind = (id) => APPEAL_KINDS.find((k) => k.id === id);
-export const appealKindByPath = (to) => APPEAL_KINDS.find((k) => k.to === to);
+export const appealKindByPath = (to) => APPEAL_KINDS.find((k) => k.to === withoutTrailingSlash(to));
 export const appealPath = (appeal) => `${appealKind(appeal.kind).to}/${appeal.id}`;
 export const appealsOf = (kind) => APPEALS.filter((a) => a.kind === kind);
-export const appealByPath = (to) => APPEALS.find((a) => appealPath(a) === to);
+export const appealByPath = (to) => APPEALS.find((a) => appealPath(a) === withoutTrailingSlash(to));
 
 /* ---------------- Page copy ----------------
    PROPOSED interface copy — what each page is, never a claim. */

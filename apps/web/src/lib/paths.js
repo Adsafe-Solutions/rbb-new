@@ -17,6 +17,15 @@ export function isInTree(pathname, entry) {
 
 export default isWithin;
 
+/* A path as the site writes its own addresses: no trailing slash, except
+   the root itself. Static hosts serve a page's folder `index.html` at
+   "/work/education/" too (Cloudflare Pages redirects to that form), so
+   every lookup that matches a page by its address compares the
+   normalised path — otherwise the pre-rendered page would hydrate into
+   the error boundary. Anything that is not a string passes through. */
+export const withoutTrailingSlash = (path) =>
+  typeof path === "string" && path.length > 1 ? path.replace(/\/+$/, "") || "/" : path;
+
 /* Where a menu entry goes: a page's own address, or — for a page that
    lives as a section of its parent (`section` in content/nav.js) — the
    section itself, so the menu never routes through a redirect. */

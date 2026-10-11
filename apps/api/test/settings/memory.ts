@@ -38,8 +38,8 @@ import { ProviderError } from "../../src/modules/donations/provider.ts";
 import { FakeDonationProvider } from "../support/fake-donations.ts";
 import type { StoredContent } from "../../src/modules/content/repository.ts";
 import { ContentService } from "../../src/modules/content/service.ts";
-import { POST_COLLECTION } from "../../src/modules/posts/service.ts";
-import { EVENT_COLLECTION } from "../../src/modules/events/service.ts";
+import { postCollection } from "../../src/modules/posts/service.ts";
+import { eventCollection } from "../../src/modules/events/service.ts";
 
 /* In-memory settings and publish stores with the Mongo stores' contracts,
    over shared data so two organizations can sit side by side. */
@@ -270,7 +270,7 @@ export function harness(orgId = "org-a", data: SharedData = sharedData(), deploy
     reports: new ReportService(reportStore, media, audit, { orgId, now: time.now, lock }),
     impact: new ImpactService(impactStore as never, media, { stories: storyStore, programs: programStore }, audit, { orgId, now: time.now, lock }),
     stories: new StoryService(storyStore, media, { programs: programStore, projects: projectStore }, audit, { orgId, now: time.now, lock }),
-    projects: new ProjectService(projectStore, media, programStore, audit, { orgId, now: time.now, lock }),
+    projects: new ProjectService(projectStore, media, { programs: programStore, stories: storyStore }, audit, { orgId, now: time.now, lock }),
     transparency: new TransparencyService(transparencyStore as never, media, audit, { orgId, now: time.now, lock }),
     careers: new CareersService(careersStore as never, media, audit, { orgId, now: time.now, lock }),
     policies,
@@ -281,8 +281,8 @@ export function harness(orgId = "org-a", data: SharedData = sharedData(), deploy
     popup: new PopupService(popupStore as never, media, audit, { orgId, now: time.now, lock }),
     storyStrip: new StoryStripService(storyStripStore as never, appealStore as never, media, audit, { orgId, now: time.now, lock }),
     provider,
-    posts: new ContentService(POST_COLLECTION, postStore, media, audit, { orgId, now: time.now, lock }),
-    events: new ContentService(EVENT_COLLECTION, eventStore, media, audit, { orgId, now: time.now, lock }),
+    posts: new ContentService(postCollection({ programs: programStore }), postStore, media, audit, { orgId, now: time.now, lock }),
+    events: new ContentService(eventCollection({ programs: programStore }), eventStore, media, audit, { orgId, now: time.now, lock }),
     data,
     time,
     audit: data.base.audit,

@@ -2,6 +2,7 @@ import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
 import { loadConfig } from "../../src/config/env.ts";
+import { isProductionBucket } from "../../src/config/target.ts";
 import { ensureIndexes } from "../../src/db/collections.ts";
 import { AuditService } from "../../src/modules/audit/audit.ts";
 import { MEDIA_POLICY, newObjectKey } from "../../src/modules/media/policy.ts";
@@ -21,7 +22,13 @@ import { FACTS, fixture, member } from "../media/memory.ts";
    Safe by construction: NODE_ENV=test keys start with "_test/", under a
    one-off organization id ("live-<random>"), so nothing touches the
    production namespace; every object written is deleted in `after`,
-   and the run fails if one survives. Nothing is printed but outcomes. */
+   and the run fails if one survives. Nothing is printed but outcomes.
+
+   Phase 0: never the PRODUCTION bucket, prefix or not — a test writes
+   and deletes objects, and the website's media lives there. Point the
+   R2_* variables at a separate test bucket; there is no override. */
+if (isProductionBucket(process.env.R2_BUCKET?.trim()))
+  throw new Error("Refusing: R2_BUCKET is the production bucket. The live R2 test runs only against a separate test bucket. Nothing was written.");
 
 const R2_NAMES = ["R2_ACCOUNT_ID", "R2_BUCKET", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_PUBLIC_URL"];
 const env: Record<string, string | undefined> = { NODE_ENV: "test", ...Object.fromEntries(Object.entries(process.env).filter(([k]) => k.startsWith("R2_"))) };

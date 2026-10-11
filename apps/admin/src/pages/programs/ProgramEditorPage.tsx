@@ -9,6 +9,8 @@ import { MediaPicker } from "../../media/MediaPicker";
 import type { PageProps } from "../../routes";
 import { slugify } from "../posts/slug";
 import styles from "../../content/content.module.css";
+import { nextSeo } from "../../content/seo";
+import { NoIndexField } from "../../content/NoIndexField";
 
 /* One program area. Sections: basic information, its page's sections,
    SEO, publishing — exactly what the program page, Our Work, the menu and
@@ -63,8 +65,8 @@ export default function ProgramEditorPage({ params }: PageProps) {
 
   const seo = d.seo ?? {};
   const setSeo = (changes: Partial<NonNullable<Program["seo"]>>) => {
-    const next = Object.fromEntries(Object.entries({ ...seo, ...changes }).filter(([, v]) => v !== undefined && v !== ""));
-    editor.set({ seo: Object.keys(next).length ? next : undefined });
+    const next = nextSeo(seo, changes);
+    editor.set({ seo: next });
   };
 
   return (
@@ -135,6 +137,7 @@ export default function ProgramEditorPage({ params }: PageProps) {
               <Textarea rows={2} maxLength={200} value={seo.description ?? ""} onChange={(e) => setSeo({ description: e.target.value })} />
             </FormField>
             <MediaPicker label="Social image" helper="Shown when the program's page is shared." value={seo.ogImageId} onChange={(ogImageId) => setSeo({ ogImageId })} disabled={readOnly} error={err("seo.ogImageId")} />
+            <NoIndexField value={seo.noIndex} onChange={(noIndex) => setSeo({ noIndex })} disabled={readOnly} noun="program page" />
           </div>
         </Panel>
         <Panel title="Publishing" as="h2">

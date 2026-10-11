@@ -77,8 +77,8 @@ Indexing still follows the approvals and the absence of sample content, so
 |---|---|---|
 | `Appeal` | Emergency appeal or campaign: `kind`, `title`, `summary`, `imageId`, `highlight?`, `sections`, `donation?` | `content/appeals.js` — **authored as records** |
 | `GeneralDonationPage` | `/appeals` singleton: `hero`, `sections`, `donation.designation` | `content/donation.js` |
-| `Post` | `type: story · news · blog`, rich-text `body`, category, related posts | `content/stories.js`, `content/media.js` |
-| `Event` | Date, `startTime`/`endTime` ("6:30 PM"), venue, schedule, `programId` (null = open to all) | `content/media.js` EVENTS |
+| `Post` | `type: story · news · blog`, rich-text `body`, category, related posts; a story's `quotes` ({ text, attribution }) and `impact` (lines) | `content/stories.js`, `content/media.js` |
+| `Event` | Date, `startTime`/`endTime` ("6:30 PM", wall-clock, never converted), `timezone` (IANA; required by the CMS, never inferred), venue, schedule (timed steps within the event, in order), `programId` (null = open to all) | `content/media.js` EVENTS |
 | `Announcement` | One bar message: `text`, `link?`, `order` | `content/announcements.js` bar |
 | `Popup` | `key` (the "closed" memory), heading, `highlight`, CTA, delay, frequency, `excludePaths` | `content/announcements.js` popup |
 | `Homepage` | Singleton: an ordered list of blocks (below) | `content/homepage.js` |
@@ -87,7 +87,8 @@ Indexing still follows the approvals and the absence of sample content, so
 | `SiteSettings` | General, contact, social, SEO defaults, branding, analytics IDs, donation defaults, engagement toggles, features | `brand.js`, `contact.js`, `donation.js`, `announcements.js`, env flags |
 
 Future fields are optional and marked in the schema. No current record uses
-them yet: `Appeal.startsOn/endsOn`, `Event.timezone/registrationUrl`,
+them yet: `Appeal.startsOn/endsOn`, `Event.timezone/registrationUrl` (the CMS requires
+`timezone` on every event it saves — Milestone 4),
 `Announcement/Popup.startsAt/endsAt`, `Popup.includePaths`, the storage
 fields on `Media`, and `SiteSettings.branding`.
 

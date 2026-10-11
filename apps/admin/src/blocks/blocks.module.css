@@ -128,6 +128,11 @@
   color: var(--color-danger-fg);
   font-size: var(--type-body-small-size);
 }
+/* A picked record's address above its error, in its description. */
+.itemDetail,
+.itemError {
+  display: block;
+}
 .items {
   display: grid;
   gap: var(--space-3);

@@ -1,4 +1,5 @@
 import manifest from "../../assets/responsive/manifest.json";
+import { focalPosition } from "../../lib/focal.js";
 
 /* A photograph at the size the layout needs — Document 15.
 
@@ -34,7 +35,20 @@ const entryFor = (src) => {
   return manifest[unhashed] ? [unhashed, manifest[unhashed]] : [null, null];
 };
 
-export default function Picture({ src, sizes = "100vw", ...img }) {
+/* `focal` (Milestone 2): the point to keep in frame when the image is
+   cropped (lib/focal.js) — set as object-position, and only when it is a
+   valid one; without it the style is exactly what was passed. */
+export default function Picture({ src, sizes = "100vw", ...props }) {
+  const position = focalPosition(props.focal);
+  /* The <img>'s attributes in the order they were given, `style` where
+     `focal` was — so a page renders exactly as it did when components
+     wrote object-position themselves. */
+  const img = {};
+  for (const [key, value] of Object.entries(props)) {
+    if (key === "focal") {
+      if (position) img.style = { ...props.style, objectPosition: position };
+    } else if (!(key === "style" && position)) img[key] = value;
+  }
   const [name, entry] = entryFor(src);
   if (!entry) return <img src={src} {...img} />;
 

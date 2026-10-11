@@ -2,6 +2,7 @@ import { json, ok } from "../../http/response.ts";
 import type { Route } from "../../http/router.ts";
 import type { Logger } from "../../logging/logger.ts";
 import type { MongoProvider } from "../../db/mongo.ts";
+import type { TargetKind } from "../../config/target.ts";
 
 /* Health.
 
@@ -14,16 +15,23 @@ import type { MongoProvider } from "../../db/mongo.ts";
 
    The readiness body keeps the { data } shape on 503 too (the one
    exception to the error convention): it is a status report, not a
-   failed request. It names no host, database or credential. */
+   failed request. It names no host, database or credential.
+
+   `target` (Phase 0) is the KIND of database this instance writes to —
+   production, test, unclassified or none (config/target.ts), never its
+   name — so test tooling can refuse a production API before it signs in
+   or writes anything (test/support/smoke-target.mjs). */
 
 const live = { status: "ok" } as const;
 
 export function healthRoutes({
   configured,
   mongo,
+  target = null,
 }: {
   configured: boolean;
   mongo: MongoProvider | null;
+  target?: TargetKind | null;
 }): Route[] {
   const liveness = () => ok(live);
   return [
@@ -39,7 +47,7 @@ export function healthRoutes({
         const database = !configured || !mongo ? "not-configured" : await reachable(mongo, log);
         const ready = configured && database === "ok";
         return json(ready ? 200 : 503, {
-          data: { status: ready ? "ok" : "unavailable", configuration: configured ? "ok" : "invalid", database },
+          data: { status: ready ? "ok" : "unavailable", configuration: configured ? "ok" : "invalid", database, target: target ?? "unknown" },
         });
       },
     },

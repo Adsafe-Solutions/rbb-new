@@ -3,6 +3,7 @@ import { cx } from "../../lib/cx.js";
 import MediaPlaceholder from "../MediaPlaceholder/MediaPlaceholder.jsx";
 import OffsetCard from "../OffsetCard/OffsetCard.jsx";
 import Picture from "../Picture/Picture.jsx";
+import { cardFocal } from "../../lib/focal.js";
 
 /* One event in the /media/events directory (content/media.js): a
    photograph with a printed date stamp in its corner, the program and
@@ -29,6 +30,7 @@ export default function EventCard({ event, href, group, status, statusLabel, det
           <Picture
             src={event.image.src}
             alt={event.image.alt}
+            focal={cardFocal(event.image)}
             sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 92vw"
             loading="lazy"
             decoding="async"

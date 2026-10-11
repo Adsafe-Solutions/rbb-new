@@ -18,13 +18,13 @@ import StepCard from "../StepCard/StepCard.jsx";
    Blue type on this blue is 3.89:1, and the tone makes that impossible to
    get wrong. The mark stamp is the band's one object when there are no
    steps. `id` is the section's anchor. */
-export default function ApproachFlow({ id, index, kicker, heading, intro, steps = [], cta, tone = "accent" }) {
+export default function ApproachFlow({ id, index, kicker, heading, intro, steps = [], cta, tone = "accent", highlight }) {
   const headingId = useId();
 
   return (
     <Section id={id} tone={tone} pad="lg" watermark="right" aria-labelledby={headingId}>
       <div className="grid gap-12 lg:grid-cols-[7fr_5fr] lg:items-end lg:gap-20">
-        <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} size="billboard" />
+        <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} highlight={highlight} size="billboard" />
         <div data-anim="sequence" className="relative">
           {/* Wrapped: the stamp's tilt is a `rotate`, and on the element
               the motion system reveals GSAP would fold it away. */}

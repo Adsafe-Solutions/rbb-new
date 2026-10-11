@@ -3,6 +3,7 @@ import { cx } from "../../lib/cx.js";
 import ActionCard, { actionTone } from "../ActionCard/ActionCard.jsx";
 import Section from "../Section/Section.jsx";
 import SectionHeading from "../SectionHeading/SectionHeading.jsx";
+import Button from "../Button/Button.jsx";
 
 /* The ways to take part as a row of action boxes — one family in four
    inks (ActionCard): the first, the primary ask, on Sky Blue; the others
@@ -13,12 +14,19 @@ import SectionHeading from "../SectionHeading/SectionHeading.jsx";
    order. Nothing else is claimed about any path. The headline sits at
    billboard size, because this is the section the whole page has been
    building to. */
-export default function GetInvolved({ id, index, kicker, heading, items, tone = "white", size = "billboard", highlight }) {
+/* `intro` and `cta` (Milestone 8: a CMS homepage block's line and link) sit
+   under the heading; the source homepage sets neither. */
+export default function GetInvolved({ id, index, kicker, heading, items, tone = "white", size = "billboard", highlight, intro, cta }) {
   const headingId = useId();
 
   return (
     <Section id={id} tone={tone} pad="lg" aria-labelledby={headingId}>
-      <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} highlight={highlight} size={size} />
+      <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} highlight={highlight} size={size} intro={intro} />
+      {cta && (
+        <Button data-anim="soft" variant="outline" to={cta.to} className="mt-9">
+          {cta.label}
+        </Button>
+      )}
 
       <ul data-anim-stagger className={cx("mt-14 grid gap-8 sm:grid-cols-2 md:mt-16 lg:gap-6", items.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3")}>
         {items.map((item, i) => (

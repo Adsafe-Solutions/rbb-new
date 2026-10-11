@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { cx } from "../../lib/cx.js";
 import Picture from "../Picture/Picture.jsx";
+import { cardFocal } from "../../lib/focal.js";
 
 /* A YouTube film that loads nothing from YouTube until it is played.
 
@@ -52,6 +53,7 @@ export default function YouTubePlayer({ youtubeId, title, playLabel, poster, rat
           <Picture
             src={poster.src}
             alt=""
+            focal={cardFocal(poster)}
             sizes={sizes}
             loading="lazy"
             decoding="async"

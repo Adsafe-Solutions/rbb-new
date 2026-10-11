@@ -7,6 +7,7 @@ import Button from "../Button/Button.jsx";
 import Picture from "../Picture/Picture.jsx";
 import { withHighlight } from "../HighlightText/HighlightText.jsx";
 import { MenuIcon } from "../Header/icons.jsx";
+import { cardFocal } from "../../lib/focal.js";
 
 /* The on-screen popup (content/announcements.js `popup`): a photograph,
    a kicker, a headline with one highlighted word, a line, the one call to
@@ -109,6 +110,7 @@ export default function SitePopup({ popup }) {
               <Picture
                 src={popup.image.src}
                 alt={popup.image.alt}
+                focal={cardFocal(popup.image)}
                 sizes="(min-width: 640px) 20rem, 92vw"
                 className="absolute inset-0 h-full w-full object-cover"
               />

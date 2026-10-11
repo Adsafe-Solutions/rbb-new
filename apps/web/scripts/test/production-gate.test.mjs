@@ -91,6 +91,13 @@ test("credentials and test identifiers are refused", async () => {
     assert.ok((await rules({ "assets/a.js": js })).includes(rule), rule);
 });
 
+test("the host's _headers and _redirects are scanned like any other text file", async () => {
+  assert.deepEqual(await rules({ _headers: "/*\n  X-Frame-Options: DENY\n", _redirects: "/about-us /about 301\n" }), [], "clean rule files pass");
+  assert.ok((await rules({ _headers: '/*\n  X-Key: re_AbCdEfGh12_IjKlMnOp34\n' })).includes("Resend API key"), "a credential in _headers is refused");
+  assert.ok((await rules({ _redirects: "/a /test-key-secret-not-real 301\n" })).includes("test fixture"), "a test fixture in _redirects is refused");
+  assert.ok((await readiness({ _redirects: "/social https://www.instagram.com/ 301\n" })).includes("platform home page as social link"), "the readiness scan reads them too");
+});
+
 test("forbidden files are refused", async () => {
   const got = await rules({
     "email-previews/001.html": "x",

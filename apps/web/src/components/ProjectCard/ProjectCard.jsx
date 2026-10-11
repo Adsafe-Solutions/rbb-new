@@ -4,6 +4,7 @@ import ArrowStamp from "../ArrowStamp/ArrowStamp.jsx";
 import MediaPlaceholder from "../MediaPlaceholder/MediaPlaceholder.jsx";
 import OffsetCard from "../OffsetCard/OffsetCard.jsx";
 import Picture from "../Picture/Picture.jsx";
+import { cardFocal } from "../../lib/focal.js";
 
 /* A project as a printed piece: the photograph across the top of the
    sheet, a line of metadata, the title in display type, a sentence, and
@@ -40,6 +41,7 @@ export default function ProjectCard({ project, href, program, tilt, wide = false
             sizes={wide ? "(min-width: 768px) 45vw, 92vw" : "(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 92vw"}
             src={project.image.src}
             alt={project.image.alt}
+            focal={cardFocal(project.image)}
             loading="lazy"
             decoding="async"
             className="absolute inset-0 h-full w-full object-cover"

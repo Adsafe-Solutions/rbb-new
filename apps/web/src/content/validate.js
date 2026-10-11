@@ -206,6 +206,9 @@ export function validateContent({ pages = [], redirects = [], preview = false } 
     });
     if (p.story?.to && !pageSet.has(p.story.to.split("#")[0]))
       err(where, `\`story.to\` "${p.story.to}" is not a published page`);
+    /* Milestone 6: a CMS project names its story by id — one the site shows. */
+    if (p.storyId != null && !STORIES.some((s) => s.id === p.storyId && live(s.status)))
+      err(where, `\`storyId\` "${p.storyId}" is not an approved story the site shows`);
   }
 
   /* ---- Team (Document 10) ---- */

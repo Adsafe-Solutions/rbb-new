@@ -28,6 +28,7 @@ import {
   type TeamMember,
   recordMediaIds,
   settingsMediaIds,
+  snapshotMediaIds,
   type Appeal,
   type Event,
   type Post,
@@ -52,7 +53,7 @@ import { SECTIONS } from "../settings/service.ts";
 import type { DeploymentOutcome, DeploymentTrigger } from "./deploy.ts";
 import type { DeploymentState, PublishStore, StoredSnapshot } from "./repository.ts";
 import { canonical, fingerprintOf } from "./schedule.ts";
-import { POLICY_LABELS as POLICY_SECTIONS } from "../policies/service.ts";
+import { POLICY_LABELS as POLICY_SECTIONS, policyWorkingTextProblems } from "../policies/service.ts";
 import { GET_INVOLVED_LABELS } from "../get-involved/service.ts";
 import { LOCK_TTL_MS, PUBLISH_BUSY } from "./lock.ts";
 
@@ -115,12 +116,19 @@ function stamp(content: SnapshotContent, at: string): SnapshotContent {
   return Object.fromEntries(Object.entries(content).map(([k, v]) => [k, Array.isArray(v) ? v.map(dated) : dated(v)])) as SnapshotContent;
 }
 
-export function contentHash(record: SiteSettings, collections: SnapshotContent = {}): string {
+export function contentHash(record: SiteSettings, collections: SnapshotContent = {}, framing: Framing = {}): string {
   const { id: _i, orgId: _o, schemaVersion: _s, status: _st, createdAt: _c, updatedAt: _u, publishedAt: _p, releaseMarker: _r, ...settings } = record;
   // Settings alone hash exactly as they did before content existed.
   const source = Object.keys(collections).length ? { settings, content: collections } : settings;
-  return createHash("sha256").update(canonical(source)).digest("hex");
+  /* Milestone 2: an image's focal point or caption is part of what goes
+     live, so changing one is a change to publish. Only images that have
+     one are hashed — every hash made before Milestone 2 stays the same. */
+  return createHash("sha256").update(canonical(Object.keys(framing).length ? { source, framing } : source)).digest("hex");
 }
+
+/* Milestone 2: the focal point and caption of each image a publish uses,
+   for the images that have either. */
+export type Framing = Record<string, { focal?: string; caption?: string }>;
 
 /* A record as it appears in a snapshot: the contract record without its
    editing timestamps (publishedAt stays). */
@@ -329,10 +337,16 @@ export class PublishService {
      mark what goes live once it is. `live` is the active snapshot (its
      records are carried forward); `generatedAt` dates a first publish
      (`content`; `keyed` holds the FIRST_PUBLISH placeholder instead).
-     Presence rules per key are unchanged: news, blogs, events, appeals and
-     the team appear once the organization has any record of the kind;
-     programs, figures, documents, stories and projects once one is
-     publishable; pages only with a publishable version. */
+     Presence rules per key — news, blogs, events, appeals and the team
+     (Milestone 1): the key appears once the collection has been on the
+     website — a record of the kind is publishable now, or one was ever
+     published (`countEverPublished`: archived ones included), or the live
+     snapshot holds records of it. From then on the CMS is the source, and
+     an empty list is an intentional one (every record since archived). A
+     collection of drafts, submissions, not-yet-due approvals or records
+     archived before they were ever published never replaces the
+     website's own. Programs, figures, documents, stories and projects:
+     once one is publishable. Pages: only with a publishable version. */
   async #collections(live: SnapshotContent | null, generatedAt: string): Promise<{ content: SnapshotContent; keyed: SnapshotContent; marks: (() => Promise<void>)[]; scheduled: DueItem[]; scheduleProblems: ErrorDetail[] }> {
     const marks: (() => Promise<void>)[] = [];
     const scheduled: DueItem[] = [];
@@ -376,17 +390,18 @@ export class PublishService {
     };
     const ordered = <R extends { order: number; id: string; createdAt?: string; updatedAt?: string }>(list: R[]) => [...list].sort((a, b) => a.order - b.order || a.id.localeCompare(b.id)).map(forSnapshot);
 
-    const [postTypes, posts, eventCount, events, appealCount, appeals, donationPage, home, about, teamCount, team, programs, metrics, reports, impact, transparency, stories, projects, careers] = await Promise.all([
-      this.#posts.distinct("type"),
+    const [everNews, everBlogs, posts, everEvents, events, everAppeals, appeals, donationPage, home, about, everTeam, team, programs, metrics, reports, impact, transparency, stories, projects, careers] = await Promise.all([
+      this.#posts.countEverPublished({ type: "news" }),
+      this.#posts.countEverPublished({ type: "blog" }),
       take(this.#posts, [live?.news, live?.blogs], "News and blogs"),
-      this.#events.count(),
+      this.#events.countEverPublished(),
       take(this.#events, [live?.events], "Events"),
-      this.#appeals?.count() ?? 0,
+      this.#appeals?.countEverPublished() ?? 0,
       take(this.#appeals, [live?.appeals], "Appeals"),
       this.#donationPage?.get() ?? null,
       this.#homepage?.get() ?? null,
       this.#about?.get() ?? null,
-      this.#team?.count() ?? 0,
+      this.#team?.countEverPublished() ?? 0,
       take(this.#team, [live?.team], "Team", true),
       take(this.#programs, [live?.programs], "Programs", true),
       take(this.#metrics, [live?.metrics], "Impact figures", true),
@@ -404,10 +419,14 @@ export class PublishService {
     const getInvolvedRows = await Promise.all(GET_INVOLVED_PAGE_IDS.map(async (id) => ({ id, stored: (await this.#getInvolved[id]?.get()) ?? null })));
     const records = <R>(list: { record: R }[]) => list.map((x) => x.record);
     const content: SnapshotContent = {};
-    if (postTypes.includes("news")) content.news = records(posts).filter((p) => p.type === "news").map(forSnapshot);
-    if (postTypes.includes("blog")) content.blogs = records(posts).filter((p) => p.type === "blog").map(forSnapshot);
-    if (eventCount > 0) content.events = records(events).map(forSnapshot);
-    if (appealCount > 0) content.appeals = records(appeals).map(forSnapshot);
+    /* On the website already (see above): carried, records or none. */
+    const onWebsite = (carried: unknown[], everPublished: number, liveList: unknown[] | undefined) => carried.length > 0 || everPublished > 0 || (liveList?.length ?? 0) > 0;
+    const news = records(posts).filter((p) => p.type === "news");
+    const blogs = records(posts).filter((p) => p.type === "blog");
+    if (onWebsite(news, everNews, live?.news)) content.news = news.map(forSnapshot);
+    if (onWebsite(blogs, everBlogs, live?.blogs)) content.blogs = blogs.map(forSnapshot);
+    if (onWebsite(events, everEvents, live?.events)) content.events = records(events).map(forSnapshot);
+    if (onWebsite(appeals, everAppeals, live?.appeals)) content.appeals = records(appeals).map(forSnapshot);
     const enabledOnly = <P extends { sections: { enabled: boolean }[] }>(p: P | undefined) => p && { ...forSnapshot(p as P & { createdAt?: string; updatedAt?: string }), sections: p.sections.filter((s) => s.enabled) };
     const donation = page(this.#donationPage, donationPage, live?.generalDonation, "Donation page");
     if (donation) content.generalDonation = forSnapshot(donation);
@@ -416,7 +435,7 @@ export class PublishService {
     const aboutPage = enabledOnly(page(this.#about, about, live?.about, "About page"));
     if (aboutPage) content.about = aboutPage as SnapshotContent["about"];
     // The team in its order (ties by id): the snapshot's order is the page's.
-    if (teamCount > 0) content.team = ordered(records(team));
+    if (onWebsite(team, everTeam, live?.team)) content.team = ordered(records(team));
     /* Programs only once at least one is publishable: other records name
        programs, so an empty set would leave them pointing at nothing — the
        website keeps its own programs until then. Figures, documents and
@@ -556,13 +575,30 @@ export class PublishService {
         for (const path of paths) problems.push({ path: `${path}.media.${id}`, message: "refers to an image that is missing, not ready or deleted" });
         continue;
       }
-      media[id] = { id, url: item.publicUrl, mimeType: item.mimeType, ...(item.width && { width: item.width }), ...(item.height && { height: item.height }), alt: item.alt };
+      /* Milestone 2: the focal point and caption travel with the image, when it has them. */
+      media[id] = { id, url: item.publicUrl, mimeType: item.mimeType, ...(item.width && { width: item.width }), ...(item.height && { height: item.height }), alt: item.alt, ...(item.focal && { focal: item.focal }), ...(item.caption?.trim() && { caption: item.caption.trim() }) };
     }
     const candidate = { version: 1, schemaVersion: SNAPSHOT_SCHEMA_VERSION, generatedAt, organization: { id: this.#orgId }, settings, media, content } as Omit<PublishedSnapshot, "version"> & { version: number };
     const checked = PublishedSnapshot.safeParse(candidate);
     if (!checked.success) problems.push(...checked.error.issues.map((i) => ({ path: ["snapshot", ...i.path.map(String)].join("."), message: i.message })));
     problems.push(...secretProblems(candidate).map((path) => ({ path, message: "looks like a credential and cannot be published" })));
+    /* Milestone 1: a policy approved before working text was refused is
+       refused here — the website build would fail on it. */
+    for (const p of content.policies ?? []) problems.push(...policyWorkingTextProblems(p, `content.policies.${p.id}`));
     return { candidate, problems };
+  }
+
+  /* Milestone 2: the focal points and captions of the images this content
+     uses (Framing). */
+  async #framing(settings: SiteSettings, content: SnapshotContent): Promise<Framing> {
+    const ids = snapshotMediaIds(settings, content);
+    if (!ids.length) return {};
+    const framing: Framing = {};
+    for (const m of await this.#media.findMany(ids)) {
+      const caption = m.caption?.trim();
+      if (m.focal || caption) framing[m.id] = { ...(m.focal && { focal: m.focal }), ...(caption && { caption }) };
+    }
+    return framing;
   }
 
   /* Every provider checkout the candidate would make public — verified
@@ -586,7 +622,7 @@ export class PublishService {
     const blockers = settings
       ? [...(await this.#candidate(settings.record, collections, generatedAt)).problems, ...scheduleProblems].map((p) => `${p.path}: ${p.message}`).slice(0, 20)
       : [];
-    const sourceHash = settings ? contentHash(settings.record, keyed) : null;
+    const sourceHash = settings ? contentHash(settings.record, keyed, await this.#framing(settings.record, keyed)) : null;
     const changedSections = settings
       ? [
           ...SECTIONS.filter((section) => !live || canonical(settings.record[section]) !== canonical(live.snapshot.settings[section])),
@@ -699,7 +735,7 @@ export class PublishService {
       if (working && live) {
         const { keyed, marks } = await this.#collections(live.snapshot.content, active.generatedAt);
         // Mark only if what is approved now is exactly what went live.
-        if (contentHash(working.record, keyed) === active.sourceHash) await this.#runMarks(marks, active.version);
+        if (contentHash(working.record, keyed, await this.#framing(working.record, keyed)) === active.sourceHash) await this.#runMarks(marks, active.version);
       }
       const deployment = await this.#deployVersion(active.version, state.attempts);
       await this.#audit.recordSafely({ action: "publish.completed", resourceType: "snapshot", resourceId: String(active.version), actorUserId: null, metadata: { version: active.version, deployment: deployment.status, trigger: "recovery" } }, facts);
@@ -742,7 +778,8 @@ export class PublishService {
     const live = await this.#store.activeSnapshot();
     const generatedAt = this.#now().toISOString();
     const { content, keyed, marks, scheduled, scheduleProblems } = await this.#collections(live?.snapshot.content ?? null, generatedAt);
-    const reviewHash = contentHash(working.record, keyed);
+    const framing = await this.#framing(working.record, keyed);
+    const reviewHash = contentHash(working.record, keyed, framing);
     if (active && active.sourceHash === reviewHash) {
       // Nothing new — but what is approved IS what is live: make sure it reads published.
       await this.#runMarks(marks, active.version);
@@ -751,7 +788,7 @@ export class PublishService {
     if (changesKey !== undefined && changesKey !== `${active?.version ?? 0}:${reviewHash}`)
       throw errors.conflict("What would be published has changed since you reviewed it. Review the changes again before publishing.");
     // What is stored: the snapshot's own content, real dates included.
-    const sourceHash = contentHash(working.record, content);
+    const sourceHash = contentHash(working.record, content, framing);
     const { candidate, problems } = await this.#candidate(working.record, content, generatedAt);
     problems.push(...scheduleProblems);
     // The provider is asked only about a candidate that is otherwise valid.

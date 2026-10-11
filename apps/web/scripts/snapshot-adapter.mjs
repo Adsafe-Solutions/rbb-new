@@ -105,9 +105,9 @@
                        timeline) — present once one is PUBLISHED; PROJECT_SOURCE
                        then says so (M31.1: the website's own stories'
                        project references are not held against them)
-   A collection the snapshot does not carry (the organization has no CMS
-   record of that kind yet, or — for programs, figures, documents, stories
-   and projects — has published none) keeps the source content.
+   A collection the snapshot does not carry (it has never been on the
+   website — Milestone 1 — or, for programs, figures, documents, stories
+   and projects, none is published) keeps the source content.
 
    A page with a Givebutter checkout gets it as { provider, widgetType,
    widgetId, amount?, frequency? } — what src/integrations/donations
@@ -127,6 +127,7 @@
                               ARE driven since M21–M23, above) */
 
 import { workingContentFindings } from "../src/lib/releaseMarkers.js";
+import { focalPosition } from "../src/lib/focal.js";
 
 /* The platforms the footer knows, with the label its links use. */
 export const SOCIAL_LABELS = { instagram: "Instagram", facebook: "Facebook", tiktok: "TikTok", linkedin: "LinkedIn", youtube: "YouTube" };
@@ -151,14 +152,28 @@ export const SNAPSHOT_TARGETS = {
   "src/content/announcements.js": "ANNOUNCEMENTS.bar, ANNOUNCEMENTS.popup",
 };
 
-/* A published media record → the image object the pages draw. */
+/* A published media record → the image object the pages draw. Milestone 2:
+   its focal point (only a valid one — lib/focal.js) and its caption come
+   with it, when it has them; otherwise the image is drawn as before. */
 const imageOf = (snapshot, id) => {
   const m = id ? snapshot.media[id] : undefined;
-  return m ? { src: m.url, alt: m.alt, ...(m.width && { width: m.width }), ...(m.height && { height: m.height }), mediaId: m.id } : undefined;
+  if (!m) return undefined;
+  const focal = focalPosition(m.focal);
+  const caption = typeof m.caption === "string" ? m.caption.trim() : "";
+  return { src: m.url, alt: m.alt, ...(m.width && { width: m.width }), ...(m.height && { height: m.height }), ...(focal && { focal }), ...(caption && { caption }), mediaId: m.id };
 };
 const dayOf = (record, snapshot) => record.date ?? (record.publishedAt ?? snapshot.generatedAt).slice(0, 10);
 const byDate = (direction) => (a, b) => (a.date === b.date ? a.id.localeCompare(b.id) : a.date.localeCompare(b.date) * direction);
-const seoOf = (record) => (record.seo?.title || record.seo?.description ? { title: record.seo.title, description: record.seo.description } : undefined);
+/* A record's sharing metadata (SeoOverrides) → what its page's meta reads:
+   title, description, a share image (src and alt, from the media library)
+   and noIndex — each only when set (Milestone 3: news, blogs, events,
+   appeals and the donation page carried title and description only). */
+const seoOf = (snapshot, seo) => {
+  if (!seo) return undefined;
+  const image = imageOf(snapshot, seo.ogImageId);
+  const view = drop({ title: seo.title, description: seo.description, image: image?.src, imageAlt: image?.alt, noIndex: seo.noIndex || undefined });
+  return Object.keys(view).length ? view : undefined;
+};
 const drop = (object) => Object.fromEntries(Object.entries(object).filter(([, v]) => v !== undefined));
 
 /* Published posts and events → the view models of src/content/media.js.
@@ -172,11 +187,11 @@ export function collectionsFrom(snapshot) {
   const out = {};
   if (c.news)
     out.NEWS = c.news
-      .map((p) => drop({ id: p.slug, date: dayOf(p, snapshot), program: p.programId, title: p.title, summary: p.excerpt, body: p.body, image: imageOf(snapshot, p.imageId), seo: seoOf(p), status: "approved" }))
+      .map((p) => drop({ id: p.slug, date: dayOf(p, snapshot), program: p.programId, title: p.title, summary: p.excerpt, body: p.body, image: imageOf(snapshot, p.imageId), seo: seoOf(snapshot, p.seo), status: "approved" }))
       .sort(byDate(1)); // oldest first: the news page is a timeline
   if (c.blogs)
     out.BLOGS = c.blogs
-      .map((p) => drop({ id: p.slug, date: dayOf(p, snapshot), category: p.category, title: p.title, excerpt: p.excerpt, author: p.author, body: p.body, image: imageOf(snapshot, p.imageId), seo: seoOf(p), status: "approved" }))
+      .map((p) => drop({ id: p.slug, date: dayOf(p, snapshot), category: p.category, title: p.title, excerpt: p.excerpt, author: p.author, body: p.body, image: imageOf(snapshot, p.imageId), seo: seoOf(snapshot, p.seo), status: "approved" }))
       .sort(byDate(-1));
   if (c.events)
     out.EVENTS = c.events
@@ -198,7 +213,7 @@ export function collectionsFrom(snapshot) {
           mapUrl: e.mapUrl ?? null,
           registrationUrl: e.registrationUrl,
           image: imageOf(snapshot, e.imageId),
-          seo: seoOf(e),
+          seo: seoOf(snapshot, e.seo),
           status: "approved",
         })
       )
@@ -208,21 +223,52 @@ export function collectionsFrom(snapshot) {
 
 /* A donation page's sections → what DonationExperience draws: one "why"
    (statement paragraphs, or rich text) and one list of how support helps.
-   Disabled blocks are left out; the API only accepts these three types. */
+   Disabled blocks are left out. Milestone 7: a statement's own kicker,
+   highlight and link, and the cards' highlight, are carried; the kickers
+   the page used before are the fallbacks, never an override. */
 const whyOf = (sections, kicker) => {
   const s = sections.find((x) => x.enabled && (x.type === "statement" || x.type === "richText"));
   if (!s) return undefined;
-  return s.type === "statement" ? { id: "why", kicker, heading: s.data.heading, body: s.data.body } : { id: "why", kicker, heading: s.data.heading, content: s.data.content };
+  return s.type === "statement"
+    ? drop({ id: "why", kicker: s.data.kicker ?? kicker, heading: s.data.heading, highlight: s.data.highlight, body: s.data.body, cta: linkOf(s.data.cta) })
+    : { id: "why", kicker, heading: s.data.heading, content: s.data.content };
 };
 const impactOf = (sections) => {
   const s = sections.find((x) => x.enabled && x.type === "numberedCards");
-  return s ? drop({ id: "how-support-helps", kicker: s.data.kicker ?? "How support helps", heading: s.data.heading, intro: s.data.intro, items: s.data.items }) : undefined;
+  return s ? drop({ id: "how-support-helps", kicker: s.data.kicker ?? "How support helps", heading: s.data.heading, highlight: s.data.highlight, intro: s.data.intro, items: s.data.items }) : undefined;
+};
+/* Milestone 7 — a donation page's trust panel, FAQ and appeal lists. Each
+   in one of three states, so a page never loses what the site gave it by
+   accident:
+     absent (undefined)  the site's own, as before (the transparency panel;
+                         the donation FAQs; the page's own appeal bands)
+     disabled (null/[])  none on this page — an editor's explicit choice
+     present             the page's own wording. A trust panel's document
+                         rows stay the transparency records'; an appeal
+                         list's appeals are the published appeals of its
+                         kind (or all). */
+const sectionOf = (sections, type) => sections.find((x) => x.type === type);
+const trustOf = (sections) => {
+  const s = sectionOf(sections, "trust");
+  if (!s) return undefined;
+  return s.enabled ? drop({ kicker: s.data.kicker, heading: s.data.heading, highlight: s.data.highlight, body: s.data.body, cta: linkOf(s.data.cta) }) : null;
+};
+const faqOf = (sections) => {
+  const s = sectionOf(sections, "faq");
+  if (!s) return undefined;
+  return s.enabled ? drop({ kicker: s.data.kicker, heading: s.data.heading, highlight: s.data.highlight, items: s.data.items.map((i) => ({ q: i.question, a: i.answer })) }) : null;
+};
+const listsOf = (sections) => {
+  const lists = sections.filter((x) => x.type === "appealList");
+  if (!lists.length) return undefined;
+  return lists.filter((x) => x.enabled).map((x) => drop({ id: x.id, kicker: x.data.kicker, heading: x.data.heading, highlight: x.data.highlight, kind: x.data.kind && VIEW_KIND[x.data.kind], cta: linkOf(x.data.cta) }));
 };
 const checkoutOf = (donation) => {
   const c = donation?.checkout;
   return c ? drop({ provider: c.provider, widgetType: c.widgetType, widgetId: c.widgetId, amount: c.defaultAmount, frequency: c.defaultFrequency }) : undefined;
 };
 const VIEW_KIND = { emergency: "emergency", campaign: "campaigns" };
+const APPEAL_VIEW_SECTIONS = new Set(["statement", "richText", "numberedCards"]);
 
 /* Published appeals → the APPEALS view models (src/contract/appeals.js
    documents the shape), newest first. A CMS appeal's description is its
@@ -240,18 +286,25 @@ export function appealsFrom(snapshot) {
         status: "published",
         summary: a.summary,
         image: imageOf(snapshot, a.imageId),
+        /* The "why" and "how support helps" passages; Milestone 7: with
+           their kicker, highlight and link, and `source: "cms"` so the page
+           uses the CMS's own headings (content/donation.js appealDonation). */
+        source: "cms",
         sections: a.sections
-          .filter((s) => s.enabled)
+          .filter((s) => s.enabled && APPEAL_VIEW_SECTIONS.has(s.type))
           .map((s) =>
             s.type === "statement"
-              ? { id: s.id, type: s.type, heading: s.data.heading, body: s.data.body }
+              ? drop({ id: s.id, type: s.type, kicker: s.data.kicker, heading: s.data.heading, highlight: s.data.highlight, body: s.data.body, cta: linkOf(s.data.cta) })
               : s.type === "richText"
                 ? { id: s.id, type: s.type, heading: s.data.heading, content: s.data.content }
-                : drop({ id: s.id, type: s.type, heading: s.data.heading, intro: s.data.intro, items: s.data.items.map((i) => i.title), cards: s.data.items })
+                : drop({ id: s.id, type: s.type, kicker: s.data.kicker, heading: s.data.heading, highlight: s.data.highlight, intro: s.data.intro, items: s.data.items.map((i) => i.title), cards: s.data.items })
           ),
+        trust: trustOf(a.sections),
+        faq: faqOf(a.sections),
+        lists: listsOf(a.sections),
         story: a.highlight ? drop({ label: a.highlight.label, image: imageOf(snapshot, a.highlight.imageId) }) : undefined,
         checkout: checkoutOf(a.donation),
-        seo: drop({ title: a.seo?.title, description: a.seo?.description ?? a.summary }),
+        seo: drop({ ...seoOf(snapshot, a.seo), description: a.seo?.description ?? a.summary }),
       })
     );
 }
@@ -268,9 +321,12 @@ export function generalDonationFrom(snapshot) {
     context: page.hero.context ? drop({ label: page.hero.context.label, body: page.hero.context.body }) : undefined,
     why: whyOf(page.sections, "Why give"),
     impact: impactOf(page.sections),
+    trust: trustOf(page.sections),
+    faq: faqOf(page.sections),
+    lists: listsOf(page.sections),
     designation: page.donation.designation,
     checkout: checkoutOf(page.donation),
-    seo: page.seo?.title || page.seo?.description ? drop({ title: page.seo.title, description: page.seo.description }) : undefined,
+    seo: seoOf(snapshot, page.seo),
   });
 }
 
@@ -282,15 +338,21 @@ const linkOf = (l) => (l ? { label: l.label, to: l.href } : undefined);
 const HOMEPAGE_VIEWS = {
   hero: (d, img) => ({ slides: d.slides.map((s) => ({ id: s.id, headline: s.headline, cta: linkOf(s.cta), image: img(s.imageId), inset: img(s.insetId) })), secondary: linkOf(d.secondaryCta), interval: d.intervalMs }),
   imageText: (d, img) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, body: d.body, cta: linkOf(d.cta), secondary: linkOf(d.secondaryCta), image: img(d.imageId), imagePosition: d.imagePosition }),
-  programs: (d) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight }),
+  /* Milestone 8: the line and link of "programs", "getInvolved",
+     "timeline" and "stories" (their SlotHeading `body` and `cta`) are
+     carried. NOT carried, on purpose: getInvolved `imageIds` (the band
+     draws the ways in as icon boxes, never photographs) and the closing
+     cta's `imageId` / `cardImageId` (the homepage's closing band draws
+     neither — the source homepage holds both and shows neither). */
+  programs: (d) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, body: d.body, cta: linkOf(d.cta) }),
   approach: (d) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, body: d.body, cta: linkOf(d.cta) }),
   stats: (d) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, body: d.body, metricIds: d.metricIds, source: d.source, cta: linkOf(d.cta) }),
   timeline: (d, img) =>
-    drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, cta: linkOf(d.cta), events: d.items.map((i) => ({ id: i.id, date: i.date, program: i.programId, title: i.title, summary: i.summary, youtubeId: i.youtubeId, videoTitle: i.videoTitle, poster: img(i.posterId) })) }),
-  stories: (d) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, cta: linkOf(d.cta), count: d.count }),
+    drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, body: d.body, cta: linkOf(d.cta), events: d.items.map((i) => ({ id: i.id, date: i.date, program: i.programId, title: i.title, summary: i.summary, youtubeId: i.youtubeId, videoTitle: i.videoTitle, poster: img(i.posterId) })) }),
+  stories: (d) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, body: d.body, cta: linkOf(d.cta), count: d.count }),
   video: (d, img) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, body: d.body, youtubeId: d.youtubeId, title: d.title, poster: img(d.posterId) }),
   trust: (d) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, body: d.body, cta: linkOf(d.cta) }),
-  getInvolved: (d) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight }),
+  getInvolved: (d) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, body: d.body, cta: linkOf(d.cta) }),
   faq: (d) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, items: d.items.map((i) => ({ q: i.question, a: i.answer })) }),
   cta: (d) => drop({ heading: d.heading, highlight: d.highlight, body: d.body, ctas: drop({ primary: linkOf(d.primary), secondary: linkOf(d.secondary) }) }),
   appealList: (d, _img, ref) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, kind: d.kind, cta: linkOf(d.cta), appeals: d.appealIds?.map((id) => ref.appeals(id)) }),
@@ -321,7 +383,7 @@ export function homepageFrom(snapshot) {
         if (!view) throw new Error(`snapshot: the homepage has a "${s.type}" block, which this site cannot draw`);
         return { id: s.id, type: s.type, data: view(s.data, img, ref) };
       }),
-    seo: page.seo ? drop({ title: page.seo.title, description: page.seo.description, image: img(page.seo.ogImageId)?.src, noIndex: page.seo.noIndex }) : undefined,
+    seo: page.seo ? drop({ title: page.seo.title, description: page.seo.description, image: img(page.seo.ogImageId)?.src, imageAlt: img(page.seo.ogImageId)?.alt, noIndex: page.seo.noIndex }) : undefined,
   };
 }
 
@@ -330,9 +392,11 @@ export function homepageFrom(snapshot) {
    unknown block type stops the build. */
 const ABOUT_VIEWS = {
   pageHero: (d) => drop({ title: d.title, crumb: d.crumb, body: d.body, cta: linkOf(d.cta) }),
-  statement: (d) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, body: d.body }),
-  missionVision: (d) => drop({ kicker: d.kicker, heading: d.heading, mission: d.mission, vision: d.vision, source: d.source }),
-  numberedCards: (d) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, items: d.items }),
+  /* Milestone 8: a statement's link, mission and vision's highlight and
+     the values' intro are carried. */
+  statement: (d) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, body: d.body, cta: linkOf(d.cta) }),
+  missionVision: (d) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, mission: d.mission, vision: d.vision, source: d.source }),
+  numberedCards: (d) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, intro: d.intro, items: d.items }),
   approach: (d) => drop({ kicker: d.kicker, heading: d.heading, highlight: d.highlight, intro: d.body, cta: linkOf(d.cta) }),
   transparency: () => ({}),
   cta: (d, img) => drop({ heading: d.heading, highlight: d.highlight, body: d.body, ctas: drop({ primary: linkOf(d.primary), secondary: linkOf(d.secondary) }), image: img(d.imageId) }),
@@ -351,7 +415,7 @@ export function aboutFrom(snapshot) {
         if (!view) throw new Error(`snapshot: the About page has a "${s.type}" block, which this site cannot draw`);
         return { id: s.id, type: s.type, data: view(s.data, img) };
       }),
-    seo: page.seo ? drop({ title: page.seo.title, description: page.seo.description, image: img(page.seo.ogImageId)?.src, noIndex: page.seo.noIndex }) : undefined,
+    seo: page.seo ? drop({ title: page.seo.title, description: page.seo.description, image: img(page.seo.ogImageId)?.src, imageAlt: img(page.seo.ogImageId)?.alt, noIndex: page.seo.noIndex }) : undefined,
   };
 }
 
@@ -408,7 +472,7 @@ export function programsFrom(snapshot) {
         activities: p.activities,
         impact: p.impact,
         stories: p.stories,
-        seo: p.seo ? drop({ title: p.seo.title, description: p.seo.description, image: imageOf(snapshot, p.seo.ogImageId)?.src, noIndex: p.seo.noIndex }) : undefined,
+        seo: p.seo ? drop({ title: p.seo.title, description: p.seo.description, image: imageOf(snapshot, p.seo.ogImageId)?.src, imageAlt: imageOf(snapshot, p.seo.ogImageId)?.alt, noIndex: p.seo.noIndex }) : undefined,
       })
     );
 }
@@ -417,7 +481,7 @@ export function programsFrom(snapshot) {
    content/work.js uses (so /work/projects, the project pages, the program
    pages, the featured projects and the timeline work unchanged), in
    order. "approved" is the site's word for a record that may be shown. */
-const seoView = (snapshot, seo) => (seo ? drop({ title: seo.title, description: seo.description, image: imageOf(snapshot, seo.ogImageId)?.src, noIndex: seo.noIndex }) : undefined);
+const seoView = (snapshot, seo) => (seo ? drop({ title: seo.title, description: seo.description, image: imageOf(snapshot, seo.ogImageId)?.src, imageAlt: imageOf(snapshot, seo.ogImageId)?.alt, noIndex: seo.noIndex }) : undefined);
 export function projectsFrom(snapshot) {
   const projects = snapshot.content?.projects;
   if (!projects) return undefined;
@@ -436,6 +500,16 @@ export function projectsFrom(snapshot) {
         activities: p.activities,
         approach: p.approach,
         outcomes: p.outcomes,
+        /* Milestone 6, in the source shape: the stage is the source's
+           `status` (the project's own stage, never its editorial status);
+           the story is named by id and resolved on the page
+           (lib/projectStory.js), its title and excerpt the story's own. */
+        location: p.location,
+        status: p.stage,
+        date: p.date,
+        impact: p.impact?.map((m) => ({ value: m.value, label: m.label })),
+        partners: p.partners,
+        storyId: p.storyId,
         featured: p.featured,
         seo: seoView(snapshot, p.seo),
       })
@@ -468,6 +542,10 @@ export function storiesFrom(snapshot) {
       programId: s.programId,
       projectId: s.projectId,
       media: s.galleryIds?.map((id) => imageOf(snapshot, id)),
+      /* Milestone 5: the source shape exactly — quotes { text, attribution? }
+         (pull-quotes after the body) and impact lines (the Impact row). */
+      quotes: s.quotes?.map((q) => drop({ text: q.text, attribution: q.attribution })),
+      impact: s.impact,
       relatedStoryIds: s.relatedPostIds?.map((id) => {
         if (!slugOf.has(id)) throw new Error(`snapshot: story "${s.slug}" relates to story "${id}", which the snapshot does not carry`);
         return slugOf.get(id);
@@ -762,7 +840,7 @@ export function impactFrom(snapshot) {
         if (!view) throw new Error(`snapshot: the Impact page has a "${s.type}" block, which this site cannot draw`);
         return { id: s.id, type: s.type, data: view(s.data, img) };
       }),
-    seo: page.seo ? drop({ title: page.seo.title, description: page.seo.description, image: img(page.seo.ogImageId)?.src, noIndex: page.seo.noIndex }) : undefined,
+    seo: page.seo ? drop({ title: page.seo.title, description: page.seo.description, image: img(page.seo.ogImageId)?.src, imageAlt: img(page.seo.ogImageId)?.alt, noIndex: page.seo.noIndex }) : undefined,
   };
 }
 
@@ -837,7 +915,8 @@ export function overridesFrom(snapshot) {
   const office = s.contact.office;
   return {
     "src/content/brand.js": { BRAND: { name: s.general.shortName, fullName: s.general.name, summary: s.general.summary } },
-    "src/content/site.js": { SITE: { description: s.seo.description } },
+    /* Milestone 3: the site-wide default share image, for pages without their own. */
+    "src/content/site.js": { SITE: drop({ description: s.seo.description, shareImage: (({ src, alt } = {}) => (src ? { src, alt } : undefined))(imageOf(snapshot, s.seo.ogImageId)) }) },
     "src/content/contact.js": {
       ORG_CONTACT: {
         methods: s.contact.methods.map((m) => ({ ...m, status: "verified" })),

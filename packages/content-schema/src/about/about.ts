@@ -22,8 +22,8 @@ import { ABOUT_BLOCKS, ABOUT_BLOCK_TYPES } from "./registry.ts";
                     (M11, transparency/), drawn by TransparencySection
      cta            the shared block — the closing ask (ClosingCta)
 
-   Fields a component does not draw (a statement's link, the cards'
-   intro) stay valid in the contract but the admin does not offer them. */
+   Milestone 8: a statement's link, mission and vision's highlight and the
+   cards' intro are drawn by their components and offered by the admin. */
 
 export const PageHeroData = z.strictObject({
   title: text(120),

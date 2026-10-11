@@ -17,6 +17,7 @@ import {
   useToast,
 } from "../../design-system";
 import { mediaApi, type Consent, type MediaItem, type MetadataChanges } from "../../media/client";
+import { focalAt, focalDraft, focalFromDraft, type FocalDraft } from "../../media/focal";
 import { formatBytes } from "../../media/uploads";
 import { typeLabel } from "./MediaTile";
 import styles from "./MediaDetail.module.css";
@@ -29,8 +30,8 @@ const CONSENT_OPTIONS: { value: Consent; label: string }[] = [
 ];
 
 const FIELDS = ["alt", "caption", "credit", "license", "consent"] as const;
-type Draft = Pick<MediaItem, (typeof FIELDS)[number]>;
-const draftOf = (media: MediaItem): Draft => ({ alt: media.alt, caption: media.caption, credit: media.credit, license: media.license, consent: media.consent });
+type Draft = Pick<MediaItem, (typeof FIELDS)[number]> & { focal: FocalDraft };
+const draftOf = (media: MediaItem): Draft => ({ alt: media.alt, caption: media.caption, credit: media.credit, license: media.license, consent: media.consent, focal: focalDraft(media.focal) });
 
 const formatDate = (iso: string) => new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 
@@ -58,11 +59,18 @@ export function MediaDetail({ media, onClose, onChanged, onDeleted }: MediaDetai
     setError(null);
   }, [media.id, media.version]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const changes = Object.fromEntries(FIELDS.filter((f) => draft[f] !== media[f]).map((f) => [f, draft[f]])) as MetadataChanges;
-  const dirty = Object.keys(changes).length > 0;
+  const focal = focalFromDraft(draft.focal);
+  const changes = {
+    ...Object.fromEntries(FIELDS.filter((f) => draft[f] !== media[f]).map((f) => [f, draft[f]])),
+    ...("value" in focal && focal.value !== (media.focal ?? null) && { focal: focal.value }),
+  } as MetadataChanges;
+  const focalProblem = "problem" in focal ? focal.problem : null;
+  const dirty = Object.keys(changes).length > 0 || Boolean(focalProblem);
+  const marker = "value" in focal && focal.value ? focalDraft(focal.value) : null;
   const ready = media.status === "ready";
 
   async function save() {
+    if (focalProblem) return;
     setSaving(true);
     setError(null);
     try {
@@ -130,7 +138,20 @@ export function MediaDetail({ media, onClose, onChanged, onDeleted }: MediaDetai
       <div className={styles.body}>
         <div className={styles.preview}>
           {ready && media.publicUrl ? (
-            <img src={media.publicUrl} alt={draft.alt} width={media.width ?? undefined} height={media.height ?? undefined} />
+            /* Milestone 2: click where the page should keep the image in
+               frame (the numbers below are the keyboard way). */
+            <div
+              className={styles.focalArea}
+              data-editable={canEdit || undefined}
+              onClick={(event) => {
+                if (!canEdit) return;
+                const img = event.currentTarget.querySelector("img");
+                if (img) setDraft({ ...draft, focal: focalAt({ x: event.clientX, y: event.clientY }, img.getBoundingClientRect()) });
+              }}
+            >
+              <img src={media.publicUrl} alt={draft.alt} width={media.width ?? undefined} height={media.height ?? undefined} />
+              {marker && <span className={styles.focalMarker} style={{ left: `${marker.x}%`, top: `${marker.y}%` }} aria-hidden="true" />}
+            </div>
           ) : (
             <StatusBadge status={media.status === "failed" ? "error" : "pending"} label={media.status === "failed" ? "Upload failed" : "Upload not finished"} />
           )}
@@ -210,6 +231,26 @@ export function MediaDetail({ media, onClose, onChanged, onDeleted }: MediaDetai
             <FormField label="Caption" helper="Shown beside the image where a page uses captions.">
               <Textarea rows={2} maxLength={1000} value={draft.caption} onChange={(e) => setDraft({ ...draft, caption: e.target.value })} disabled={!canEdit} />
             </FormField>
+            <fieldset className={styles.focal}>
+              <legend className={styles.focalLegend}>Focal point</legend>
+              <p className={styles.focalHelp}>The part of the image to keep in frame when a page crops it, from the left and from the top. Click the preview, or type both. Leave both empty to keep it centred.</p>
+              <div className={styles.focalRow}>
+                <FormField label="From the left (%)">
+                  <Input type="number" inputMode="numeric" min={0} max={100} step={1} value={draft.focal.x} onChange={(e) => setDraft({ ...draft, focal: { ...draft.focal, x: e.target.value } })} disabled={!canEdit} />
+                </FormField>
+                <FormField label="From the top (%)">
+                  <Input type="number" inputMode="numeric" min={0} max={100} step={1} value={draft.focal.y} onChange={(e) => setDraft({ ...draft, focal: { ...draft.focal, y: e.target.value } })} disabled={!canEdit} />
+                </FormField>
+                <Button size="sm" variant="ghost" onClick={() => setDraft({ ...draft, focal: { x: "", y: "" } })} disabled={!canEdit || (!draft.focal.x && !draft.focal.y)}>
+                  Centre
+                </Button>
+              </div>
+              {focalProblem && (
+                <p className={styles.focalProblem} role="alert">
+                  {focalProblem}
+                </p>
+              )}
+            </fieldset>
             <FormField label="Credit" helper="The photographer or source, as it should be credited.">
               <Input maxLength={200} value={draft.credit} onChange={(e) => setDraft({ ...draft, credit: e.target.value })} disabled={!canEdit} />
             </FormField>
@@ -234,7 +275,7 @@ export function MediaDetail({ media, onClose, onChanged, onDeleted }: MediaDetai
             Delete
           </Button>
           {ready && (
-            <Button variant="primary" onClick={save} loading={saving} disabled={!dirty && !saving}>
+            <Button variant="primary" onClick={save} loading={saving} disabled={(!dirty && !saving) || Boolean(focalProblem)}>
               Save details
             </Button>
           )}

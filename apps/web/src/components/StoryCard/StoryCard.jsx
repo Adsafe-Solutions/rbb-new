@@ -4,6 +4,7 @@ import ArrowStamp from "../ArrowStamp/ArrowStamp.jsx";
 import MediaPlaceholder from "../MediaPlaceholder/MediaPlaceholder.jsx";
 import Picture from "../Picture/Picture.jsx";
 import { formatDate } from "../../lib/dates.js";
+import { cardFocal } from "../../lib/focal.js";
 
 /* A story, set like an item in a publication rather than a blog card:
    the photograph as a framed print, a category stamp, a date, a headline
@@ -56,6 +57,7 @@ function Print({ story, className, sizes, priority = false }) {
             sizes={sizes}
             src={story.image.src}
             alt={story.image.alt}
+            focal={cardFocal(story.image)}
             /* Lazy unless this is the page's lead image (see `priority`). */
             loading={priority ? undefined : "lazy"}
             fetchpriority={priority ? "high" : undefined}

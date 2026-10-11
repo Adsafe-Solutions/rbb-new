@@ -16,6 +16,7 @@ import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
 import { delimiter, join } from "node:path";
 import { pathToFileURL } from "node:url";
+import { requireTestTarget } from "../../api/test/support/smoke-target.mjs";
 
 function resolveFromPath(name) {
   try {
@@ -39,6 +40,8 @@ const axePath = resolveFromPath("axe-core/axe.min.js");
 const axeSource = axePath ? readFileSync(axePath, "utf8") : null;
 
 const base = process.env.ADMIN_URL ?? "http://localhost:5174";
+/* Phase 0: never against a production API — asked before anything is written. */
+await requireTestTarget(base);
 const owner = { email: process.env.ADMIN_SMOKE_EMAIL, password: process.env.ADMIN_SMOKE_PASSWORD };
 const editor = { email: process.env.ADMIN_SMOKE_EDITOR_EMAIL, password: process.env.ADMIN_SMOKE_EDITOR_PASSWORD };
 const shots = process.env.SCREENSHOTS;
@@ -53,6 +56,9 @@ const results = [];
 const check = (name, ok, detail = "") => results.push({ name, ok: Boolean(ok), detail });
 const browser = await playwright.chromium.launch();
 const consoleErrors = [];
+/* M48: while a step makes a request fail on purpose, the browser's own
+   "Failed to load resource" line is expected, not an error. */
+let simulating = false;
 const visibleSoon = (locator, timeout = 6000) => locator.waitFor({ state: "visible", timeout }).then(() => true, () => false);
 const toast = (page, text) => page.getByRole("region", { name: "Notifications" }).getByText(text).first();
 const shot = async (page, name) => shots && page.screenshot({ path: join(shots, `${name}.png`), fullPage: true });
@@ -85,7 +91,7 @@ async function axe(page, name) {
 async function signIn(who, viewport = { width: 1280, height: 900 }) {
   const context = await browser.newContext({ viewport });
   const page = await context.newPage();
-  page.on("console", (m) => m.type() === "error" && !/status of (401|400|403|409)/.test(m.text()) && consoleErrors.push(m.text()));
+  page.on("console", (m) => m.type() === "error" && !simulating && !/status of (401|400|403|409)/.test(m.text()) && consoleErrors.push(m.text()));
   page.on("pageerror", (e) => consoleErrors.push(e.message));
   await page.goto(`${base}/login`);
   await page.getByLabel("Email").fill(who.email);
@@ -139,7 +145,8 @@ try {
   await field(page, "Title").fill(T("first project"));
   check("project: the address follows the title", (await page.getByLabel("Public address").innerText()) === `/work/projects/smoke-${run}-first-project`);
   const programPicker = page.getByLabel("Program area");
-  check("project: the program is chosen from this organization's programs", (await programPicker.locator(`option[value="${programSlug}"]`).count()) === 1);
+  /* The list arrives after the form: wait for it rather than count at once. */
+  check("project: the program is chosen from this organization's programs", await programPicker.locator(`option[value="${programSlug}"]`).waitFor({ state: "attached", timeout: 6000 }).then(() => true, () => false));
   await programPicker.selectOption(programSlug);
   await page.getByRole("button", { name: "Create project" }).click();
   check("project: the API names the missing description", await visibleSoon(page.getByText("is required").first()));
@@ -155,6 +162,18 @@ try {
   created.projects.push(firstProject);
   const stored = (await apiCall(page, `/api/v1/projects/${firstProject}`)).body.data.record;
   check("project: a draft in its program", stored.status === "draft" && stored.programId === programSlug && stored.activities[0] === "A smoke focus.");
+  /* M48: once created, the address is the record's own — a title edit no
+     longer rewrites it. */
+  await field(page, "Title").fill(T("first project renamed"));
+  check("project: after creating it, the address no longer follows the title", (await page.getByLabel("Public address").innerText()) === `/work/projects/smoke-${run}-first-project`);
+  await field(page, "Title").fill(T("first project"));
+  /* M48: an error on a later paragraph is shown at its field. */
+  /* Ticking it replaces the box with the field, so a click, not check(). */
+  await page.getByRole("checkbox", { name: "Write “The challenge”" }).click();
+  await page.getByRole("textbox", { name: "The challenge" }).fill("A smoke paragraph.\n\nA second one.\n\n ");
+  await page.getByRole("button", { name: /^Save$/ }).click();
+  check("project: an error on paragraph 3 is shown at its field", await visibleSoon(page.getByText("Paragraph 3: must not be empty")));
+  await page.getByRole("textbox", { name: "The challenge" }).fill("");
   await page.getByRole("button", { name: "Submit for review" }).click();
   check("project: submitting an undescribed photograph is refused", await visibleSoon(page.getByText("no alt text").first()));
   await page.getByRole("group", { name: "Photograph", exact: true }).getByRole("button", { name: "Change" }).click();
@@ -218,6 +237,9 @@ try {
   await page.waitForURL(/\/stories\/[0-9a-f-]{36}$/, { timeout: 10_000 });
   const firstStory = page.url().split("/").pop();
   created.stories.push(firstStory);
+  await field(page, "Title").fill(T("first story renamed"));
+  check("story: after creating it, the address no longer follows the title", (await page.getByLabel("Public address").innerText()) === `/stories/smoke-${run}-first-story`);
+  await field(page, "Title").fill(T("first story"));
   const s = (await apiCall(page, `/api/v1/stories/${firstStory}`)).body.data.record;
   check("stored: a story post, its relationships by key and id, rich text", s.type === "story" && s.category === "community" && s.programId === programSlug && s.projectId === `smoke-${run}-first-project` && s.relatedPostIds[0] === other.record.id && s.galleryIds[0] === described && JSON.stringify(s.body).includes('"bold"'), JSON.stringify(s));
   // Conflict, then publish.
@@ -236,6 +258,89 @@ try {
   await page.getByRole("heading", { level: 1, name: "Posts" }).waitFor();
   await page.waitForTimeout(500);
   check("posts: stories are not listed among news and blog posts", (await page.locator("[data-content-id]").filter({ hasText: T("renamed elsewhere") }).count()) === 0);
+
+  /* ================= M48: loads, pickers, errors, list archive ================= */
+  // A late reply to an earlier load (React's development double load) never overwrites what was typed since.
+  const recordUrl = new RegExp(`/api/v1/stories/${firstStory}$`);
+  let loads = 0;
+  await page.route(recordUrl, async (route) => {
+    if (route.request().method() !== "GET" || ++loads > 1) return route.continue();
+    const response = await route.fetch();
+    await new Promise((r) => setTimeout(r, 2500));
+    await route.fulfill({ response });
+  });
+  await page.goto(`${base}/stories/${firstStory}`);
+  const typed = "Typed while an earlier load was on its way.";
+  await field(page, "Excerpt").fill(typed);
+  await page.waitForTimeout(3000);
+  check("stale load: a late reply never overwrites what was typed", loads >= 2 && (await field(page, "Excerpt").inputValue()) === typed, `loads: ${loads}`);
+  await page.unroute(recordUrl);
+  await page.getByRole("button", { name: "Discard" }).click();
+
+  // An editor that could not be loaded offers to try again.
+  simulating = true;
+  await page.route(recordUrl, (route) => (route.request().method() === "GET" ? route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: { code: "UNAVAILABLE", message: "Smoke: unavailable." } }) }) : route.continue()));
+  await page.goto(`${base}/stories/${firstStory}`);
+  check("editor: a failed load says so", await visibleSoon(page.getByRole("heading", { name: "The story could not be loaded" })));
+  await page.unroute(recordUrl);
+  await page.getByRole("button", { name: "Try again" }).click();
+  check("editor: Try again loads the story", await visibleSoon(page.getByTestId("workflow")));
+
+  // A picker whose list could not be loaded says so — never the empty-CMS box — and tries again.
+  const lists = /\/api\/v1\/(programs|stories)\?/;
+  await page.route(lists, (route) => route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: { code: "UNAVAILABLE", message: "Smoke: unavailable." } }) }));
+  await page.goto(`${base}/stories/${firstStory}`);
+  const programsFailed = page.getByRole("alert").filter({ hasText: "programs could not be loaded" });
+  const storiesFailed = page.getByRole("alert").filter({ hasText: "stories could not be loaded" });
+  check("pickers: a failed list says so", (await visibleSoon(programsFailed)) && (await visibleSoon(storiesFailed)));
+  check("pickers: a failed list is not offered as 'nothing managed here yet'", (await page.getByText("are managed here yet").count()) === 0);
+  await page.unroute(lists);
+  simulating = false;
+  await programsFailed.getByRole("button", { name: "Try again" }).click();
+  await storiesFailed.getByRole("button", { name: "Try again" }).click();
+  check("pickers: Try again loads the list and keeps the chosen program", (await visibleSoon(page.getByLabel("Program area"))) && (await page.getByLabel("Program area").inputValue()) === programSlug);
+  check("pickers: Try again loads the related stories, the chosen one still checked", await group(page, "Related stories").getByRole("checkbox", { name: new RegExp(T("other story")) }).isChecked().catch(() => false));
+
+  // A related story the API refuses is named at its own checkbox.
+  const pending = (await apiCall(page, "/api/v1/stories", { method: "POST", body: JSON.stringify({ title: T("pending story"), category: "field", body: richBody }) })).body.data;
+  created.stories.push(pending.record.id);
+  const naming = (await apiCall(page, "/api/v1/stories", { method: "POST", body: JSON.stringify({ title: T("naming story"), category: "field", body: richBody, relatedPostIds: [pending.record.id] }) })).body.data;
+  created.stories.push(naming.record.id);
+  await apiCall(page, `/api/v1/stories/${naming.record.id}/submit`, { method: "POST", body: JSON.stringify({ revision: naming.revision }) });
+  await page.goto(`${base}/stories/${naming.record.id}`);
+  await page.getByRole("button", { name: "Approve", exact: true }).click();
+  const approveDialog = page.getByRole("dialog", { name: /^Approve this/ });
+  await approveDialog.waitFor();
+  await approveDialog.getByRole("button", { name: "Approve", exact: true }).click();
+  const pendingBox = group(page, "Related stories").getByRole("checkbox", { name: new RegExp(T("pending story")) });
+  /* The API's words for it — not the picker's own "Chosen but not approved yet" note. */
+  check("related stories: the refused story's error is at its checkbox", (await visibleSoon(group(page, "Related stories").getByText("approve it first"))) && (await pendingBox.getAttribute("aria-invalid")) === "true");
+  check("related stories: its checkbox is described by the error", await pendingBox.evaluate((el) => document.getElementById(el.getAttribute("aria-describedby") ?? "")?.textContent?.includes("approve it first") ?? false));
+
+  // Archiving from the Stories list is confirmed, and a refusal says why.
+  await page.goto(`${base}/stories`);
+  await page.getByLabel("Search by title").fill(T("pending story"));
+  const pendingRow = page.locator(`[data-content-id="${pending.record.id}"]`);
+  await pendingRow.waitFor();
+  const archiveFromRow = async () => {
+    await pendingRow.getByRole("button", { name: /^Actions for/ }).click();
+    await page.getByRole("menuitem", { name: "Archive" }).click();
+    const dialog = page.getByRole("dialog", { name: "Archive this story?" });
+    return (await visibleSoon(dialog)) && dialog;
+  };
+  let dialog = await archiveFromRow();
+  check("stories list: Archive asks first", Boolean(dialog));
+  if (dialog) await dialog.getByRole("button", { name: "Cancel" }).click();
+  check("stories list: Cancel archives nothing", (await apiCall(page, `/api/v1/stories/${pending.record.id}`)).body.data.record.status === "draft");
+  const archiveUrl = new RegExp(`/api/v1/stories/${pending.record.id}$`);
+  await page.route(archiveUrl, (route) => (route.request().method() === "DELETE" ? route.fulfill({ status: 403, contentType: "application/json", body: JSON.stringify({ error: { code: "FORBIDDEN", message: "Smoke: archiving is not allowed here." } }) }) : route.continue()));
+  dialog = await archiveFromRow();
+  if (dialog) await dialog.getByRole("button", { name: "Archive", exact: true }).click();
+  check("stories list: a refused archive says why", await visibleSoon(toast(page, "Smoke: archiving is not allowed here.")));
+  await page.unroute(archiveUrl);
+  dialog = await archiveFromRow();
+  if (dialog) await dialog.getByRole("button", { name: "Archive", exact: true }).click();
+  check("stories list: confirmed, it is archived", (await visibleSoon(toast(page, `“${T("pending story")}” archived`))) && (await apiCall(page, `/api/v1/stories/${pending.record.id}`)).body.data.record.status === "archived");
 
   /* ================= Impact: the same stories and programs ================= */
   const imp = (await apiCall(page, "/api/v1/impact")).body.data;

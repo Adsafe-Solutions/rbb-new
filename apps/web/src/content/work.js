@@ -21,6 +21,7 @@
 import { BRAND } from "./brand.js";
 import { pathCards } from "./getInvolved.js";
 import { WORKING_PHOTOS as IMG } from "./photos.js";
+import { withoutTrailingSlash } from "../lib/paths.js";
 
 /* ---------------- Programs ----------------
    The four program areas: SOURCE (annual report) — exactly these four, in
@@ -386,7 +387,7 @@ export const PROJECT_SOURCE = { cms: false };
 
 /* ---------------- Lookups ---------------- */
 export const programBySlug = (slug) => PROGRAMS.find((p) => p.slug === slug);
-export const programByPath = (path) => PROGRAMS.find((p) => p.to === path);
+export const programByPath = (path) => PROGRAMS.find((p) => p.to === withoutTrailingSlash(path));
 export const projectBySlug = (slug) => PROJECTS.find((p) => p.slug === slug);
 export const projectsIn = (programSlug) => PROJECTS.filter((p) => p.program === programSlug);
 export const projectPath = (project) => `/work/projects/${project.slug}`;

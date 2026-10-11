@@ -1,6 +1,7 @@
 import { useLocation } from "react-router-dom";
 import DonationExperience from "../../components/DonationExperience/DonationExperience.jsx";
 import AppealGrid from "../../components/AppealGrid/AppealGrid.jsx";
+import AppealLists from "../../components/AppealLists/AppealLists.jsx";
 import { APPEALS, APPEALS_PAGES, appealByPath, appealDonation, appealKind } from "../../content/index.js";
 
 /* One page template for every appeal — each Emergency Response appeal and
@@ -23,9 +24,12 @@ export default function Appeal() {
   const sameKind = APPEALS.filter((a) => a.kind === appeal.kind && a.id !== appeal.id);
   const others = sameKind.length > 0 ? sameKind : APPEALS.filter((a) => a.id !== appeal.id);
 
+  const experience = appealDonation(appeal);
+
   return (
-    <DonationExperience experience={appealDonation(appeal)}>
-      {others.length > 0 && (
+    <DonationExperience experience={experience}>
+      {/* A CMS appeal's own appeal lists (Milestone 7), never naming itself; else this page's own band. */}
+      {experience.lists ? <AppealLists lists={experience.lists} exclude={appeal.id} /> : others.length > 0 && (
         <AppealGrid
           {...t.more}
           tone="white"

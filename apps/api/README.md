@@ -476,9 +476,10 @@ Variables.
 | Variable | Required | Secret | |
 |---|---|---|---|
 | `NODE_ENV` | no (`development`) | no | `development` · `test` · `production` |
-| `ORGANIZATION_ID` | production | no | The organization this deployment serves. Defaults to `rbb` outside production only |
+| `ORGANIZATION_ID` | production, and with the production database | no | The organization this deployment serves. Defaults to `rbb` outside production only; must be `rbb` with `MONGODB_DB=risingbeyondborders` |
 | `MONGODB_URI` | production | **yes** | `mongodb://` or `mongodb+srv://` |
 | `MONGODB_DB` | production, and with `MONGODB_URI` | no | Database name |
+| `RBB_TARGET` | with the production database | no | `production` · `test` · `development`: what this configuration points at on purpose. Must be `production` with `MONGODB_DB=risingbeyondborders`, and only then (see "Production safety") |
 | `WEB_ORIGIN`, `ADMIN_ORIGIN` | no | no | Exact origins allowed by CORS and the CSRF check. `https://` in production — RBB's admin is `https://admin.risingbeyondborders.org`, which must also be on the R2 bucket's CORS rule (docs/MEDIA_LIBRARY.md). Locally, `ADMIN_ORIGIN=http://localhost:5174` |
 | `AUTH_SECRET` | production | **yes** | 32+ characters. Keys IP and throttle pseudonyms. Development without it uses a per-process secret (warned) |
 | `AUTH_COOKIE_NAME` | no (`cms_session`) | no | |
@@ -506,6 +507,70 @@ Variables.
 user with **readWrite on the organization's database only** (for RBB,
 `risingbeyondborders`). Never `atlasAdmin`. Keep admin users for maintenance.
 
+## Production safety
+
+Production is identified by the resources a configuration points at
+(`src/config/target.ts`), never by `NODE_ENV` — a development server can
+be connected to the production database:
+
+| Target | When | What may use it |
+|---|---|---|
+| production | `MONGODB_DB=risingbeyondborders` | the API itself (deliberate CMS work) and maintenance commands given `--production=risingbeyondborders` |
+| test | `MONGODB_DB` ends in `_test` | everything, including tests and smoke tests |
+| unclassified | any other database | the API and maintenance commands; never tests or smoke tests |
+
+- **On purpose only.** With the production database, the configuration
+  must also say `RBB_TARGET=production` and `ORGANIZATION_ID=rbb`, or it is
+  refused by name before anything connects. `RBB_TARGET=production` with
+  any other database is refused too.
+- **The production bucket** (`R2_BUCKET=rbb`) only with the production
+  database, and the production database only with it. Test or development
+  configuration that names the production bucket is refused.
+- **Media keys** follow the target: the production database's new objects
+  are filed under `rbb/media/…`, never `_development/…`, whatever
+  `NODE_ENV` is. (One object uploaded before Phase 0 is under
+  `_development/rbb/media/…`; it is left where it is.)
+- **Maintenance commands** — `api:db:indexes`, `api:settings:import`,
+  `api:media:cleanup` (even its report), `api:scheduler:run` — print their
+  target and refuse production unless given the database's name, typed:
+  `-- --production=risingbeyondborders`. A generic `--confirm` is not
+  enough. `api:owner:setup` / `api:auth:bootstrap` keep their own stricter
+  check (`BOOTSTRAP_TARGET_DB` / `_ORG` must name the target).
+- **Tests and smoke tests never touch production, and there is no
+  override:** the integration harness needs a `_test` database; the
+  live R2 test refuses the production bucket (use a separate test
+  bucket); `test/support/dev-server-fake-storage.ts` starts only on a
+  `_test` database; and every browser smoke (`apps/admin/scripts/smoke-*`,
+  `apps/web/scripts/smoke-forms.mjs`) first asks the API it is pointed at
+  — `GET /api/v1/health/ready` reports the target's kind, never its name
+  — and stops unless it is `test` (`test/support/smoke-target.mjs`).
+- **Env files:** `pnpm api:dev` / `api:start` and the maintenance commands
+  load `apps/api/.env.local`; `api:owner:setup` loads `.env` then
+  `.env.bootstrap`; `api:test:r2` loads `.env` then `.env.local`. Whichever
+  file names the production database must carry `RBB_TARGET=production`
+  and `ORGANIZATION_ID=rbb`. For smoke tests, run the API on the test
+  database (as `test/support/dev-server-fake-storage.ts` does), not on the
+  production `.env.local`.
+
+**Replacing a broad database user with least privilege** (in the Atlas UI,
+by an Atlas project owner; nothing in this repository does it):
+1. Database Access → Add New Database User: password authentication, a
+   generated password, **Specific Privileges → `readWrite` on
+   `risingbeyondborders`** only, restricted to this cluster. This covers
+   everything the API and its commands do: reads, writes, index creation
+   (`api:db:indexes`), and the CMS's publishing.
+2. A second user with `readWrite` on `risingbeyondborders_test` only, for
+   integration tests and smoke runs.
+3. Put each user's connection string where it is used (`.env.local` and
+   Vercel for the API; the test runner's `MONGODB_TEST_URI` for tests), and
+   check `GET /api/v1/health/ready` answers `ok`.
+4. Then remove the broad user from every application configuration, and
+   delete it or keep it for people only (Atlas admin tasks, backups).
+   `api:owner:setup` lists the cluster's databases before it writes, which
+   `readWrite` cannot: run that one-time command with an admin user. Every
+   other command and the API need nothing beyond `readWrite`.
+5. Backups (Atlas snapshots) are a project setting, not a database role.
+
 ## MongoDB
 
 - **Databases:** one Atlas cluster, two databases, each named once:
@@ -524,8 +589,9 @@ user with **readWrite on the organization's database only** (for RBB,
   validated, contract-shaped and use ISO dates.
 - **Indexes:** every index, and the reason for it, is in
   `src/db/collections.ts`. `pnpm api:db:indexes` creates missing ones only.
-  It's idempotent, never drops anything, and refuses production without
-  `-- --confirm`.
+  It's idempotent, never drops anything, and refuses the production
+  database without `-- --production=risingbeyondborders` (see "Production
+  safety").
 - **Seed data:** the app never seeds data and never creates users on its own.
 
 ## Local development
@@ -539,7 +605,10 @@ pnpm api:dev                                     # http://localhost:4000
 pnpm admin:dev                                   # http://localhost:5174 — proxies /api to the API
 ```
 
-Use a local or test database for this, never production.
+Use a local or test database for this, never production. (Deliberate CMS
+work on production uses the same commands with a configuration that says
+so — `RBB_TARGET=production` and `ORGANIZATION_ID=rbb`; see "Production
+safety".)
 
 ## Tests
 
@@ -548,12 +617,12 @@ pnpm api:test                                    # unit tests, no database
 MONGODB_TEST_URI=… MONGODB_TEST_DB=risingbeyondborders_test pnpm api:test:integration
 ADMIN_SMOKE_EMAIL=… ADMIN_SMOKE_PASSWORD=… pnpm admin:smoke   # browser sign-in flow (needs API + admin running)
 
-# Live R2 (needs the R2_* variables, MONGODB_TEST_URI and MONGODB_TEST_DB): uploads,
-# verifies and deletes a few tiny objects under _test/live-<random>/ — never the production namespace.
+# Live R2 (needs the R2_* variables of a TEST bucket, MONGODB_TEST_URI and MONGODB_TEST_DB): uploads,
+# verifies and deletes a few tiny objects under _test/live-<random>/. Refuses the production bucket.
 MONGODB_TEST_URI=… MONGODB_TEST_DB=risingbeyondborders_test pnpm api:test:r2
 
-# Media UI against a local, signature-checking fake R2 (no real bucket):
-node apps/api/test/support/dev-server-fake-storage.ts        # instead of api:dev
+# Media UI against a local, signature-checking fake R2 (no real bucket), on a _test database only:
+MONGODB_URI=… MONGODB_DB=risingbeyondborders_test node apps/api/test/support/dev-server-fake-storage.ts   # instead of api:dev
 ADMIN_SMOKE_EMAIL=… ADMIN_SMOKE_PASSWORD=… pnpm admin:smoke:media
 ```
 

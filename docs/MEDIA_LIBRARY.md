@@ -38,14 +38,32 @@ pending, ready, failed ──delete──▶ deleted   (terminal; the record is 
   - identity and status: `id`, `orgId`, `status`, `kind`
   - storage: `objectKey`, `objectState`, `publicUrl`
   - file: `originalFilename`, `mimeType`, `size`, `width`, `height`
-  - editable: `alt`, `caption`, `credit`, `license`, `consent`
+  - editable: `alt`, `caption`, `focal`, `credit`, `license`, `consent`
     (`unknown | not-required | obtained | not-obtained`)
   - who and when: `createdBy`/`updatedBy`, `createdAt`/`updatedAt`,
     `completedAt`, `failedAt`, `failureReason`, `deletedAt`/`deletedBy`
   - concurrency and schema: `version`, `schemaVersion`
-- **Editable fields:** only `alt`, `caption`, `credit`, `license` and
-  `consent`, and only with the current `version` (optimistic concurrency).
-  Nothing can change `orgId`, `objectKey`, `createdBy` or `createdAt`.
+- **Editable fields:** only `alt`, `caption`, `focal`, `credit`, `license`
+  and `consent`, and only with the current `version` (optimistic
+  concurrency). Nothing can change `orgId`, `objectKey`, `createdBy` or
+  `createdAt`.
+- **Focal point and caption (Milestone 2):**
+  - `focal` is the point to keep in frame when a page crops the image:
+    `"X% Y%"` — horizontal then vertical, whole percentages 0–100, one
+    space (CSS `object-position`; `FocalPoint` in `@rbb/content-schema`).
+    `null`, or no field at all on records saved before Milestone 2, means
+    centred. Anything else is refused by name; `null` clears it. The admin
+    edits it as two numbers or a click on the preview; nothing sets it
+    automatically.
+  - `caption` (plain text, up to 1000) is **published**: a publish copies
+    `focal` and a non-empty `caption` into the snapshot's `media` entry, and
+    a change to either is a change to publish. `credit`, `license` and
+    `consent` stay private.
+  - The website draws the focal point on every cropped image of a library
+    image, and the caption under the main image of a story, project, news or
+    blog post and event, and under story gallery photographs. The website's
+    own photographs keep exactly today's rendering (cards do not apply their
+    `content/photos.js` focal points).
 - **Content references:** content refers to media by `id`. That id matches
   `MediaId` in `@rbb/content-schema`. `toContentMedia()` maps a ready record
   onto the contract's `Media` shape, renaming `size` → `bytes`, `license` →
@@ -130,7 +148,10 @@ Run `pnpm api:build && pnpm api:media:cleanup`.
 - **Default is a dry run:** it reports counts and changes nothing.
 - `-- --apply` marks abandoned uploads failed and retries unconfirmed storage
   deletions.
-- **Production** additionally needs `-- --confirm`.
+- **Production** (the production database, whatever `NODE_ENV` says) needs
+  the database's name, typed: `-- --production=risingbeyondborders` — even
+  to report. A generic `--confirm` is not enough (apps/api README
+  "Production safety").
 - It runs on demand only; there is no scheduler yet.
 
 ## Image metadata (EXIF, GPS)

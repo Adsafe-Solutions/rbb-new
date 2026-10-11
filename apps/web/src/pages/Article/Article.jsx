@@ -82,7 +82,7 @@ function Detail({ item, kind }) {
         parent={k.back()}
         kicker={label}
         crumb={item.title}
-        aside={item.image && <EditorialImage image={item.image} tilt="r" cast="cast-lg" priority sizes="(min-width: 1024px) 40vw, 90vw" />}
+        aside={item.image && <EditorialImage image={item.image} caption={item.image.caption} tilt="r" cast="cast-lg" priority sizes="(min-width: 1024px) 40vw, 90vw" />}
       >
         {k.lead(item) && <p className="type-lead mt-7 max-w-[46ch] text-copy">{k.lead(item)}</p>}
         <p className="type-meta mt-8 flex flex-wrap gap-x-5 gap-y-1 text-quiet">
@@ -129,6 +129,6 @@ export default function Article({ kind }) {
   const k = KINDS[kind];
   const item = k.byId(slug);
   /* A CMS post's own SEO title/description, when it set them. */
-  useSeo(item ? routeMeta(k.path(item), { title: item.seo?.title ?? item.title, description: item.seo?.description ?? k.lead(item) }) : notFoundMeta());
+  useSeo(item ? routeMeta(k.path(item), { title: item.seo?.title ?? item.title, description: item.seo?.description ?? k.lead(item), image: item.seo?.image ?? item.image?.src, imageAlt: item.seo?.image ? item.seo.imageAlt : item.image?.alt, noIndex: item.seo?.noIndex }) : notFoundMeta());
   return item ? <Detail item={item} kind={kind} /> : <NotFound />;
 }

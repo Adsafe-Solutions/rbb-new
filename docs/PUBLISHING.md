@@ -44,7 +44,7 @@ site down.
 - **First record:** RBB's real current values, not invented ones:
   ```sh
   pnpm --filter @rbb/web run export:settings        # the website's settings → apps/web/build-meta/site-settings.json
-  pnpm api:build && pnpm api:settings:import -- --file apps/web/build-meta/site-settings.json   # production: add --confirm
+  pnpm api:build && pnpm api:settings:import -- --file apps/web/build-meta/site-settings.json   # production: add --production=risingbeyondborders
   ```
   The import creates the record only if none exists. It never overwrites,
   and nothing is published by it.
@@ -170,11 +170,19 @@ Not yet driven, on purpose:
 **Snapshot.** `content.news`, `content.blogs` and `content.events` hold the
 published contract records, without editing timestamps or any admin
 metadata.
-- **When a key appears:** only once the organization has created at least
-  one record of that kind, at any status.
+- **When a key appears (Milestone 1):** only once the collection has been
+  on the website — a record of that kind is publishable now (published, or
+  approved and due), or one was ever published (it keeps `publishedAt`,
+  even archived), or the live snapshot holds records of it. Drafts,
+  submissions, approvals not yet due, and records archived before they were
+  ever published never make the key appear. (Before Milestone 1 any record
+  at any status did, so one draft emptied the website's list.)
 - **Missing key:** the website keeps its source collection.
 - **Present key, even empty:** the CMS is the source, and the website's
-  sample items for that collection are gone from snapshot builds.
+  sample items for that collection are gone from snapshot builds. An empty
+  list is intentional: every record of the kind was published and has since
+  been archived.
+- The same rule applies to appeals and the team.
 
 **Website.**
 - **Collections:** `scripts/snapshot-adapter.mjs` replaces `NEWS`, `BLOGS`
@@ -219,8 +227,9 @@ metadata.
   - **The widget id cannot be verified** (Givebutter can't list widgets), so
     it is stored as the editor set it.
 - **Snapshot:**
-  - `content.appeals` holds published appeals. It appears once the
-    organization has created any appeal. Present (even empty), it
+  - `content.appeals` holds published appeals. It appears once appeals
+    have been on the website (Milestone 1: an appeal publishable now, or
+    one ever published — never a draft alone). Present (even empty), it
     **replaces the website's sample appeals** in snapshot builds.
   - `content.generalDonation` holds the page, only while it is PUBLISHED.
     Absent (never published, or drafted/archived again), the website shows
@@ -386,7 +395,8 @@ shared lifecycle.
 - **Audit:** `team_member.created`, `team_member.updated` (including
   `order`) and `team_member.archived`.
 - **Snapshot:** `content.team` holds published members in team order. Like
-  news, the key appears once the organization has created any team member.
+  news, the key appears once the team has been on the website (Milestone 1):
+  a draft member never empties the website's team.
 - **Website:**
   - `TEAM_MEMBERS` (`team.js`) is replaced in source shape, so the team
     grid, the profile pages, their routes, the sitemap rules and person SEO
@@ -436,9 +446,10 @@ content collection (`programs`) with the shared lifecycle.
   one `program.reordered` per reorder (`{ moved, total }`), never one event
   per program.
 - **Snapshot:** `content.programs` holds published programs in order.
-  - Unlike news or the team, the key appears only once at least one
-    program is PUBLISHED. The whole site names its program areas, so an
-    empty set must never replace them.
+  - Unlike news or the team, the key appears only while at least one
+    program is PUBLISHED — even after programs have been on the website.
+    The whole site names its program areas, so an empty set must never
+    replace them.
   - When the key is present, every program a CMS record names (an event's,
     post's or homepage timeline item's `programId`) must be published in
     the same snapshot, or the publish is refused.
@@ -773,6 +784,13 @@ reviewed by counsel. The editor says so on an empty policy.
 - **Approval:** approving (or publishing) needs both dates and at least
   one section (`policyApprovalProblems`). Submitting and approving also
   check that the contact is still in the settings.
+- **Working text (Milestone 1):** a policy whose intro or a section carries
+  working-placeholder text ("Demo text —", "WORKING text —", example.org
+  addresses … — `common/workingText.ts`, the website's own rules) can be
+  saved as a draft while it is written, but is refused on submit, approve,
+  schedule and publish (`policyWorkingTextProblems`), with the part's path.
+  Before, the API accepted it and the website build failed after the
+  publish (`policiesFrom`).
 - **API:** the single-page service with named parts, as Careers. Each
   policy is keyed by `policyId` in the shared `policies` collection
   (`orgId_policyId_unique`).
@@ -1404,6 +1422,192 @@ submitted or approved until it picks another, so the website never
 references a deleted file.
 
 Details are in [MEDIA_LIBRARY.md](MEDIA_LIBRARY.md#what-deletion-refuses-m16).
+
+## Sharing metadata (Milestone 3)
+
+Every content type with SEO overrides (`SeoOverrides`: `title`,
+`description`, `ogImageId`, `noIndex`) treats them the same way — news,
+blogs, events, stories, projects, programs, appeals, the donation page, the
+homepage, About and Impact; Careers has `title`, `description` and `noIndex`
+(its contract has no share image, and one is refused, not dropped).
+
+- **Editing:** every editor has the four fields (Careers three), "Keep out
+  of search engines" included. `seo` is one field: an update without it
+  keeps it, `seo: null` clears it, and `seo: { … }` replaces it whole (the
+  admin always sends all of it). The admin stores `noIndex` only when true.
+- **Validation:** the share image must be a ready image of the organization's
+  media library (at save); `noIndex` is a boolean; unknown keys are refused.
+- **Snapshot:** records carry their `seo` as stored; the share image is
+  published with them. The site-wide default share image is
+  `settings.seo.ogImageId`.
+- **Website — the share image of a page**, in order: its own SEO image; else
+  the image the page already uses as its own (a story's, a project's, an
+  article's, an event's, a person's); else the site-wide default
+  (`SITE.shareImage`); else none. A share image appears only on a page that
+  is indexed (and only as an absolute URL) — never a placeholder.
+- **Website — `noIndex`:** true takes the page out of the index (and with it
+  its canonical, share image and structured data); false or absent changes
+  nothing. It never adds a page to the index: news, blog, event and appeal
+  pages stay unindexed, as before — there is no indexing policy for them.
+
+## News, blog and event fields (Milestone 4)
+
+- **News — program area** (`programId`): a program's slug, optional. Checked
+  at save like a story's program: this organization's, not archived, and
+  approved or live by the time the item is approved (while no program is
+  managed in the CMS, the website's own program is named by its address and
+  the website build checks it). Absent: no program label, as before. A news
+  item has no `category` — it is refused.
+- **Blog — category** (`category`): one of `BLOG_CATEGORY_IDS`
+  (`reflections`, `field-notes`, `how-to` — the website's
+  `BLOG_CATEGORIES`), optional. Absent: listed under "All" only, as before.
+  A blog post has no `programId` — it is refused. Changing a post's type
+  means clearing the other type's field in the same save (the admin does).
+  The snapshot refuses a blog category outside the list.
+- **Event — program area** (`programId`): a program's slug, or `null` for
+  an event open to all; clearing it (`null`) makes the event open to all.
+  Checked like a news item's.
+- **Event — schedule** (`schedule`): up to 20 steps `{ time?, item }`; a
+  timed step falls within the event (not before the start, not after the
+  end) and timed steps run in order; clearing it (`null`) leaves no
+  schedule (`[]`), and the page shows no schedule section.
+- **Event — time zone.** An event's date, start, end and schedule times are
+  wall-clock values on its own day, stored and published exactly as
+  written, and never converted (not to UTC, the reader's zone or the
+  server's). `timezone` names the IANA zone they are in; the website shows
+  it beside the times on the event page. The CMS requires one and never
+  infers it: the editor chooses it (any IANA name the runtime knows, older
+  spellings included — `Asia/Kolkata` and `Asia/Calcutta`; abbreviations
+  such as `IST` are refused). A start that a daylight-saving change skips in
+  that zone is refused, never moved; a start in an hour that happens twice
+  is kept as written. The website's own source events state no zone and
+  show their times as written; migrating them waits on RBB naming the zone
+  (the rehearsal reports each as blocked on `timezone`, and on nothing
+  else).
+- **Every update:** a field left out is kept; `null` clears it as above.
+  Records saved before these fields existed carry none of them and render
+  as they always have.
+
+## Story quotes and impact (Milestone 5)
+
+The two story fields the website's story template already drew, now in
+the CMS — stories only (news and blog posts have neither; `/api/v1/posts`
+refuses them, and the snapshot refuses them on a news or blog post).
+
+- **Quotes** (`quotes`): up to 6, each `{ text, attribution }` — the words
+  as said (up to 600 characters) and who said them (up to 160). Both are
+  required, as the website's own content rules require
+  (`content/validate.js`, `docs/CONTENT_GUIDE.md`). Shown after the story
+  as pull-quotes, in order. Public as written. A real person's words need
+  RBB's approval and their permission: the editorial approval is that gate;
+  the CMS records no consent for a quote.
+- **Impact** (`impact`): up to 12 plain lines (up to 200 characters each) —
+  the change the story documents, shown as written in its "Impact" row.
+- **Both:** a list of at least one, or absent; each quote's words and each
+  line distinct (the page tells them apart by their text); plain text only.
+  An update without them keeps them; a list replaces the whole list; `null`
+  clears it (the admin clears an emptied list). Stories saved before
+  Milestone 5 have neither and render as before.
+- **Listings** — the stories hub, the homepage, /impact and related-story
+  cards — draw neither: a card is the same with or without them.
+- **Private stays private:** an image's credit, licence and consent are
+  never published (Milestone 2); a quote carries nothing but its words and
+  attribution.
+
+## Project fields (Milestone 6)
+
+The fields the project template already drew (`pages/ProjectDetail`), now
+in the CMS. Each is optional and shows only when present; projects saved
+before Milestone 6 have none and render as before. An update without one
+keeps it, a list replaces the whole list, `null` clears it.
+
+- **Location** (`location`, up to 120): "Location" in the project's facts.
+- **Stage** (`stage`, up to 60): "Status" in the facts — the project's own
+  stage as RBB states it. The source calls it `status`; the contract calls
+  it `stage` because a record's `status` is its editorial status. The
+  website receives it as `status`, as before.
+- **Date** (`date`, YYYY-MM-DD): the project's date on the homepage's
+  project timeline (newest first; the card shows the date, else the stage).
+  One date — the source has no range. Not shown on the project page.
+- **Impact** (`impact`, 1–8 of `{ value, label }`): "Impact", each as
+  "value — label". Results RBB has verified, never aims (aims are
+  `outcomes`); the owner's approval is the verification — there is no
+  separate verified flag.
+- **Partners** (`partners`, 1–12 names): "Partners", one per line.
+- **Story** (`storyId`): "Story", with the story's own title and excerpt
+  (never a copy). Named by id, as the Impact page names stories: one of this
+  organization's stories (not archived; approved by the time the project
+  is — or, when the story names this project back, in review with it), or,
+  while the organization has no CMS story, one of the website's own by its
+  id. The publish refuses a project whose story it does not carry (once it
+  carries stories); the website build fails on a story the site does not
+  show (`lib/projectStory.js`, `content/validate.js`). The row shows the
+  title and excerpt as text, as the template always did — not a link.
+
+## Donation page and appeal sections (Milestone 7)
+
+The general donation page (/appeals) and every appeal draw the same
+donation experience; their `sections` now carry everything it draws. The
+form slot (the site's form, or a verified Givebutter checkout) is
+unchanged.
+
+- **"Why it matters"** — one passage: a statement (`kicker`, `heading`,
+  `highlight`, paragraphs, `cta`) or formatted text (`heading`, rich
+  text). The admin edits a statement as a statement (it no longer turns it
+  into formatted text on save). Its kicker falls back to the page's old
+  one ("Why give"; an appeal's kind).
+- **"How your support helps"** — numbered cards with `kicker` (fallback
+  "How support helps"), `highlight` and `intro`.
+- **Appeal lists** (`appealList`, up to 3) — each the published appeals of
+  one kind, or all; on an appeal page never the appeal itself. Present,
+  they replace the page's built-in appeal bands (the hub's Emergency
+  Response and Campaigns bands; an appeal's "Other appeals").
+- **Trust panel** (`trust`, one) — the page's own kicker, heading,
+  highlight, text and link; the documents beneath it stay the
+  transparency records'.
+- **Questions** (`faq`, one) — the page's own heading and questions.
+- **Three states** for the trust panel, questions and appeal lists: none in
+  the record → the site's own, exactly as before (the transparency panel;
+  the donation questions on /appeals, none on an appeal; the built-in
+  bands); in the record but switched off (`enabled: false`) → none on this
+  page; in the record and on → the page's own.
+- **Appeals published from the CMS** use their own statement heading and
+  kicker. The website's own sample appeals keep the page's wording ("Why
+  this response matters"), as before. "Support <title>" stays the page
+  title for every appeal: it is the page's wording around the CMS title,
+  not a field.
+- **Validation:** the contract's block rules; one passage, one list of how
+  support helps, one trust panel, one FAQ, at most three appeal lists;
+  `imageText` and `stats` are still refused (the donation page does not
+  draw them). A release marker anywhere in a section is refused at save
+  and by the snapshot (the source's sample FAQ answers carry one).
+- **Updates:** `sections` is one field: left out, kept; sent, replaced as a
+  whole. Pages and appeals saved before Milestone 7 render as before.
+- **Not applied (payment-adjacent, left for a decision):** `designation`
+  and `formOverrides` (stored, not used by the form), the settings'
+  `donations` defaults, and an appeal's `startsOn` / `endsOn`.
+
+## Homepage and About fields (Milestone 8)
+
+Fields the contract always held, now drawn by the website and offered by
+the admin. Each is optional; without it the band is exactly as before.
+
+- **Homepage:** "programs" and "get involved" — a line under the heading
+  (`body`) and a link button (`cta`); "timeline" and "stories" — a line
+  under the heading (`body`; their link was already drawn); "approach" and
+  an appeal list — the heading's `highlight`.
+- **About:** "who we are" (statement) — a link button (`cta`); mission and
+  vision — the heading's `highlight`; the values (numbered cards) — a line
+  under the heading (`intro`); "how we work" (approach) — the heading's
+  `highlight`.
+- **Stored but intentionally not drawn:** "get involved" `imageIds` (the
+  band draws the ways in as icon boxes, never photographs) and the closing
+  call to action's `imageId` / `cardImageId` (the homepage's closing band
+  draws no photograph; the source homepage holds both and shows neither).
+  The admin does not offer them.
+- **Not fields:** the hero's kicker (the brand's name), the slideshow and
+  play labels, the approach steps and the Get Involved cards are the
+  website's own.
 
 ## Failure behaviour
 

@@ -45,6 +45,10 @@ export interface MediaRecord {
   height: number | null;
   alt: string;
   caption: string;
+  /* Milestone 2: the point to keep in frame when a page crops the image,
+     "X% Y%" (@rbb/content-schema FocalPoint). Absent or null: centred.
+     Records saved before Milestone 2 have no field at all. */
+  focal?: string | null;
   credit: string;
   license: string;
   consent: Consent;
@@ -79,6 +83,7 @@ export interface MediaView {
   height: number | null;
   alt: string;
   caption: string;
+  focal: string | null;
   credit: string;
   license: string;
   consent: Consent;
@@ -105,6 +110,7 @@ export function toMediaView(record: MediaRecord): MediaView {
     height: record.height,
     alt: record.alt,
     caption: record.caption,
+    focal: record.focal ?? null,
     credit: record.credit,
     license: record.license,
     consent: record.consent,
@@ -130,6 +136,7 @@ export function toContentMedia(record: MediaRecord) {
     status: "published" as const,
     kind: record.kind,
     alt: record.alt,
+    ...(record.focal && { focal: record.focal }),
     filename: record.originalFilename,
     mimeType: record.mimeType,
     ...(record.width && { width: record.width }),

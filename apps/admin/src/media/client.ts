@@ -23,6 +23,8 @@ export interface MediaItem {
   height: number | null;
   alt: string;
   caption: string;
+  /* Milestone 2: "X% Y%", or null (centred). */
+  focal: string | null;
   credit: string;
   license: string;
   consent: Consent;
@@ -67,7 +69,7 @@ export interface UploadIntent {
   media: MediaItem;
 }
 
-export type MetadataChanges = Partial<Pick<MediaItem, "alt" | "caption" | "credit" | "license" | "consent">>;
+export type MetadataChanges = Partial<Pick<MediaItem, "alt" | "caption" | "focal" | "credit" | "license" | "consent">>;
 
 const BASE = "/api/v1/media";
 const post = (body?: unknown): RequestInit => ({ method: "POST", ...(body !== undefined && { body: JSON.stringify(body) }) });

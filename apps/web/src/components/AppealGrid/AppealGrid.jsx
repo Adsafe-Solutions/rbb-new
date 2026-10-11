@@ -15,13 +15,13 @@ import { appealKind, appealPath } from "../../content/index.js";
    compared. With none, `empty` ({ text, cta }) on a pinned-up sheet —
    never fake cards.
    `cta` sits beside the heading when there is something to list. */
-export default function AppealGrid({ id, index, kicker, heading, appeals, empty, cta, showKind = true, tone = "white" }) {
+export default function AppealGrid({ id, index, kicker, heading, highlight, appeals, empty, cta, showKind = true, tone = "white" }) {
   const headingId = useId();
 
   return (
     <Section id={id} tone={tone} pad="lg" aria-labelledby={headingId}>
       <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-        <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} />
+        <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} highlight={highlight} />
         {cta && appeals.length > 0 && (
           <Button data-anim="soft" variant="outline" to={cta.to} className="self-start md:self-auto">
             {cta.label}

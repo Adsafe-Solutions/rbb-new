@@ -6,19 +6,21 @@ import { AuditService, mongoAuditStore } from "../modules/audit/audit.ts";
 import { MongoMediaStore } from "../modules/media/repository.ts";
 import { MongoSettingsStore } from "../modules/settings/repository.ts";
 import { SettingsService } from "../modules/settings/service.ts";
+import { guardTarget } from "./target-guard.ts";
 
 /* Creates the organization's FIRST settings record from a file — the
    website's current settings, exported by the web app:
 
      pnpm --filter @rbb/web run export:settings
-     pnpm api:settings:import -- --file apps/web/build-meta/site-settings.json [--confirm]
+     pnpm api:settings:import -- --file apps/web/build-meta/site-settings.json [--production=<database>]
 
    · validated against the content contract; the organization, id, status
      and timestamps are this deployment's, whatever the file says
    · creates only — if settings already exist it changes nothing (edit them
      in the admin instead)
    · nothing is published: an owner reviews and publishes in the admin
-   · production needs --confirm
+   · the production database (config/target.ts — whatever NODE_ENV says)
+     needs its name, typed: --production=<database>
    Output: what happened and any problems by field path — never values. */
 const args = process.argv.slice(2);
 const fileIndex = args.indexOf("--file");
@@ -27,10 +29,7 @@ try {
   if (!file) throw new ConfigError(["--file <path to the exported site-settings.json> is required"]);
   const config = loadConfig();
   if (!config.mongo) throw new ConfigError(["MONGODB_URI and MONGODB_DB are required"]);
-  if (config.env === "production" && !args.includes("--confirm")) {
-    console.error("Refusing to write production settings without --confirm.");
-    process.exit(1);
-  }
+  guardTarget(config, "maintenance", args);
   const record = JSON.parse(await readFile(file, "utf8"));
   if (record?.orgId && record.orgId !== config.orgId) throw new ConfigError([`the file is for organization "${record.orgId}", this deployment serves "${config.orgId}"`]);
   const mongo = createMongoProvider(config.mongo);

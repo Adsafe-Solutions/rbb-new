@@ -36,6 +36,8 @@ import { errorsByBlock, newBlockId, type Block, type BlockInfo } from "./blocks"
 import { Preview, type PreviewOptions } from "./Preview";
 import contentStyles from "../content/content.module.css";
 import styles from "./blocks.module.css";
+import { nextSeo } from "../content/seo";
+import { NoIndexField } from "../content/NoIndexField";
 
 /* A BLOCK PAGE editor — the homepage (M8), the About page (M9): one page
    per organization as an ordered list of blocks from the contract's
@@ -304,8 +306,8 @@ export function BlockPageEditor<S extends Block>({ config }: { config: BlockPage
 
   const seo = draft.seo ?? {};
   const setSeo = (changes: Partial<NonNullable<Draft<S>["seo"]>>) => {
-    const next = Object.fromEntries(Object.entries({ ...seo, ...changes }).filter(([, v]) => v !== undefined && v !== ""));
-    setDraft((d) => ({ ...d, seo: Object.keys(next).length ? next : undefined }));
+    const next = nextSeo(seo, changes);
+    setDraft((d) => ({ ...d, seo: next }));
   };
   const placed = new Set(sections.map((s) => s.type));
 
@@ -442,6 +444,7 @@ export function BlockPageEditor<S extends Block>({ config }: { config: BlockPage
                           <Textarea rows={2} maxLength={200} value={seo.description ?? ""} onChange={(e) => setSeo({ description: e.target.value })} />
                         </FormField>
                         <MediaPicker label="Social image" helper={`Shown when the ${noun} is shared.`} value={seo.ogImageId} onChange={(ogImageId) => setSeo({ ogImageId })} disabled={readOnly} />
+                        <NoIndexField value={seo.noIndex} onChange={(noIndex) => setSeo({ noIndex })} disabled={readOnly} noun={noun} />
                       </div>
                     </Panel>
                     <Panel title="Publishing" as="h2">

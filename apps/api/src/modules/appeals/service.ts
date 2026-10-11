@@ -15,11 +15,14 @@ import type { CheckoutVerifier } from "../donations/verify.ts";
    story circles), sections, donation (designation and the Givebutter
    checkout), start/end dates and SEO.
 
-   Sections: the CMS accepts only the blocks an appeal page draws — one
-   "why it matters" passage (a statement, or rich text) and one list of how
-   support helps (numbered cards). The contract allows more; the website
-   would refuse to build a page with a block it cannot draw, so they are
-   refused here, at save, instead.
+   Sections: the CMS accepts only the blocks a donation page draws — one
+   "why it matters" passage (a statement, or rich text), one list of how
+   support helps (numbered cards) and (Milestone 7) one trust panel, one
+   FAQ and up to three appeal lists. The contract allows more (imageText,
+   stats); the website would refuse to build a page with a block it cannot
+   draw, so they are refused here, at save, instead. Release markers are
+   internal to the website's source content and are never set in the CMS:
+   a section carrying one anywhere is refused (as on the block pages).
 
    Givebutter: a checkout is checked for shape on every save (the
    contract). It is VERIFIED with the provider whenever the appeal is
@@ -27,7 +30,9 @@ import type { CheckoutVerifier } from "../donations/verify.ts";
    published — and again when an owner publishes the website. A draft may
    hold an unverified checkout. */
 
-export const DRAWN_SECTIONS = ["statement", "richText", "numberedCards"] as const;
+export const DRAWN_SECTIONS = ["statement", "richText", "numberedCards", "trust", "faq", "appealList"] as const;
+export const MAX_APPEAL_LISTS = 3;
+const MARKER = "release markers are internal to source content and are never set in the CMS";
 
 /* The section rules shared by appeals and the general donation page. */
 export function donationSectionProblems(sections: { type: string; enabled: boolean }[], prefix: string): ErrorDetail[] {
@@ -35,11 +40,17 @@ export function donationSectionProblems(sections: { type: string; enabled: boole
   sections.forEach((section, i) => {
     if (!(DRAWN_SECTIONS as readonly string[]).includes(section.type))
       problems.push({ path: `${prefix}.${i}.type`, message: `"${section.type}" sections are not drawn on donation pages yet` });
+    if (JSON.stringify((section as { data?: unknown }).data ?? null).includes('"releaseMarker"')) problems.push({ path: `${prefix}.${i}.data`, message: MARKER });
   });
   const enabled = sections.filter((s) => s.enabled);
   if (enabled.filter((s) => s.type === "statement" || s.type === "richText").length > 1)
     problems.push({ path: prefix, message: "a donation page has one “why it matters” passage (statement or rich text)" });
   if (enabled.filter((s) => s.type === "numberedCards").length > 1) problems.push({ path: prefix, message: "a donation page has one list of how support helps" });
+  /* Milestone 7. One of each kind in the record (enabled or not): a
+     disabled trust panel or FAQ means "none on this page". */
+  if (sections.filter((s) => s.type === "trust").length > 1) problems.push({ path: prefix, message: "a donation page has one trust panel" });
+  if (sections.filter((s) => s.type === "faq").length > 1) problems.push({ path: prefix, message: "a donation page has one set of questions" });
+  if (sections.filter((s) => s.type === "appealList").length > MAX_APPEAL_LISTS) problems.push({ path: prefix, message: `a donation page has at most ${MAX_APPEAL_LISTS} appeal lists` });
   return problems;
 }
 

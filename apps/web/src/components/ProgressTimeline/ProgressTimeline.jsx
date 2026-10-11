@@ -7,6 +7,7 @@ import Container from "../Container/Container.jsx";
 import Picture from "../Picture/Picture.jsx";
 import SectionHeading from "../SectionHeading/SectionHeading.jsx";
 import YouTubePlayer from "../YouTubePlayer/YouTubePlayer.jsx";
+import { cardFocal } from "../../lib/focal.js";
 
 /* The events so far, oldest first, as a row of cards over a timeline.
    Each card is a YouTube Short (played in place, components/
@@ -94,7 +95,7 @@ export default function ProgressTimeline({ index, timeline, programOf, tone = "w
       <div data-timeline-pin="" className="flex flex-col justify-center overflow-clip py-16 md:py-24 group-data-[timeline-pinned]/timeline:min-h-svh group-data-[timeline-pinned]/timeline:py-0 group-data-[timeline-pinned]/timeline:pt-[var(--header-h)]">
         <Container>
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <SectionHeading id={headingId} index={index} kicker={timeline.kicker} heading={timeline.heading} highlight={highlight} />
+            <SectionHeading id={headingId} index={index} kicker={timeline.kicker} heading={timeline.heading} highlight={highlight} intro={timeline.body} />
             {timeline.cta && (
               <Button to={timeline.cta.to} variant="outline" className="self-start md:self-auto">
                 {timeline.cta.label}
@@ -165,6 +166,7 @@ export default function ProgressTimeline({ index, timeline, programOf, tone = "w
                           <Picture
                             src={event.image.src}
                             alt={event.image.alt}
+                            focal={cardFocal(event.image)}
                             sizes="(min-width: 768px) 18rem, 78vw"
                             loading="lazy"
                             decoding="async"

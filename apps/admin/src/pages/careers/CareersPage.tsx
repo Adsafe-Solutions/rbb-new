@@ -10,6 +10,8 @@ import { publishApi, type PublishStatus } from "../../settings/client";
 import { careersApi, type Careers, type CareersParts, type CareersView } from "../../careers/client";
 import { PublishPanel } from "../settings/PublishPanel";
 import styles from "../../content/content.module.css";
+import { nextSeo } from "../../content/seo";
+import { NoIndexField } from "../../content/NoIndexField";
 
 /* /careers — the website's Careers page (/about-us/careers): its header,
    "Why work with us", "Open opportunities" with the open roles in order,
@@ -85,8 +87,8 @@ export default function CareersPage() {
   const closing = draft.closing ?? INITIAL.closing!;
   const seo = draft.seo ?? {};
   const setSeo = (changes: Partial<NonNullable<Careers["seo"]>>) => {
-    const next = Object.fromEntries(Object.entries({ ...seo, ...changes }).filter(([, v]) => v !== undefined && v !== ""));
-    set({ seo: Object.keys(next).length ? (next as Careers["seo"]) : undefined });
+    const next = nextSeo(seo, changes);
+    set({ seo: next });
   };
   const sectionField = (key: "why" | "apply", label: string, defaultHeading: string) => {
     const section = draft[key];
@@ -308,6 +310,7 @@ export default function CareersPage() {
             <FormField label="SEO description" helper="Up to 200 characters." disabled={readOnly} error={err("seo.description")}>
               <Textarea rows={2} maxLength={200} value={seo.description ?? ""} onChange={(e) => setSeo({ description: e.target.value })} />
             </FormField>
+            <NoIndexField value={seo.noIndex} onChange={(noIndex) => setSeo({ noIndex })} disabled={readOnly} noun="page" />
           </div>
         </Panel>
         <Panel title="Publishing" as="h2">

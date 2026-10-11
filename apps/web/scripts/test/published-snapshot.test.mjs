@@ -167,7 +167,7 @@ test("collections: only the ones the snapshot carries; published records → the
   assert.deepEqual(Object.keys(c).sort(), ["EVENTS", "NEWS"], "blogs not carried → source blogs stay");
   assert.deepEqual(c.NEWS.map((n) => n.id), ["earlier", "later"], "news oldest first (the timeline)");
   assert.equal(c.NEWS[0].date, "2026-04-01", "no date → the day it was first published");
-  assert.deepEqual(c.NEWS[0].seo, { title: "SEO title", description: undefined });
+  assert.deepEqual(c.NEWS[0].seo, { title: "SEO title" });
   assert.deepEqual(c.NEWS[1].image, { src: "https://media.example.org/rbb/media/u/a.png", alt: "A test image", width: 48, height: 32, mediaId: "img" });
   assert.equal(c.NEWS[0].image, undefined);
   assert.deepEqual(c.NEWS[1].body, body, "rich text stays structured");
@@ -190,6 +190,17 @@ test("a collection's contents are replaced in place (the export stays the same a
   const module = { exports: {} };
   new Function("module", out.replace("export const ", "const ") + "\nmodule.exports = NEWS;")(module);
   assert.deepEqual(module.exports, [{ id: "cms" }]);
+});
+
+test("Milestone 1: an absent key keeps the website's own list; a present key — even empty — replaces it", () => {
+  /* The API decides presence (a collection that has been on the website —
+     publishing/service.ts #collections); the website only obeys it. */
+  const targets = { news: ["src/content/media.js", "NEWS"], blogs: ["src/content/media.js", "BLOGS"], events: ["src/content/media.js", "EVENTS"], appeals: ["src/content/appeals.js", "APPEALS"], team: ["src/content/team.js", "TEAM_MEMBERS"] };
+  const none = overridesFrom(withContent({}));
+  for (const [key, [file, name]] of Object.entries(targets)) {
+    assert.equal(none[file]?.[name], undefined, `${key}: absent → the website's own list stays`);
+    assert.deepEqual(overridesFrom(withContent({ [key]: [] }))[file]?.[name], [], `${key}: present and empty → replaced with nothing (an intentional empty list)`);
+  }
 });
 
 test("appeals and the general donation page: published records → the donation pages' view models", () => {
@@ -259,7 +270,7 @@ test("homepage: the published homepage's enabled blocks, in order, references as
   assert.deepEqual(page.sections[2].data.events, ["an-event"]);
   assert.deepEqual(page.sections[3].data.appeals, ["an-appeal"]);
   assert.equal(page.sections[4].data.imagePosition, "left");
-  assert.deepEqual(page.seo, { title: "Home", image: "https://media.example.org/rbb/media/u/a.png" });
+  assert.deepEqual(page.seo, { title: "Home", image: "https://media.example.org/rbb/media/u/a.png", imageAlt: "A test image" });
   assert.ok(!/Referenced (news|blog) title/.test(JSON.stringify(page)), "no copy of a referenced record");
   assert.equal(homepageFrom(withContent({ homepage: home(sections, { status: "draft" }) })), undefined, "only a PUBLISHED homepage");
   assert.throws(() => homepageFrom(withContent({ homepage: home([block("x", "carousel", {})]) })), /cannot draw/);
@@ -331,7 +342,7 @@ test("programs: published programs → PROGRAMS in work.js's shape, in order; on
   );
   assert.deepEqual(list.map((p) => [p.slug, p.to]), [["education", "/work/education"], ["health-wellbeing", "/work/health-wellbeing"]], "in order; the address from the slug");
   assert.equal(list[0].missing, "To be provided.", "the template's own name for the note");
-  assert.deepEqual(list[0].seo, { title: "Learning", image: "https://media.example.org/rbb/media/u/a.png" });
+  assert.deepEqual(list[0].seo, { title: "Learning", image: "https://media.example.org/rbb/media/u/a.png", imageAlt: "A test image" });
   assert.equal(list[1].seo, undefined);
   assert.ok(!("status" in list[0]) && !("order" in list[0]), "no editing fields reach the page");
   const o = overridesFrom(withContent({ programs: [program({ id: "a", slug: "education", title: "Education", order: 0 })] }));
@@ -371,7 +382,7 @@ test("impact: published figures → IMPACT.metrics by key, in order; the publish
   assert.deepEqual(page.sections[1].data, { heading: "H.", metricIds: ["lives"], cta: { label: "More", to: "/impact" } }, "figures named, links as the site's");
   assert.deepEqual(page.sections[2].data, { first: { heading: "A", body: "a", cta: { label: "A", to: "/a" } }, second: { kicker: "K", heading: "B", body: "b", cta: { label: "B", to: "/b" } } });
   assert.equal(page.sections[3].data.image.src, "https://media.example.org/rbb/media/u/a.png");
-  assert.deepEqual(page.seo, { title: "T", image: "https://media.example.org/rbb/media/u/a.png", noIndex: true });
+  assert.deepEqual(page.seo, { title: "T", image: "https://media.example.org/rbb/media/u/a.png", imageAlt: "A test image", noIndex: true });
   assert.throws(() => impactFrom(withContent({ impact: { ...record, id: "impact", sections: [block("x", "carousel", {})] } })), /cannot draw/);
   const o = overridesFrom(withContent({ metrics: [{ ...record, id: "a", slug: "lives", value: "1", label: "L", verification: "verified", order: 0 }] }));
   assert.deepEqual(Object.keys(o["src/content/impact.js"]), ["IMPACT"], "figures only: the source page stays");
@@ -421,7 +432,7 @@ test("stories and projects: published records → stories.js and work.js shapes;
   assert.deepEqual(stories.map((s) => s.slug), ["newer", "older"], "the snapshot's order");
   assert.deepEqual([stories[0].status, stories[0].image.src, stories[0].image.mediaId, stories[0].media[0].alt, stories[0].relatedStoryIds[0], stories[0].projectId], ["approved", "https://media.example.org/rbb/media/u/a.png", "img", "A test image", "older", "p"]);
   assert.deepEqual(stories[0].body, body, "rich text stays structured");
-  assert.deepEqual(stories[0].seo, { title: "T", image: "https://media.example.org/rbb/media/u/a.png" });
+  assert.deepEqual(stories[0].seo, { title: "T", image: "https://media.example.org/rbb/media/u/a.png", imageAlt: "A test image" });
   assert.ok(!("type" in stories[0]) && !("relatedPostIds" in stories[0]), "no contract-only fields reach the page");
   assert.throws(() => storiesFrom(withContent({ stories: [{ ...record, id: "s1", type: "story", slug: "a", title: "A", category: "field", body, relatedPostIds: ["gone"] }] })), /does not carry/);
   const projects = projectsFrom(withContent({ projects: [{ ...record, id: "b", slug: "second", title: "B", programId: "health-wellbeing", description: "D.", order: 1 }, { ...record, id: "a", slug: "first", title: "A", programId: "education", description: "D.", order: 0, imageId: "img", activities: ["A."], featured: true }] }));

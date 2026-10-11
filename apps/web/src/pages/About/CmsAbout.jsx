@@ -43,10 +43,10 @@ const RENDERERS = {
       )}
     </PageHeader>
   ),
-  statement: ({ index, tone, data }) => <StatementSplit id="who-we-are" index={index} tone={tone} kicker={data.kicker} heading={data.heading} body={data.body} highlight={data.highlight} />,
-  missionVision: ({ index, tone, data }) => <MissionVision id="mission-vision" index={index} tone={tone} kicker={data.kicker} heading={data.heading} mission={data.mission} vision={data.vision} source={data.source} />,
-  numberedCards: ({ index, tone, data }) => <ValuesList id="values" index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} items={data.items} fallback={ABOUT.values.fallback} />,
-  approach: ({ index, tone, data }) => <ApproachFlow id="how-we-work" index={index} tone={tone} kicker={data.kicker} heading={data.heading} intro={data.intro} cta={data.cta} steps={[]} />,
+  statement: ({ index, tone, data }) => <StatementSplit id="who-we-are" index={index} tone={tone} kicker={data.kicker} heading={data.heading} body={data.body} highlight={data.highlight} cta={data.cta} />,
+  missionVision: ({ index, tone, data }) => <MissionVision id="mission-vision" index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} mission={data.mission} vision={data.vision} source={data.source} />,
+  numberedCards: ({ index, tone, data }) => <ValuesList id="values" index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} intro={data.intro} items={data.items} fallback={ABOUT.values.fallback} />,
+  approach: ({ index, tone, data }) => <ApproachFlow id="how-we-work" index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} intro={data.intro} cta={data.cta} steps={[]} />,
   transparency: ({ index }) => <TransparencySection index={index} />,
   cta: ({ tone, data }) => <ClosingCta tone={tone} heading={data.heading} highlight={data.highlight} body={data.body} ctas={data.ctas} image={data.image} />,
 };

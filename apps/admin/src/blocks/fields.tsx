@@ -114,7 +114,9 @@ export interface PickableRecord {
   detail?: string;
 }
 
-export function RecordPicker({ label, load, value, onChange, max, disabled, error }: { label: string; load: () => Promise<PickableRecord[]>; value: string[]; onChange: (ids: string[]) => void; max: number; disabled: boolean; error?: string }) {
+/* `itemError` (M48): the API's message for one chosen record, by id — shown
+   with its checkbox and announced as its description. */
+export function RecordPicker({ label, load, value, onChange, max, disabled, error, itemError }: { label: string; load: () => Promise<PickableRecord[]>; value: string[]; onChange: (ids: string[]) => void; max: number; disabled: boolean; error?: string; itemError?: (id: string) => string | undefined }) {
   const [records, setRecords] = useState<PickableRecord[] | null>(null);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
@@ -138,6 +140,7 @@ export function RecordPicker({ label, load, value, onChange, max, disabled, erro
         <ul className={styles.picker} aria-label={label}>
           {records.map((r) => {
             const on = value.includes(r.id);
+            const problem = on ? itemError?.(r.id) : undefined;
             return (
               <li key={r.id}>
                 <Checkbox
@@ -146,7 +149,17 @@ export function RecordPicker({ label, load, value, onChange, max, disabled, erro
                       {r.title} <Badge tone={isReady(r.status, r.live) ? "success" : "neutral"}>{readinessWord(r.status, r.live)}</Badge>
                     </span>
                   }
-                  description={r.detail}
+                  description={
+                    problem ? (
+                      <>
+                        {r.detail && <span className={styles.itemDetail}>{r.detail}</span>}
+                        <span className={`${styles.error} ${styles.itemError}`}>{problem}</span>
+                      </>
+                    ) : (
+                      r.detail
+                    )
+                  }
+                  aria-invalid={problem ? true : undefined}
                   checked={on}
                   disabled={disabled || (!on && value.length >= max)}
                   onChange={(e) => onChange(e.target.checked ? [...value, r.id] : value.filter((id) => id !== r.id))}
@@ -156,6 +169,13 @@ export function RecordPicker({ label, load, value, onChange, max, disabled, erro
           })}
         </ul>
       )}
+      {value
+        .filter((id) => !byId.has(id) && itemError?.(id))
+        .map((id) => (
+          <p key={id} className={styles.error} role="alert">
+            “{id}” (not in the list): {itemError!(id)}
+          </p>
+        ))}
       {chosen.some((r) => !isReady(r.status, r.live)) && value.length > 0 && <p className={styles.help}>Chosen but not approved yet: {chosen.filter((r) => !isReady(r.status, r.live)).map((r) => r.title).join(", ")}.</p>}
     </fieldset>
   );

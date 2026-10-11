@@ -81,6 +81,10 @@ export interface ContentStore<R extends ContentRecordBase> {
   /* Distinct values of `field` across ALL records (any status). */
   distinct(field: "type"): Promise<string[]>;
   count(): Promise<number>;
+  /* Milestone 1: records (of `type`, for posts) that have been on the
+     website: live now (`publishedRevision`) or first published at some
+     point (`publishedAt`, which archiving keeps). Archived ones count. */
+  countEverPublished(filter?: { type?: string }): Promise<number>;
   /* M14: the stored records with these ids (their live state too). */
   findManyStored(ids: string[]): Promise<StoredContent<R>[]>;
   /* M14: what a website publish may draw on — every record that is not
@@ -200,6 +204,14 @@ export class MongoContentStore<R extends ContentRecordBase> implements ContentSt
 
   async distinct(field: "type") {
     return (await this.#collection.distinct(`record.${field}`, this.#base() as Filter<Document<R>>)) as string[];
+  }
+
+  async countEverPublished({ type }: { type?: string } = {}) {
+    return this.#collection.countDocuments({
+      ...this.#base(),
+      ...(type && { "record.type": type }),
+      $or: [{ publishedRevision: { $type: "number" } }, { "record.publishedAt": { $exists: true } }],
+    } as Filter<Document<R>>);
   }
 
   async count() {

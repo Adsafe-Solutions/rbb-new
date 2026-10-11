@@ -17,6 +17,7 @@ import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
 import { delimiter, join } from "node:path";
 import { pathToFileURL } from "node:url";
+import { requireTestTarget } from "../../api/test/support/smoke-target.mjs";
 
 function resolveFromPath(name) {
   try {
@@ -40,6 +41,8 @@ const axePath = resolveFromPath("axe-core/axe.min.js");
 const axeSource = axePath ? readFileSync(axePath, "utf8") : null;
 
 const base = process.env.ADMIN_URL ?? "http://localhost:5174";
+/* Phase 0: never against a production API — asked before anything is written. */
+await requireTestTarget(base);
 const owner = { email: process.env.ADMIN_SMOKE_EMAIL, password: process.env.ADMIN_SMOKE_PASSWORD };
 const editor = { email: process.env.ADMIN_SMOKE_EDITOR_EMAIL, password: process.env.ADMIN_SMOKE_EDITOR_PASSWORD };
 const shots = process.env.SCREENSHOTS;

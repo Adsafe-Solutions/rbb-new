@@ -27,6 +27,8 @@ export default function StoriesOfChange({
   cta,
   tone = "paper",
   highlight,
+  /* Milestone 8: a CMS homepage block's line under the heading. */
+  intro,
   leadPriority = false,
 }) {
   const headingId = useId();
@@ -40,6 +42,7 @@ export default function StoriesOfChange({
         kicker={kicker}
         heading={heading}
         highlight={highlight}
+        intro={intro}
       />
 
       {lead ? (

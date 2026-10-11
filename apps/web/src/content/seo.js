@@ -128,6 +128,7 @@ const RULES = {
     title: PUBLISHED_HOMEPAGE.page?.seo?.title,
     description: PUBLISHED_HOMEPAGE.page?.seo?.description ?? SITE.description,
     image: PUBLISHED_HOMEPAGE.page?.seo?.image,
+    imageAlt: PUBLISHED_HOMEPAGE.page?.seo?.imageAlt,
     index: () => !PUBLISHED_HOMEPAGE.page?.seo?.noIndex,
   },
 
@@ -142,6 +143,7 @@ const RULES = {
     title: PUBLISHED_ABOUT.page?.seo?.title,
     description: PUBLISHED_ABOUT.page?.seo?.description ?? `Who ${BRAND.fullName} is: its mission, vision and values, how it works, and its transparency and financials.`,
     image: PUBLISHED_ABOUT.page?.seo?.image,
+    imageAlt: PUBLISHED_ABOUT.page?.seo?.imageAlt,
     index: () => !PUBLISHED_ABOUT.page?.seo?.noIndex,
   },
   "/work": {
@@ -158,6 +160,7 @@ const RULES = {
         title: p.seo?.title,
         description: p.seo?.description ?? `${p.description} One of the four program areas of ${BRAND.fullName}.`,
         image: p.seo?.image,
+        imageAlt: p.seo?.imageAlt,
         index: () => !p.seo?.noIndex,
       },
     ])
@@ -168,6 +171,7 @@ const RULES = {
     title: PUBLISHED_IMPACT.page?.seo?.title,
     description: PUBLISHED_IMPACT.page?.seo?.description,
     image: PUBLISHED_IMPACT.page?.seo?.image,
+    imageAlt: PUBLISHED_IMPACT.page?.seo?.imageAlt,
     index: () => !PUBLISHED_IMPACT.page?.seo?.noIndex,
   },
   "/get-involved": { index: () => true },
@@ -175,10 +179,17 @@ const RULES = {
      are not: each is a working placeholder until RBB supplies it. Its
      title and description are the CMS's once the page is published there
      (undefined otherwise: the sitemap entry's own). */
-  "/appeals": { title: PUBLISHED_GENERAL_DONATION.page?.seo?.title, description: PUBLISHED_GENERAL_DONATION.page?.seo?.description, index: () => true },
+  "/appeals": {
+    title: PUBLISHED_GENERAL_DONATION.page?.seo?.title,
+    description: PUBLISHED_GENERAL_DONATION.page?.seo?.description,
+    /* Milestone 3: its own share image, and `noIndex` only ever removing it. */
+    image: PUBLISHED_GENERAL_DONATION.page?.seo?.image,
+    imageAlt: PUBLISHED_GENERAL_DONATION.page?.seo?.imageAlt,
+    index: () => !PUBLISHED_GENERAL_DONATION.page?.seo?.noIndex,
+  },
   /* Appeals published from the CMS: their own title and description.
      Still never indexed — appeal routes have no approval area (AREAS). */
-  ...Object.fromEntries(APPEALS.filter((a) => a.seo).map((a) => [appealPath(a), { title: a.seo.title, description: a.seo.description }])),
+  ...Object.fromEntries(APPEALS.filter((a) => a.seo).map((a) => [appealPath(a), { title: a.seo.title, description: a.seo.description, image: a.seo.image, imageAlt: a.seo.imageAlt }])),
   ...Object.fromEntries(GET_INVOLVED.paths.map((p) => [p.to, { description: p.metaDescription, index: () => true }])),
   "/contact": { description: CONTACT_COPY.metaDescription, index: () => true },
 
@@ -285,12 +296,25 @@ export const breadcrumbSchema = (trail) => {
    absolute URLs appear only once ENV.siteOrigin is a verified production
    origin. This file decides indexability from the page's own content
    alone. */
+/* The share image (Milestone 3): the page's own — its SEO image, else the
+   image a page already uses as its own (a story's, a project's, a
+   person's) — and only when that is a usable absolute URL; otherwise the
+   site-wide default from the published settings (SITE.shareImage);
+   otherwise none. Never a placeholder. */
+const shareImageOf = (image, imageAlt) => {
+  const own = absoluteUrl(image);
+  if (own) return { src: own, alt: imageAlt };
+  const fallback = absoluteUrl(SITE.shareImage?.src);
+  return fallback ? { src: fallback, alt: SITE.shareImage.alt } : null;
+};
+
 const build = ({ route, title, description, robots, image, imageAlt, ogType = "website", schema = [], areas = [] }) => {
   const indexable = robots === INDEX;
   const canonical = indexable ? absoluteUrl(canonicalPath(route)) : null;
   /* A page that may not be indexed gets no share image and no structured
      data either: both present it as finished, citable content. */
-  const ogImage = indexable ? absoluteUrl(image) : null;
+  const share = indexable ? shareImageOf(image, imageAlt) : null;
+  const ogImage = share?.src ?? null;
   const graph = indexable ? schema.filter(Boolean) : [];
   return {
     route,
@@ -305,7 +329,7 @@ const build = ({ route, title, description, robots, image, imageAlt, ogType = "w
     ogType,
     ogUrl: canonical,
     ogImage,
-    ogImageAlt: ogImage ? imageAlt : null,
+    ogImageAlt: ogImage ? share.alt : null,
     twitterCard: ogImage ? "summary_large_image" : "summary",
     twitterTitle: title ?? SITE.name,
     twitterDescription: description,
@@ -320,11 +344,14 @@ const build = ({ route, title, description, robots, image, imageAlt, ogType = "w
 
 /* A sitemap route's metadata. `overrides` lets a page that knows more
    about itself (a Placeholder's derived title) fill the gaps. */
+/* `overrides` also carries a detail page's own share image and `noIndex`
+   (Milestone 3: news, blog and event pages): `noIndex` can only take the
+   page out of the index; the image is used only if the page is indexed. */
 export function routeMeta(pathname, overrides = {}) {
   const route = canonicalPath(pathname);
   const page = PAGE_BY_ROUTE.get(route);
   const rule = RULES[route] ?? {};
-  const indexable = Boolean(rule.index?.()) && allApproved(approvalAreas(route));
+  const indexable = Boolean(rule.index?.()) && allApproved(approvalAreas(route)) && !overrides.noIndex;
   const title = route === "/" ? rule.title : (overrides.title ?? rule.title ?? page?.title ?? page?.label);
   const description = rule.description ?? page?.description ?? overrides.description ?? SITE.description;
 
@@ -339,7 +366,7 @@ export function routeMeta(pathname, overrides = {}) {
     title,
     description,
     robots: indexable ? INDEX : NOINDEX,
-    ...(rule.image && { image: rule.image }),
+    ...((rule.image ?? overrides.image) && { image: rule.image ?? overrides.image, imageAlt: rule.image ? rule.imageAlt : overrides.imageAlt }),
     schema: indexable ? [route === "/" ? organizationSchema() : breadcrumbSchema(trail)] : [],
     areas: approvalAreas(route),
   });
@@ -378,7 +405,7 @@ export function storyMeta(story) {
       : SITE.previewDescription,
     robots: indexable ? INDEX : NOINDEX,
     image,
-    imageAlt: story.seo?.image ? undefined : story.image?.alt,
+    imageAlt: story.seo?.image ? story.seo.imageAlt : story.image?.alt,
     ogType: "article",
     schema: [
       ENV.siteOrigin && {
@@ -413,7 +440,7 @@ export function projectMeta(project) {
       : SITE.previewDescription,
     robots: indexable ? INDEX : NOINDEX,
     image: project.seo?.image ?? project.image?.src,
-    imageAlt: project.seo?.image ? undefined : project.image?.alt,
+    imageAlt: project.seo?.image ? project.seo.imageAlt : project.image?.alt,
     schema: [
       breadcrumbSchema([
         { label: "Home", to: "/" },

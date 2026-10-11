@@ -51,9 +51,12 @@ export default function StoriesHub() {
   /* The query applies after hydration — see hooks/useHydrated. */
   const requested = hydrated ? categoryById(params.get("type")) : null;
   const current = requested && storiesIn(requested.id).length ? requested : null;
-  const stories = (current ? storiesIn(current.id) : latestStories())
-    .filter((story) => story !== featured || current)
-    .map(storyCard);
+  /* The featured story leads above, so the full list leaves it out —
+     unless it is the only story: the list must never say stories are
+     still to come right under one it has just shown (M48). */
+  const listed = current ? storiesIn(current.id) : latestStories();
+  const others = current ? listed : listed.filter((story) => story !== featured);
+  const stories = (others.length > 0 ? others : listed).map(storyCard);
 
   return (
     <>

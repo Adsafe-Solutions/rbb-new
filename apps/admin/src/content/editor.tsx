@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ApiRequestError } from "../api";
 import { Alert, Archive, Button, Dialog, useToast } from "../design-system";
 import { navigate } from "../router";
+import { latestLoads } from "./latest";
 import type { ContentStatus, ContentView, ScheduleInput, ScheduleView, WorkflowAction, contentApi } from "./client";
 import { ACTED, workflowBadge } from "./workflow";
 import styles from "./content.module.css";
@@ -27,6 +28,8 @@ export interface EditorState<R> {
   problem: { kind: "conflict" | "invalid" | "error"; message: string } | null;
   save: () => Promise<void>;
   reload: () => Promise<void>;
+  /* After a failed load: show the loading state and load again. */
+  retry: () => void;
   discard: () => void;
   slugConfirm: { open: boolean; confirm: () => void; cancel: () => void };
   archive: () => Promise<void>;
@@ -52,20 +55,31 @@ export function useContentEditor<R extends { id: string; status: ContentStatus }
   const [problem, setProblem] = useState<EditorState<R>["problem"]>(null);
   const [slugPending, setSlugPending] = useState(false);
   const [acting, setActing] = useState(false);
+  /* M48: only the newest load is shown — see latest.ts. */
+  const [loads] = useState(latestLoads);
 
   const reload = useCallback(async () => {
     if (isNew) return;
+    const current = loads.begin();
     setProblem(null);
     setErrors(new Map());
     try {
       const v = await api.get(id);
+      if (!current()) return;
       setView(v);
       setDraft(structuredClone(v.record));
       setStatus("ready");
     } catch (e) {
-      setStatus(e instanceof ApiRequestError && e.status === 404 ? "missing" : "error");
+      if (current()) setStatus(e instanceof ApiRequestError && e.status === 404 ? "missing" : "error");
     }
-  }, [api, id, isNew]);
+  }, [api, id, isNew, loads]);
+  /* A revision the API has just returned is newer than any load still on
+     its way: show it, and retire those loads. */
+  const show = (next: ContentView<R>) => {
+    loads.supersede();
+    setView(next);
+    setDraft(structuredClone(next.record));
+  };
   useEffect(() => void reload(), [reload]);
 
   const saved = (view?.record ?? initial) as Partial<R>;
@@ -85,7 +99,13 @@ export function useContentEditor<R extends { id: string; status: ContentStatus }
       return setProblem({ kind: "conflict", message: caught.message });
     }
     if (caught instanceof ApiRequestError && caught.status === 400) {
-      const map = new Map(caught.details.map((d) => [d.path.replace(/^body\.(changes\.)?/, ""), d.message]));
+      /* Several messages for one field (a references field names each
+         record it refuses) are kept, one per line. */
+      const map = new Map<string, string>();
+      for (const d of caught.details) {
+        const path = d.path.replace(/^body\.(changes\.)?/, "");
+        map.set(path, map.has(path) ? `${map.get(path)}\n${d.message}` : d.message);
+      }
       setErrors(map);
       return setProblem({ kind: "invalid", message: caught.message === "Request validation failed." ? `Some fields need attention before this can be ${what}.` : caught.message });
     }
@@ -108,8 +128,7 @@ export function useContentEditor<R extends { id: string; status: ContentStatus }
       if (!view) return;
       const changes = Object.fromEntries(changed.map((f) => [f, draft[f] === undefined || draft[f] === "" ? null : draft[f]]));
       const next = await api.update(view.record.id, view.revision, changes, confirmSlugChange);
-      setView(next);
-      setDraft(structuredClone(next.record));
+      show(next);
       toast({ title: "Saved", tone: "success" });
     } catch (caught) {
       fail(caught);
@@ -122,8 +141,7 @@ export function useContentEditor<R extends { id: string; status: ContentStatus }
     if (!view) return;
     try {
       const next = await api.archive(view.record.id);
-      setView(next);
-      setDraft(structuredClone(next.record));
+      show(next);
       toast({ title: `${kind[0]!.toUpperCase()}${kind.slice(1)} archived`, description: "It will not appear on the website after the next publish." });
     } catch (caught) {
       fail(caught);
@@ -134,8 +152,7 @@ export function useContentEditor<R extends { id: string; status: ContentStatus }
     if (!view) return;
     try {
       const next = await api.update(view.record.id, view.revision, { status: "draft" });
-      setView(next);
-      setDraft(structuredClone(next.record));
+      show(next);
       toast({ title: "Reopened as a draft" });
     } catch (caught) {
       fail(caught);
@@ -150,8 +167,7 @@ export function useContentEditor<R extends { id: string; status: ContentStatus }
     setErrors(new Map());
     try {
       const next = await api.act(view.record.id, action, view.revision);
-      setView(next);
-      setDraft(structuredClone(next.record));
+      show(next);
       toast({ ...ACTED[action], tone: "success" });
     } catch (caught) {
       fail(caught, action === "approve" ? "approved" : action === "submit" ? "submitted" : "changed");
@@ -166,8 +182,7 @@ export function useContentEditor<R extends { id: string; status: ContentStatus }
     setProblem(null);
     try {
       const next = await api.schedule(view.record.id, view.revision, input);
-      setView(next);
-      setDraft(structuredClone(next.record));
+      show(next);
       toast({ title: "Scheduled", description: "It is published at that time — not before.", tone: "success" });
       return null;
     } catch (caught) {
@@ -185,8 +200,7 @@ export function useContentEditor<R extends { id: string; status: ContentStatus }
     setProblem(null);
     try {
       const next = await api.unschedule(view.record.id, view.revision);
-      setView(next);
-      setDraft(structuredClone(next.record));
+      show(next);
       toast({ title: "Unscheduled", description: "It stays approved." });
     } catch (caught) {
       fail(caught, "changed");
@@ -206,6 +220,10 @@ export function useContentEditor<R extends { id: string; status: ContentStatus }
     problem,
     save: () => save(false),
     reload,
+    retry: () => {
+      setStatus("loading");
+      void reload();
+    },
     discard: () => {
       setDraft(structuredClone((view?.record ?? initial) as Partial<R>));
       setErrors(new Map());

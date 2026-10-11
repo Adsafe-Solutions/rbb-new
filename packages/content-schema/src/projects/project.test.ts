@@ -32,8 +32,9 @@ test("project: the fields the projects use, typed; nothing invented", () => {
     ["no program", project({ programId: undefined })],
     ["a program copied in", project({ program: { title: "Education" } })],
     ["no description", project({ description: undefined })],
-    ["an impact claim (not supplied by any project)", project({ impact: [{ value: "100", label: "People" }] })],
-    ["partners (not supplied)", project({ partners: ["A partner"] })],
+    // Milestone 6: impact and partners are fields now (project-fields.test.ts); malformed ones are still refused.
+    ["an impact figure without its label", project({ impact: [{ value: "100" }] })],
+    ["no partners listed", project({ partners: [] })],
     ["HTML", project({ html: "<b>x</b>" })],
     ["empty activities", project({ activities: [] })],
     ["bad slug", project({ slug: "Reading Clubs" })],

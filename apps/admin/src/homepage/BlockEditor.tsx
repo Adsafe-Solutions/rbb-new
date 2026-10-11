@@ -79,8 +79,10 @@ const EDITORS: { [T in BlockType]: (p: EditorProps<T>) => ReactNode } = {
   ),
   programs: ({ data, set, err, disabled }) => (
     <>
-      <p className={styles.help}>The cards are the program areas themselves; only the heading is set here.</p>
+      <p className={styles.help}>The cards are the program areas themselves; the heading, a line and a link are set here.</p>
       <HeadingFields data={data} set={set} err={err} disabled={disabled} />
+      <Body data={data} set={set} err={err} disabled={disabled} />
+      <Cta data={data} set={set} err={err} disabled={disabled} />
     </>
   ),
   approach: ({ data, set, err, disabled }) => (
@@ -102,6 +104,7 @@ const EDITORS: { [T in BlockType]: (p: EditorProps<T>) => ReactNode } = {
   timeline: ({ data, set, err, disabled }) => (
     <>
       <HeadingFields data={data} set={set} err={err} disabled={disabled} />
+      <Body data={data} set={set} err={err} disabled={disabled} />
       <Cta data={data} set={set} err={err} disabled={disabled} />
       <ItemList
         label="Milestones"
@@ -135,6 +138,7 @@ const EDITORS: { [T in BlockType]: (p: EditorProps<T>) => ReactNode } = {
     <>
       <p className={styles.help}>Shows the newest published stories.</p>
       <HeadingFields data={data} set={set} err={err} disabled={disabled} />
+      <Body data={data} set={set} err={err} disabled={disabled} />
       <FormField label="How many stories" helper="1 to 6." error={err("count")} disabled={disabled}>
         <Input type="number" min={1} max={6} value={data.count} onChange={(e) => set({ ...data, count: Number(e.target.value) })} />
       </FormField>
@@ -164,6 +168,8 @@ const EDITORS: { [T in BlockType]: (p: EditorProps<T>) => ReactNode } = {
     <>
       <p className={styles.help}>The ways to take part are the Get Involved pages themselves.</p>
       <HeadingFields data={data} set={set} err={err} disabled={disabled} />
+      <Body data={data} set={set} err={err} disabled={disabled} />
+      <Cta data={data} set={set} err={err} disabled={disabled} />
     </>
   ),
   faq: ({ data, set, err, disabled }) => (

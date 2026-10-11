@@ -7,6 +7,7 @@ export const testConfig = (overrides: Partial<Config> = {}): Config => ({
   env: "test",
   orgId: TEST_ORG,
   mongo: null,
+  target: { kind: "none", database: null, bucket: null, productionBucket: false },
   cors: { origins: ["https://site.example", "https://admin.example"], web: "https://site.example" },
   logLevel: "debug",
   auth: {

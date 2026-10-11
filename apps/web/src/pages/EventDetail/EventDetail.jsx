@@ -60,7 +60,7 @@ function Detail({ event }) {
         <div className="grid gap-12 lg:grid-cols-[7fr_4fr] lg:gap-16">
           <div className="min-w-0">
             {event.image && (
-              <EditorialImage image={event.image} ratio="aspect-[16/10]" sizes="(min-width: 1024px) 55vw, 92vw" priority />
+              <EditorialImage image={event.image} caption={event.image.caption} ratio="aspect-[16/10]" sizes="(min-width: 1024px) 55vw, 92vw" priority />
             )}
 
             <section aria-labelledby="about-event" className="reveal mt-14">
@@ -175,6 +175,6 @@ function Fact({ label, children }) {
 export default function EventDetail() {
   const { slug } = useParams();
   const event = eventById(slug);
-  useSeo(event ? routeMeta(eventPath(event), { title: event.seo?.title ?? event.title, description: event.seo?.description ?? event.summary }) : notFoundMeta());
+  useSeo(event ? routeMeta(eventPath(event), { title: event.seo?.title ?? event.title, description: event.seo?.description ?? event.summary, image: event.seo?.image ?? event.image?.src, imageAlt: event.seo?.image ? event.seo.imageAlt : event.image?.alt, noIndex: event.seo?.noIndex }) : notFoundMeta());
   return event ? <Detail event={event} /> : <NotFound />;
 }

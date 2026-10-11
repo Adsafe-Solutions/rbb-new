@@ -116,6 +116,9 @@ export function postRecords() {
       location: s.location,
       featured: s.featured,
       galleryIds: s.media?.map(mediaIdOf),
+      /* Milestone 5: as the source writes them — quotes { text, attribution }, impact lines. */
+      quotes: s.quotes?.map((q) => compact({ text: q.text, attribution: q.attribution })),
+      impact: s.impact,
       /* The story records name related stories by slug. */
       relatedPostIds: s.relatedStoryIds?.map((slug) => storyIdBySlug.get(slug) ?? `missing:${slug}`),
     })
@@ -422,11 +425,20 @@ export function reportRecords() {
   );
 }
 
-/* The source projects as Project records, in their list order. Fields the
-   contract does not hold yet (a location, a stage — the record's `status`,
-   distinct from its editorial status — verified impact,
-   partners, a story) are passed through, so a project that ever sets one
-   fails conformance loudly instead of losing it. */
+/* The source projects as Project records, in their list order. Milestone
+   6: a location, a stage (the record's `status`, distinct from its
+   editorial status), a date, verified impact, partners and a story are
+   contract fields. A source project's story is a copy ({ title, excerpt,
+   to }); the contract names the story by id, so a copy that is exactly the
+   story's own (found by its address) becomes that id — any other copy is
+   passed through as `story`, so conformance fails loudly instead of losing
+   its words. */
+const storyReference = (story) => {
+  if (!story) return {};
+  const slug = /^\/stories\/([^/#?]+)$/.exec(story.to ?? "")?.[1];
+  const own = slug && STORIES.find((s) => s.slug === slug);
+  return own && own.title === story.title && (story.excerpt === undefined || story.excerpt === own.excerpt) ? { storyId: own.id } : { story };
+};
 export function projectRecords() {
   return PROJECT_RECORDS.map((p, i) =>
     compact({
@@ -447,7 +459,7 @@ export function projectRecords() {
       date: p.date,
       impact: p.impact,
       partners: p.partners,
-      story: p.story,
+      ...storyReference(p.story),
     })
   );
 }

@@ -11,12 +11,12 @@ import SectionHeading from "../SectionHeading/SectionHeading.jsx";
 
    Each statement is set at display size — this is the one section of the
    page meant to be read twice. `source` says where the words come from. */
-export default function MissionVision({ id, index, kicker, heading, mission, vision, source, tone = "paper" }) {
+export default function MissionVision({ id, index, kicker, heading, mission, vision, source, tone = "paper", highlight }) {
   const headingId = useId();
 
   return (
     <Section id={id} tone={tone} pad="lg" aria-labelledby={headingId}>
-      <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} />
+      <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} highlight={highlight} />
 
       <div className="mt-14 grid gap-12 md:mt-16 lg:grid-cols-2 lg:gap-10">
         {[

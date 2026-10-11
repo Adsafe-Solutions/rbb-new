@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { ApiRequestError } from "../api";
 import { useCan } from "../auth";
 import {
   Alert,
@@ -7,6 +8,7 @@ import {
   Card,
   ChevronLeft,
   ChevronRight,
+  Dialog,
   Ellipsis,
   EmptyState,
   IconButton,
@@ -62,6 +64,8 @@ interface ListPageProps<R extends { id: string; title: string; status: ContentSt
   statusColumn?: boolean;
   /* What "By date" sorts by, when it is not the record's own date. */
   dateSortLabel?: string;
+  /* Ask before archiving from a row, as the editor does (M48: stories). */
+  confirmArchive?: boolean;
 }
 
 const STATUSES: SelectOption[] = [
@@ -73,7 +77,7 @@ const STATUSES: SelectOption[] = [
   { value: "archived", label: "Archived" },
 ];
 
-export function ContentListPage<R extends { id: string; title: string; status: ContentStatus }>({ api, base, kind, plural, description, icon, emptyDescription, columns: given, types, statusColumn = false, dateSortLabel = "By date" }: ListPageProps<R>) {
+export function ContentListPage<R extends { id: string; title: string; status: ContentStatus }>({ api, base, kind, plural, description, icon, emptyDescription, columns: given, types, statusColumn = false, dateSortLabel = "By date", confirmArchive = false }: ListPageProps<R>) {
   const columns: Column<R>[] = statusColumn ? [{ label: "Status", cell: (v) => statusBadge(v.record.status, v.live, v.schedule) }, ...given] : given;
   const canCreate = useCan("content:create");
   const canArchive = useCan("content:delete");
@@ -88,6 +92,7 @@ export function ContentListPage<R extends { id: string; title: string; status: C
   const [publish, setPublish] = useState<PublishStatus | null>(null);
   const [reloads, setReloads] = useState(0);
   const reload = useCallback(() => setReloads((n) => n + 1), []);
+  const [archiving, setArchiving] = useState<ContentView<R> | null>(null);
 
   useEffect(() => {
     const t = window.setTimeout(() => setQuery(search.trim()), 250);
@@ -106,13 +111,18 @@ export function ContentListPage<R extends { id: string; title: string; status: C
     };
   }, [api, query, status, type, sort, page, reloads]);
 
+  /* A refusal says why, in the API's words (changed or removed elsewhere,
+     not allowed, unreachable); a server failure says to try again. A
+     record changed or removed elsewhere is shown as it now is. */
   const archive = async (view: ContentView<R>) => {
     try {
       await api.archive(view.record.id);
       toast({ title: `“${view.record.title}” archived`, description: "It will not appear on the website after the next publish." });
       reload();
-    } catch {
-      toast({ title: `The ${kind} could not be archived`, tone: "danger" });
+    } catch (caught) {
+      const said = caught instanceof ApiRequestError && caught.status < 500;
+      toast({ title: `“${view.record.title}” could not be archived`, description: said ? caught.message : "Try again in a moment.", tone: "danger" });
+      if (caught instanceof ApiRequestError && (caught.status === 404 || caught.status === 409)) reload();
     }
   };
 
@@ -200,7 +210,7 @@ export function ContentListPage<R extends { id: string; title: string; status: C
                           Edit
                         </MenuItem>
                         {canArchive && view.record.status !== "archived" && (
-                          <MenuItem icon={<Archive />} destructive onSelect={() => archive(view)}>
+                          <MenuItem icon={<Archive />} destructive onSelect={() => (confirmArchive ? setArchiving(view) : archive(view))}>
                             Archive
                           </MenuItem>
                         )}
@@ -226,6 +236,28 @@ export function ContentListPage<R extends { id: string; title: string; status: C
           </Button>
         </nav>
       )}
+      <Dialog
+        open={archiving !== null}
+        onClose={() => setArchiving(null)}
+        size="sm"
+        title={`Archive this ${kind}?`}
+        description={archiving ? `“${archiving.record.title}” will no longer appear on the public website after the next publish.` : undefined}
+        footer={
+          <>
+            <Button onClick={() => setArchiving(null)}>Cancel</Button>
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                const view = archiving;
+                setArchiving(null);
+                if (view) await archive(view);
+              }}
+            >
+              Archive
+            </Button>
+          </>
+        }
+      />
     </PageContainer>
   );
 }

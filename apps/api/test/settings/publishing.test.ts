@@ -61,7 +61,7 @@ test("a publish freezes a valid, published, public-only snapshot; drafts stay ou
 test("media: only referenced, ready media of this organization is published — and nothing private about it", async () => {
   const data = sharedData();
   const h = await ready(harness("org-a", data));
-  const logo = addMedia(data, "org-a", "ready", { alt: "Test logo", objectKey: "org-a/media/secret-key/logo.png", caption: "private caption" });
+  const logo = addMedia(data, "org-a", "ready", { alt: "Test logo", objectKey: "org-a/media/secret-key/logo.png", caption: "A public caption", credit: "private credit", license: "private licence" });
   addMedia(data, "org-a", "ready", { originalFilename: "unrelated.png" });
   addMedia(data, "org-a", "pending");
   const v = (await h.settings.get(owner))!;
@@ -69,9 +69,10 @@ test("media: only referenced, ready media of this organization is published — 
   await h.publishing.publish(owner, FACTS);
   const snapshot = (await h.publishing.publicSnapshot())!;
   assert.deepEqual(Object.keys(snapshot.media), [logo.id]);
-  assert.deepEqual(snapshot.media[logo.id], { id: logo.id, url: logo.publicUrl, mimeType: "image/png", width: 128, height: 128, alt: "Test logo" });
+  /* Milestone 2: the caption is published (pages show it); credit, licence and consent are not. */
+  assert.deepEqual(snapshot.media[logo.id], { id: logo.id, url: logo.publicUrl, mimeType: "image/png", width: 128, height: 128, alt: "Test logo", caption: "A public caption" });
   const text = JSON.stringify(snapshot);
-  for (const leak of ["secret-key", "private caption", "unrelated.png", "objectKey", "createdBy", "consent"]) assert.ok(!text.includes(leak), leak);
+  for (const leak of ["secret-key", "private credit", "private licence", "unrelated.png", "objectKey", "createdBy", "consent"]) assert.ok(!text.includes(leak), leak);
 });
 
 test("a reference that stopped being valid makes the publish FAIL, and the public keeps the previous version", async () => {

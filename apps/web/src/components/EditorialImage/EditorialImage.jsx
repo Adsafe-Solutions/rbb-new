@@ -56,7 +56,7 @@ export default function EditorialImage({
             loading={priority ? undefined : "lazy"}
             fetchpriority={priority ? "high" : undefined}
             decoding="async"
-            style={image.focal ? { objectPosition: image.focal } : undefined}
+            focal={image.focal}
             className="h-full w-full object-cover"
             {...rest}
           />

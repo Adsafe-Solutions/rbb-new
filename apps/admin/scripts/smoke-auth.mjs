@@ -12,6 +12,7 @@
 import { createRequire } from "node:module";
 import { delimiter, join } from "node:path";
 import { pathToFileURL } from "node:url";
+import { requireTestTarget } from "../../api/test/support/smoke-target.mjs";
 
 const usable = (m) => (m?.chromium ? m : m?.default?.chromium ? m.default : null);
 async function loadPlaywright() {
@@ -30,6 +31,8 @@ async function loadPlaywright() {
 }
 
 const base = process.env.ADMIN_URL ?? "http://localhost:5174";
+/* Phase 0: never against a production API — asked before anything is written. */
+await requireTestTarget(base);
 const email = process.env.ADMIN_SMOKE_EMAIL;
 const password = process.env.ADMIN_SMOKE_PASSWORD;
 if (!email || !password) {

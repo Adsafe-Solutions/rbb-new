@@ -19,6 +19,7 @@ import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { delimiter, join } from "node:path";
 import { pathToFileURL } from "node:url";
+import { requireTestTarget } from "../../api/test/support/smoke-target.mjs";
 
 function resolveFromPath(name) {
   try {
@@ -40,6 +41,8 @@ if (!playwrightPath) {
 const playwright = await import(pathToFileURL(playwrightPath).href).then((m) => (m.chromium ? m : m.default));
 
 const base = process.env.ADMIN_URL ?? "http://localhost:5174";
+/* Phase 0: never against a production API — asked before anything is written. */
+await requireTestTarget(base);
 const owner = { email: process.env.ADMIN_SMOKE_EMAIL, password: process.env.ADMIN_SMOKE_PASSWORD };
 if (!owner.email || !owner.password) {
   console.error("Set ADMIN_SMOKE_EMAIL and ADMIN_SMOKE_PASSWORD (an OWNER in a local/test database).");

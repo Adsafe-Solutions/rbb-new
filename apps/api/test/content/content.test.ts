@@ -108,7 +108,8 @@ test("events: required timezone, real zones only, end after start, https registr
     [{ date: undefined }, "date"],
     [{ registrationUrl: "http://tickets.example.org" }, "registrationUrl"],
     [{ imageId: undefined }, "imageId"],
-    [{ schedule: [] }, "schedule"],
+    // Milestone 4: `schedule` is editable now (test/posts-events-fields.test.ts); a malformed one is still refused.
+    [{ schedule: [{ time: "18:30", item: "Welcome" }] }, "schedule"],
   ] as const)
     await rejects(h.events.create(owner, testEvent(image.id, { ...overrides, slug: `e-${Math.random().toString(36).slice(2, 8)}` }), FACTS), "VALIDATION_ERROR", path);
 });
@@ -205,14 +206,15 @@ test("snapshot: only PUBLISHED records of managed collections, public fields onl
   await h.posts.archive(owner, archived.record.id, FACTS);
   await h.events.create(owner, testEvent(image.id, { title: "Draft gathering" }), FACTS);
   const status = await h.publishing.status(owner);
-  assert.deepEqual(status.changedSections, ["news", "events"]);
+  /* Milestone 1: a draft-only collection is not on the website — events stay the website's own. */
+  assert.deepEqual(status.changedSections, ["news"]);
 
   const result = await h.publishing.publish(owner, FACTS);
   const snapshot = (await h.publishing.publicSnapshot())!;
   assert.ok(PublishedSnapshot.safeParse(snapshot).success);
   assert.deepEqual(snapshot.content.news!.map((p) => p.title), ["Test news item"]);
   assert.equal(snapshot.content.blogs, undefined, "no blog records exist: blogs stay the website's own");
-  assert.deepEqual(snapshot.content.events, [], "events are managed (a draft exists) but none is published");
+  assert.equal(snapshot.content.events, undefined, "only a draft event: events stay the website's own (Milestone 1)");
   assert.deepEqual(Object.keys(snapshot.media), [image.id]);
   const text = JSON.stringify(snapshot);
   for (const leak of ["Draft only", "Submitted only", "Archived one", "Draft gathering", "createdBy", "updatedBy", "revision", "slugHistory", "Test Member", "objectKey"])
@@ -221,7 +223,7 @@ test("snapshot: only PUBLISHED records of managed collections, public fields onl
   assert.ok(!contentText.includes('"createdAt"') && !contentText.includes('"updatedAt"'), "content records carry no editing timestamps");
   assert.ok(snapshot.content.news![0]!.publishedAt);
   assert.equal(result.version, 2);
-  assert.deepEqual(h.audit.filter((e) => e.action === "publish.completed").at(-1)!.metadata.counts, { news: 1, events: 0 });
+  assert.deepEqual(h.audit.filter((e) => e.action === "publish.completed").at(-1)!.metadata.counts, { news: 1 });
   assert.equal(published.record.status, "approved");
   const after = await h.posts.get(owner, published.record.id);
   assert.deepEqual([after.record.status, after.live, after.revision], ["published", true, published.revision], "the publish marks it, without a new revision");

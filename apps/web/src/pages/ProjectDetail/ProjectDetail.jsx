@@ -10,6 +10,7 @@ import { SITE, WORK, programBySlug, projectBySlug, projectsIn } from "../../cont
 import EditorialImage from "../../components/EditorialImage/EditorialImage.jsx";
 import TicketCard from "../../components/TicketCard/TicketCard.jsx";
 import Button from "../../components/Button/Button.jsx";
+import { projectStory } from "../../lib/projectStory.js";
 
 /* /work/projects/:slug — one verified project (Document 04's detail
    template), built entirely from its entry in content/work.js.
@@ -27,6 +28,8 @@ import Button from "../../components/Button/Button.jsx";
 function Detail({ project }) {
   const t = WORK.detail;
   const program = programBySlug(project.program);
+  /* Its own copy (a website project), or the story it names by id (a CMS project). */
+  const story = projectStory(project);
 
   const meta = [
     program && { label: t.program, value: program.title },
@@ -45,7 +48,7 @@ function Detail({ project }) {
       items: project.impact.map((m) => `${m.value} — ${m.label}`),
     },
     project.partners?.length && { id: "partners", heading: t.partners, items: project.partners },
-    project.story && { id: "story", heading: t.story, body: [project.story.title, project.story.excerpt] },
+    story && { id: "story", heading: t.story, body: [story.title, story.excerpt].filter(Boolean) },
     /* Where the project sits: its program, in the program's own approved
        description. */
     program && { id: "program", heading: t.connection, body: [`${program.title} — ${program.description}`] },
@@ -61,7 +64,7 @@ function Detail({ project }) {
         kicker={program?.title}
         aside={
           project.image && (
-            <EditorialImage image={project.image} tilt="r-lg" cast="cast-lg" priority sizes="(min-width: 1024px) 40vw, 90vw" label={program?.title} />
+            <EditorialImage image={project.image} caption={project.image.caption} tilt="r-lg" cast="cast-lg" priority sizes="(min-width: 1024px) 40vw, 90vw" label={program?.title} />
           )
         }
       >

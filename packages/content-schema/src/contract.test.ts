@@ -197,7 +197,7 @@ test("a highlight must be part of its heading", () => {
 test("events: an end time must come after the start, on the event's own day", () => {
   fails(Event, { ...fx.event(), startTime: "6:30 PM", endTime: "6:30 PM" }, ["endTime"]);
   fails(Event, { ...fx.event(), startTime: "9:00 PM", endTime: "10:00 AM" }, ["endTime"]);
-  ok(Event, { ...fx.event(), startTime: "11:30 AM", endTime: "12:15 PM" });
+  ok(Event, { ...fx.event(), startTime: "11:30 AM", endTime: "12:15 PM", schedule: [] }); // M4: a timed step must fall within the event
   ok(Event, { ...fx.event(), endTime: undefined });
 });
 

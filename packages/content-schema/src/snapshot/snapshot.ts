@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { IsoDateTime, MediaId, OrgId } from "../common/primitives.ts";
-import { MIME_TYPES } from "../media/media.ts";
+import { FocalPoint, MIME_TYPES } from "../media/media.ts";
 import { SiteSettings } from "../settings/siteSettings.ts";
-import { Post, STORY_CATEGORY_IDS } from "../posts/post.ts";
+import { BLOG_CATEGORY_IDS, Post, STORY_CATEGORY_IDS } from "../posts/post.ts";
 import { Event } from "../events/event.ts";
 import { Appeal, GeneralDonationPage } from "../appeals/appeal.ts";
 import { Homepage, homepageMediaIds, homepageReferences } from "../homepage/homepage.ts";
@@ -143,6 +143,10 @@ export const PublishedMedia = z.strictObject({
   width: z.int().positive().optional(),
   height: z.int().positive().optional(),
   alt: z.string().max(300),
+  /* Milestone 2: where to keep the image in frame, and its caption — only
+     when the library record has them (media/media.ts FocalPoint). */
+  focal: FocalPoint.optional(),
+  caption: z.string().max(1000).optional(),
 });
 export type PublishedMedia = z.infer<typeof PublishedMedia>;
 
@@ -245,6 +249,12 @@ export const PublishedSnapshot = z
         slugs.add(record.slug);
         if (key !== "events")
           for (const related of (record as Post).relatedPostIds ?? []) if (!postIds.has(related)) issue([...at, "relatedPostIds"], "refers to a post that is not published");
+        /* Milestone 5: quotes and impact are a story's; news and blog posts carry neither. */
+        if (key !== "events") for (const field of ["quotes", "impact"] as const) if ((record as Post)[field] !== undefined) issue([...at, field], "only a story has it");
+        /* Milestone 4: a blog post's category, when it has one, is one of
+           the blog categories. */
+        const category = key === "blogs" ? (record as Post).category : undefined;
+        if (category !== undefined && !(BLOG_CATEGORY_IDS as readonly string[]).includes(category)) issue([...at, "category"], `must be one of ${BLOG_CATEGORY_IDS.join(", ")}`);
       });
     }
     /* Appeals: the same rules, in their own address space. */
@@ -255,6 +265,8 @@ export const PublishedSnapshot = z
       if (record.status !== "published") issue([...at, "status"], "a snapshot holds published records only");
       if (record.orgId !== snapshot.organization.id) issue([...at, "orgId"], "must be the snapshot's organization");
       if (record.releaseMarker !== undefined) issue([...at, "releaseMarker"], "is internal and never published");
+      /* Milestone 7: nor inside a section (a FAQ item may carry one in the contract). */
+      if (JSON.stringify(record.sections).includes('"releaseMarker"')) issue([...at, "sections"], "release markers are internal and never published");
       if (appealIds.has(record.id)) issue([...at, "id"], "appears twice");
       appealIds.add(record.id);
       if (appealSlugs.has(record.slug)) issue([...at, "slug"], "is already the address of another record in this collection");
@@ -265,6 +277,7 @@ export const PublishedSnapshot = z
       if (page.status !== "published") issue(["content", "generalDonation", "status"], "a snapshot holds published records only");
       if (page.orgId !== snapshot.organization.id) issue(["content", "generalDonation", "orgId"], "must be the snapshot's organization");
       if (page.releaseMarker !== undefined) issue(["content", "generalDonation", "releaseMarker"], "is internal and never published");
+      if (JSON.stringify(page.sections).includes('"releaseMarker"')) issue(["content", "generalDonation", "sections"], "release markers are internal and never published");
     }
     const home = snapshot.content.homepage;
     if (home) {
@@ -403,6 +416,12 @@ export const PublishedSnapshot = z
         (s.galleryIds ?? []).forEach((id, j) => described(id, [...at, "galleryIds", j], "gallery image"));
       });
       for (const id of (snapshot.content.impact && impactReferences(snapshot.content.impact.sections).stories) || []) if (!storyIds.has(id)) issue(["content", "impact", "sections"], `refers to story "${id}", which is not published`);
+      /* Milestone 6: a project's story, once the CMS's stories are the
+         site's, is one published here (without them it names the website's
+         own story, which the website build checks). */
+      (snapshot.content.projects ?? []).forEach((p, i) => {
+        if (p.storyId && !storyIds.has(p.storyId)) issue(["content", "projects", i, "storyId"], `refers to story "${p.storyId}", which is not published`);
+      });
     }
 
     const impact = snapshot.content.impact;

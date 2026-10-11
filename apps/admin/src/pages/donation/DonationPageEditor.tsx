@@ -13,6 +13,8 @@ import { MediaPicker } from "../../media/MediaPicker";
 import { publishApi, type PublishStatus } from "../../settings/client";
 import { PublishPanel } from "../settings/PublishPanel";
 import styles from "../../content/content.module.css";
+import { nextSeo } from "../../content/seo";
+import { NoIndexField } from "../../content/NoIndexField";
 
 /* The general donation page — "give to the organization generally", the
    website's /appeals page. One per organization: no list, no create, just
@@ -90,8 +92,8 @@ export default function DonationPageEditor() {
   };
   const seo = draft.seo ?? {};
   const setSeo = (changes: Partial<NonNullable<GeneralDonationPage["seo"]>>) => {
-    const next = Object.fromEntries(Object.entries({ ...seo, ...changes }).filter(([, v]) => v !== undefined && v !== ""));
-    setDraft((d) => ({ ...d, seo: Object.keys(next).length ? next : undefined }));
+    const next = nextSeo(seo, changes);
+    setDraft((d) => ({ ...d, seo: next }));
   };
   const donation = draft.donation ?? INITIAL.donation!;
   const setDonation = (changes: Partial<GeneralDonationPage["donation"]>) => {
@@ -258,6 +260,7 @@ export default function DonationPageEditor() {
               <Textarea rows={2} maxLength={200} value={seo.description ?? ""} onChange={(e) => setSeo({ description: e.target.value })} />
             </FormField>
             <MediaPicker label="Social image" helper="Shown when the page is shared." value={seo.ogImageId} onChange={(ogImageId) => setSeo({ ogImageId })} disabled={readOnly} error={err("seo.ogImageId")} />
+            <NoIndexField value={seo.noIndex} onChange={(noIndex) => setSeo({ noIndex })} disabled={readOnly} noun="page" />
           </div>
         </Panel>
         <Panel title="Publishing" as="h2">

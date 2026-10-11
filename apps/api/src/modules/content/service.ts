@@ -50,6 +50,9 @@ export interface CollectionConfig<R extends ContentRecordBase> {
   required: readonly string[];
   /* Required by the contract but not edited in the CMS yet. */
   defaults: () => Record<string, unknown>;
+  /* Editable fields the contract still requires: what clearing one (null)
+     sets instead of removing it (an event's program: null, open to all). */
+  cleared?: Record<string, unknown>;
   rules: (record: R) => ErrorDetail[];
   media: (record: R) => [string, string | undefined][];
   /* Rich-text fields: audited by name only. */
@@ -272,7 +275,11 @@ export class ContentService<R extends ContentRecordBase & { publishedAt?: string
     const now = this.#now().toISOString();
     const { status: requested, ...content } = changes;
     const merged: Record<string, unknown> = { ...before, ...content, updatedAt: now };
-    for (const [key, value] of Object.entries(content)) if (value === null) delete merged[key];
+    for (const [key, value] of Object.entries(content))
+      if (value === null) {
+        if (this.#config.cleared && key in this.#config.cleared) merged[key] = this.#config.cleared[key];
+        else delete merged[key];
+      }
     if (content.slug !== undefined) merged.slug = slugify(String(content.slug ?? ""));
     if (!merged.slug) throw errors.validation([{ path: "body.changes.slug", message: "must contain letters or digits" }]);
     const contentChanged = changedFields(before, merged, this.#config.opaque).some((f) => f !== "updatedAt");

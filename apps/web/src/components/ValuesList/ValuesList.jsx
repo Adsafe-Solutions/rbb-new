@@ -13,12 +13,12 @@ import SectionHeading from "../SectionHeading/SectionHeading.jsx";
    With no items it shows `fallback` on a pinned-up sheet: the section
    keeps its place and its heading, and says plainly that the values are
    still to come. It never fills the gap with generic ones. */
-export default function ValuesList({ id, index, kicker, heading, items, fallback, tone = "ink", highlight }) {
+export default function ValuesList({ id, index, kicker, heading, items, fallback, tone = "ink", highlight, intro }) {
   const headingId = useId();
 
   return (
     <Section id={id} tone={tone} pad="lg" watermark="right" aria-labelledby={headingId}>
-      <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} highlight={highlight} />
+      <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} highlight={highlight} intro={intro} />
 
       {items.length > 0 ? (
         <ol data-anim-stagger className="mt-14 grid gap-x-8 gap-y-10 md:mt-16 md:grid-cols-2 lg:grid-cols-3">

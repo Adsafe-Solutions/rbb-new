@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { MediaId } from "@rbb/content-schema";
+import { FocalPoint, MediaId } from "@rbb/content-schema";
 import { ApiError, errors, type ErrorDetail } from "../../errors.ts";
 import type { Logger } from "../../logging/logger.ts";
 import type { AuditService, RequestFacts } from "../audit/audit.ts";
@@ -50,6 +50,8 @@ const MetadataInput = z.strictObject({
   version: z.int().positive(),
   alt: Text(300).optional(),
   caption: Text(1000).optional(),
+  /* Milestone 2: "X% Y%", or null to go back to centred. */
+  focal: FocalPoint.nullable().optional(),
   credit: Text(200).optional(),
   license: Text(200).optional(),
   consent: z.enum(CONSENT_VALUES).optional(),
@@ -204,6 +206,7 @@ export class MediaService {
       height: height ?? null,
       alt: "",
       caption: "",
+      focal: null,
       credit: "",
       license: "",
       consent: "unknown",
@@ -337,7 +340,8 @@ export class MediaService {
     const record = await this.#find(id);
     if (record.status !== "ready") throw errors.conflict("Only a ready file's details can be edited.");
     const { version, ...fields } = parsed.data;
-    const changed = Object.fromEntries(Object.entries(fields).filter(([key, value]) => value !== undefined && record[key as keyof MediaRecord] !== value));
+    /* A field never saved (a focal point before Milestone 2) is null. */
+    const changed = Object.fromEntries(Object.entries(fields).filter(([key, value]) => value !== undefined && (record[key as keyof MediaRecord] ?? null) !== value));
     if (!Object.keys(changed).length) {
       if (version !== record.version) throw errors.conflict("This file was changed since it was opened. Reload it and try again.");
       return toMediaView(record);

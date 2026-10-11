@@ -36,7 +36,8 @@ test("stories: posts of type story, in their own module — typed, categorised, 
   await rejects(h.stories.create(editor, story({ title: "X", category: undefined }), FACTS), "VALIDATION_ERROR", "category");
   await rejects(h.stories.create(editor, story({ title: "X", category: "opinion" }), FACTS), "VALIDATION_ERROR", "category");
   await rejects(h.stories.create(editor, story({ title: "X", body: "<p>x</p>" }), FACTS), "VALIDATION_ERROR", "body");
-  await rejects(h.stories.create(editor, story({ title: "X", impact: ["100 people"] }), FACTS), "VALIDATION_ERROR", "impact");
+  // Milestone 5: impact is a story field now (test/story-quotes-impact.test.ts); an empty list is still refused.
+  await rejects(h.stories.create(editor, story({ title: "X", impact: [] }), FACTS), "VALIDATION_ERROR", "impact");
   await rejects(h.stories.update(editor, s.record.id, { revision: s.revision, changes: { relatedPostIds: [s.record.id] } }, FACTS), "VALIDATION_ERROR", "itself");
   // One posts collection, two modules: neither sees the other's records; an address is unique across both.
   const news = await h.posts.create(editor, { type: "news", title: "Test news", body }, FACTS);
@@ -119,7 +120,8 @@ test("projects: at the end, in a program, one reorder event, a stale order chang
   const b = await h.projects.create(editor, project({ title: "B" }), FACTS);
   assert.deepEqual([a.record.order, b.record.order, a.record.status], [0, 1, "draft"]);
   await rejects(h.projects.create(editor, project({ title: "C", programId: undefined }), FACTS), "VALIDATION_ERROR", "programId");
-  await rejects(h.projects.create(editor, project({ title: "D", impact: [{ value: "100", label: "People" }] }), FACTS), "VALIDATION_ERROR", "impact");
+  // Milestone 6: impact is a project field now (test/project-fields.test.ts); a figure without its label is still refused.
+  await rejects(h.projects.create(editor, project({ title: "D", impact: [{ value: "100" }] }), FACTS), "VALIDATION_ERROR", "impact");
   await rejects(h.projects.create(editor, project({ title: "E", order: 4 }), FACTS), "VALIDATION_ERROR", "order");
   await h.projects.reorder(editor, { items: [b, a].map((v) => ({ id: v.record.id, revision: v.revision })) }, FACTS);
   assert.deepEqual(h.audit.filter((e) => e.action === "project.reordered").map((e) => e.metadata), [{ moved: 2, total: 2 }]);

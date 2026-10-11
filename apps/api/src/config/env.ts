@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { OrgId } from "@rbb/content-schema";
 import { loadFormsConfig, type FormsConfig } from "../modules/forms/config.ts";
+import { targetOf, targetProblems, type Target } from "./target.ts";
 
 /* The API's configuration — read from the environment ONCE, validated, and
    the only place in the API that touches process.env (apart from PORT in
@@ -18,6 +19,7 @@ export const ENV_VARIABLES = {
   ORGANIZATION_ID: { secret: false, requiredIn: "production", purpose: "the organization this deployment serves (orgId of every record)" },
   MONGODB_URI: { secret: true, requiredIn: "production", purpose: "MongoDB connection string" },
   MONGODB_DB: { secret: false, requiredIn: "production", purpose: "MongoDB database name (required whenever MONGODB_URI is set)" },
+  RBB_TARGET: { secret: false, requiredIn: "never", purpose: "production | test | development — what this configuration deliberately points at; production is required with the production database (config/target.ts)" },
   WEB_ORIGIN: { secret: false, requiredIn: "never", purpose: "the public site's origin, allowed by CORS" },
   ADMIN_ORIGIN: { secret: false, requiredIn: "never", purpose: "the admin's origin, allowed by CORS" },
   LOG_LEVEL: { secret: false, requiredIn: "never", purpose: "debug | info | warn | error (default info)" },
@@ -64,6 +66,9 @@ export interface Config {
   orgId: string;
   /* null: no database configured (allowed outside production only). */
   mongo: { uri: string; dbName: string } | null;
+  /* Which real database and bucket this is (config/target.ts) — names
+     only. Production safety reads this, never NODE_ENV. */
+  target: Target;
   /* `web`: the public site's origin — the only origin its forms accept. */
   cors: { origins: string[]; web: string | null };
   logLevel: "debug" | "info" | "warn" | "error";
@@ -138,6 +143,7 @@ const EnvSchema = z
       .string()
       .regex(/^[A-Za-z0-9_-]{1,63}$/, "must be letters, digits, '-' or '_' (max 63)")
       .optional(),
+    RBB_TARGET: z.enum(["production", "test", "development"]).optional(),
     WEB_ORIGIN: Origin.optional(),
     ADMIN_ORIGIN: Origin.optional(),
     LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
@@ -196,6 +202,11 @@ const EnvSchema = z
     for (const name of ["WEB_ORIGIN", "ADMIN_ORIGIN"] as const)
       if (env[name] && !env[name].startsWith("https://")) need(name, "must be an https:// origin in production");
   })
+  /* Phase 0: the production database and bucket only ever on purpose, and
+     with the organization they serve (config/target.ts). */
+  .superRefine((env, ctx) => {
+    for (const { name, message } of targetProblems(env)) ctx.addIssue({ code: "custom", path: [name], message });
+  })
   /* SameSite=None cookies must be Secure, and cookies are Secure only in
      production (https). */
   .superRefine((env, ctx) => {
@@ -224,6 +235,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     env: env.NODE_ENV,
     orgId: env.ORGANIZATION_ID ?? DEVELOPMENT_ORG_ID,
     mongo: env.MONGODB_URI && env.MONGODB_DB ? { uri: env.MONGODB_URI, dbName: env.MONGODB_DB } : null,
+    target: targetOf({ database: env.MONGODB_DB, bucket: env.R2_BUCKET }),
     cors: { origins: [env.WEB_ORIGIN, env.ADMIN_ORIGIN].filter((o): o is string => Boolean(o)), web: env.WEB_ORIGIN ?? null },
     logLevel: env.LOG_LEVEL,
     auth: {

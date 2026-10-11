@@ -9,11 +9,17 @@ import { MediaPicker } from "../../media/MediaPicker";
 import type { PageProps } from "../../routes";
 import { slugify } from "./slug";
 import styles from "../../content/content.module.css";
+import { nextSeo } from "../../content/seo";
+import { NoIndexField } from "../../content/NoIndexField";
+import { ProgramSelect } from "../../content/pickers";
+import { BLOG_CATEGORIES, typeChange } from "../../content/postFields";
 
 /* One post. Sections: basic information, content, featured image, SEO,
-   publishing. The address follows the title until it is edited by hand. */
+   publishing. The address follows the title until it is edited by hand.
+   Milestone 4: a news item names its program area, a blog post its
+   category — each optional, each only on its own type (content/postFields). */
 
-const FIELDS = ["type", "title", "slug", "excerpt", "date", "author", "imageId", "body", "seo"] as const;
+const FIELDS = ["type", "title", "slug", "excerpt", "date", "author", "category", "programId", "imageId", "body", "seo"] as const;
 const PATHS = { news: "/media/news/", blog: "/media/blogs/", story: "/stories/" } as const;
 
 export default function PostEditorPage({ params }: PageProps) {
@@ -36,8 +42,8 @@ export default function PostEditorPage({ params }: PageProps) {
 
   const seo = d.seo ?? {};
   const setSeo = (changes: Partial<NonNullable<Post["seo"]>>) => {
-    const next = Object.fromEntries(Object.entries({ ...seo, ...changes }).filter(([, v]) => v !== undefined && v !== ""));
-    editor.set({ seo: Object.keys(next).length ? next : undefined });
+    const next = nextSeo(seo, changes);
+    editor.set({ seo: next });
   };
 
   return (
@@ -48,7 +54,7 @@ export default function PostEditorPage({ params }: PageProps) {
         <Panel title="Basic information" as="h2">
           <div className={styles.fields}>
             <FormField label="Type" disabled={readOnly} error={err("type")}>
-              <Select options={[{ value: "news", label: "News" }, { value: "blog", label: "Blog" }]} value={d.type ?? "news"} onChange={(e) => editor.set({ type: e.target.value as Post["type"] })} />
+              <Select options={[{ value: "news", label: "News" }, { value: "blog", label: "Blog" }]} value={d.type ?? "news"} onChange={(e) => editor.set(typeChange(e.target.value as "news" | "blog"))} />
             </FormField>
             <FormField label="Title" required disabled={readOnly} error={err("title")}>
               <Input maxLength={160} value={d.title ?? ""} onChange={(e) => editor.set({ title: e.target.value, ...(!slugTouched && { slug: slugify(e.target.value) }) })} />
@@ -79,6 +85,13 @@ export default function PostEditorPage({ params }: PageProps) {
                 <Input maxLength={120} value={d.author ?? ""} onChange={(e) => editor.set({ author: e.target.value })} />
               </FormField>
             </div>
+            {(d.type ?? "news") === "news" ? (
+              <ProgramSelect helper="Optional. Shown with the item in the news timeline." value={d.programId} onChange={(programId) => editor.set({ programId })} error={err("programId")} disabled={readOnly} />
+            ) : (
+              <FormField label="Category" helper="Optional. Readers can filter the blog by it; without one the post is listed under All only." disabled={readOnly} error={err("category")}>
+                <Select options={[{ value: "", label: "None" }, ...(d.category && !BLOG_CATEGORIES.some((c) => c.value === d.category) ? [{ value: d.category, label: `“${d.category}” — not a blog category` }] : []), ...BLOG_CATEGORIES]} value={d.category ?? ""} onChange={(e) => editor.set({ category: e.target.value || undefined })} />
+              </FormField>
+            )}
           </div>
         </Panel>
         <Panel title="Content" as="h2">
@@ -96,6 +109,7 @@ export default function PostEditorPage({ params }: PageProps) {
               <Textarea rows={2} maxLength={200} value={seo.description ?? ""} onChange={(e) => setSeo({ description: e.target.value })} />
             </FormField>
             <MediaPicker label="Social image" helper="Shown when the post is shared. Defaults to the featured image." value={seo.ogImageId} onChange={(ogImageId) => setSeo({ ogImageId })} disabled={readOnly} error={err("seo.ogImageId")} />
+            <NoIndexField value={seo.noIndex} onChange={(noIndex) => setSeo({ noIndex })} disabled={readOnly} noun="post" />
           </div>
         </Panel>
         <Panel title="Publishing" as="h2">

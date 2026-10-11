@@ -113,8 +113,8 @@ const RENDERERS = {
   imageText: ({ index, tone, data }) => (
     <EditorialSplit index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} body={data.body} cta={data.cta} secondary={data.secondary} image={data.image} reverse={data.imagePosition === "left"} />
   ),
-  programs: ({ index, tone, data }) => <ProgramAreas index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} items={HOMEPAGE.programs.items} />,
-  approach: ({ index, tone, data }) => <ApproachFlow index={index} tone={tone} kicker={data.kicker} heading={data.heading} intro={data.body} steps={HOMEPAGE.approach.steps} cta={data.cta} />,
+  programs: ({ index, tone, data }) => <ProgramAreas index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} intro={data.body} cta={data.cta} items={HOMEPAGE.programs.items} />,
+  approach: ({ index, tone, data }) => <ApproachFlow index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} intro={data.body} steps={HOMEPAGE.approach.steps} cta={data.cta} />,
   stats: ({ index, tone, data }) => (
     <ImpactStats index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} body={data.body} stats={statsFor(data.metricIds)} note={metricsNote()} source={data.source} cta={data.cta} />
   ),
@@ -122,17 +122,17 @@ const RENDERERS = {
     <ProgressTimeline index={index} tone={tone} highlight={data.highlight} programOf={programOf} timeline={{ ...data, playLabel: HOMEPAGE.timeline.playLabel, viewportLabel: HOMEPAGE.timeline.viewportLabel }} />
   ),
   stories: ({ index, tone, data }) => (
-    <StoriesOfChange index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} items={latestStories(data.count).map(storyCard)} fallback={HOMEPAGE.stories.fallback} readLabel={HOMEPAGE.stories.readLabel} cta={data.cta} />
+    <StoriesOfChange index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} intro={data.body} items={latestStories(data.count).map(storyCard)} fallback={HOMEPAGE.stories.fallback} readLabel={HOMEPAGE.stories.readLabel} cta={data.cta} />
   ),
   video: ({ index, tone, data }) => <VideoFeature index={index} tone={tone} highlight={data.highlight} video={{ ...data, playLabel: HOMEPAGE.video.playLabel }} />,
   trust: ({ index, tone, data }) => (
     <TrustPanel index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} body={data.body} links={transparencyLinks()} linkMeta={SITE.transparencyLinkMeta} cta={data.cta} />
   ),
-  getInvolved: ({ index, tone, data }) => <GetInvolved index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} items={pathCards()} />,
+  getInvolved: ({ index, tone, data }) => <GetInvolved index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} intro={data.body} cta={data.cta} items={pathCards()} />,
   faq: ({ id, index, tone, data }) => <Faq id={id} index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} items={data.items} />,
   cta: ({ tone, data }) => <CtaSection tone={tone} highlight={data.highlight} heading={data.heading} body={data.body} ctas={data.ctas} />,
   appealList: ({ index, tone, data }) => (
-    <AppealGrid index={index} tone={tone} kicker={data.kicker} heading={data.heading} cta={data.cta} appeals={data.appeals ? data.appeals.map((slug) => bySlug(APPEALS, slug, "appeal")) : data.kind ? appealsOf(data.kind === "campaign" ? "campaigns" : "emergency") : APPEALS} />
+    <AppealGrid index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} cta={data.cta} appeals={data.appeals ? data.appeals.map((slug) => bySlug(APPEALS, slug, "appeal")) : data.kind ? appealsOf(data.kind === "campaign" ? "campaigns" : "emergency") : APPEALS} />
   ),
   postList: ({ index, tone, data }) => (
     <FeaturedBand index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} cta={data.cta}>

@@ -44,7 +44,10 @@ const FORBIDDEN_FILES = [
   ["server code", /(^|\/)server\//],
 ];
 
-const TEXT = /\.(html|js|css|xml|txt|json|svg|webmanifest)$/;
+/* Files whose contents are scanned: text by extension, and the host's
+   extension-less rule files the prerender writes (Cloudflare Pages'
+   _headers and _redirects, scripts/cloudflare-pages.mjs). */
+const TEXT = /(\.(html|js|css|xml|txt|json|svg|webmanifest)|(^|\/)_(headers|redirects))$/;
 
 async function walk(dir) {
   const out = [];

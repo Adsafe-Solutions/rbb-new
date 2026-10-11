@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useCan } from "../../auth";
-import { Alert, Checkbox, EmptyState, FormField, Input, PageContainer, PageHeader, Panel, Select, Spinner, Textarea } from "../../design-system";
+import { Alert, Button, Checkbox, EmptyState, FormField, Input, PageContainer, PageHeader, Panel, Select, Spinner, Textarea } from "../../design-system";
 import { storiesApi, type Post } from "../../content/client";
 import { EditorNotices, EditorSaveBar, statusBadge, useContentEditor } from "../../content/editor";
+import { referenceErrors } from "../../content/fieldErrors";
 import { ProgramSelect, ProjectSelect, StoriesField } from "../../content/pickers";
 import { WorkflowControls, isLocked } from "../../content/workflow";
 import { RichTextEditor } from "../../content/RichTextEditor";
@@ -12,6 +13,9 @@ import type { PageProps } from "../../routes";
 import { STORY_CATEGORIES } from "../../stories/categories";
 import { slugify } from "../posts/slug";
 import styles from "../../content/content.module.css";
+import { nextSeo } from "../../content/seo";
+import { NoIndexField } from "../../content/NoIndexField";
+import { ATTRIBUTION_MAX, IMPACT_LINE_MAX, IMPACT_MAX, QUOTES_MAX, QUOTE_TEXT_MAX, impactProblems, listOrNone, quoteProblems, type StoryQuote } from "../../content/storyFields";
 
 /* One story — a post of type "story" (M12). Sections: basic information,
    the story (rich text — never HTML), images, related work, SEO,
@@ -19,11 +23,21 @@ import styles from "../../content/content.module.css";
    /impact draw. The program, project and related stories are chosen from
    this organization's records; the address follows the title until it is
    edited by hand. Real stories only, approved by the organization and with
-   the consent of anyone they describe: nothing here is sample content. */
+   the consent of anyone they describe: nothing here is sample content.
+   Milestone 5: quotes (pull-quotes after the story) and impact (its
+   "Impact" row) — public as written; an emptied list is cleared
+   (content/storyFields). */
 
-const FIELDS = ["title", "slug", "category", "excerpt", "date", "author", "location", "imageId", "body", "programId", "projectId", "featured", "galleryIds", "relatedPostIds", "seo"] as const;
+const FIELDS = ["title", "slug", "category", "excerpt", "date", "author", "location", "imageId", "body", "programId", "projectId", "featured", "galleryIds", "relatedPostIds", "quotes", "impact", "seo"] as const;
 
-export default function StoryEditorPage({ params }: PageProps) {
+/* M48: one editor per record. Creating one moves to its own address, and
+   a fresh editor loads it there — so its address no longer follows the
+   title, and nothing from the "new" form carries over. */
+export default function StoryEditorPage(props: PageProps) {
+  return <StoryEditor key={props.params.id} {...props} />;
+}
+
+function StoryEditor({ params }: PageProps) {
   const canEdit = useCan(params.id === "new" ? "content:create" : "content:update");
   const canArchive = useCan("content:delete");
   const canApprove = useCan("content:approve");
@@ -37,16 +51,25 @@ export default function StoryEditorPage({ params }: PageProps) {
   if (editor.status === "missing" || editor.status === "error")
     return (
       <PageContainer width="narrow">
-        <EmptyState title={editor.status === "missing" ? "This story doesn't exist" : "The story could not be loaded"} description="It may have been removed, or the link is wrong." />
+        {editor.status === "missing" ? (
+          <EmptyState title="This story doesn't exist" description="It may have been removed, or the link is wrong." />
+        ) : (
+          <EmptyState title="The story could not be loaded" description="Check the connection and try again." actions={<Button onClick={editor.retry}>Try again</Button>} />
+        )}
       </PageContainer>
     );
 
   const seo = d.seo ?? {};
   const setSeo = (changes: Partial<NonNullable<Post["seo"]>>) => {
-    const next = Object.fromEntries(Object.entries({ ...seo, ...changes }).filter(([, v]) => v !== undefined && v !== ""));
-    editor.set({ seo: Object.keys(next).length ? next : undefined });
+    const next = nextSeo(seo, changes);
+    editor.set({ seo: next });
   };
   const gallery = d.galleryIds ?? [];
+  const quotes: StoryQuote[] = d.quotes ?? [];
+  const impact: string[] = d.impact ?? [];
+  const quoteIssues = quoteProblems(quotes);
+  const impactIssues = impactProblems(impact);
+  const related = referenceErrors(editor.errors, "relatedPostIds", d.relatedPostIds ?? []);
 
   return (
     <PageContainer width="narrow">
@@ -95,6 +118,47 @@ export default function StoryEditorPage({ params }: PageProps) {
         <Panel title="The story" as="h2">
           <RichTextEditor label="Story" required value={d.body} onChange={(body) => editor.set({ body })} disabled={readOnly} error={err("body") ?? [...editor.errors.keys()].filter((k) => k.startsWith("body.")).map((k) => editor.errors.get(k)).join(" ")} helper="In paragraphs, headings and lists. The first paragraph opens with a drop cap." />
         </Panel>
+        <Panel title="Quotes" as="h2" description="Shown after the story, each as a pull-quote. Only words a real person said, with RBB's approval and that person's permission.">
+          <ItemList<StoryQuote>
+            label="Quotes"
+            items={quotes}
+            max={QUOTES_MAX}
+            disabled={readOnly}
+            error={err("quotes")}
+            itemLabel={(i) => `Quote ${i + 1}`}
+            addLabel="Add a quote"
+            onChange={(next) => editor.set({ quotes: listOrNone(next) })}
+            make={() => ({ text: "", attribution: "" })}
+            render={(quote, set, i) => (
+              <div className={styles.fields}>
+                <FormField label="Words" required disabled={readOnly} error={err(`quotes.${i}.text`) ?? err(`quotes.${i}`) ?? quoteIssues.get(i)?.text}>
+                  <Textarea rows={3} maxLength={QUOTE_TEXT_MAX} value={quote.text} onChange={(e) => set({ ...quote, text: e.target.value })} />
+                </FormField>
+                <FormField label="Who said it" required helper="As it should appear on the page." disabled={readOnly} error={err(`quotes.${i}.attribution`) ?? quoteIssues.get(i)?.attribution}>
+                  <Input maxLength={ATTRIBUTION_MAX} value={quote.attribution ?? ""} onChange={(e) => set({ ...quote, attribution: e.target.value })} />
+                </FormField>
+              </div>
+            )}
+          />
+        </Panel>
+        <Panel title="Impact" as="h2" description="The change this story documents, one line each, shown as written in the story's Impact section. Only what the organization has confirmed.">
+          <ItemList<string>
+            label="Impact lines"
+            items={impact}
+            max={IMPACT_MAX}
+            disabled={readOnly}
+            error={err("impact")}
+            itemLabel={(i) => `Line ${i + 1}`}
+            addLabel="Add a line"
+            onChange={(next) => editor.set({ impact: listOrNone(next) })}
+            make={() => ""}
+            render={(line, set, i) => (
+              <FormField label={`Line ${i + 1}`} disabled={readOnly} error={err(`impact.${i}`) ?? impactIssues.get(i)}>
+                <Input maxLength={IMPACT_LINE_MAX} value={line} onChange={(e) => set(e.target.value)} />
+              </FormField>
+            )}
+          />
+        </Panel>
         <Panel title="Images" as="h2" description="From the media library, each described (alt text) before the story is published.">
           <div className={styles.fields}>
             <MediaPicker label="Image" helper="At the top of the story and on its card." value={d.imageId} onChange={(imageId) => editor.set({ imageId })} disabled={readOnly} error={err("imageId")} />
@@ -116,7 +180,7 @@ export default function StoryEditorPage({ params }: PageProps) {
           <div className={styles.fields}>
             <ProgramSelect value={d.programId} onChange={(programId) => editor.set({ programId })} error={err("programId")} disabled={readOnly} />
             <ProjectSelect value={d.projectId} onChange={(projectId) => editor.set({ projectId })} error={err("projectId")} disabled={readOnly} />
-            <StoriesField label="Related stories" value={d.relatedPostIds ?? []} onChange={(ids) => editor.set({ relatedPostIds: ids.length ? ids : undefined })} max={6} except={editor.view?.record.id} error={err("relatedPostIds")} disabled={readOnly} />
+            <StoriesField label="Related stories" value={d.relatedPostIds ?? []} onChange={(ids) => editor.set({ relatedPostIds: ids.length ? ids : undefined })} max={6} except={editor.view?.record.id} error={related.field} itemError={(id) => related.byId.get(id)} disabled={readOnly} />
           </div>
         </Panel>
         <Panel title="SEO" as="h2" description="Leave empty to use the title, the excerpt and the site's defaults.">
@@ -128,6 +192,7 @@ export default function StoryEditorPage({ params }: PageProps) {
               <Textarea rows={2} maxLength={200} value={seo.description ?? ""} onChange={(e) => setSeo({ description: e.target.value })} />
             </FormField>
             <MediaPicker label="Social image" helper="Shown when the story is shared. Defaults to its image." value={seo.ogImageId} onChange={(ogImageId) => setSeo({ ogImageId })} disabled={readOnly} error={err("seo.ogImageId")} />
+            <NoIndexField value={seo.noIndex} onChange={(noIndex) => setSeo({ noIndex })} disabled={readOnly} noun="story" />
           </div>
         </Panel>
         <Panel title="Publishing" as="h2">

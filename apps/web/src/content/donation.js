@@ -397,9 +397,18 @@ const TRUST = {
    organization PUBLISHES its page in the CMS, `page` holds it:
      { eyebrow?, title, description, image, context?, why?, impact?,
        designation, checkout?, seo? }
-   The trust panel, FAQ and closing band stay this file's: they are
-   site-wide, not part of the page's own content. */
+   The closing band stays this file's. Milestone 7: the trust panel, the
+   FAQ and the appeal bands are the site's unless the published page has
+   its own (scripts/snapshot-adapter.mjs: absent = the site's; null or []
+   = none on this page; otherwise the page's own — see `ownTrust`). */
 export const PUBLISHED_GENERAL_DONATION = {};
+
+/* Milestone 7: a CMS donation page's own trust panel, FAQ and appeal
+   lists, in the three states the adapter gives them (absent → the site's
+   `fallback`; null → none; else the page's own). The trust panel's
+   document rows are always the transparency records'. */
+const ownTrust = (trust, fallback) => (trust === undefined ? fallback : trust && { id: TRUST.id, ...trust, links: TRUST.links, linkMeta: TRUST.linkMeta });
+const ownFaq = (faq, fallback) => (faq === undefined ? { faq: fallback } : { faq: faq?.items ?? [], ...(faq && { faqHeading: { kicker: faq.kicker, heading: faq.heading, highlight: faq.highlight } }) });
 
 export const generalDonation = () => {
   const cms = PUBLISHED_GENERAL_DONATION.page;
@@ -417,8 +426,9 @@ export const generalDonation = () => {
       donation: { type: "general", designation: cms.designation },
       why: cms.why ?? null,
       impact: cms.impact ?? null,
-      trust: TRUST,
-      faq: approvedDonationFaqs(),
+      trust: ownTrust(cms.trust, TRUST),
+      ...ownFaq(cms.faq, approvedDonationFaqs()),
+      lists: cms.lists,
       closing: DONATION.closing,
       checkout: cms.checkout ?? null,
     };
@@ -453,6 +463,12 @@ export const appealDonation = (appeal) => {
   const response = appeal.sections.find((s) => s.type === "numberedCards");
   const body = situation?.type === "statement" ? [].concat(situation.body ?? []) : [];
   const content = situation?.type === "richText" ? situation.content : null;
+  /* Milestone 7: an appeal published from the CMS uses its own statement
+     heading, kicker, highlight and link, and its cards' kicker and
+     highlight; the wording below is the fallback. The website's own
+     appeals keep the page's wording, as before (their statement headings
+     were written for the record, never shown). */
+  const cms = appeal.source === "cms";
   return {
     type: emergency ? "appeal" : "campaign",
     id: DONATION.donationAction.id,
@@ -468,9 +484,11 @@ export const appealDonation = (appeal) => {
     why: body.length
       ? {
           id: "why",
-          kicker: kind.kicker,
-          heading: emergency ? "Why this response matters" : "Why this campaign matters",
+          kicker: (cms && situation.kicker) || kind.kicker,
+          heading: cms ? situation.heading : emergency ? "Why this response matters" : "Why this campaign matters",
           body,
+          ...(cms && situation.highlight && { highlight: situation.highlight }),
+          ...(cms && situation.cta && { cta: situation.cta }),
         }
       : content?.length
         ? { id: "why", kicker: kind.kicker, heading: situation.heading, content }
@@ -478,14 +496,16 @@ export const appealDonation = (appeal) => {
     impact: response?.items?.length
       ? {
           id: "how-support-helps",
-          kicker: "How support helps",
+          kicker: (cms && response.kicker) || "How support helps",
           heading: response.heading,
+          ...(cms && response.highlight && { highlight: response.highlight }),
           intro: response.intro ?? "Your support can help with:",
           items: response.cards ?? response.items.map((title) => ({ title })),
         }
       : null,
-    trust: TRUST,
-    faq: [],
+    trust: cms ? ownTrust(appeal.trust, TRUST) : TRUST,
+    ...(cms ? ownFaq(appeal.faq, []) : { faq: [] }),
+    lists: cms ? appeal.lists : undefined,
     closing: DONATION.closing,
     releaseMarker: appeal.releaseMarker,
     /* The appeal's Givebutter checkout, when the CMS configured one. */

@@ -7,6 +7,8 @@ import { MEDIA_POLICY } from "../modules/media/policy.ts";
 import { R2Storage } from "../modules/media/r2.ts";
 import { MongoMediaStore } from "../modules/media/repository.ts";
 import { MediaService } from "../modules/media/service.ts";
+import { guardTarget } from "./target-guard.ts";
+import { mediaKeyEnv } from "../config/target.ts";
 
 /* Media housekeeping, on demand (there is no scheduler yet):
 
@@ -14,18 +16,17 @@ import { MediaService } from "../modules/media/service.ts";
        they left is removed
      · storage deletions that failed earlier are retried
 
-   By default it only REPORTS what it would do. --apply does it; against
-   production --apply also needs --confirm. It never deletes a database
-   record, and it touches only objects that belong to records already
-   failed or deleted. Output is counts only. */
+   By default it only REPORTS what it would do. --apply does it. Against
+   the production database (config/target.ts — whatever NODE_ENV says)
+   it does not even report without the database's name, typed:
+   --production=<database>; a generic --confirm is not enough. It never
+   deletes a database record, and it touches only objects that belong to
+   records already failed or deleted. Output is counts only. */
 const apply = process.argv.includes("--apply");
 try {
   const config = loadConfig();
   if (!config.mongo) throw new ConfigError(["MONGODB_URI and MONGODB_DB are required"]);
-  if (apply && config.env === "production" && !process.argv.includes("--confirm")) {
-    console.error("Refusing to change production media without --confirm.");
-    process.exit(1);
-  }
+  guardTarget(config, "maintenance");
   const mongo = createMongoProvider(config.mongo);
   try {
     const db = await mongo.db();
@@ -40,7 +41,7 @@ try {
       const log = createLogger({ level: config.logLevel, base: { service: "rbb-media-cleanup", env: config.env } });
       const audit = new AuditService(mongoAuditStore(db, config.orgId), { orgId: config.orgId, secret: config.auth.secret, log });
       const storage = new R2Storage({ endpoint: s.endpoint, bucket: s.bucket, credentials: { accessKeyId: s.accessKeyId, secretAccessKey: s.secretAccessKey }, publicBaseUrl: s.publicBaseUrl });
-      const service = new MediaService(store, storage, audit, mongoAuthStores(db, config.orgId).throttle, { orgId: config.orgId, env: config.env, log });
+      const service = new MediaService(store, storage, audit, mongoAuthStores(db, config.orgId).throttle, { orgId: config.orgId, env: mediaKeyEnv(config.env, config.target), log });
       const result = await service.cleanup();
       console.log(`Abandoned uploads marked failed: ${result.abandoned}; objects removed: ${result.objectsRemoved}; still to retry: ${result.objectsStillPending}.`);
     }

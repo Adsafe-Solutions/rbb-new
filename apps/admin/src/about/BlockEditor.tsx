@@ -6,8 +6,9 @@ import styles from "../blocks/blocks.module.css";
 
 /* The About page's block forms: typed fields for exactly what each
    chapter's component draws. EDITORS is explicit — type → form — like the
-   website's renderers (pages/About/CmsAbout). Contract fields the page
-   does not draw (a statement's link, the cards' intro) are not offered. */
+   website's renderers (pages/About/CmsAbout). Milestone 8: a statement's
+   link, mission and vision's highlight and the values' intro are drawn
+   now, so they are offered. */
 
 export const ABOUT_BLOCK_INFO = ABOUT_BLOCKS;
 
@@ -69,12 +70,14 @@ const EDITORS: { [T in AboutBlockType]: (p: EditorProps<T>) => ReactNode } = {
     <>
       <HeadingFields data={data} set={set} err={err} disabled={disabled} />
       <ParagraphsField label="Paragraphs" helper="Separate paragraphs with a blank line. The first is set as a statement." value={data.body} onChange={(body) => set({ ...data, body: body as typeof data.body })} error={err("body") ?? err("body.0")} disabled={disabled} />
+      <Cta data={data} set={set} err={err} disabled={disabled} />
     </>
   ),
   missionVision: ({ data, set, err, disabled }) => (
     <>
       <TextField label="Kicker" helper="Optional. A short label above the heading." max={60} value={data.kicker} onChange={(kicker) => set(clean({ ...data, kicker }))} error={err("kicker")} disabled={disabled} />
       <TextField label="Heading" required max={160} value={data.heading} onChange={(heading) => set({ ...data, heading: heading ?? "" })} error={err("heading")} disabled={disabled} />
+      <TextField label="Highlight" helper="Optional. A word or phrase from the heading to set on a highlight block." max={60} value={data.highlight} onChange={(highlight) => set(clean({ ...data, highlight }))} error={err("highlight")} disabled={disabled} />
       <Statement label="Mission" value={data.mission} onChange={(mission) => set({ ...data, mission })} err={sub(err, "mission")} disabled={disabled} />
       <Statement label="Vision" value={data.vision} onChange={(vision) => set({ ...data, vision })} err={sub(err, "vision")} disabled={disabled} />
       <TextField label="Source line" helper="Optional. Where the statements come from." max={300} value={data.source} onChange={(source) => set(clean({ ...data, source }))} error={err("source")} disabled={disabled} />
@@ -83,6 +86,7 @@ const EDITORS: { [T in AboutBlockType]: (p: EditorProps<T>) => ReactNode } = {
   numberedCards: ({ data, set, err, disabled }) => (
     <>
       <HeadingFields data={data} set={set} err={err} disabled={disabled} />
+      <TextField label="Introduction" helper="Optional. One line under the heading." max={400} value={data.intro} onChange={(intro) => set(clean({ ...data, intro }))} error={err("intro")} disabled={disabled} />
       <ItemList
         label="Values"
         items={data.items}

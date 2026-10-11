@@ -35,6 +35,7 @@
 
 import { ABOUT } from "./about.js";
 import { ORG_CONTACT } from "./contact.js";
+import { withoutTrailingSlash } from "../lib/paths.js";
 
 /* A page section: { id, heading, body?, items?, empty, hideWhenEmpty? }.
    `body` is approved text; `items` approved list entries; `faqs` (FAQ
@@ -210,7 +211,7 @@ export const pathCards = () =>
     featured: path.featured,
   }));
 
-export const pathByPath = (to) => GET_INVOLVED.paths.find((p) => p.to === to);
+export const pathByPath = (to) => GET_INVOLVED.paths.find((p) => p.to === withoutTrailingSlash(to));
 
 /* ---------------- Page copy ----------------
    Headings and labels are PROPOSED interface copy. */

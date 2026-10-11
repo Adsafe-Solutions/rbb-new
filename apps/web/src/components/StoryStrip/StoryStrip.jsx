@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { cx } from "../../lib/cx.js";
 import Picture from "../Picture/Picture.jsx";
+import { cardFocal } from "../../lib/focal.js";
 
 /* The story circles over the navbar — up to four appeals, each a round
    photograph in a ring with its short name under it, linking to its
@@ -47,6 +48,7 @@ export default function StoryStrip({ items, label }) {
                         <Picture
                           src={item.image.src}
                           alt=""
+                          focal={cardFocal(item.image)}
                           sizes="80px"
                           className="absolute inset-0 h-full w-full object-cover"
                         />

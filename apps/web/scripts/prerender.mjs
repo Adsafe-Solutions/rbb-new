@@ -14,6 +14,8 @@
                           refresh, no JavaScript) — a fallback until the
                           host serves real 301s from build-meta/
      robots.txt, sitemap.xml (the latter only with a verified origin)
+     _redirects, _headers  the redirects and security headers below, in
+                          Cloudflare Pages' format (scripts/cloudflare-pages.mjs)
    And, OUTSIDE the published folder, for whoever configures the host:
      build-meta/redirects.json   every permanent redirect, final targets
      build-meta/routes.json      every pre-rendered route
@@ -46,6 +48,7 @@ import {
   hasDonationWidget,
 } from "./security-policy.mjs";
 import { productionGate, contentReadiness, indexingProblems } from "./production-gate.mjs";
+import { cloudflareHeaders, cloudflareRedirects } from "./cloudflare-pages.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = join(root, "dist");
@@ -384,6 +387,7 @@ try {
   );
   if (unapproved.length)
     fail(`unapproved third-party origin(s) in published pages: ${unapproved.join(", ")}`);
+  const hostHeaders = securityHeaders(inline, { reportOnly, video, donation, images: published.imageOrigins });
   await writeFile(
     join(metaDir, "security-headers.json"),
     JSON.stringify(
@@ -395,12 +399,21 @@ try {
         },
         video: video ? { page: VIDEO_ROUTE, frame: VIDEO.frame, features: VIDEO.features } : false,
         donationWidget: donation ? { pages: donationRoutes, provider: DONATION_WIDGET.provider } : false,
-        headers: securityHeaders(inline, { reportOnly, video, donation, images: published.imageOrigins }),
+        headers: hostHeaders,
       },
       null,
       2
     ) + "\n"
   );
+  /* The same redirects and headers in Cloudflare Pages' own files, beside
+     the pages (scripts/cloudflare-pages.mjs). Written before the safety
+     gate below, which checks every file in dist/. */
+  try {
+    await writeFile(join(dist, "_redirects"), cloudflareRedirects(redirects.map((r) => ({ ...r, status: 301 }))));
+    await writeFile(join(dist, "_headers"), cloudflareHeaders(hostHeaders, { productionOrigin: ssr.siteOrigin() }));
+  } catch (error) {
+    fail(error.message);
+  }
   await writeFile(
     join(metaDir, "observability.json"),
     JSON.stringify(obs, null, 2) + "\n"

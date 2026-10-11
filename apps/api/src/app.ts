@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { ConfigError, describeEnvironment, loadConfig, type Config } from "./config/env.ts";
+import { mediaKeyEnv } from "./config/target.ts";
 import { COLLECTIONS } from "./db/collections.ts";
 import { createMongoProvider, isDatabaseUnavailable, type MongoProvider } from "./db/mongo.ts";
 import { ApiError, errors } from "./errors.ts";
@@ -78,8 +79,8 @@ import type { AnnouncementBar, Popup, StoryStrip, About, Appeal, Careers, Event,
 import { MongoContentStore } from "./modules/content/repository.ts";
 import { contentRoutes } from "./modules/content/routes.ts";
 import { ContentService } from "./modules/content/service.ts";
-import { EVENT_COLLECTION } from "./modules/events/service.ts";
-import { POST_COLLECTION, POST_TYPES } from "./modules/posts/service.ts";
+import { eventCollection } from "./modules/events/service.ts";
+import { POST_TYPES, postCollection } from "./modules/posts/service.ts";
 
 /* The API: one Fetch-standard function, `handle(Request) → Response`.
    Built ONCE per runtime instance (src/vercel.ts, src/server.ts) and
@@ -172,7 +173,7 @@ export function createApp(options: AppOptions = {}): App {
     ...(options.write && { write: options.write }),
   });
   if (configProblems.length) log.error("configuration invalid — only liveness will answer", { problems: configProblems });
-  else log.info("configuration loaded", { environment: describeEnvironment(env) });
+  else log.info("configuration loaded", { environment: describeEnvironment(env), target: config!.target.kind });
   if (config?.forms.problems.length) log.warn("form configuration problems — the affected forms are off", { problems: config.forms.problems });
   if (config?.auth.secretIsEphemeral && config.env === "development")
     log.warn("AUTH_SECRET is not set — using a per-process secret (development only)");
@@ -235,7 +236,8 @@ export function createApp(options: AppOptions = {}): App {
     const audit = new AuditService(mongoAuditStore(db, config.orgId), { orgId: config.orgId, secret: config.auth.secret, log, ...(options.now && { now: options.now }) });
     return new MediaService(new MongoMediaStore(db, config.orgId), storage, audit, mongoAuthStores(db, config.orgId).throttle, {
       orgId: config.orgId,
-      env: config.env,
+      /* Phase 0: object keys follow the TARGET, not NODE_ENV. */
+      env: mediaKeyEnv(config.env, config.target),
       log,
       ...(options.now && { now: options.now }),
       // M16: a media item the website or approved content still needs is not deleted.
@@ -323,7 +325,7 @@ export function createApp(options: AppOptions = {}): App {
   const posts = async () => {
     if (!config || !mongo) throw errors.unavailable("The database is not configured.");
     const db = await mongo.db();
-    return new ContentService(POST_COLLECTION, new MongoContentStore<Post & { title: string }>(db, COLLECTIONS.posts, config.orgId, { types: POST_TYPES }), new MongoMediaStore(db, config.orgId), auditFor(db, config), {
+    return new ContentService(postCollection({ programs: programStore(db) }), new MongoContentStore<Post & { title: string }>(db, COLLECTIONS.posts, config.orgId, { types: POST_TYPES }), new MongoMediaStore(db, config.orgId), auditFor(db, config), {
       orgId: config.orgId,
       ...(options.now && { now: options.now }),
       lock: lockFor(db),
@@ -332,7 +334,7 @@ export function createApp(options: AppOptions = {}): App {
   const events = async () => {
     if (!config || !mongo) throw errors.unavailable("The database is not configured.");
     const db = await mongo.db();
-    return new ContentService(EVENT_COLLECTION, new MongoContentStore<Event>(db, COLLECTIONS.events, config.orgId), new MongoMediaStore(db, config.orgId), auditFor(db, config), {
+    return new ContentService(eventCollection({ programs: programStore(db) }), new MongoContentStore<Event>(db, COLLECTIONS.events, config.orgId), new MongoMediaStore(db, config.orgId), auditFor(db, config), {
       orgId: config.orgId,
       ...(options.now && { now: options.now }),
       lock: lockFor(db),
@@ -393,7 +395,7 @@ export function createApp(options: AppOptions = {}): App {
   const projects = async () => {
     if (!config || !mongo) throw errors.unavailable("The database is not configured.");
     const db = await mongo.db();
-    return new ProjectService(projectStore(db), new MongoMediaStore(db, config.orgId), programStore(db), auditFor(db, config), { orgId: config.orgId, ...(options.now && { now: options.now }), lock: lockFor(db) });
+    return new ProjectService(projectStore(db), new MongoMediaStore(db, config.orgId), { programs: programStore(db), stories: storyStore(db) }, auditFor(db, config), { orgId: config.orgId, ...(options.now && { now: options.now }), lock: lockFor(db) });
   };
   const careers = async () => {
     if (!config || !mongo) throw errors.unavailable("The database is not configured.");
@@ -469,7 +471,7 @@ export function createApp(options: AppOptions = {}): App {
   };
 
   const routes: Route[] = [
-    ...healthRoutes({ configured: config !== null, mongo }),
+    ...healthRoutes({ configured: config !== null, mongo, target: config?.target.kind ?? null }),
     ...appealRoutes(appealStore),
     ...(config ? authRoutes(auth, config.auth.cookie) : []),
     ...(config ? memberRoutes(members) : []),

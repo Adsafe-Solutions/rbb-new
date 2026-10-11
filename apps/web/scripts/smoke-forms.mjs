@@ -21,6 +21,7 @@ import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
 import { delimiter, join } from "node:path";
 import { pathToFileURL } from "node:url";
+import { requireTestTarget } from "../../api/test/support/smoke-target.mjs";
 
 function resolveFromPath(name) {
   try {
@@ -44,6 +45,10 @@ const axePath = resolveFromPath("axe-core/axe.min.js");
 const axeSource = axePath ? readFileSync(axePath, "utf8") : null;
 
 const base = process.env.WEB_URL ?? "http://localhost:5173";
+/* Phase 0: the forms post through this site to an API, which must be on a
+   test database — asked before anything is sent (SMOKE_API_URL when the
+   site has no /api/v1 proxy). */
+await requireTestTarget(base);
 const uri = process.env.MONGODB_TEST_URI;
 const dbName = process.env.MONGODB_TEST_DB;
 const org = process.env.SMOKE_ORG ?? "test-org";

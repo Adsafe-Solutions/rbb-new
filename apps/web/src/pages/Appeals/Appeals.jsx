@@ -1,5 +1,6 @@
 import DonationExperience from "../../components/DonationExperience/DonationExperience.jsx";
 import AppealGrid from "../../components/AppealGrid/AppealGrid.jsx";
+import AppealLists from "../../components/AppealLists/AppealLists.jsx";
 import GivingMethods from "../../components/GivingMethods/GivingMethods.jsx";
 import {
   APPEAL_KINDS,
@@ -35,7 +36,8 @@ export default function Appeals() {
 
   return (
     <DonationExperience experience={experience}>
-      {APPEAL_KINDS.map((kind, i) => (
+      {/* A CMS page's own appeal lists (Milestone 7), else the page's own bands. */}
+      {experience.lists ? <AppealLists lists={experience.lists} /> : APPEAL_KINDS.map((kind, i) => (
         <AppealGrid
           key={kind.id}
           id={kind.id}

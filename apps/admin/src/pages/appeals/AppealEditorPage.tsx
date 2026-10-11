@@ -11,6 +11,8 @@ import { MediaPicker } from "../../media/MediaPicker";
 import type { PageProps } from "../../routes";
 import { slugify } from "../posts/slug";
 import styles from "../../content/content.module.css";
+import { nextSeo } from "../../content/seo";
+import { NoIndexField } from "../../content/NoIndexField";
 
 /* One appeal. Sections: basic information, content, featured media,
    donation configuration, SEO, publishing. The address follows the title
@@ -40,8 +42,8 @@ export default function AppealEditorPage({ params }: PageProps) {
 
   const seo = d.seo ?? {};
   const setSeo = (changes: Partial<NonNullable<Appeal["seo"]>>) => {
-    const next = Object.fromEntries(Object.entries({ ...seo, ...changes }).filter(([, v]) => v !== undefined && v !== ""));
-    editor.set({ seo: Object.keys(next).length ? next : undefined });
+    const next = nextSeo(seo, changes);
+    editor.set({ seo: next });
   };
   const donation = d.donation ?? {};
   const setDonation = (changes: Partial<NonNullable<Appeal["donation"]>>) => {
@@ -111,7 +113,7 @@ export default function AppealEditorPage({ params }: PageProps) {
           </div>
         </Panel>
         <Panel title="Content" as="h2" description="What the appeal's page says below its donation form.">
-          <DonationSections value={d.sections ?? []} onChange={(sections) => editor.set({ sections })} disabled={readOnly} error={err} path="sections" />
+          <DonationSections value={d.sections ?? []} onChange={(sections) => editor.set({ sections })} disabled={readOnly} error={err} path="sections" noun="appeal" />
           {err("sections") && <Alert tone="danger">{err("sections")}</Alert>}
         </Panel>
         <Panel title="Featured media" as="h2">
@@ -137,6 +139,7 @@ export default function AppealEditorPage({ params }: PageProps) {
               <Textarea rows={2} maxLength={200} value={seo.description ?? ""} onChange={(e) => setSeo({ description: e.target.value })} />
             </FormField>
             <MediaPicker label="Social image" helper="Shown when the appeal is shared." value={seo.ogImageId} onChange={(ogImageId) => setSeo({ ogImageId })} disabled={readOnly} error={err("seo.ogImageId")} />
+            <NoIndexField value={seo.noIndex} onChange={(noIndex) => setSeo({ noIndex })} disabled={readOnly} noun="appeal" />
           </div>
         </Panel>
         <Panel title="Publishing" as="h2">

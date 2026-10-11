@@ -21,7 +21,7 @@ export { Href, HttpsUrl, InternalPath, Link, isSafeHref } from "./common/link.ts
 export { PublicationStatus, recordFields } from "./common/record.ts";
 export { IANA_ZONE_NAME, IanaTimeZone, LocalDateTime, PublicationSchedule, ScheduleRequest, UtcInstant, instantToZonedTime, isIanaTimeZone, zonedTimeToInstant, type ZonedConversion } from "./common/schedule.ts";
 export { HeadingNode, Inline, LinkNode, ListNode, Mark, ParagraphNode, RichText, TextNode } from "./richText/richText.ts";
-export { MIME_TYPES, Media, MediaKind } from "./media/media.ts";
+export { FOCAL_POINT_PATTERN, FocalPoint, MIME_TYPES, Media, MediaKind, isFocalPoint } from "./media/media.ts";
 export { SeoDefaults, SeoOverrides } from "./seo/seo.ts";
 export {
   AppealListData,
@@ -61,7 +61,7 @@ export {
 export { AppealKind } from "./appeals/kind.ts";
 export { Appeal, AppealDonation, AppealHighlight, DonationHero, GeneralDonationPage } from "./appeals/appeal.ts";
 export { Metric, MetricVerification } from "./impact/metric.ts";
-export { Post, PostType, STORY_CATEGORY_IDS } from "./posts/post.ts";
+export { BLOG_CATEGORY_IDS, Post, PostType, STORY_CATEGORY_IDS, STORY_IMPACT_MAX, STORY_QUOTES_MAX, StoryImpact, StoryQuote, StoryQuotes } from "./posts/post.ts";
 export { Event, ScheduleItem, minutesOf } from "./events/event.ts";
 export { Announcement, AnnouncementBar, AnnouncementBarItem, POPUP_RECORD_ID, Popup, STORY_STRIP_LIMIT, StoryStrip, announcementBarApprovalProblems, popupCmsProblems, storyStripApprovalProblems } from "./engagement/engagement.ts";
 export {
@@ -86,7 +86,7 @@ export { ABOUT_BLOCKS, ABOUT_BLOCK_TYPES } from "./about/registry.ts";
 export type { AboutBlockInfo, AboutBlockType } from "./about/registry.ts";
 export { TeamGroup, TeamMember } from "./team/member.ts";
 export { PROGRAM_ICONS, Program } from "./programs/program.ts";
-export { Project, projectMediaIds } from "./projects/project.ts";
+export { PROJECT_IMPACT_MAX, PROJECT_PARTNERS_MAX, Project, ProjectImpact, projectMediaIds } from "./projects/project.ts";
 export { CareerRole, Careers, CareersSeo } from "./careers/careers.ts";
 export { POLICY_IDS, POLICY_ROUTES, Policy, PolicyId, PolicySection, PolicySeo, policyApprovalProblems } from "./policies/policy.ts";
 export {

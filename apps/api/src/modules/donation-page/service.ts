@@ -32,7 +32,8 @@ import type { DonationPageStore, StoredDonationPage } from "./repository.ts";
    { status: "draft" } reopens it.
 
    The same rules as an appeal: contract, the blocks a donation page
-   draws, ready media of this organization, and a Givebutter checkout
+   draws (Milestone 7: the "why" passage, how support helps, a trust panel,
+   a FAQ and appeal lists — appeals/service.ts donationSectionProblems), ready media of this organization, and a Givebutter checkout
    verified with the provider whenever the page is published with a
    checkout the public has not had yet. Audited as donation_page.updated
    with field paths only. */

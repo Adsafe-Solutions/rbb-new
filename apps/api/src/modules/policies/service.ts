@@ -1,6 +1,6 @@
 import type { PublishLock } from "../publishing/lock.ts";
 import type { Db } from "mongodb";
-import { POLICY_IDS, POLICY_ROUTES, Policy, policyApprovalProblems, type PolicyId } from "@rbb/content-schema";
+import { POLICY_IDS, POLICY_ROUTES, Policy, policyApprovalProblems, workingTextFindings, type PolicyId } from "@rbb/content-schema";
 import { COLLECTIONS } from "../../db/collections.ts";
 import type { ErrorDetail } from "../../errors.ts";
 import type { AuditService } from "../audit/audit.ts";
@@ -48,6 +48,25 @@ import { BlockPageService, type BlockPageConfig, type BlockPageView } from "../p
      POST   /api/v1/policies/<id>/submit | withdraw | approve | reject |
                                  schedule | unschedule */
 
+/* Milestone 1: working-placeholder text ("Demo —", "Sample …", example.org
+   addresses — common/workingText.ts, the website's own rules) in a
+   policy's intro or sections. The website build refuses a published policy
+   that carries it (apps/web scripts/snapshot-adapter.mjs policiesFrom), so
+   the API refuses it first: a policy may hold it while it is a DRAFT being
+   written, never once it is submitted, approved, scheduled or published.
+   Checked per part, as the build checks the two together. */
+export function policyWorkingTextProblems(record: Pick<Policy, "intro" | "sections">, at: string): ErrorDetail[] {
+  const problem = (path: string, findings: string[]) => ({ path, message: `contains working-placeholder text (${findings.join(", ")}) — a policy can be submitted, approved and published only with RBB's own final text` });
+  const problems: ErrorDetail[] = [];
+  const intro = workingTextFindings(record.intro ?? []);
+  if (intro.length) problems.push(problem(`${at}.intro`, intro));
+  (record.sections ?? []).forEach((section, i) => {
+    const found = workingTextFindings(section);
+    if (found.length) problems.push(problem(`${at}.sections.${i}`, found));
+  });
+  return problems;
+}
+
 export const POLICY_CONFLICT = "This policy was changed elsewhere since you opened it. Reload the latest version before saving.";
 
 /* The site's own names and cross-links (apps/web src/content/policies.js)
@@ -69,6 +88,7 @@ export const policyPage = (id: PolicyId, settings: SettingsStore): BlockPageConf
   check: async (record, at): Promise<ErrorDetail[]> => {
     const problems: ErrorDetail[] = [];
     if (record.status === "approved" || record.status === "published") problems.push(...policyApprovalProblems(record).map((p) => ({ path: `${at}.${p.path}`, message: p.message })));
+    if (record.status === "submitted" || record.status === "approved" || record.status === "published") problems.push(...policyWorkingTextProblems(record, at));
     if (record.contactReference) {
       const methods = (await settings.get())?.record.contact.methods ?? [];
       if (!methods.some((m) => m.id === record.contactReference)) problems.push({ path: `${at}.contactReference`, message: "must be one of the contact methods in the organization's settings" });

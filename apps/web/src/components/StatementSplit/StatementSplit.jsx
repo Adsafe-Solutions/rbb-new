@@ -1,6 +1,7 @@
 import { useId } from "react";
 import Section from "../Section/Section.jsx";
 import SectionHeading from "../SectionHeading/SectionHeading.jsx";
+import Button from "../Button/Button.jsx";
 
 /* An editorial two-column statement: the heading set large on the left,
    the paragraphs that expand on it on the right, the first of them as a
@@ -8,7 +9,7 @@ import SectionHeading from "../SectionHeading/SectionHeading.jsx";
    opening. No picture: this is where the page says something in words.
 
    `id` is the section's anchor (the nav's "Who We Are" lands here). */
-export default function StatementSplit({ id, index, kicker, heading, body, tone = "white", highlight }) {
+export default function StatementSplit({ id, index, kicker, heading, body, tone = "white", highlight, cta }) {
   const headingId = useId();
   const [first, ...rest] = body;
 
@@ -27,6 +28,14 @@ export default function StatementSplit({ id, index, kicker, heading, body, tone 
               {text}
             </p>
           ))}
+          {/* Milestone 8: a CMS statement's link (the source sets none). */}
+          {cta && (
+            <div data-anim-item data-anim="soft">
+              <Button to={cta.to} variant="outline" className="mt-9">
+                {cta.label}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </Section>

@@ -107,4 +107,7 @@ export class MemoryContentStore<R extends ContentRecordBase> implements ContentS
   async count() {
     return this.#mine().length;
   }
+  async countEverPublished({ type }: { type?: string } = {}) {
+    return this.#mine().filter((r) => (!type || (r.record as unknown as { type?: string }).type === type) && (typeof r.publishedRevision === "number" || Boolean((r.record as { publishedAt?: string }).publishedAt))).length;
+  }
 }

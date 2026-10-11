@@ -80,7 +80,8 @@ export default function DonationExperience({ experience, children }) {
 
       {trust && <TrustPanel tone="ink" {...trust} />}
 
-      {faq.length > 0 && <Faq index={next()} tone="white" kicker={DONATION.faq.kicker} heading={DONATION.faq.heading} items={faq} />}
+      {/* The page's own FAQ heading (a CMS page, Milestone 7), else the site's. */}
+      {faq.length > 0 && <Faq index={next()} tone="white" kicker={experience.faqHeading ? experience.faqHeading.kicker : DONATION.faq.kicker} heading={experience.faqHeading?.heading ?? DONATION.faq.heading} highlight={experience.faqHeading?.highlight} items={faq} />}
 
       {closing && (
         <Section tone="accent" pad="lg" watermark="right">
@@ -183,12 +184,12 @@ const PARAGRAPH = "mt-6 max-w-[58ch] text-[19px] leading-relaxed text-copy";
 /* `body` is plain paragraphs (source content); `content` is structured
    rich text (published from the CMS), drawn by components/RichText with
    the same lead-then-paragraphs rhythm. */
-function Why({ id, index, kicker, heading, body = [], content, cta }) {
+function Why({ id, index, kicker, heading, highlight, body = [], content, cta }) {
   const headingId = useId();
   return (
     <Section id={id} tone="white" pad="lg" aria-labelledby={headingId}>
       <div className="grid gap-10 lg:grid-cols-[5fr_7fr] lg:gap-16">
-        <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} />
+        <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} highlight={highlight} />
         <div data-anim="sequence" className="lg:pt-12">
           {content?.map((block, i) => (
             <div key={i} data-anim-item data-anim="soft">
@@ -224,11 +225,11 @@ function Why({ id, index, kicker, heading, body = [], content, cta }) {
 
 /* How your support helps — numbered areas as cards, square: they are read
    and compared. General areas only; never a costed claim. */
-function Impact({ id, index, kicker, heading, intro, items }) {
+function Impact({ id, index, kicker, heading, highlight, intro, items }) {
   const headingId = useId();
   return (
     <Section id={id} tone="paper" pad="lg" aria-labelledby={headingId}>
-      <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} intro={intro} />
+      <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} highlight={highlight} intro={intro} />
       <ol data-anim-stagger className={cx("gap-cards mt-14 grid sm:grid-cols-2", items.length >= 4 && "lg:grid-cols-4", items.length === 3 && "lg:grid-cols-3")}>
         {items.map((item, i) => (
           <li key={item.title}>

@@ -1,0 +1,18 @@
+/* The policies list and editor (M19). Everything else is the shared
+   content and block styles. */
+.name {
+  display: block;
+  color: var(--color-text-strong);
+  font-weight: 500;
+}
+.route {
+  display: block;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-line);
+}
+.related {
+  display: grid;
+  gap: var(--space-2);
+}

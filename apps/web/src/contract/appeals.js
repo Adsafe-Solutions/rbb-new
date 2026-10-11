@@ -11,19 +11,22 @@
      slug            → id        (the URL segment and the gift's context)
      kind "campaign" → "campaigns"   (the list page's id and address)
      imageId         → image     (content/photos.js record, via media ids)
-     statement       → { id, heading, body }
-     numberedCards   → { id, heading, items: [title] }
+     statement       → { id, type, heading, body }
+     numberedCards   → { id, type, heading, intro?, items: [title], cards: [{ title, description? }] }
      highlight       → story     ({ label?, image? }, the story circles)
    Disabled sections are left out. A block type the appeal page cannot
-   draw yet stops the build — it is never silently dropped. */
+   draw yet stops the build — it is never silently dropped. (Appeals
+   published from the CMS arrive through the build's snapshot adapter,
+   scripts/snapshot-adapter.mjs, which also draws `richText`.) */
 import { mediaImage } from "./media.js";
 
 const VIEW_KIND = { emergency: "emergency", campaign: "campaigns" };
 
 function sectionView(section) {
   const { id, type, data } = section;
-  if (type === "statement") return { id, heading: data.heading, body: data.body };
-  if (type === "numberedCards") return { id, heading: data.heading, items: data.items.map((item) => item.title) };
+  if (type === "statement") return { id, type, heading: data.heading, body: data.body };
+  if (type === "numberedCards")
+    return { id, type, heading: data.heading, ...(data.intro && { intro: data.intro }), items: data.items.map((item) => item.title), cards: data.items };
   throw new Error(`Appeal section "${id}": the appeal page cannot draw a "${type}" section yet (src/contract/appeals.js)`);
 }
 

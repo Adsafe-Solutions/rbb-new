@@ -28,11 +28,12 @@
 import { ABOUT } from "./about.js";
 import { HOMEPAGE } from "./homepage.js";
 import { SITE } from "./site.js";
+import { transparencyLinks } from "./transparency.js";
 import { PROGRAMS } from "./work.js";
 import { pathCards } from "./getInvolved.js";
 import { policyLink } from "./policies.js";
 import { RBB_PHOTOS } from "./photos.js";
-import { appealKind } from "./appeals.js";
+import { APPEALS_PAGES, appealKind } from "./appeals.js";
 import { PAYMENT_CONNECTED } from "../lib/payment.js";
 
 /* The public state of giving on the site:
@@ -246,7 +247,7 @@ export const DONATION = {
     body: "Supporters should always be able to see how our work is run and how resources are used.",
     cta: { label: "View Transparency", to: "/about#transparency" },
   },
-  trustLinks: SITE.transparencyLinks,
+  trustLinks: transparencyLinks(),
   trustLinkMeta: SITE.transparencyLinkMeta,
 
   /* 07 — FAQ. [{ q, a, status }] — questions and answers RBB supplies.
@@ -390,7 +391,41 @@ const TRUST = {
   linkMeta: DONATION.trustLinkMeta,
 };
 
-export const generalDonation = () => ({
+/* The general donation page as the CMS published it — set by the build
+   from the published snapshot (scripts/snapshot-adapter.mjs), and empty
+   otherwise. While empty, the page is the source content above. Once the
+   organization PUBLISHES its page in the CMS, `page` holds it:
+     { eyebrow?, title, description, image, context?, why?, impact?,
+       designation, checkout?, seo? }
+   The trust panel, FAQ and closing band stay this file's: they are
+   site-wide, not part of the page's own content. */
+export const PUBLISHED_GENERAL_DONATION = {};
+
+export const generalDonation = () => {
+  const cms = PUBLISHED_GENERAL_DONATION.page;
+  if (cms)
+    return {
+      type: "general",
+      source: "cms",
+      id: DONATION.donationAction.id,
+      eyebrow: cms.eyebrow ?? APPEALS_PAGES.hub.heading,
+      title: cms.title,
+      description: cms.description,
+      image: cms.image,
+      parent: null,
+      context: cms.context ?? null,
+      donation: { type: "general", designation: cms.designation },
+      why: cms.why ?? null,
+      impact: cms.impact ?? null,
+      trust: TRUST,
+      faq: approvedDonationFaqs(),
+      closing: DONATION.closing,
+      checkout: cms.checkout ?? null,
+    };
+  return sourceGeneralDonation();
+};
+
+const sourceGeneralDonation = () => ({
   type: "general",
   id: DONATION.donationAction.id,
   eyebrow: DONATION.general.eyebrow,
@@ -412,9 +447,12 @@ export const generalDonation = () => ({
 export const appealDonation = (appeal) => {
   const kind = appealKind(appeal.kind);
   const emergency = appeal.kind === "emergency";
-  const situation = appeal.sections.find((s) => s.id === "situation");
-  const response = appeal.sections.find((s) => s.id === "response");
-  const body = situation ? [].concat(situation.body ?? []) : [];
+  /* The appeal's one "why" passage (a statement, or rich text from the
+     CMS) and its one list of how support helps. */
+  const situation = appeal.sections.find((s) => s.type === "statement" || s.type === "richText");
+  const response = appeal.sections.find((s) => s.type === "numberedCards");
+  const body = situation?.type === "statement" ? [].concat(situation.body ?? []) : [];
+  const content = situation?.type === "richText" ? situation.content : null;
   return {
     type: emergency ? "appeal" : "campaign",
     id: DONATION.donationAction.id,
@@ -434,20 +472,24 @@ export const appealDonation = (appeal) => {
           heading: emergency ? "Why this response matters" : "Why this campaign matters",
           body,
         }
-      : null,
+      : content?.length
+        ? { id: "why", kicker: kind.kicker, heading: situation.heading, content }
+        : null,
     impact: response?.items?.length
       ? {
           id: "how-support-helps",
           kicker: "How support helps",
-          heading: "How your support helps",
-          intro: "Your support can help with:",
-          items: response.items.map((title) => ({ title })),
+          heading: response.heading,
+          intro: response.intro ?? "Your support can help with:",
+          items: response.cards ?? response.items.map((title) => ({ title })),
         }
       : null,
     trust: TRUST,
     faq: [],
     closing: DONATION.closing,
     releaseMarker: appeal.releaseMarker,
+    /* The appeal's Givebutter checkout, when the CMS configured one. */
+    checkout: appeal.checkout ?? null,
   };
 };
 

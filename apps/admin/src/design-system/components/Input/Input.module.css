@@ -1,0 +1,31 @@
+.input {
+  height: 32px;
+  padding: 0 var(--space-3);
+}
+.sm {
+  height: 28px;
+  padding: 0 var(--space-2);
+  font-size: var(--type-body-small-size);
+}
+.lg {
+  height: 40px;
+}
+.wrap {
+  position: relative;
+  display: block;
+}
+.icon {
+  position: absolute;
+  inset: 0 auto 0 var(--space-3);
+  display: flex;
+  align-items: center;
+  color: var(--color-text-subtle);
+  pointer-events: none;
+}
+.icon svg {
+  width: 16px;
+  height: 16px;
+}
+.withIcon {
+  padding-left: 36px;
+}

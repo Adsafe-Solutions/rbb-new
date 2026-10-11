@@ -102,9 +102,11 @@ test("every response has the API security headers and no-store", async () => {
 test("CORS allows the configured origins only, and never *", async () => {
   const allowed = await get(app(), "/api/v1/health", { headers: { Origin: "https://admin.example" } });
   assert.equal(allowed.headers.get("access-control-allow-origin"), "https://admin.example");
-  assert.equal(allowed.headers.get("access-control-expose-headers"), "X-Request-Id");
+  assert.equal(allowed.headers.get("access-control-expose-headers"), "X-Request-Id, Retry-After");
+  assert.equal(allowed.headers.get("access-control-allow-credentials"), "true");
   const other = await get(app(), "/api/v1/health", { headers: { Origin: "https://evil.example" } });
   assert.equal(other.headers.get("access-control-allow-origin"), null);
+  assert.equal(other.headers.get("access-control-allow-credentials"), null, "credentials never for an unlisted origin");
   assert.equal(other.headers.get("vary"), "Origin");
 });
 
@@ -137,6 +139,20 @@ test("readJson: JSON only, within its limit, parsed", async () => {
   assert.equal(await code(readJson(req("{not json"))), "BAD_REQUEST");
   assert.equal(await code(readJson(req("   "))), "BAD_REQUEST");
   assert.equal(await code(readJson(req(JSON.stringify({ a: "x".repeat(200) })), 100)), "PAYLOAD_TOO_LARGE");
+  // An optional body (M14: POST /api/v1/publish): none, or empty, is undefined; anything else is checked as ever.
+  assert.equal(await readJson(new Request("http://api.test/x", { method: "POST" }), 100, { optional: true }), undefined);
+  // A Node adapter gives every POST a body stream: an empty one, untyped, is still "no body".
+  const untyped = (b: string) => new Request("http://api.test/x", { method: "POST", body: new Blob([b]).stream(), duplex: "half" } as RequestInit);
+  const emptyStream = untyped("");
+  emptyStream.headers.delete("content-type");
+  assert.equal(await readJson(emptyStream, 100, { optional: true }), undefined);
+  const textStream = untyped('{"a":1}');
+  textStream.headers.delete("content-type");
+  assert.equal(await code(readJson(textStream, 100, { optional: true })), "UNSUPPORTED_MEDIA_TYPE", "a body still needs its JSON type");
+  assert.equal(await readJson(req("  "), 100, { optional: true }), undefined);
+  assert.deepEqual(await readJson(req('{"a":1}'), 100, { optional: true }), { a: 1 });
+  assert.equal(await code(readJson(req("{not json"), 100, { optional: true })), "BAD_REQUEST");
+  assert.equal(await code(readJson(req("a=1", "text/plain"), 100, { optional: true })), "UNSUPPORTED_MEDIA_TYPE");
 });
 
 /* ---------------- Configuration ---------------- */

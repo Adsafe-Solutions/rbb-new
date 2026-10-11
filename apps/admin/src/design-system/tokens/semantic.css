@@ -1,0 +1,178 @@
+/* Layer 2 — SEMANTIC tokens: what a colour is FOR. This is the only layer
+   components read.
+
+   Each token resolves to a primitive (primitives.css) or to the brand
+   layer (`--brand-*`, written onto <html> by applyTheme() from the theme
+   config in src/theme/). Hover, pressed and tinted states are DERIVED
+   from the brand values with color-mix(), so rebranding means changing
+   six values in one file, not editing a ramp.
+
+   Rules the tokens encode:
+   - The accent (RBB Sky Blue) is never text on a light surface: it
+     measures about 2.5:1 on white. It marks things (active indicator,
+     the mark, tints); text and focus use darkened mixes of it.
+   - The success hue (Growth Green) is also too light for text; success
+     text is a darkened mix.
+   - A status is never colour alone: StatusBadge pairs every tone with an
+     icon and a word.
+
+   Themes: `[data-theme="light"]` is the designed default. The
+   `[data-theme="dark"]` block proves the architecture — every semantic
+   token has a dark value — but it has not been designed or reviewed. */
+
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  --font-sans: var(--primitive-font-sans);
+  --font-mono: var(--primitive-font-mono);
+
+  /* Grounds */
+  --color-bg-canvas: var(--brand-surface-subtle);
+  --color-bg-surface: var(--brand-surface);
+  --color-bg-raised: var(--brand-surface);
+  --color-bg-subtle: var(--primitive-neutral-50);
+  --color-bg-muted: var(--primitive-neutral-100);
+  --color-bg-hover: color-mix(in srgb, var(--brand-text) 6%, transparent);
+  --color-bg-pressed: color-mix(in srgb, var(--brand-text) 10%, transparent);
+  --color-bg-selected: color-mix(in srgb, var(--brand-primary) 7%, var(--brand-surface));
+  --color-bg-inverse: var(--primitive-neutral-900);
+  --color-bg-backdrop: rgb(15 17 20 / 0.42);
+  --color-bg-disabled: var(--primitive-neutral-100);
+
+  /* Lines */
+  --color-border: var(--primitive-neutral-200);
+  --color-border-subtle: var(--primitive-neutral-100);
+  --color-border-strong: var(--primitive-neutral-300);
+  /* Form controls: the edge IS the control, so it meets 3:1 (WCAG 1.4.11). */
+  --color-border-control: var(--primitive-neutral-450);
+  --color-border-control-hover: var(--primitive-neutral-500);
+
+  /* Text */
+  --color-text-strong: color-mix(in srgb, var(--brand-text) 75%, #000);
+  --color-text: var(--brand-text);
+  --color-text-muted: var(--primitive-neutral-600);
+  --color-text-subtle: var(--primitive-neutral-500);
+  --color-text-disabled: var(--primitive-neutral-400);
+  --color-text-inverse: var(--primitive-neutral-0);
+  --color-text-link: var(--brand-primary);
+
+  /* The brand action colour (Deep Trust Blue for RBB) */
+  --color-primary: var(--brand-primary);
+  --color-primary-hover: color-mix(in srgb, var(--brand-primary) 86%, #000);
+  --color-primary-pressed: color-mix(in srgb, var(--brand-primary) 74%, #000);
+  --color-primary-subtle: color-mix(in srgb, var(--brand-primary) 8%, var(--brand-surface));
+  --color-on-primary: var(--brand-on-primary);
+
+  /* The brand accent (Sky Blue for RBB) — marks, never text */
+  --color-accent: var(--brand-accent);
+  --color-accent-subtle: color-mix(in srgb, var(--brand-accent) 12%, var(--brand-surface));
+
+  /* Focus: a darkened accent, so the ring meets 3:1 on every ground. */
+  --color-focus-ring: color-mix(in srgb, var(--brand-accent) 68%, #000);
+
+  /* Status tones: fg = text and icon, bg = fill, border = edge */
+  --color-neutral-fg: var(--primitive-neutral-700);
+  --color-neutral-bg: var(--primitive-neutral-100);
+  --color-neutral-border: var(--primitive-neutral-200);
+
+  --color-info-fg: color-mix(in srgb, var(--brand-accent) 50%, #000);
+  --color-info-bg: color-mix(in srgb, var(--brand-accent) 9%, var(--brand-surface));
+  --color-info-border: color-mix(in srgb, var(--brand-accent) 32%, var(--brand-surface));
+
+  --color-success-fg: color-mix(in srgb, var(--brand-success) 56%, #000);
+  --color-success-bg: color-mix(in srgb, var(--brand-success) 11%, var(--brand-surface));
+  --color-success-border: color-mix(in srgb, var(--brand-success) 38%, var(--brand-surface));
+
+  --color-warning-fg: var(--primitive-amber-800);
+  --color-warning-bg: var(--primitive-amber-50);
+  --color-warning-border: var(--primitive-amber-200);
+
+  --color-danger-fg: var(--primitive-red-700);
+  --color-danger-bg: var(--primitive-red-50);
+  --color-danger-border: var(--primitive-red-200);
+  --color-danger-solid: var(--primitive-red-600);
+  --color-danger-solid-hover: var(--primitive-red-700);
+
+  --color-scheduled-fg: var(--primitive-violet-700);
+  --color-scheduled-bg: var(--primitive-violet-50);
+  --color-scheduled-border: var(--primitive-violet-200);
+
+  --color-brand-fg: var(--brand-primary);
+  --color-brand-bg: var(--color-primary-subtle);
+  --color-brand-border: color-mix(in srgb, var(--brand-primary) 24%, var(--brand-surface));
+
+  /* Elevation — floating layers only. Cards and panels use a 1px border. */
+  --shadow-dropdown: 0 1px 2px rgb(16 24 40 / 0.04), 0 6px 16px -2px rgb(16 24 40 / 0.1);
+  --shadow-popover: 0 1px 2px rgb(16 24 40 / 0.04), 0 8px 24px -4px rgb(16 24 40 / 0.12);
+  --shadow-dialog: 0 2px 6px rgb(16 24 40 / 0.05), 0 24px 56px -12px rgb(16 24 40 / 0.24);
+  --shadow-command: 0 2px 6px rgb(16 24 40 / 0.05), 0 32px 72px -16px rgb(16 24 40 / 0.3);
+  --shadow-toast: 0 1px 2px rgb(16 24 40 / 0.05), 0 10px 28px -6px rgb(16 24 40 / 0.16);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg-canvas: var(--primitive-neutral-950);
+  --color-bg-surface: var(--primitive-neutral-900);
+  --color-bg-raised: var(--primitive-neutral-800);
+  --color-bg-subtle: var(--primitive-neutral-800);
+  --color-bg-muted: var(--primitive-neutral-800);
+  --color-bg-hover: rgb(255 255 255 / 0.06);
+  --color-bg-pressed: rgb(255 255 255 / 0.1);
+  --color-bg-selected: color-mix(in srgb, var(--brand-accent) 14%, var(--primitive-neutral-900));
+  --color-bg-inverse: var(--primitive-neutral-50);
+  --color-bg-backdrop: rgb(0 0 0 / 0.6);
+  --color-bg-disabled: var(--primitive-neutral-800);
+
+  --color-border: var(--primitive-neutral-800);
+  --color-border-subtle: var(--primitive-neutral-800);
+  --color-border-strong: var(--primitive-neutral-700);
+  --color-border-control: var(--primitive-neutral-500);
+  --color-border-control-hover: var(--primitive-neutral-400);
+
+  --color-text-strong: var(--primitive-neutral-0);
+  --color-text: var(--primitive-neutral-100);
+  --color-text-muted: var(--primitive-neutral-300);
+  --color-text-subtle: var(--primitive-neutral-400);
+  --color-text-disabled: var(--primitive-neutral-600);
+  --color-text-inverse: var(--primitive-neutral-900);
+  --color-text-link: var(--brand-accent);
+
+  --color-primary: color-mix(in srgb, var(--brand-primary) 70%, #fff);
+  --color-primary-hover: color-mix(in srgb, var(--brand-primary) 60%, #fff);
+  --color-primary-pressed: color-mix(in srgb, var(--brand-primary) 50%, #fff);
+  --color-primary-subtle: color-mix(in srgb, var(--brand-primary) 30%, var(--primitive-neutral-900));
+  --color-on-primary: var(--primitive-neutral-950);
+
+  --color-accent-subtle: color-mix(in srgb, var(--brand-accent) 18%, var(--primitive-neutral-900));
+  --color-focus-ring: var(--brand-accent);
+
+  --color-neutral-fg: var(--primitive-neutral-200);
+  --color-neutral-bg: var(--primitive-neutral-800);
+  --color-neutral-border: var(--primitive-neutral-700);
+  --color-info-fg: color-mix(in srgb, var(--brand-accent) 60%, #fff);
+  --color-info-bg: color-mix(in srgb, var(--brand-accent) 14%, var(--primitive-neutral-900));
+  --color-info-border: color-mix(in srgb, var(--brand-accent) 35%, var(--primitive-neutral-900));
+  --color-success-fg: color-mix(in srgb, var(--brand-success) 70%, #fff);
+  --color-success-bg: color-mix(in srgb, var(--brand-success) 14%, var(--primitive-neutral-900));
+  --color-success-border: color-mix(in srgb, var(--brand-success) 35%, var(--primitive-neutral-900));
+  --color-warning-fg: var(--primitive-amber-200);
+  --color-warning-bg: color-mix(in srgb, var(--primitive-amber-500) 14%, var(--primitive-neutral-900));
+  --color-warning-border: color-mix(in srgb, var(--primitive-amber-500) 35%, var(--primitive-neutral-900));
+  --color-danger-fg: var(--primitive-red-200);
+  --color-danger-bg: color-mix(in srgb, var(--primitive-red-600) 16%, var(--primitive-neutral-900));
+  --color-danger-border: color-mix(in srgb, var(--primitive-red-600) 40%, var(--primitive-neutral-900));
+  --color-scheduled-fg: var(--primitive-violet-200);
+  --color-scheduled-bg: color-mix(in srgb, var(--primitive-violet-700) 20%, var(--primitive-neutral-900));
+  --color-scheduled-border: color-mix(in srgb, var(--primitive-violet-700) 45%, var(--primitive-neutral-900));
+  --color-brand-fg: var(--color-primary);
+  --color-brand-bg: var(--color-primary-subtle);
+  --color-brand-border: color-mix(in srgb, var(--brand-primary) 50%, var(--primitive-neutral-900));
+
+  --shadow-dropdown: 0 0 0 1px rgb(255 255 255 / 0.04), 0 8px 20px rgb(0 0 0 / 0.5);
+  --shadow-popover: 0 0 0 1px rgb(255 255 255 / 0.04), 0 10px 28px rgb(0 0 0 / 0.55);
+  --shadow-dialog: 0 0 0 1px rgb(255 255 255 / 0.05), 0 24px 64px rgb(0 0 0 / 0.6);
+  --shadow-command: 0 0 0 1px rgb(255 255 255 / 0.05), 0 32px 80px rgb(0 0 0 / 0.65);
+  --shadow-toast: 0 0 0 1px rgb(255 255 255 / 0.05), 0 12px 32px rgb(0 0 0 / 0.55);
+}

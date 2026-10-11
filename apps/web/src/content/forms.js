@@ -176,9 +176,13 @@ export const FORMS = {
 
   /* Newsletter sign-up, wherever a newsletter card appears. Cannot go
      live without approved consent wording and a real privacy policy,
-     whatever else is supplied (Document 12 §10). */
+     whatever else is supplied (Document 12 §10).
+     M18: OFF — status "draft" — until RBB approves its consent wording,
+     recipient and subscriber processing; the API does not take it either.
+     An endpoint in the environment does not change that. */
   newsletter: {
     ...pending("newsletter"),
+    status: "draft",
     heading: "Sign up",
     submitLabel: "Sign up",
     /* The card's inline field (components/Newsletter) shows a placeholder;

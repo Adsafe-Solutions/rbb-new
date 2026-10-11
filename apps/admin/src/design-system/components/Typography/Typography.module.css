@@ -1,0 +1,22 @@
+.heading {
+  color: var(--color-text-strong);
+  text-wrap: balance;
+}
+.default {
+  color: var(--color-text);
+}
+.strong {
+  color: var(--color-text-strong);
+}
+.muted {
+  color: var(--color-text-muted);
+}
+.subtle {
+  color: var(--color-text-subtle);
+}
+.danger {
+  color: var(--color-danger-fg);
+}
+.success {
+  color: var(--color-success-fg);
+}

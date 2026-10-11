@@ -60,13 +60,14 @@ export const TRANSPARENCY = {
      board, its duties or its policies are facts about RBB, so nothing
      stands in for them: the section shows its pending line until RBB
      supplies an approved statement. `documents` stays empty for the same
-     reason as the report lists above. */
+     reason as the report lists above. Its documents are listed in
+     `governanceDocuments`, like the other two lists. */
   governance: {
     intro: null,
     sections: [],
-    documents: [],
     status: "placeholder",
   },
+  governanceDocuments: [],
 
   /* Why transparency matters, and how the page works. PROPOSED wording
      describing the site's own practice — not a claim about audits,
@@ -90,10 +91,15 @@ export const TRANSPARENCY_COPY = {
   overview: {
     id: "financial-overview",
     kicker: "Financial overview",
-    heading: `${TRANSPARENCY.financialOverview.year} at a glance`,
+    /* Read when drawn, so a published overview's year is the one shown. */
+    get heading() {
+      return `${TRANSPARENCY.financialOverview.year} at a glance`;
+    },
     /* The two things Document 09 requires the page to say about the
        figures: where they come from, and that they await verification. */
-    caption: `The ${TRANSPARENCY.financialOverview.year} financial overview as it appears in the ${BRAND.fullName} annual report materials, shown as a share of the total.`,
+    get caption() {
+      return `The ${TRANSPARENCY.financialOverview.year} financial overview as it appears in the ${BRAND.fullName} annual report materials, shown as a share of the total.`;
+    },
     verification: SITE.figuresPending,
   },
   reports: {
@@ -132,6 +138,25 @@ export const TRANSPARENCY_COPY = {
       secondary: { label: "Contact", to: "/contact" },
     },
   },
+};
+
+/* The transparency rows every trust panel shows (the homepage, About,
+   Impact, donation and contact pages): what the Transparency chapter of
+   /about actually has — the financial overview, each document list once
+   it has a published document, governance once there is any, and "How we
+   report". Each row lands on its own anchor there. Read when drawn, so
+   published transparency content is reflected everywhere at once. */
+export const transparencyLinks = () => {
+  const t = TRANSPARENCY_COPY;
+  const { governance, accountability } = TRANSPARENCY;
+  const listed = (docs) => publishedDocuments(docs).length > 0;
+  return [
+    { title: t.overview.kicker, to: `/about#${t.overview.id}` },
+    listed(TRANSPARENCY.annualReports) && { title: t.reports.heading, to: `/about#${t.reports.id}` },
+    listed(TRANSPARENCY.financialDocuments) && { title: t.financial.heading, to: `/about#${t.financial.id}` },
+    (governance.intro || governance.sections.length > 0 || listed(TRANSPARENCY.governanceDocuments)) && { title: t.governance.heading, to: `/about#${t.governance.id}` },
+    accountability.intro && { title: t.accountability.heading, to: `/about#${t.accountability.id}` },
+  ].filter(Boolean);
 };
 
 export default TRANSPARENCY;

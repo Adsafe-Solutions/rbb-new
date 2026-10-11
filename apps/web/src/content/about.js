@@ -18,6 +18,7 @@
 
 import { BRAND } from "./brand.js";
 import { SITE } from "./site.js";
+import { transparencyLinks } from "./transparency.js";
 
 export const ABOUT = {
   /* 01 — Hero. Copy: SOURCE — the positioning the annual report supports,
@@ -115,13 +116,13 @@ export const ABOUT = {
 
   /* 07 — Transparency & Governance. Body: PROPOSED; the documents are
      PENDING. The document rows are shared with the homepage
-     (SITE.transparencyLinks). */
+     (transparencyLinks()). */
   transparency: {
     id: "transparency",
     kicker: "Transparency & governance",
     heading: "Transparency matters.",
     body: "Supporters, communities and partners should always be able to see how our work is run and how resources are used.",
-    links: SITE.transparencyLinks,
+    links: transparencyLinks(),
     linkMeta: SITE.transparencyLinkMeta,
     cta: { label: "View Transparency", to: "/about#transparency" },
   },
@@ -200,5 +201,14 @@ export const HOW_WE_WORK = {
     },
   },
 };
+
+/* The About page as the CMS published it — set by the build from the
+   published snapshot (scripts/snapshot-adapter.mjs), and empty otherwise.
+   While empty, /about is ABOUT above, exactly as it always was. Once the
+   organization PUBLISHES its About page in the CMS, `page` holds its
+   blocks in order — { sections: [{ id, type, data }], seo? } — and
+   pages/About draws those instead (pages/About/CmsAbout). Other pages
+   that quote ABOUT (the mission line elsewhere) keep reading ABOUT. */
+export const PUBLISHED_ABOUT = {};
 
 export default ABOUT;

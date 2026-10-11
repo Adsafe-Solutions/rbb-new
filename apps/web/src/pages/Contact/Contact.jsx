@@ -6,7 +6,7 @@ import LinkSection from "../../components/LinkSection/LinkSection.jsx";
 import TrustPanel from "../../components/TrustPanel/TrustPanel.jsx";
 import Newsletter from "../../components/Newsletter/Newsletter.jsx";
 import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
-import { CONTACT_COPY, FORMS, ORG_CONTACT, SITE, alternativeContact, pathCards, verifiedOnly } from "../../content/index.js";
+import { CONTACT_COPY, FORMS, ORG_CONTACT, SITE, alternativeContact, pathCards, transparencyLinks, verifiedOnly } from "../../content/index.js";
 
 /* /contact — Document 08:
 
@@ -80,7 +80,7 @@ export default function Contact() {
       {/* Paper, not the panel's default Deep Trust Blue: between the Sky
           Blue newsletter and the Sky Blue close, a blue band made the end
           of the page four alternating saturated stripes. */}
-      <TrustPanel tone="paper" {...t.transparency} links={SITE.transparencyLinks} linkMeta={SITE.transparencyLinkMeta} />
+      <TrustPanel tone="paper" {...t.transparency} links={transparencyLinks()} linkMeta={SITE.transparencyLinkMeta} />
 
       <ClosingCta tone="accent" {...t.closing} />
     </>

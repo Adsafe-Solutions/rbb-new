@@ -1,0 +1,25 @@
+.tooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--z-tooltip);
+  max-width: 260px;
+  padding: 5px var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-line);
+  font-weight: 500;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity var(--motion-duration-fast) var(--motion-ease-standard),
+    visibility 0s linear var(--motion-duration-fast);
+}
+.tooltip[data-open] {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity var(--motion-duration-fast) var(--motion-ease-standard);
+}

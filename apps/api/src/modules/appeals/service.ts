@@ -1,107 +1,94 @@
-import { Appeal } from "@rbb/content-schema";
-import { DuplicateKeyError } from "../../db/mongo.ts";
-import { ApiError, errors, type ErrorDetail } from "../../errors.ts";
-import type { AppealStore, StoredRecord } from "./repository.ts";
+import { isApproval } from "../content/workflow.ts";
+import { z } from "zod";
+import { Appeal, type DonationCheckout } from "@rbb/content-schema";
+import { errors, type ErrorDetail } from "../../errors.ts";
+import type { ContentStore } from "../content/repository.ts";
+import type { CollectionConfig } from "../content/service.ts";
+import type { CheckoutVerifier } from "../donations/verify.ts";
 
-/* Appeal rules — the one place they live:
+/* Appeals — emergency appeals and campaigns (the content contract's
+   Appeal), on the shared content lifecycle (modules/content): drafts,
+   published, archived; unique addresses; confirmed address changes; media
+   from the library; audit by field name.
 
-     · every record in and out is checked against the content contract
-       (@rbb/content-schema `Appeal`) — the API defines no schema of its own
-     · a record belongs to this deployment's organization; another orgId is
-       refused
-     · timestamps are the API's: whatever a caller sends as createdAt,
-       updatedAt or publishedAt is replaced
-     · a reader only ever sees a published appeal
-     · an update names the revision it was based on; a stale one conflicts
+   Editable: kind, title, slug, summary, featured image, highlight (the
+   story circles), sections, donation (designation and the Givebutter
+   checkout), start/end dates and SEO.
 
-   M2 exposes only the published read over HTTP. create/update are here for
-   the admin to call once it can authenticate (M3) — there is no
-   unauthenticated write route. */
+   Sections: the CMS accepts only the blocks an appeal page draws — one
+   "why it matters" passage (a statement, or rich text) and one list of how
+   support helps (numbered cards). The contract allows more; the website
+   would refuse to build a page with a block it cannot draw, so they are
+   refused here, at save, instead.
 
-const issuesOf = (error: { issues: { path: PropertyKey[]; message: string }[] }): ErrorDetail[] =>
-  error.issues.map((issue) => ({ path: issue.path.map(String).join("."), message: issue.message }));
+   Givebutter: a checkout is checked for shape on every save (the
+   contract). It is VERIFIED with the provider whenever the appeal is
+   published — on the save that publishes it or changes its checkout while
+   published — and again when an owner publishes the website. A draft may
+   hold an unverified checkout. */
 
-export class AppealService {
-  readonly #store: AppealStore;
-  readonly #orgId: string;
-  readonly #now: () => Date;
+export const DRAWN_SECTIONS = ["statement", "richText", "numberedCards"] as const;
 
-  constructor(store: AppealStore, orgId: string, now: () => Date = () => new Date()) {
-    this.#store = store;
-    this.#orgId = orgId;
-    this.#now = now;
-  }
-
-  /* A published appeal by its slug, or NOT_FOUND — a draft or archived
-     appeal is indistinguishable from a missing one. */
-  async getPublished(slug: string): Promise<Appeal> {
-    const stored = await this.#store.findBySlug(slug);
-    if (!stored || stored.record.status !== "published") throw errors.notFound("appeal");
-    return this.#checked(stored.record);
-  }
-
-  async create(input: unknown): Promise<{ appeal: Appeal; revision: number }> {
-    const appeal = this.#parse(input);
-    const now = this.#now().toISOString();
-    const record: Appeal = {
-      ...withoutTimestamps(appeal),
-      createdAt: now,
-      updatedAt: now,
-      ...(appeal.status === "published" && { publishedAt: now }),
-    };
-    try {
-      const stored = await this.#store.insert(record);
-      return { appeal: this.#checked(stored.record), revision: stored.revision };
-    } catch (error) {
-      throw conflictFor(error) ?? error;
-    }
-  }
-
-  async update(id: string, input: unknown, expectedRevision: number): Promise<{ appeal: Appeal; revision: number }> {
-    const existing = await this.#store.findById(id);
-    if (!existing) throw errors.notFound("appeal");
-    const appeal = this.#parse(input);
-    if (appeal.id !== id) throw errors.validation([{ path: "id", message: "must not change" }]);
-
-    const now = this.#now().toISOString();
-    const publishedAt = (existing.record.publishedAt as string | undefined) ?? (appeal.status === "published" ? now : undefined);
-    const record: Appeal = {
-      ...withoutTimestamps(appeal),
-      createdAt: existing.record.createdAt as string,
-      updatedAt: now,
-      ...(publishedAt && { publishedAt }),
-    };
-    try {
-      const stored = await this.#store.replace(id, record, expectedRevision);
-      if (!stored) throw errors.conflict("The appeal was changed since it was read. Reload it and try again.");
-      return { appeal: this.#checked(stored.record), revision: stored.revision };
-    } catch (error) {
-      throw conflictFor(error) ?? error;
-    }
-  }
-
-  #parse(input: unknown): Appeal {
-    const result = Appeal.safeParse(input);
-    if (!result.success) throw errors.validation(issuesOf(result.error));
-    if (result.data.orgId !== this.#orgId)
-      throw errors.validation([{ path: "orgId", message: "must be this deployment's organization" }]);
-    return result.data;
-  }
-
-  /* What leaves the API is a valid record — a stored document that no
-     longer meets the contract is a data problem, reported as an internal
-     error (the field paths go to the log, never to the client). */
-  #checked(record: StoredRecord): Appeal {
-    const result = Appeal.safeParse(record);
-    if (!result.success)
-      throw errors.internal(new Error(`Stored appeal fails the content contract at: ${issuesOf(result.error).map((i) => i.path).join(", ")}`));
-    return result.data;
-  }
+/* The section rules shared by appeals and the general donation page. */
+export function donationSectionProblems(sections: { type: string; enabled: boolean }[], prefix: string): ErrorDetail[] {
+  const problems: ErrorDetail[] = [];
+  sections.forEach((section, i) => {
+    if (!(DRAWN_SECTIONS as readonly string[]).includes(section.type))
+      problems.push({ path: `${prefix}.${i}.type`, message: `"${section.type}" sections are not drawn on donation pages yet` });
+  });
+  const enabled = sections.filter((s) => s.enabled);
+  if (enabled.filter((s) => s.type === "statement" || s.type === "richText").length > 1)
+    problems.push({ path: prefix, message: "a donation page has one “why it matters” passage (statement or rich text)" });
+  if (enabled.filter((s) => s.type === "numberedCards").length > 1) problems.push({ path: prefix, message: "a donation page has one list of how support helps" });
+  return problems;
 }
 
-const withoutTimestamps = ({ createdAt: _c, updatedAt: _u, publishedAt: _p, ...rest }: Appeal) => rest;
+const sameCheckout = (a?: DonationCheckout, b?: DonationCheckout) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
-const conflictFor = (error: unknown): ApiError | null =>
-  error instanceof DuplicateKeyError
-    ? errors.conflict(`An appeal with this ${error.field} already exists.`)
-    : null;
+/* Verify when the record is (still, or newly) published and its checkout
+   is new to the public — never for a draft. */
+export const checkoutToVerify = (
+  record: { status: string; donation?: { checkout?: DonationCheckout } },
+  previous: { status: string; donation?: { checkout?: DonationCheckout } } | null
+): DonationCheckout | null => {
+  /* M14: checked when the record is approved (it goes live at the next
+     website publish, which checks every checkout again). */
+  const checkout = record.donation?.checkout;
+  if (!checkout || !isApproval(record.status)) return null;
+  if (previous && isApproval(previous.status) && sameCheckout(checkout, previous.donation?.checkout)) return null;
+  return checkout;
+};
+
+const editable = Object.fromEntries(
+  ["kind", "title", "slug", "summary", "imageId", "highlight", "sections", "donation", "startsOn", "endsOn", "seo"].map((f) => [f, z.unknown()])
+);
+
+export const appealCollection = (verify: CheckoutVerifier): CollectionConfig<Appeal> => ({
+  kind: "appeal",
+  contract: Appeal,
+  fields: editable,
+  required: ["kind", "title", "summary", "imageId"],
+  defaults: () => ({ sections: [] }),
+  rules: (appeal) => donationSectionProblems(appeal.sections, "body.sections"),
+  media: (appeal) => [
+    ["body.imageId", appeal.imageId],
+    ["body.highlight.imageId", appeal.highlight?.imageId],
+    ["body.seo.ogImageId", appeal.seo?.ogImageId],
+  ],
+  // Sections hold the appeal's wording: audited as "sections", never walked.
+  opaque: ["sections"],
+  async check(appeal, previous) {
+    const checkout = checkoutToVerify(appeal, previous);
+    return checkout ? verify([{ path: "body.donation.checkout", checkout }]) : [];
+  },
+});
+
+/* M2's internal read: a published appeal by its address, or NOT_FOUND —
+   a draft or archived appeal is indistinguishable from a missing one. */
+export async function publishedAppeal(store: ContentStore<Appeal>, slug: string): Promise<Appeal> {
+  const stored = await store.findBySlug(slug);
+  if (!stored || stored.record.status !== "published") throw errors.notFound("appeal");
+  const checked = Appeal.safeParse(stored.record);
+  if (!checked.success) throw errors.internal(new Error(`Stored appeal fails the content contract at: ${checked.error.issues.map((i) => i.path.join(".")).join(", ")}`));
+  return checked.data;
+}

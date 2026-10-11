@@ -1,0 +1,97 @@
+.frame {
+  position: relative;
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+}
+.frame:focus-visible {
+  outline-offset: 2px;
+}
+.table {
+  --cell-y: var(--space-3);
+  --cell-x: var(--space-4);
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-line);
+}
+.compact {
+  --cell-y: 6px;
+  --cell-x: var(--space-3);
+  font-size: var(--type-body-small-size);
+  line-height: var(--type-body-small-line);
+}
+
+.head {
+  height: 40px;
+  padding: 0 var(--cell-x);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-subtle);
+  color: var(--color-text-muted);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-line);
+  font-weight: 500;
+  text-align: left;
+  white-space: nowrap;
+}
+.compact .head {
+  height: 32px;
+}
+.sticky .head {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+}
+
+.cell {
+  padding: var(--cell-y) var(--cell-x);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  vertical-align: middle;
+}
+.row:last-child .cell,
+.loadingRow:last-child .cell {
+  border-bottom: 0;
+}
+.row {
+  transition: background-color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+tbody .row:hover {
+  background: var(--color-bg-subtle);
+}
+.row[data-selected] {
+  background: var(--color-bg-selected);
+}
+.row[data-selected] .cell:first-child {
+  box-shadow: inset 2px 0 0 var(--color-primary);
+}
+tbody .row[data-selected]:hover {
+  background: color-mix(in srgb, var(--color-bg-selected) 100%, var(--color-text) 3%);
+}
+
+.start {
+  text-align: left;
+}
+.center {
+  text-align: center;
+}
+.end {
+  text-align: right;
+}
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--type-mono-size);
+  font-variant-numeric: tabular-nums;
+}
+.muted {
+  color: var(--color-text-muted);
+}
+.shrink {
+  width: 1%;
+  white-space: nowrap;
+}
+.emptyCell {
+  padding: 0;
+}

@@ -7,13 +7,15 @@
    Ids are derived from the photographs' names in content/photos.js —
    RBB_PHOTOS.kids is "rbb-kids", WORKING_PHOTOS.reliefPacking is
    "working-relief-packing" — so renaming one there renames its id. */
-import { RBB_PHOTOS, WORKING_PHOTOS } from "../content/photos.js";
+import { RBB_PHOTOS, TEAM_PORTRAITS, TEAM_PORTRAIT_ALT, WORKING_PHOTOS } from "../content/photos.js";
 
 const kebab = (key) => key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 
 export const MEDIA_LIBRARY = Object.fromEntries([
   ...Object.entries(RBB_PHOTOS).map(([key, image]) => [`rbb-${kebab(key)}`, image]),
   ...Object.entries(WORKING_PHOTOS).map(([key, image]) => [`working-${kebab(key)}`, image]),
+  /* The team's stock portraits are bare URLs in content/team.js. */
+  ...TEAM_PORTRAITS.map((src, i) => [`team-portrait-${i + 1}`, { src, alt: TEAM_PORTRAIT_ALT }]),
 ]);
 
 /* The photograph for an id. An unknown id is a broken reference, so it

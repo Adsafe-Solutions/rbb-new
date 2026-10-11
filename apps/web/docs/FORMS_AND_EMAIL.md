@@ -1,8 +1,44 @@
 # Forms & email — Rising Beyond Borders website
 
 Document 21. How the Contact, Volunteer, Partner, Fundraise and Newsletter
-forms send, and what must happen before they go live. **All forms are
-still disabled on the public site** — see *Activation* below.
+forms send, and what must happen before they go live. **No form is live
+in production yet** — see *Activation* below.
+
+## Current state (M18)
+
+- **Where forms post.** Contact, Volunteer, Partner and Fundraise post to
+  the **API**: `POST /api/v1/forms/:formId` (`apps/api/src/modules/forms/`;
+  behaviour and configuration in `apps/api/README.md`, "Public forms").
+  - Field schema and validation are shared, from `@rbb/forms`.
+  - Rate limiting is shared in MongoDB across API instances.
+  - Email goes through Resend, in modes `off`, `test`, `staging` or `live`.
+  - **Email only:** nothing a visitor sends is stored.
+- **Newsletter stays off.** It has `status: "draft"` in `content/forms.js`,
+  and the API refuses it whatever the environment says, until its consent
+  wording, recipient and subscriber processing are approved.
+- **Travel stays off.** The API doesn't take it in M18. Its form stays
+  undrawn without an endpoint.
+- **Fundraise has no page.** The API takes it, but no page draws its form:
+  `/get-involved/fundraise` redirects to `/get-involved`.
+  Showing it is a content decision.
+- **Endpoints.** `VITE_FORM_ENDPOINT_<FORM>` is public configuration.
+  - Locally: same-origin `/api/v1/forms/<form>`, which the Vite dev proxy
+    sends to the API (`WEB_API_PROXY`, default `http://localhost:4000`).
+  - Production (planned):
+    `https://api.risingbeyondborders.org/api/v1/forms/<form>`.
+  - Unset: the form stays undrawn.
+- **The old server.** `apps/web/server` (below) is the previous endpoint.
+  It's kept until a separate, reviewed change retires it.
+  - The sections from *Architecture* to *Testing locally* describe that
+    old server.
+  - The API's email templates are byte-identical to its templates; a test
+    checks this.
+- **API response shape.** Success is `{ data: { reference } }`. A 422
+  carries `error.details[].path = "fields.<name>"` with the same codes;
+  `src/lib/formResponse.js` reads both shapes.
+- **Browser smoke test:** `pnpm web:smoke:forms`, against the local
+  website and API, with the API in `EMAIL_MODE=test` on the test database.
+  Its header lists the setup.
 
 ## Architecture
 
@@ -157,11 +193,12 @@ and its HTML written to `build-meta/email-previews/`.
 
 - [ ] **Privacy Policy published** (the forms stay disabled until it is — Document 13).
 - [ ] Sending domain verified in Resend (SPF/DKIM records at the DNS host); status recorded here.
-- [ ] Approved From address; approved recipient per form.
-- [ ] New `EMAIL_API_KEY` created (the planning key revoked), stored only in the host's secrets.
-- [ ] Rate limiting backed by the platform or a shared store (`RATE_LIMIT_STORE=shared` + the adapter's limiter), or `RATE_LIMIT_SINGLE_INSTANCE=true` for one long-lived process. **Live mode refuses anything else (Document 25).** Thresholds approved.
+- [ ] Approved From address (`EMAIL_FROM`); approved recipient per form (`EMAIL_TO_<FORM>` on the API).
+- [ ] New `EMAIL_API_KEY` created (the planning key revoked), stored only in the API host's secrets.
+- [x] Rate limiting shared across instances: the API's MongoDB throttle (M18). It relies on a trusted client address (`x-real-ip` on Vercel). Thresholds (`FORMS_RATE_LIMIT_*`, default 5 per 10 min) still to be approved.
+- [ ] API deployed at `https://api.risingbeyondborders.org`, with `WEB_ORIGIN` = the website's production origin; `EMAIL_MODE=staging` first.
 - [ ] Delivery tested in `staging` to approved addresses.
-- [ ] Per form in `content/forms.js`: `status: "approved"`, RBB's `successMessage` and `errorMessage`; `VITE_FORM_ENDPOINT_<FORM>=/api/forms`.
+- [ ] Per form in `content/forms.js`: `status: "approved"`, RBB's `successMessage` and `errorMessage`; the website built with `VITE_FORM_ENDPOINT_<FORM>=https://api.risingbeyondborders.org/api/v1/forms/<form>` (Contact, Volunteer, Partner, Fundraise).
 - [ ] Acknowledgements: decide per form (`EMAIL_ACK_FORMS`) and approve the wording.
 - [ ] Newsletter: consent wording, unsubscribe, subscriber management, confirmation flow.
 - [ ] Log retention decided; `docs/TECHNOLOGY_AUDIT.md` updated (Resend as processor); technology audit re-run on the live site.

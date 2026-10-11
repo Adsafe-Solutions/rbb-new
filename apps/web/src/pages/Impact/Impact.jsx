@@ -6,7 +6,8 @@ import ContentRows from "../../components/ContentRows/ContentRows.jsx";
 import StoriesOfChange from "../../components/StoriesOfChange/StoriesOfChange.jsx";
 import TrustPanel from "../../components/TrustPanel/TrustPanel.jsx";
 import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
-import { IMPACT, IMPACT_PAGES, PROGRAMS, SITE, impactStats, metricsNote, storyBySlug, storyCard } from "../../content/index.js";
+import CmsImpact from "./CmsImpact.jsx";
+import { IMPACT, IMPACT_PAGES, PROGRAMS, PUBLISHED_IMPACT, impactStats, metricsNote, STORY_SOURCE, storyBySlug, storyCard, transparencyLinks } from "../../content/index.js";
 
 /* /impact — Document 05, in its section order:
 
@@ -26,9 +27,13 @@ import { IMPACT, IMPACT_PAGES, PROGRAMS, SITE, impactStats, metricsNote, storyBy
    programs (content/work.js), the stories (content/stories.js) and the
    transparency links (content/site.js) instead of copying them. */
 
-/* Impact stories are references into the one story collection
-   (content/stories.js); only approved ones resolve. */
-const impactStories = IMPACT.stories.map(storyBySlug).filter(Boolean).map(storyCard);
+/* Impact stories are references into the website's own story collection
+   (content/stories.js); only approved ones resolve. Once the stories come
+   from the CMS (M15: STORY_SOURCE), those references name stories that are
+   no longer published: they are never resolved against the CMS's stories,
+   so the chapter shows its empty state (the build says so) until the
+   Impact page is published from the CMS, which names CMS stories. */
+const impactStories = STORY_SOURCE.cms ? [] : IMPACT.stories.map(storyBySlug).filter(Boolean).map(storyCard);
 
 /* Reports as links: a file gets `href`, the rest fall back to the shared
    transparency rows. */
@@ -38,9 +43,12 @@ const reportLinks = IMPACT.reports.length
       href: r.url,
       meta: [r.type, r.year].filter(Boolean).join(" · ") || undefined,
     }))
-  : SITE.transparencyLinks;
+  : transparencyLinks();
 
 export default function Impact() {
+  /* An Impact page published from the CMS replaces this composition;
+     without one, the page below is /impact, exactly as it always was. */
+  if (PUBLISHED_IMPACT.page) return <CmsImpact page={PUBLISHED_IMPACT.page} />;
   const t = IMPACT_PAGES.overview;
   const { geography, approach, measurement } = IMPACT;
 

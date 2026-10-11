@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import contentPublishing from "./scripts/content-publishing.mjs";
+import publishedSnapshot from "./scripts/vite-published-snapshot.mjs";
 
 /* Tailwind v4 is a Vite plugin, not a PostCSS step — there is no
    tailwind.config.js and no postcss.config.js in this project. The theme lives
@@ -23,7 +24,7 @@ import contentPublishing from "./scripts/content-publishing.mjs";
    module graph — not even as unreferenced files in dist/. Same condition
    as DEV_TOOLS_IN_BUILD in src/config/env.js. */
 function omitDevTools(included) {
-  const DEV_PAGES = /\/pages\/(Components\/Components|DesignSystem\/DesignSystem)\.jsx$/;
+  const DEV_PAGES = /\/pages\/(Components\/Components|DesignSystem\/DesignSystem|IntegrationGivebutter\/IntegrationGivebutter)\.jsx$/;
   const STUB = "\0rbb-dev-tool-omitted";
   return {
     name: "rbb-omit-dev-tools",
@@ -51,6 +52,9 @@ export default defineConfig(({ command, mode }) => {
     plugins: [
       omitDevTools(devTools),
       contentPublishing({ root: import.meta.dirname }),
+      /* The CMS's published snapshot, when this build fetched one
+         (scripts/published-snapshot.mjs). Without one it does nothing. */
+      publishedSnapshot({ root: import.meta.dirname }),
       react(),
       tailwindcss(),
     ],
@@ -58,12 +62,21 @@ export default defineConfig(({ command, mode }) => {
       port: 5173,
       open: false,
       /* `npm run dev` shows the whole site, forms included, so the forms
-         need somewhere to post. /api goes to the local server
-         (`npm run serve:local`, port 5190) — the same handler production
-         runs, in EMAIL_MODE=test. With that server not running a
-         submission fails and the form shows its error message, which is
-         the honest outcome: nothing was received. */
-      proxy: { "/api": { target: "http://localhost:5190", changeOrigin: false } },
+         need somewhere to post (same-origin paths, VITE_FORM_ENDPOINT_*):
+           /api/v1/…  the API (M18: POST /api/v1/forms/:formId) —
+                      WEB_API_PROXY, default http://localhost:4000. The API
+                      needs WEB_ORIGIN=http://localhost:5173 and, to accept
+                      anything, EMAIL_MODE=test plus EMAIL_TO_<FORM>.
+           /api/…     the old local form server (`npm run serve:local`,
+                      port 5190), until it is retired.
+         The Origin header is passed through unchanged (changeOrigin only
+         touches Host), which is what the API checks. With nothing running
+         a submission fails and the form shows its error message — the
+         honest outcome: nothing was received. More specific first. */
+      proxy: {
+        "/api/v1": { target: process.env.WEB_API_PROXY ?? "http://localhost:4000", changeOrigin: false },
+        "/api": { target: "http://localhost:5190", changeOrigin: false },
+      },
     },
     build: {
       /* Documents are always real files, never inlined as data: URLs —

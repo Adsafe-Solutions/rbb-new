@@ -122,6 +122,11 @@ const DesignSystem = DEV_TOOLS_IN_BUILD
 const Components = DEV_TOOLS_IN_BUILD
   ? lazy(() => import("./pages/Components/Components.jsx"))
   : null;
+/* The Givebutter integration spike (M3.5) — internal, dev builds only,
+   like the two above. */
+const IntegrationGivebutter = DEV_TOOLS_IN_BUILD
+  ? lazy(() => import("./pages/IntegrationGivebutter/IntegrationGivebutter.jsx"))
+  : null;
 
 /* The pages built before the sitemap, by address (config/routes.js
    lists the addresses). */
@@ -353,17 +358,34 @@ export function Shell() {
               />
             )}
 
+            {/* The component catalogue and the Givebutter integration spike
+                (internal) — dev builds only. One expression, so a production
+                build compiles both to nothing. */}
             {Components && SECTIONS.componentsRoute && (
-              <Route
-                path="/components"
-                element={
-                  <Titled path="/components" title={SITE.titles["/components"]}>
-                    <Suspense fallback={null}>
-                      <Components />
-                    </Suspense>
-                  </Titled>
-                }
-              />
+              <>
+                <Route
+                  path="/components"
+                  element={
+                    <Titled path="/components" title={SITE.titles["/components"]}>
+                      <Suspense fallback={null}>
+                        <Components />
+                      </Suspense>
+                    </Titled>
+                  }
+                />
+                {IntegrationGivebutter && (
+                  <Route
+                    path="/__integration/givebutter"
+                    element={
+                      <Titled path="/__integration/givebutter" title="Givebutter integration (internal)">
+                        <Suspense fallback={null}>
+                          <IntegrationGivebutter />
+                        </Suspense>
+                      </Titled>
+                    }
+                  />
+                )}
+              </>
             )}
 
             {STUB_PATHS.map((path) => (

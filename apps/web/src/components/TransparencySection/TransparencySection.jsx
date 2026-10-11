@@ -70,7 +70,7 @@ export default function TransparencySection({ index }) {
 
   const reports = publishedDocuments(TRANSPARENCY.annualReports);
   const financial = publishedDocuments(TRANSPARENCY.financialDocuments);
-  const governanceDocs = publishedDocuments(governance.documents);
+  const governanceDocs = publishedDocuments(TRANSPARENCY.governanceDocuments);
   /* Only what exists: a document area with nothing published is left
      out, with its jump link, rather than shown as an empty box. */
   const cards = [

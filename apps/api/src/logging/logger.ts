@@ -20,12 +20,14 @@ export interface Logger {
 
 const RANK: Record<LogLevel, number> = { debug: 10, info: 20, warn: 30, error: 40 };
 
-const SENSITIVE_KEY = /authorization|cookie|password|passwd|secret|token|api[-_]?key|credential|connection[-_]?string|^uri$|mongodb[-_]?uri/i;
+export const SENSITIVE_KEY = /authorization|cookie|password|passwd|secret|token|api[-_]?key|credential|connection[-_]?string|^uri$|mongodb[-_]?uri/i;
 
 const SENSITIVE_TEXT: [RegExp, string][] = [
   [/mongodb(\+srv)?:\/\/[^\s"'`]+/gi, "[redacted-uri]"],
   [/\bBearer\s+[A-Za-z0-9._~+/-]+=*/g, "Bearer [redacted]"],
   [/\b(re|sk|pk|rk)_[A-Za-z0-9_]{12,}/g, "[redacted-key]"],
+  /* Presigned storage URLs: the signature and credential scope. */
+  [/(X-Amz-(?:Signature|Credential|Security-Token)=)[^&\s"'`]+/gi, "$1[redacted]"],
 ];
 
 export const redactText = (text: string) =>

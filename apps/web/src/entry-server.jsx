@@ -1,4 +1,8 @@
 import { StrictMode } from "react";
+import { PublishedSnapshot } from "@rbb/content-schema";
+import PUBLISHED_SNAPSHOT from "virtual:rbb-published-snapshot";
+import { ORG_ID } from "./contract/org.js";
+import { imageOrigins as snapshotImageOrigins } from "../scripts/snapshot-adapter.mjs";
 import { renderToString } from "react-dom/server";
 import { StaticRouter } from "react-router-dom";
 import { Shell } from "./App.jsx";
@@ -107,9 +111,13 @@ export const validate = (preview = false) =>
    confirm each one exists in the build output. */
 export const publicImages = () =>
   [
-    ...published().flatMap((s) => [s.image?.src, ...(s.media ?? []).map((m) => m.src)]),
-    ...PROJECTS.map((p) => p.image?.src),
-    ...approvedMembers().map((m) => m.image),
+    /* Media-library images (`mediaId`: CMS stories and projects) are
+       served from the library's public origin, not from the build. */
+    ...published().flatMap((s) => [s.image, ...(s.media ?? [])]).filter((i) => i && !i.mediaId).map((i) => i.src),
+    ...PROJECTS.map((p) => p.image).filter((i) => i && !i.mediaId).map((i) => i.src),
+    /* A photograph from the CMS's media library (`imageId`) is served from
+       the library's public origin, not from the build. */
+    ...approvedMembers().filter((m) => !m.imageId).map((m) => m.image),
     ...DONATION.givingMethods
       .filter((m) => m.status === "approved")
       .map((m) => m.image?.src),
@@ -161,3 +169,23 @@ export const observability = () => ({
 });
 
 export { absoluteUrl, notFoundMeta, robotsTxt, seoHeadHtml, sitemapXml };
+
+/* The website's current settings as a content-contract record — what
+   `npm run export:settings` hands to the API's settings import, so the CMS
+   starts from the values the site already shows (nothing typed in). */
+export { siteSettingsRecord } from "./contract/importers.js";
+
+/* The published snapshot this build applied (or null), checked against the
+   content contract. The pre-renderer stops the build on any problem — a
+   snapshot is used whole and valid, or not at all. Server build only. */
+export const publishedSnapshotInfo = () => {
+  if (!PUBLISHED_SNAPSHOT) return { snapshot: null, problems: [], imageOrigins: [] };
+  const result = PublishedSnapshot.safeParse(PUBLISHED_SNAPSHOT);
+  const problems = result.success ? [] : result.error.issues.map((i) => `${i.path.join(".") || "(snapshot)"}: ${i.message}`);
+  if (PUBLISHED_SNAPSHOT.organization?.id !== ORG_ID) problems.push(`organization.id: must be this site's organization ("${ORG_ID}")`);
+  return {
+    snapshot: { version: PUBLISHED_SNAPSHOT.version, generatedAt: PUBLISHED_SNAPSHOT.generatedAt, collections: Object.keys(PUBLISHED_SNAPSHOT.content ?? {}) },
+    problems,
+    imageOrigins: snapshotImageOrigins(PUBLISHED_SNAPSHOT),
+  };
+};

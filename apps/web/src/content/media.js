@@ -480,6 +480,9 @@ export const MEDIA_PAGES = {
     time: "Time",
     takePart: "Taking part",
     takePartBody: "To ask about taking part, get in touch through our Contact page.",
+    /* Shown instead, when an event published from the CMS has a
+       registration link. */
+    register: "Register",
     more: "More about",
     others: "More events",
   },

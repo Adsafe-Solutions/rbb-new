@@ -17,6 +17,12 @@ import { SeoOverrides } from "../seo/seo.ts";
 export const PostType = z.enum(["story", "news", "blog"]);
 export type PostType = z.infer<typeof PostType>;
 
+/* A story's `category`: the four story types (apps/web content/stories.js
+   STORY_CATEGORIES draws their names). M12: stories are managed in the
+   CMS as posts of type "story", with their program, project, gallery and
+   related stories. */
+export const STORY_CATEGORY_IDS = ["news", "field", "impact", "community"] as const;
+
 export const Post = z.strictObject({
   ...recordFields,
   type: PostType,

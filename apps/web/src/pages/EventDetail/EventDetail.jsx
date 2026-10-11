@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import useHydrated from "../../hooks/useHydrated.js";
 import useSeo from "../../hooks/useSeo.js";
+import { RichBlock } from "../../components/RichText/RichText.jsx";
 import { formatDate } from "../../lib/dates.js";
 import PageHeader from "../../components/PageHeader/PageHeader.jsx";
 import Section from "../../components/Section/Section.jsx";
@@ -36,7 +37,9 @@ function Detail({ event }) {
   const status = eventStatus(event, on);
   const group = eventGroup(event.program);
   const program = PROGRAMS.find((p) => p.slug === event.program);
-  const time = event.end ? `${event.start}–${event.end}` : event.start;
+  /* Times are the event's own, in its time zone when it names one
+     (events published from the CMS do) — never converted. */
+  const time = (event.end ? `${event.start}–${event.end}` : event.start) + (event.timezone ? ` (${event.timezone.replace(/_/g, " ")})` : "");
   const others = EVENTS.filter((e) => e.id !== event.id).slice(0, 3);
 
   return (
@@ -64,11 +67,15 @@ function Detail({ event }) {
               <h2 id="about-event" className="type-meta text-quiet">
                 {t.about}
               </h2>
-              {event.about.map((text) => (
-                <p key={text} className="mt-5 max-w-[62ch] text-[length:var(--text-body)] leading-[1.75] text-copy">
-                  {text}
-                </p>
-              ))}
+              {event.about.map((text, i) =>
+                typeof text === "string" ? (
+                  <p key={text} className="mt-5 max-w-[62ch] text-[length:var(--text-body)] leading-[1.75] text-copy">
+                    {text}
+                  </p>
+                ) : (
+                  <RichBlock key={i} block={text} index={i} paragraphClass={() => "mt-5 max-w-[62ch] text-[length:var(--text-body)] leading-[1.75] text-copy"} />
+                )
+              )}
               {program && (
                 <p className="mt-6">
                   <Link to={program.to} className="font-bold text-fg underline decoration-2 underline-offset-4">
@@ -113,7 +120,15 @@ function Detail({ event }) {
                     </Button>
                   )}
                 </Fact>
-                <Fact label={t.takePart}>{t.takePartBody}</Fact>
+                <Fact label={t.takePart}>
+                  {event.registrationUrl ? (
+                    <Button href={event.registrationUrl} size="sm" rel="noopener noreferrer" target="_blank">
+                      {t.register}
+                    </Button>
+                  ) : (
+                    t.takePartBody
+                  )}
+                </Fact>
               </dl>
             </OffsetCard>
           </aside>
@@ -160,6 +175,6 @@ function Fact({ label, children }) {
 export default function EventDetail() {
   const { slug } = useParams();
   const event = eventById(slug);
-  useSeo(event ? routeMeta(eventPath(event), { title: event.title, description: event.summary }) : notFoundMeta());
+  useSeo(event ? routeMeta(eventPath(event), { title: event.seo?.title ?? event.title, description: event.seo?.description ?? event.summary }) : notFoundMeta());
   return event ? <Detail event={event} /> : <NotFound />;
 }

@@ -1,0 +1,17 @@
+.icon {
+  padding: 0;
+  aspect-ratio: 1;
+}
+.sm {
+  width: 28px;
+}
+.md {
+  width: 32px;
+}
+.lg {
+  width: 40px;
+}
+.lg svg {
+  width: 18px;
+  height: 18px;
+}

@@ -28,6 +28,7 @@ import { GET_INVOLVED } from "./getInvolved.js";
 import { CONTACT_COPY } from "./contact.js";
 import { routedPolicies } from "./policies.js";
 import { APPEAL_KINDS, appealPath, appealsOf } from "./appeals.js";
+import { PROGRAMS } from "./work.js";
 
 /* An entry with `children` whose own parent is a section is a GROUP: the
    dropdown draws it as a column — its label as a heading linking to its
@@ -81,12 +82,9 @@ export const ABOUT_SECTION = {
 export const WORK_SECTION = {
   label: "Our Work",
   to: "/work",
-  children: [
-    { label: "Education", to: "/work/education" },
-    { label: "Health & Wellbeing", to: "/work/health-wellbeing" },
-    { label: "Livelihoods", to: "/work/livelihoods" },
-    { label: "Community Support", to: "/work/community-support" },
-  ],
+  /* The program areas, as content/work.js lists them (or the CMS's
+     published programs, in a build from a snapshot). */
+  children: PROGRAMS.map((p) => ({ label: p.title, to: p.to })),
 };
 
 /* Appeals — what the Donate page became. Its two groups and every appeal

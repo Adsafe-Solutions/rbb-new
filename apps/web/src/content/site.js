@@ -95,17 +95,12 @@ export const SITE = {
   },
 
   /* The documents a visitor checks before trusting a charity, as Documents
-     02, 03 and 09 name them. Shared by every trust panel on the site; each
-     row lands on its own anchor in the Transparency section of /about, which is where the
-     documents themselves live (content/transparency.js). No registration,
-     audit, ratio or policy claim goes here until RBB confirms it. */
-  /* The transparency rows the panels show: what the About page actually
-     has today. Annual reports, financial statements and governance join
-     this list when RBB publishes them (content/transparency.js). */
-  transparencyLinks: [
-    { title: "Financial overview", to: "/about#financial-overview" },
-    { title: "How we report", to: "/about#accountability" },
-  ],
+     02, 03 and 09 name them, are the rows every trust panel shows —
+     derived from the transparency content itself
+     (content/transparency.js transparencyLinks), so a panel never lists
+     something the Transparency chapter of /about does not have. No
+     registration, audit, ratio or policy claim goes there until RBB
+     confirms it. */
   transparencyLinkMeta: null,
 
 

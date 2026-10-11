@@ -4,7 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./homepage-registry": "./src/homepage/registry.ts",
+    "./about-registry": "./src/about/registry.ts",
+    "./impact-registry": "./src/impact/registry.ts"
   },
   "engines": {
     "node": ">=22.18"

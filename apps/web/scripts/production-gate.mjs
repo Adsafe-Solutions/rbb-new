@@ -77,7 +77,7 @@ export async function productionGate(dist, { routes = [] } = {}) {
 
   /* The development routes are never part of a deployable build. */
   for (const route of routes)
-    if (/^\/(design-system|components)(\/|$)/.test(route))
+    if (/^\/(design-system|components|__integration)(\/|$)/.test(route))
       problems.push({ file: route, rule: "development route" });
 
   return problems;

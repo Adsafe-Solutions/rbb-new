@@ -1,0 +1,131 @@
+.detail {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+.headerText {
+  flex: 1;
+  min-width: 0;
+}
+.title {
+  overflow-wrap: anywhere;
+  color: var(--color-text-strong);
+  font-size: var(--type-h3-size);
+  line-height: var(--type-h3-line);
+  font-weight: var(--type-h3-weight);
+}
+.subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--type-body-small-size);
+}
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  align-content: start;
+  gap: var(--space-5);
+  padding: var(--space-5);
+}
+.preview {
+  display: grid;
+  place-items: center;
+  min-height: 160px;
+  max-height: 320px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  /* A checkerboard shows where an image is transparent. */
+  background-color: var(--color-bg-subtle);
+  background-image:
+    linear-gradient(45deg, var(--color-bg-muted) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--color-bg-muted) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--color-bg-muted) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--color-bg-muted) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+.preview img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 318px;
+  object-fit: contain;
+}
+.facts {
+  display: grid;
+  gap: var(--space-2);
+}
+.facts > div {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: center;
+  min-height: 28px;
+}
+.facts dt {
+  color: var(--color-text-muted);
+  font-size: var(--type-body-small-size);
+}
+.facts dd {
+  min-width: 0;
+  color: var(--color-text-strong);
+}
+.copyRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.mono {
+  overflow: hidden;
+  font-size: var(--type-caption-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.url {
+  overflow: hidden;
+  font-size: var(--type-body-small-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.form {
+  display: grid;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+.inlineAction {
+  display: block;
+  margin-top: var(--space-2);
+}
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg-subtle);
+}
+.delete {
+  color: var(--color-danger-fg);
+}
+.delete:hover {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-fg);
+}
+
+/* M16: where a file that could not be deleted is still used. */
+.usedBy {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-5);
+  overflow-wrap: anywhere;
+}

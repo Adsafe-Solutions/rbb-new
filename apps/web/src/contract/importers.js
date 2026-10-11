@@ -24,10 +24,14 @@ import { ANNOUNCEMENTS } from "../content/announcements.js";
 import { APPEAL_KINDS, APPEAL_STORIES, APPEALS_PAGES } from "../content/appeals.js";
 import { DONATION, approvedDonationFaqs } from "../content/donation.js";
 import { HOMEPAGE } from "../content/homepage.js";
-import { IMPACT } from "../content/impact.js";
-import { STORIES } from "../content/stories.js";
+import { ABOUT } from "../content/about.js";
+import { TEAM_MEMBERS } from "../content/team.js";
+import { PROGRAMS, PROJECT_RECORDS } from "../content/work.js";
+import { IMPACT, IMPACT_PAGES } from "../content/impact.js";
+import { TRANSPARENCY, TRANSPARENCY_COPY, publishedDocuments } from "../content/transparency.js";
+import { STORIES, STORY_SOURCE } from "../content/stories.js";
 import { BLOGS, EVENTS, NEWS } from "../content/media.js";
-import { ORG_CONTACT, verifiedOnly } from "../content/contact.js";
+import { CAREERS, ORG_CONTACT, verifiedOnly } from "../content/contact.js";
 import { ENV } from "../config/env.js";
 
 /* ---------------- Shared conversions ---------------- */
@@ -62,14 +66,18 @@ const BY_SRC = new Map(Object.entries(MEDIA_LIBRARY).map(([id, image]) => [image
 /* A photograph record (or anything carrying its `src`) → its media id. */
 export function mediaIdOf(image) {
   if (!image) return undefined;
+  // An image from the published snapshot carries its media library id.
+  if (image.mediaId) return image.mediaId;
   const id = BY_IMAGE.get(image) ?? BY_SRC.get(image.src);
   if (!id) throw new Error(`Image "${image.alt ?? image.src}" is not in the media registry (src/contract/media.js)`);
   return id;
 }
 
 const link = (l) => (l ? { label: l.label, href: l.to ?? l.href } : undefined);
+/* Source paragraphs (strings) → rich text; published rich text (from the
+   snapshot) is already structured and passes through. */
 const richText = (paragraphs) =>
-  [].concat(paragraphs).map((text) => ({ type: "paragraph", children: [{ type: "text", text }] }));
+  [].concat(paragraphs).map((block) => (typeof block === "string" ? { type: "paragraph", children: [{ type: "text", text: block }] } : block));
 
 /* ---------------- Collections ---------------- */
 
@@ -79,8 +87,10 @@ export const mediaRecords = () =>
   );
 
 export const metricRecords = () =>
-  IMPACT.metrics.map((m) => ({
+  IMPACT.metrics.map((m, i) => ({
     ...envelope(m.id),
+    slug: m.id,
+    order: i,
     value: m.value,
     label: m.label,
     verification: ["verified", "approved"].includes(m.status) ? "verified" : "pending-review",
@@ -121,6 +131,7 @@ export function postRecords() {
       imageId: mediaIdOf(n.image),
       body: richText(n.body),
       programId: n.program,
+      seo: n.seo && compact(n.seo),
     })
   );
   const blogs = BLOGS.map((b) =>
@@ -135,6 +146,7 @@ export function postRecords() {
       author: b.author,
       imageId: mediaIdOf(b.image),
       body: richText(b.body),
+      seo: b.seo && compact(b.seo),
     })
   );
   return [...stories, ...news, ...blogs];
@@ -156,6 +168,9 @@ export const eventRecords = () =>
       venue: e.venue,
       address: e.address,
       mapUrl: e.mapUrl ?? undefined,
+      timezone: e.timezone,
+      registrationUrl: e.registrationUrl,
+      seo: e.seo && compact(e.seo),
       schedule: e.schedule.map(({ time, item }) => compact({ time: time || undefined, item })),
       imageId: mediaIdOf(e.image),
     })
@@ -169,11 +184,12 @@ export const announcementRecords = () =>
 export function popupRecord() {
   const p = ANNOUNCEMENTS.popup;
   return compact({
-    ...envelope(p.id, "published", p.releaseMarker),
+    /* A published CMS popup (M22) clears the parts it leaves out with null. */
+    ...envelope(p.id, "published", p.releaseMarker ?? undefined),
     key: p.id,
-    kicker: p.kicker,
+    kicker: p.kicker ?? undefined,
     heading: p.heading,
-    highlight: p.highlight,
+    highlight: p.highlight ?? undefined,
     body: p.body,
     imageId: mediaIdOf(p.image),
     cta: link(p.cta),
@@ -224,92 +240,283 @@ function block(id, type, data) {
 
 export function homepageRecord() {
   const h = HOMEPAGE;
+  /* The source homepage as the contract's ordered blocks, in the page's
+     own order (pages/Home). The film is a block only while it has one. */
+  const block = (id, type, data) => ({ id, type, enabled: true, version: 1, data });
   return compact({
     ...envelope("homepage"),
-    hero: {
-      slides: h.hero.slides.map((s) => ({
-        id: s.id,
-        headline: s.headline,
-        cta: link(s.cta),
-        imageId: mediaIdOf(s.image),
-        insetId: mediaIdOf(s.inset),
+    sections: [
+      block("hero", "hero", {
+        slides: h.hero.slides.map((s) => ({
+          id: s.id,
+          headline: s.headline,
+          cta: link(s.cta),
+          imageId: mediaIdOf(s.image),
+          insetId: mediaIdOf(s.inset),
+        })),
+        secondaryCta: link(h.hero.ctas.secondary),
+        intervalMs: h.hero.interval,
+      }),
+      /* pages/Home draws the collage's wide photograph and the "with
+         people" highlight. */
+      block("who-we-are", "imageText", compact({
+        kicker: h.whoWeAre.kicker,
+        heading: h.whoWeAre.heading,
+        highlight: "with people",
+        body: h.whoWeAre.body,
+        imageId: mediaIdOf(h.whoWeAre.collage.photos.wide),
+        cta: link(h.whoWeAre.cta),
+        secondaryCta: link(h.whoWeAre.collage.secondary),
       })),
-      secondaryCta: link(h.hero.ctas.secondary),
-      intervalMs: h.hero.interval,
+      block("programs", "programs", { kicker: h.programs.kicker, heading: h.programs.heading }),
+      block("approach", "approach", compact({ kicker: h.approach.kicker, heading: h.approach.heading, body: h.approach.intro, cta: link(h.approach.cta) })),
+      block("impact", "stats", compact({
+        kicker: h.impact.kicker,
+        heading: h.impact.heading,
+        body: h.impact.body,
+        metricIds: IMPACT.metrics.map((m) => m.id),
+        source: h.impact.source,
+        cta: link(h.impact.cta),
+      })),
+      block("timeline", "timeline", {
+        kicker: h.timeline.kicker,
+        heading: h.timeline.heading,
+        cta: link(h.timeline.cta),
+        items: h.timeline.events.map((e) =>
+          compact({
+            id: e.id,
+            date: e.date,
+            programId: e.program,
+            title: e.title,
+            summary: e.summary,
+            youtubeId: e.youtubeId,
+            videoTitle: e.videoTitle,
+            posterId: mediaIdOf(e.poster),
+            releaseMarker: e.releaseMarker,
+          })
+        ),
+      }),
+      block("stories", "stories", { kicker: h.stories.kicker, heading: h.stories.heading, cta: link(h.stories.cta), count: h.stories.slots }),
+      ...(h.video.youtubeId
+        ? [
+            block("video", "video", compact({
+              kicker: h.video.kicker,
+              heading: h.video.heading,
+              highlight: "up close",
+              body: h.video.body,
+              youtubeId: h.video.youtubeId,
+              title: h.video.title,
+              posterId: mediaIdOf(h.video.poster),
+              releaseMarker: h.video.releaseMarker,
+            })),
+          ]
+        : []),
+      block("transparency", "trust", compact({ kicker: h.transparency.kicker, heading: h.transparency.heading, body: h.transparency.body, cta: link(h.transparency.cta) })),
+      block("get-involved", "getInvolved", {
+        kicker: h.getInvolved.kicker,
+        heading: h.getInvolved.heading,
+        imageIds: Object.fromEntries(h.getInvolved.tabs.map((tab) => [tab.key, mediaIdOf(tab)])),
+      }),
+      block("faq", "faq", {
+        kicker: h.faq.kicker,
+        heading: h.faq.heading,
+        highlight: "questions",
+        items: h.faq.items.map((f) => compact({ question: f.q, answer: f.a, releaseMarker: f.releaseMarker })),
+      }),
+      block("final-cta", "cta", compact({
+        heading: h.finalCta.heading,
+        highlight: "beyond borders",
+        body: h.finalCta.body,
+        primary: link(h.finalCta.ctas.primary),
+        secondary: link(h.finalCta.ctas.secondary),
+        imageId: mediaIdOf(h.finalCta.image),
+        cardImageId: mediaIdOf(h.finalCta.cardImage),
+      })),
+    ],
+  });
+}
+
+/* The source About page as the contract's ordered blocks, in the page's
+   own order (pages/About). Block ids are the chapters' own addresses. The
+   transparency chapter is a placement: its content is the transparency
+   records', not the About page's. */
+export function aboutRecord() {
+  const a = ABOUT;
+  const block = (id, type, data) => ({ id, type, enabled: true, version: 1, data });
+  return compact({
+    ...envelope("about"),
+    sections: [
+      block("intro", "pageHero", compact({ title: a.hero.kicker, crumb: a.hero.crumb, body: a.hero.body, cta: link(a.hero.cta) })),
+      /* pages/About draws the "solutions" highlight. */
+      block(a.whoWeAre.id, "statement", compact({ kicker: a.whoWeAre.kicker, heading: a.whoWeAre.heading, highlight: "solutions", body: a.whoWeAre.body })),
+      block(a.missionVision.id, "missionVision", compact({ kicker: a.missionVision.kicker, heading: a.missionVision.heading, mission: a.missionVision.mission, vision: a.missionVision.vision, source: a.missionVision.source })),
+      block(a.values.id, "numberedCards", { kicker: a.values.kicker, heading: a.values.heading, items: a.values.items.map((v) => compact({ title: v.title, description: v.description })) }),
+      block(a.approach.id, "approach", compact({ kicker: a.approach.kicker, heading: a.approach.heading, body: a.approach.intro, cta: link(a.approach.cta) })),
+      block("transparency", "transparency", {}),
+      block("closing", "cta", compact({ heading: a.closingCta.heading, primary: link(a.closingCta.ctas.primary), secondary: link(a.closingCta.ctas.secondary) })),
+    ],
+  });
+}
+
+/* The source Impact page as the contract's ordered blocks, in /impact's
+   own order (pages/Impact). Its figures, programs and stories are NAMED
+   (the figures' keys are their source ids). The two posters are the ones
+   /impact shows today: with no verified geography, Our approach and Our
+   work. */
+export function impactRecord() {
+  const t = IMPACT_PAGES.overview;
+  const { geography, approach, measurement } = IMPACT;
+  const block = (id, type, data) => ({ id, type, enabled: true, version: 1, data });
+  const teaser = (x) => compact({ kicker: x.kicker, heading: x.heading, body: x.body ?? x.empty, cta: link(x.cta) });
+  const hasGeography = geography.regions.length || geography.countries.length;
+  const first = hasGeography ? { ...t.teasers.whereWeWork, body: geography.summary ?? undefined } : { ...t.teasers.approach, body: approach.intro ?? undefined };
+  const second = hasGeography ? { ...t.teasers.approach, body: approach.intro ?? undefined } : t.teasers.work;
+  return compact({
+    ...envelope("impact"),
+    sections: [
+      /* pages/Impact draws the "Impact" highlight. */
+      block("intro", "intro", compact({ kicker: t.kicker, title: t.heading, highlight: "Impact", body: t.body })),
+      block(t.glance.id, "stats", compact({ kicker: t.glance.kicker, heading: t.glance.heading, metricIds: IMPACT.metrics.map((m) => m.id), source: IMPACT.metricsSource })),
+      block("programs", "programImpact", { kicker: t.programs.kicker, heading: t.programs.heading, items: IMPACT.programImpact.map((p) => ({ programId: p.programId, summary: p.summary })) }),
+      block("teasers", "teasers", { items: [teaser(first), teaser(second)] }),
+      block("measurement", "measurement", compact({ heading: t.measurement.heading, body: measurement.intro ?? undefined, items: [...measurement.methods, ...measurement.evidence] })),
+      /* The website's own stories, by slug — only while they are the site's
+         stories (M15: once the CMS's stories replace them, the page names
+         none, as it draws none: never a CMS story by a coincidental slug). */
+      block(t.stories.id, "stories", compact({ kicker: t.stories.kicker, heading: t.stories.heading, storyIds: STORY_SOURCE.cms ? [] : IMPACT.stories.map((slug) => STORIES.find((s) => s.slug === slug)?.id ?? `missing:${slug}`), cta: link(t.stories.cta) })),
+      block("reports", "trust", compact({ kicker: t.reports.kicker, heading: t.reports.heading, body: t.reports.body, cta: link(t.reports.cta) })),
+      block("closing", "cta", compact({ heading: t.closing.heading, primary: link(t.closing.ctas.primary), secondary: link(t.closing.ctas.secondary) })),
+    ],
+  });
+}
+
+/* The source transparency content as the Transparency record: the
+   chapter's words, the financial overview, governance and "How we
+   report" (content/transparency.js). */
+export function transparencyRecord() {
+  const t = TRANSPARENCY_COPY;
+  const { financialOverview, governance, accountability } = TRANSPARENCY;
+  const hasGovernance = Boolean(governance.intro || governance.sections.length);
+  return compact({
+    ...envelope("transparency"),
+    kicker: t.kicker,
+    heading: t.heading,
+    intro: t.body,
+    financialOverview: {
+      year: financialOverview.year,
+      verification: financialOverview.status === "verified" ? "verified" : "pending-review",
+      items: financialOverview.items.map(({ id, label, percentage }) => ({ id, label, percentage })),
     },
-    /* pages/Home draws the collage's wide photograph and the "with
-       people" highlight. */
-    whoWeAre: compact({
-      kicker: h.whoWeAre.kicker,
-      heading: h.whoWeAre.heading,
-      highlight: "with people",
-      body: h.whoWeAre.body,
-      imageId: mediaIdOf(h.whoWeAre.collage.photos.wide),
-      cta: link(h.whoWeAre.cta),
-      secondaryCta: link(h.whoWeAre.collage.secondary),
-    }),
-    programs: { kicker: h.programs.kicker, heading: h.programs.heading },
-    approach: compact({ kicker: h.approach.kicker, heading: h.approach.heading, body: h.approach.intro, cta: link(h.approach.cta) }),
-    impact: compact({
-      kicker: h.impact.kicker,
-      heading: h.impact.heading,
-      body: h.impact.body,
-      metricIds: IMPACT.metrics.map((m) => m.id),
-      source: h.impact.source,
-      cta: link(h.impact.cta),
-    }),
-    timeline: {
-      kicker: h.timeline.kicker,
-      heading: h.timeline.heading,
-      cta: link(h.timeline.cta),
-      items: h.timeline.events.map((e) =>
-        compact({
-          id: e.id,
-          date: e.date,
-          programId: e.program,
-          title: e.title,
-          summary: e.summary,
-          youtubeId: e.youtubeId,
-          videoTitle: e.videoTitle,
-          posterId: mediaIdOf(e.poster),
-          releaseMarker: e.releaseMarker,
-        })
-      ),
-    },
-    stories: { kicker: h.stories.kicker, heading: h.stories.heading, cta: link(h.stories.cta), count: h.stories.slots },
-    video: h.video.youtubeId
-      ? compact({
-          kicker: h.video.kicker,
-          heading: h.video.heading,
-          highlight: "up close",
-          body: h.video.body,
-          youtubeId: h.video.youtubeId,
-          title: h.video.title,
-          posterId: mediaIdOf(h.video.poster),
-          releaseMarker: h.video.releaseMarker,
-        })
-      : undefined,
-    transparency: compact({ kicker: h.transparency.kicker, heading: h.transparency.heading, body: h.transparency.body, cta: link(h.transparency.cta) }),
-    getInvolved: {
-      kicker: h.getInvolved.kicker,
-      heading: h.getInvolved.heading,
-      imageIds: Object.fromEntries(h.getInvolved.tabs.map((tab) => [tab.key, mediaIdOf(tab)])),
-    },
-    faq: {
-      kicker: h.faq.kicker,
-      heading: h.faq.heading,
-      highlight: "questions",
-      items: h.faq.items.map((f) => compact({ question: f.q, answer: f.a, releaseMarker: f.releaseMarker })),
-    },
-    finalCta: compact({
-      heading: h.finalCta.heading,
-      highlight: "beyond borders",
-      body: h.finalCta.body,
-      primary: link(h.finalCta.ctas.primary),
-      secondary: link(h.finalCta.ctas.secondary),
-      imageId: mediaIdOf(h.finalCta.image),
-      cardImageId: mediaIdOf(h.finalCta.cardImage),
-    }),
+    governance: hasGovernance ? compact({ intro: governance.intro ?? undefined, sections: governance.sections.length ? governance.sections : undefined }) : undefined,
+    accountability: accountability.intro ? [accountability.intro].flat() : undefined,
+  });
+}
+
+/* The source transparency documents as Report records — the published
+   ones with a file (none yet: content/transparency.js lists nothing
+   without a real, approved file). */
+export function reportRecords() {
+  const lists = [["annualReport", TRANSPARENCY.annualReports], ["financial", TRANSPARENCY.financialDocuments], ["governance", TRANSPARENCY.governanceDocuments]];
+  return lists.flatMap(([category, docs]) =>
+    publishedDocuments(docs).map((d, i) => compact({ ...envelope(d.id), slug: d.id, category, title: d.title, year: d.year, type: d.type, fileUrl: d.fileUrl, order: i }))
+  );
+}
+
+/* The source projects as Project records, in their list order. Fields the
+   contract does not hold yet (a location, a stage — the record's `status`,
+   distinct from its editorial status — verified impact,
+   partners, a story) are passed through, so a project that ever sets one
+   fails conformance loudly instead of losing it. */
+export function projectRecords() {
+  return PROJECT_RECORDS.map((p, i) =>
+    compact({
+      ...envelope(p.id, fromLegacyStatus(p.editorialStatus), p.releaseMarker),
+      slug: p.slug,
+      title: p.title,
+      programId: p.program,
+      description: p.description,
+      imageId: mediaIdOf(p.image),
+      context: p.context,
+      activities: p.activities,
+      approach: p.approach,
+      outcomes: p.outcomes,
+      featured: p.featured,
+      order: i,
+      location: p.location,
+      stage: p.status,
+      date: p.date,
+      impact: p.impact,
+      partners: p.partners,
+      story: p.story,
+    })
+  );
+}
+
+/* The source Careers page as the Careers record: its header, its three
+   sections (an absent one stays absent), the open roles (only verified
+   ones are on the page) and the closing ask; the meta description is the
+   record's SEO description. */
+export function careersRecord() {
+  const c = CAREERS;
+  const section = (id) => {
+    const s = c.sections.find((x) => x.id === id);
+    return s?.body ? { heading: s.heading, body: s.body } : undefined;
+  };
+  const opportunities = c.sections.find((x) => x.id === "opportunities");
+  return compact({
+    ...envelope("careers"),
+    kicker: c.kicker,
+    title: c.title,
+    intro: c.body,
+    why: section("why"),
+    opportunities: { heading: opportunities.heading, empty: opportunities.empty, roles: c.roles.filter((r) => r.status === "verified").map((r) => ({ title: r.title })) },
+    apply: section("apply"),
+    closing: compact({ heading: c.closing.heading, primary: link(c.closing.ctas.primary), secondary: link(c.closing.ctas.secondary) }),
+    seo: c.metaDescription ? { description: c.metaDescription } : undefined,
+  });
+}
+
+/* The source team as TeamMember records. A source record that is not
+   approved is a draft; the sample profiles keep their release marker. */
+export function teamRecords() {
+  return TEAM_MEMBERS.map((m) =>
+    compact({
+      ...envelope(m.id, m.status === "approved" ? "published" : m.status === "archived" ? "archived" : "draft", m.releaseMarker),
+      slug: m.slug,
+      name: m.name,
+      role: m.role,
+      group: m.category,
+      order: m.order ?? 0,
+      featured: m.featured,
+      shortBio: m.shortBio,
+      biography: m.biography,
+      imageId: m.imageId ?? (m.image ? mediaIdOf({ src: m.image }) : undefined),
+      departmentOrArea: m.departmentOrArea,
+      location: m.location,
+      socialLinks: m.socialLinks?.map((l) => ({ label: l.label, url: l.url })),
+      relatedLinks: m.relatedLinks?.map((l) => ({ label: l.label, href: l.to })),
+    })
+  );
+}
+
+/* The source program areas as Program records, in their order. `to` is
+   derived from the slug (/work/<slug>) and checked to be. */
+export function programRecords() {
+  return PROGRAMS.map((p, i) => {
+    if (p.to !== `/work/${p.slug}`) throw new Error(`Program "${p.slug}": its address must be /work/${p.slug} (src/content/work.js)`);
+    return compact({
+      ...envelope(p.slug),
+      slug: p.slug,
+      title: p.title,
+      icon: p.icon,
+      order: i,
+      description: p.description,
+      missingNote: p.missing,
+      why: p.why === undefined ? undefined : [].concat(p.why),
+      activities: p.activities?.length ? p.activities : undefined,
+      impact: p.impact?.length ? p.impact : undefined,
+      stories: p.stories?.length ? p.stories : undefined,
+    });
   });
 }
 

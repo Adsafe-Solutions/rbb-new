@@ -22,6 +22,13 @@ export const ScheduleItem = z.strictObject({
   item: text(200),
 });
 
+/* "6:30 PM" → minutes after midnight, for comparing times on one day. */
+export const minutesOf = (time: string): number => {
+  const m = /^(1[0-2]|[1-9]):([0-5]\d) (AM|PM)$/.exec(time);
+  if (!m) return NaN;
+  return ((Number(m[1]) % 12) + (m[3] === "PM" ? 12 : 0)) * 60 + Number(m[2]);
+};
+
 export const Event = z.strictObject({
   ...recordFields,
   slug: Slug,
@@ -42,5 +49,10 @@ export const Event = z.strictObject({
   schedule: z.array(ScheduleItem).max(20),
   imageId: MediaId,
   seo: SeoOverrides.optional(),
+}).superRefine((event, ctx) => {
+  /* One calendar day, in the event's own time: an end must come after
+     the start. Times are never converted — they are what the event says. */
+  if (event.endTime && minutesOf(event.endTime) <= minutesOf(event.startTime))
+    ctx.addIssue({ code: "custom", path: ["endTime"], message: "must be after the start time" });
 });
 export type Event = z.infer<typeof Event>;

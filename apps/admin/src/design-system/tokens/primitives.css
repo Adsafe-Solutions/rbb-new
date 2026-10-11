@@ -1,0 +1,88 @@
+/* Layer 1 — PRIMITIVES. Raw values with no meaning attached: a cool
+   neutral ramp, the status hues the brand does not supply, and the
+   scales (type, space, radius, elevation, motion).
+
+   Components never read these directly. They read the semantic layer
+   (semantic.css), which maps meaning onto primitives and onto the brand
+   layer (brand.ts). Changing a value here changes every semantic token
+   built on it. */
+
+:root {
+  /* Neutrals — cool, so they sit with the brand's Light Gray (#F5F7FA). */
+  --primitive-neutral-0: #ffffff;
+  --primitive-neutral-25: #fbfcfd;
+  --primitive-neutral-50: #f6f8fa;
+  --primitive-neutral-100: #eef1f5;
+  --primitive-neutral-200: #e2e6ec;
+  --primitive-neutral-300: #cfd5de;
+  --primitive-neutral-400: #a3acb9;
+  --primitive-neutral-450: #858e9b;
+  --primitive-neutral-500: #656d7a;
+  --primitive-neutral-600: #545c68;
+  --primitive-neutral-700: #3d444f;
+  --primitive-neutral-800: #272c33;
+  --primitive-neutral-900: #181b20;
+  --primitive-neutral-950: #0f1114;
+
+  /* Status hues the brand palette does not cover. */
+  --primitive-red-50: #fef2f2;
+  --primitive-red-200: #f9c9c6;
+  --primitive-red-600: #c8281e;
+  --primitive-red-700: #a71f17;
+  --primitive-amber-50: #fff8eb;
+  --primitive-amber-200: #f6dca5;
+  --primitive-amber-500: #d98e04;
+  --primitive-amber-800: #8a4b06;
+  --primitive-violet-50: #f5f3ff;
+  --primitive-violet-200: #ddd6fe;
+  --primitive-violet-700: #5b3fc4;
+
+  /* Type families. Geist (OFL-1.1, self-hosted via @fontsource-variable);
+     the system stack is only a fallback while the files load. */
+  --primitive-font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --primitive-font-mono: "Geist Mono Variable", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* Spacing — an 8px rhythm with 4px half-steps. The suffix is the
+     multiple of 4px, so --space-4 is 16px and --space-16 is 64px. */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radius — small and consistent; nothing in the admin is pill-shaped
+     except avatars, switches and badges' dots. */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-full: 9999px;
+
+  /* Motion — restrained. Reduced-motion zeroes the durations (base.css). */
+  --motion-duration-fast: 120ms;
+  --motion-duration-base: 180ms;
+  --motion-duration-slow: 240ms;
+  --motion-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Stacking order, lowest to highest. */
+  --z-sticky: 10;
+  --z-sidebar: 20;
+  --z-topbar: 30;
+  --z-dropdown: 40;
+  --z-overlay: 50;
+  --z-toast: 60;
+  --z-tooltip: 70;
+
+  /* Shell layout. */
+  --layout-sidebar-width: 248px;
+  --layout-sidebar-rail-width: 60px;
+  --layout-topbar-height: 56px;
+  --layout-content-max: 1200px;
+}

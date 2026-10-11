@@ -28,6 +28,7 @@ import {
   PROJECTS,
   SITE,
   impactStats,
+  transparencyLinks,
   latestStories,
   pathCards,
   projectPath,
@@ -120,7 +121,7 @@ export default function Components() {
           </PosterCard>
           <TicketCard
             kicker="Transparency"
-            rows={SITE.transparencyLinks.map((l) => (
+            rows={transparencyLinks().map((l) => (
               <p key={l.title} className="font-extrabold text-fg">
                 {l.title}
               </p>

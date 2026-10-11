@@ -42,6 +42,8 @@ import {
   collectInline,
   contentSecurityPolicy,
   securityHeaders,
+  DONATION_WIDGET,
+  hasDonationWidget,
 } from "./security-policy.mjs";
 import { productionGate, contentReadiness, indexingProblems } from "./production-gate.mjs";
 
@@ -166,6 +168,19 @@ try {
   const routes = ssr.prerenderPaths();
   const redirects = ssr.redirects();
 
+  /* The CMS's published snapshot, if this build applied one
+     (scripts/published-snapshot.mjs): valid against the content contract,
+     or the build stops. Recorded in build-meta either way. */
+  const published = ssr.publishedSnapshotInfo();
+  if (published.problems.length)
+    fail(`the published snapshot fails the content contract (${published.problems.length}):\n  - ${published.problems.join("\n  - ")}`);
+  await mkdir(metaDir, { recursive: true });
+  await writeFile(
+    join(metaDir, "published-snapshot-report.json"),
+    JSON.stringify(published.snapshot ? { source: "published-snapshot", ...published.snapshot } : { source: "source-content" }, null, 2) + "\n"
+  );
+  if (published.snapshot) console.log(`  built from published snapshot version ${published.snapshot.version}`);
+
   /* Document 18: validate the content first. Any error stops the build —
      a malformed approved record never becomes a public page. */
   const check = ssr.validate();
@@ -249,10 +264,17 @@ try {
   /* The homepage video's player origin (VIDEO) goes into the homepage's
      policy only, and only when content has a video. */
   const video = Boolean(ssr.featuredVideo?.());
-  const metaCsp = contentSecurityPolicy(inline, { forMeta: true });
+  /* The donation widget's origins (DONATION_WIDGET) go into the policy of a
+     page that contains a widget, and nowhere else. */
+  const donationRoutes = pages.filter((p) => hasDonationWidget(p.html)).map((p) => p.route);
+  const donation = donationRoutes.length > 0;
   for (const { route, file, html } of pages) {
-    const policy =
-      video && route === VIDEO_ROUTE ? contentSecurityPolicy(inline, { forMeta: true, video: true }) : metaCsp;
+    const policy = contentSecurityPolicy(inline, {
+      forMeta: true,
+      video: video && route === VIDEO_ROUTE,
+      donation: donationRoutes.includes(route),
+      images: published.imageOrigins,
+    });
     const out = reportOnly
       ? html
       : html.replace(
@@ -355,8 +377,10 @@ try {
       );
   }
 
+  /* The published snapshot's image origin is approved for this build by
+     the API that published it (img-src only — see above). */
   const unapproved = obs.thirdPartyOrigins.filter(
-    (o) => !approvedOriginList().includes(o)
+    (o) => !approvedOriginList().includes(o) && !published.imageOrigins.includes(o)
   );
   if (unapproved.length)
     fail(`unapproved third-party origin(s) in published pages: ${unapproved.join(", ")}`);
@@ -370,7 +394,8 @@ try {
           styleAttributes: inline.styles.length,
         },
         video: video ? { page: VIDEO_ROUTE, frame: VIDEO.frame, features: VIDEO.features } : false,
-        headers: securityHeaders(inline, { reportOnly, video }),
+        donationWidget: donation ? { pages: donationRoutes, provider: DONATION_WIDGET.provider } : false,
+        headers: securityHeaders(inline, { reportOnly, video, donation, images: published.imageOrigins }),
       },
       null,
       2

@@ -20,6 +20,7 @@
 
 import { BRAND } from "./brand.js";
 import { SITE } from "./site.js";
+import { transparencyLinks } from "./transparency.js";
 import { PROGRAMS, PROJECTS, projectHighlights, projectPath } from "./work.js";
 import { IMPACT, approachSteps, impactStats, metricsNote } from "./impact.js";
 import { GET_INVOLVED, pathCards } from "./getInvolved.js";
@@ -338,7 +339,7 @@ export const HOMEPAGE = {
     kicker: "Transparency",
     heading: "Trust matters.",
     body: "Supporters should always be able to see how our work is run and how resources are used.",
-    links: SITE.transparencyLinks,
+    links: transparencyLinks(),
     linkMeta: SITE.transparencyLinkMeta,
     cta: { label: "View Transparency", to: "/about#transparency" },
   },
@@ -428,5 +429,13 @@ export const HOMEPAGE = {
     cardImage: WORKING_PHOTOS.checkup,
   },
 };
+
+/* The homepage as the CMS published it — set by the build from the
+   published snapshot (scripts/snapshot-adapter.mjs), and empty otherwise.
+   While empty, the homepage is HOMEPAGE above, exactly as it always was.
+   Once the organization PUBLISHES a homepage in the CMS, `page` holds its
+   blocks in order — { sections: [{ id, type, data }], seo? } — and
+   pages/Home draws those instead (pages/Home/CmsHome). */
+export const PUBLISHED_HOMEPAGE = {};
 
 export default HOMEPAGE;

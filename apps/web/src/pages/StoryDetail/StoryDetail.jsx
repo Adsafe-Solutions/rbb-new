@@ -1,3 +1,4 @@
+import { RichBlock } from "../../components/RichText/RichText.jsx";
 import { useParams } from "react-router-dom";
 import PageHeader from "../../components/PageHeader/PageHeader.jsx";
 import Section from "../../components/Section/Section.jsx";
@@ -20,6 +21,12 @@ import {
   storyBySlug,
   storyCard,
 } from "../../content/index.js";
+
+/* The opening paragraph carries the drop cap; the rest read at body size. */
+const paragraphClass = (i) =>
+  i === 0
+    ? "text-[20px] leading-[1.7] text-copy first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:rounded-lg first-letter:bg-bumble-honey first-letter:px-2.5 first-letter:text-[3.4em] first-letter:font-black first-letter:leading-[0.95] first-letter:text-night"
+    : "mt-6 text-[length:var(--text-body)] leading-[1.75] text-copy";
 
 /* /stories/:slug — one approved story (Document 07's detail template),
    built entirely from its entry in content/stories.js.
@@ -97,18 +104,17 @@ function Detail({ story }) {
             {/* The release marker, for HTML scans only: `hidden` keeps it
                 off the screen and out of the accessibility tree. */}
             {story.releaseMarker && <span hidden data-release-marker={story.releaseMarker} />}
-            {(story.body ?? []).map((paragraph, i) => (
-              <p
-                key={paragraph}
-                className={
-                  i === 0
-                    ? "text-[20px] leading-[1.7] text-copy first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:rounded-lg first-letter:bg-bumble-honey first-letter:px-2.5 first-letter:text-[3.4em] first-letter:font-black first-letter:leading-[0.95] first-letter:text-night"
-                    : "mt-6 text-[length:var(--text-body)] leading-[1.75] text-copy"
-                }
-              >
-                {paragraph}
-              </p>
-            ))}
+            {(story.body ?? []).map((paragraph, i) =>
+              /* Source stories are plain paragraphs; a published CMS story
+                 is structured rich text (components/RichText). */
+              typeof paragraph === "string" ? (
+                <p key={paragraph} className={paragraphClass(i)}>
+                  {paragraph}
+                </p>
+              ) : (
+                <RichBlock key={i} block={paragraph} index={i} paragraphClass={paragraphClass} />
+              )
+            )}
             {story.quotes?.map((quote) => (
               <figure key={quote.text} className="my-12 border-l-[6px] border-pop pl-6 md:-mx-10 md:pl-10">
                 <Mark className="h-8 w-8 text-pop" />

@@ -1,0 +1,124 @@
+.dialog,
+.drawer {
+  padding: 0;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-raised);
+  color: var(--color-text);
+  box-shadow: var(--shadow-dialog);
+}
+.dialog::backdrop,
+.drawer::backdrop {
+  background: var(--color-bg-backdrop);
+  animation: fade-in var(--motion-duration-base) var(--motion-ease-standard);
+}
+
+.dialog {
+  width: min(100% - 32px, var(--dialog-width));
+  max-height: min(100% - 64px, 720px);
+  border-radius: var(--radius-xl);
+  animation: dialog-in var(--motion-duration-base) var(--motion-ease-standard);
+}
+.sm {
+  --dialog-width: 400px;
+}
+.md {
+  --dialog-width: 520px;
+}
+.lg {
+  --dialog-width: 720px;
+}
+.content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: inherit;
+}
+.header {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-5) var(--space-12) 0 var(--space-6);
+}
+.title {
+  color: var(--color-text-strong);
+  font-size: var(--type-h2-size);
+  line-height: var(--type-h2-line);
+  font-weight: var(--type-h2-weight);
+  letter-spacing: var(--type-h2-tracking);
+}
+.description {
+  color: var(--color-text-muted);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-line);
+}
+.body {
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-6) var(--space-2);
+}
+.header + .footer {
+  margin-top: var(--space-4);
+}
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-6);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg-subtle);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+.close {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+}
+
+.drawer {
+  width: min(85vw, 300px);
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  border-width: 0;
+  border-radius: 0;
+}
+.drawerLg {
+  width: min(100vw, 480px);
+}
+.left {
+  margin-right: auto;
+  border-right-width: 1px;
+  animation: drawer-in-left var(--motion-duration-slow) var(--motion-ease-standard);
+}
+.right {
+  margin-left: auto;
+  border-left-width: 1px;
+  animation: drawer-in-right var(--motion-duration-slow) var(--motion-ease-standard);
+}
+.drawerContent {
+  height: 100%;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    scale: 0.98;
+    translate: 0 4px;
+  }
+}
+@keyframes drawer-in-left {
+  from {
+    translate: -100% 0;
+  }
+}
+@keyframes drawer-in-right {
+  from {
+    translate: 100% 0;
+  }
+}

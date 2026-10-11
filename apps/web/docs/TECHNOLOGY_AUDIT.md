@@ -45,6 +45,26 @@ Each of the two receives the visitor's IP address and browser details.
 Self-hosting DM Sans would remove both; the SIL Open Font License permits
 it (Document 15).
 
+### Donation widget — approved for widget pages only, NOT active (M3.5)
+
+Givebutter's checkout widget was verified in a browser (docs/GIVEBUTTER_SPIKE.md
+at the repository root). Its origins are listed in `scripts/security-policy.mjs`
+(`DONATION_WIDGET`) and enter a page's policy only when that page contains a
+`<givebutter-…>` element. **No published page does today**, so the published
+CSP, headers and third-party list above are unchanged.
+
+| Origin | What | Purpose | Loaded |
+| --- | --- | --- | --- |
+| `widgets.givebutter.com` | script + fetch | Widget library and its configuration | Only on a page with a widget, after hydration |
+| `givebutter.com` | frame + fetch + image | The checkout (iframe) and its data | Same |
+
+Inside the checkout frame (Givebutter's document, under Givebutter's own
+policy, not this site's): Stripe, Google Analytics/Tag Manager, Cloudflare
+Insights and Turnstile, PostHog (`ph.givebutter.com`), Google Maps and
+FontAwesome. Before a widget is published, the privacy policy must cover
+donating through a Givebutter-hosted checkout. Open item: the library writes
+inline styles the site's CSP blocks (no visible effect; see the spike notes).
+
 ### Server-side services (not browser origins)
 
 | Service | Where it runs | Data | Status |

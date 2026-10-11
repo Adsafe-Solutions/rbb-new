@@ -58,6 +58,43 @@ export const resolveDonationForm = (defaults: DonationFormConfig, overrides: Don
    Never shown to the donor. */
 export const DonationDesignation = Slug;
 
+/* The provider checkout a donation page embeds instead of the site's own
+   form — the payment provider's widget, configured by PUBLIC identifiers
+   only. Givebutter is the provider; payment, amounts, frequencies and
+   donor records stay entirely Givebutter's.
+
+     campaignId        Givebutter's numeric campaign id. The API verifies
+                       it with Givebutter (server-side) before a page that
+                       uses it can be published
+     widgetId          the Form widget's id from the Givebutter dashboard.
+                       Givebutter's API cannot list widgets or say which
+                       campaign a widget belongs to, so this is stored as
+                       the editor configured it — never inferred
+     widgetType        "form": the one widget type the site embeds
+     defaultAmount     optional preselection: one of the amounts the
+                       campaign already offers (major units)
+     defaultFrequency  optional preselection: one of the campaign's own
+                       frequencies
+
+   No account id: that is deployment configuration (the web build's
+   VITE_GIVEBUTTER_ACCOUNT_ID). No API key, ever: it is server-only. */
+export const GIVEBUTTER_FREQUENCIES = ["once", "monthly", "quarterly", "yearly"] as const;
+
+export const DonationCheckout = z.strictObject({
+  provider: z.literal("givebutter"),
+  campaignId: z.string().regex(/^\d{1,20}$/, "must be a Givebutter campaign id (digits)"),
+  widgetId: z.string().regex(/^[A-Za-z0-9]{4,16}$/, "must be a Givebutter widget id (4–16 letters or digits)"),
+  widgetType: z.literal("form"),
+  defaultAmount: z
+    .number()
+    .positive()
+    .max(1_000_000)
+    .refine((n) => Math.round(n * 100) === n * 100, "must have at most two decimal places")
+    .optional(),
+  defaultFrequency: z.enum(GIVEBUTTER_FREQUENCIES).optional(),
+});
+export type DonationCheckout = z.infer<typeof DonationCheckout>;
+
 /* Site-wide donation settings (SiteSettings.donations). */
 export const DonationSettings = z.strictObject({
   form: DonationFormConfig,

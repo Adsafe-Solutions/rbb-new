@@ -144,7 +144,7 @@ export const AppealListData = z
      enabled  false keeps the section in the record but off the page
      version  the version of this block type's data schema (all 1 today),
               so a block can be migrated when its schema evolves */
-const section = <T extends string, D extends z.ZodType>(type: T, data: D) =>
+export const sectionBlock = <T extends string, D extends z.ZodType>(type: T, data: D) =>
   z.strictObject({
     id: EntityId,
     type: z.literal(type),
@@ -153,15 +153,15 @@ const section = <T extends string, D extends z.ZodType>(type: T, data: D) =>
     data,
   });
 
-export const StatementSection = section("statement", StatementData);
-export const RichTextSection = section("richText", RichTextData);
-export const NumberedCardsSection = section("numberedCards", NumberedCardsData);
-export const ImageTextSection = section("imageText", ImageTextData);
-export const StatsSection = section("stats", StatsData);
-export const FaqSection = section("faq", FaqData);
-export const CtaSection = section("cta", CtaData);
-export const TrustSection = section("trust", TrustData);
-export const AppealListSection = section("appealList", AppealListData);
+export const StatementSection = sectionBlock("statement", StatementData);
+export const RichTextSection = sectionBlock("richText", RichTextData);
+export const NumberedCardsSection = sectionBlock("numberedCards", NumberedCardsData);
+export const ImageTextSection = sectionBlock("imageText", ImageTextData);
+export const StatsSection = sectionBlock("stats", StatsData);
+export const FaqSection = sectionBlock("faq", FaqData);
+export const CtaSection = sectionBlock("cta", CtaData);
+export const TrustSection = sectionBlock("trust", TrustData);
+export const AppealListSection = sectionBlock("appealList", AppealListData);
 
 /* Any section. An unknown `type` is refused — there is no generic or
    free-form block. */

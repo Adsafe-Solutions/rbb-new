@@ -37,11 +37,15 @@ import { SITE } from "./site.js";
 import { PAGES } from "./nav.js";
 import { ORG_CONTACT, CAREERS, CONTACT_COPY, verifiedOnly } from "./contact.js";
 import { GET_INVOLVED } from "./getInvolved.js";
-import { IMPACT } from "./impact.js";
+import { IMPACT, PUBLISHED_IMPACT } from "./impact.js";
 import { PROGRAMS, PROJECTS, projectPath } from "./work.js";
 import { published, storyPath, categoryById } from "./stories.js";
 import { approvedMembers, hasProfile, memberPath } from "./team.js";
 import { POLICIES, isFinalPolicy } from "./policies.js";
+import { APPEALS, appealPath } from "./appeals.js";
+import { PUBLISHED_GENERAL_DONATION } from "./donation.js";
+import { PUBLISHED_HOMEPAGE } from "./homepage.js";
+import { PUBLISHED_ABOUT } from "./about.js";
 import { isWorkingContent } from "../lib/releaseMarkers.js";
 import { APPROVALS } from "../../release/approvals.mjs";
 
@@ -117,35 +121,64 @@ const programList = PROGRAMS.map((p) => p.title);
 const joined = `${programList.slice(0, -1).join(", ")} and ${programList.at(-1)}`;
 
 const RULES = {
-  "/": { description: SITE.description, index: () => true },
+  /* The homepage's SEO is the CMS's once a homepage is published there
+     (its own title, description and share image; `noIndex` can only take
+     it out of the index) — the site defaults otherwise. */
+  "/": {
+    title: PUBLISHED_HOMEPAGE.page?.seo?.title,
+    description: PUBLISHED_HOMEPAGE.page?.seo?.description ?? SITE.description,
+    image: PUBLISHED_HOMEPAGE.page?.seo?.image,
+    index: () => !PUBLISHED_HOMEPAGE.page?.seo?.noIndex,
+  },
 
   /* Sections whose own content is real: mission, vision, program areas,
      the ways to take part. */
   /* The one About page: who RBB is, mission and vision, values, how it
      works, and transparency and financials — the old standalone pages
      forward to its sections, so this is the only indexable copy. */
+  /* The About page's SEO is the CMS's once it is published there (as the
+     homepage's); its own description otherwise. */
   "/about": {
-    description: `Who ${BRAND.fullName} is: its mission, vision and values, how it works, and its transparency and financials.`,
-    index: () => true,
+    title: PUBLISHED_ABOUT.page?.seo?.title,
+    description: PUBLISHED_ABOUT.page?.seo?.description ?? `Who ${BRAND.fullName} is: its mission, vision and values, how it works, and its transparency and financials.`,
+    image: PUBLISHED_ABOUT.page?.seo?.image,
+    index: () => !PUBLISHED_ABOUT.page?.seo?.noIndex,
   },
   "/work": {
     description: `The four program areas of ${BRAND.fullName}: ${joined}.`,
     index: () => true,
   },
+  /* A program published from the CMS may set its own SEO title,
+     description and share image; `noIndex` can only take it out of the
+     index. Source programs carry none: their rule is unchanged. */
   ...Object.fromEntries(
     PROGRAMS.map((p) => [
       p.to,
       {
-        description: `${p.description} One of the four program areas of ${BRAND.fullName}.`,
-        index: () => true,
+        title: p.seo?.title,
+        description: p.seo?.description ?? `${p.description} One of the four program areas of ${BRAND.fullName}.`,
+        image: p.seo?.image,
+        index: () => !p.seo?.noIndex,
       },
     ])
   ),
-  "/impact": { index: () => true },
+  /* The Impact page's SEO is the CMS's once it is published there (as the
+     About page's); otherwise its menu entry's description, as before. */
+  "/impact": {
+    title: PUBLISHED_IMPACT.page?.seo?.title,
+    description: PUBLISHED_IMPACT.page?.seo?.description,
+    image: PUBLISHED_IMPACT.page?.seo?.image,
+    index: () => !PUBLISHED_IMPACT.page?.seo?.noIndex,
+  },
   "/get-involved": { index: () => true },
   /* The donation page's successor, indexed as it was. The appeals on it
-     are not: each is a working placeholder until RBB supplies it. */
-  "/appeals": { index: () => true },
+     are not: each is a working placeholder until RBB supplies it. Its
+     title and description are the CMS's once the page is published there
+     (undefined otherwise: the sitemap entry's own). */
+  "/appeals": { title: PUBLISHED_GENERAL_DONATION.page?.seo?.title, description: PUBLISHED_GENERAL_DONATION.page?.seo?.description, index: () => true },
+  /* Appeals published from the CMS: their own title and description.
+     Still never indexed — appeal routes have no approval area (AREAS). */
+  ...Object.fromEntries(APPEALS.filter((a) => a.seo).map((a) => [appealPath(a), { title: a.seo.title, description: a.seo.description }])),
   ...Object.fromEntries(GET_INVOLVED.paths.map((p) => [p.to, { description: p.metaDescription, index: () => true }])),
   "/contact": { description: CONTACT_COPY.metaDescription, index: () => true },
 
@@ -160,10 +193,13 @@ const RULES = {
     index: () => PROJECTS.length > 0,
   },
   "/about/team": { index: () => approvedMembers().length > 0 },
+  /* The Careers page's SEO is the CMS's once it is published there
+     (M13: its own title and description, `noIndex` only ever removing it);
+     as before, it is indexed only with an open role. */
   "/about-us/careers": {
-    title: CAREERS.title,
+    title: CAREERS.seoTitle ?? CAREERS.title,
     description: CAREERS.metaDescription,
-    index: () => CAREERS.roles.some((r) => verified(r)),
+    index: () => CAREERS.roles.some((r) => verified(r)) && !CAREERS.noIndex,
   },
 
   /* Pages whose substance is still pending. */
@@ -289,7 +325,7 @@ export function routeMeta(pathname, overrides = {}) {
   const page = PAGE_BY_ROUTE.get(route);
   const rule = RULES[route] ?? {};
   const indexable = Boolean(rule.index?.()) && allApproved(approvalAreas(route));
-  const title = route === "/" ? undefined : (overrides.title ?? rule.title ?? page?.title ?? page?.label);
+  const title = route === "/" ? rule.title : (overrides.title ?? rule.title ?? page?.title ?? page?.label);
   const description = rule.description ?? page?.description ?? overrides.description ?? SITE.description;
 
   const trail = page?.parent
@@ -303,6 +339,7 @@ export function routeMeta(pathname, overrides = {}) {
     title,
     description,
     robots: indexable ? INDEX : NOINDEX,
+    ...(rule.image && { image: rule.image }),
     schema: indexable ? [route === "/" ? organizationSchema() : breadcrumbSchema(trail)] : [],
     areas: approvalAreas(route),
   });
@@ -324,21 +361,24 @@ export const notFoundMeta = () =>
 /* One approved story. Article schema only from fields the story itself
    carries: headline, its approved date and image. No author or publisher
    is added that the story does not state. */
+/* A CMS story or project may set its own SEO title, description and share
+   image (M12); `noIndex` can only take it out of the index. Source records
+   carry none: their metadata is unchanged. */
 export function storyMeta(story) {
   const route = storyPath(story);
   const category = categoryById(story.category);
-  const image = story.image?.src;
-  const indexable = detailIndexable("stories", story);
+  const image = story.seo?.image ?? story.image?.src;
+  const indexable = detailIndexable("stories", story) && !story.seo?.noIndex;
   return build({
     route,
     areas: ["stories"],
-    title: story.title,
+    title: story.seo?.title ?? story.title,
     description: indexable
-      ? (story.excerpt ?? `${category ? `${category.label}: ` : ""}${story.title}.`)
+      ? (story.seo?.description ?? story.excerpt ?? `${category ? `${category.label}: ` : ""}${story.title}.`)
       : SITE.previewDescription,
     robots: indexable ? INDEX : NOINDEX,
     image,
-    imageAlt: story.image?.alt,
+    imageAlt: story.seo?.image ? undefined : story.image?.alt,
     ogType: "article",
     schema: [
       ENV.siteOrigin && {
@@ -363,17 +403,17 @@ export function storyMeta(story) {
 export function projectMeta(project) {
   const route = projectPath(project);
   const program = PROGRAMS.find((p) => p.slug === project.program);
-  const indexable = detailIndexable("programs", project);
+  const indexable = detailIndexable("programs", project) && !project.seo?.noIndex;
   return build({
     route,
     areas: ["programs"],
-    title: project.title,
+    title: project.seo?.title ?? project.title,
     description: indexable
-      ? (project.description ?? `${project.title} — a ${program ? `${program.title} ` : ""}project of ${BRAND.fullName}.`)
+      ? (project.seo?.description ?? project.description ?? `${project.title} — a ${program ? `${program.title} ` : ""}project of ${BRAND.fullName}.`)
       : SITE.previewDescription,
     robots: indexable ? INDEX : NOINDEX,
-    image: project.image?.src,
-    imageAlt: project.image?.alt,
+    image: project.seo?.image ?? project.image?.src,
+    imageAlt: project.seo?.image ? undefined : project.image?.alt,
     schema: [
       breadcrumbSchema([
         { label: "Home", to: "/" },

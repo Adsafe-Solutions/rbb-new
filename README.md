@@ -6,7 +6,7 @@ the admin and API are foundations only (M0).
 ```
 apps/web/       the public website — Vite + React (JavaScript), pre-rendered.
                 Its own guide: apps/web/README.md, apps/web/CLAUDE.md, apps/web/docs/
-apps/admin/     admin foundation — Vite + React + TypeScript (boots only)
+apps/admin/     the admin — Vite + React + TypeScript; sign-in and a signed-in shell (see apps/admin/README.md)
 apps/api/       the API — Node + TypeScript + MongoDB (see apps/api/README.md)
 packages/       content-schema — the content contract (Zod); forms — the form
                 domain; money — boundary, empty until needed
@@ -36,6 +36,8 @@ pnpm api:build            # typecheck + bundle into apps/api/dist
 pnpm api:test             # unit tests
 MONGODB_TEST_URI=… pnpm api:test:integration   # disposable MongoDB only
 pnpm api:db:indexes       # create missing indexes (non-destructive)
+pnpm api:auth:bootstrap -- --confirm   # create the FIRST owner (see apps/api/README.md)
+pnpm admin:smoke          # browser sign-in test against a running admin + API
 pnpm schema:test          # content contract tests
 pnpm typecheck            # content-schema + admin + api
 ```

@@ -72,11 +72,11 @@ test("an unknown enum value is refused", () => {
   fails(Popup, { ...fx.popup(), frequency: "always" }, ["frequency"]);
 });
 
-test("only draft, published and archived are publication states", () => {
-  for (const status of ["draft", "published", "archived"]) ok(Appeal, { ...fx.appeal(), status });
+test("the editorial lifecycle is the only set of publication states (M14)", () => {
+  for (const status of ["draft", "submitted", "approved", "published", "archived"]) ok(Appeal, { ...fx.appeal(), status });
   /* The web's legacy editorial statuses are translated by its importer,
-     never stored as-is. */
-  for (const status of ["approved", "verified", "pending-review", "placeholder", ""]) fails(Appeal, { ...fx.appeal(), status }, ["status"]);
+     never stored as-is ("approved" is an editorial state since M14). */
+  for (const status of ["verified", "pending-review", "placeholder", "review", ""]) fails(Appeal, { ...fx.appeal(), status }, ["status"]);
 });
 
 test("fields the contract does not define are refused (no styling, no stray keys)", () => {
@@ -192,4 +192,30 @@ test("dates, times and windows are real", () => {
 
 test("a highlight must be part of its heading", () => {
   fails(Popup, { ...fx.popup(), highlight: "elsewhere" }, ["highlight"]);
+});
+
+test("events: an end time must come after the start, on the event's own day", () => {
+  fails(Event, { ...fx.event(), startTime: "6:30 PM", endTime: "6:30 PM" }, ["endTime"]);
+  fails(Event, { ...fx.event(), startTime: "9:00 PM", endTime: "10:00 AM" }, ["endTime"]);
+  ok(Event, { ...fx.event(), startTime: "11:30 AM", endTime: "12:15 PM" });
+  ok(Event, { ...fx.event(), endTime: undefined });
+});
+
+test("DonationCheckout: a typed Givebutter reference — public ids only, nothing else", async () => {
+  const { DonationCheckout } = await import("./index.ts");
+  const valid = { provider: "givebutter", campaignId: "758500", widgetId: "jNKkQk", widgetType: "form" };
+  assert.equal(DonationCheckout.safeParse(valid).success, true);
+  assert.equal(DonationCheckout.safeParse({ ...valid, defaultAmount: 50, defaultFrequency: "monthly" }).success, true);
+  for (const [name, value] of [
+    ["provider", { ...valid, provider: "paypal" }],
+    ["campaign code instead of id", { ...valid, campaignId: "GN49PE" }],
+    ["widget id with markup", { ...valid, widgetId: "<script>" }],
+    ["widget type", { ...valid, widgetType: "button" }],
+    ["amount precision", { ...valid, defaultAmount: 10.005 }],
+    ["negative amount", { ...valid, defaultAmount: -5 }],
+    ["frequency", { ...valid, defaultFrequency: "weekly" }],
+    ["unknown field", { ...valid, accountId: "G74PAxznHgSZtsvG" }],
+    ["credential", { ...valid, apiKey: "x" }],
+  ] as const)
+    assert.equal(DonationCheckout.safeParse(value).success, false, name);
 });

@@ -61,6 +61,38 @@ export const VIDEO = {
 };
 export const VIDEO_ROUTE = "/";
 
+/* The donation provider's widget (Givebutter, M3.5) — allowed ONLY in the
+   policy of a page that actually contains a <givebutter-…> element, and
+   in the site-wide header only while some page does (a browser enforces
+   BOTH, and a header cannot be per page — the same arrangement as VIDEO).
+   Today no published page contains one, so the published policy is
+   unchanged.
+
+   Exactly what the page itself loads, measured in a browser with the
+   real widget (docs/TECHNOLOGY_AUDIT.md):
+     script   https://widgets.givebutter.com   the widget library
+     connect  https://widgets.givebutter.com   its configuration fetch
+              https://givebutter.com           the widget's data fetch
+     img      https://givebutter.com           an image it renders
+     frame    https://givebutter.com           the checkout itself
+   Everything the checkout loads INSIDE its frame (Stripe, Givebutter's
+   own analytics, fonts, Turnstile…) is governed by Givebutter's policy,
+   not this one, and never runs in this site's document.
+
+   `features`: the checkout frame asks for the Payment Request API (Apple
+   Pay / Google Pay); Permissions-Policy grants it to that origin only and
+   still denies it everywhere else. */
+export const DONATION_WIDGET = {
+  provider: "givebutter",
+  marker: "<givebutter-",
+  script: ["https://widgets.givebutter.com"],
+  connect: ["https://widgets.givebutter.com", "https://givebutter.com"],
+  img: ["https://givebutter.com"],
+  frame: ["https://givebutter.com"],
+  features: ["payment"],
+};
+export const hasDonationWidget = (html) => html.includes(DONATION_WIDGET.marker);
+
 const sha256 = (text) =>
   `'sha256-${createHash("sha256").update(text, "utf8").digest("base64")}'`;
 
@@ -97,11 +129,15 @@ export function collectInline(htmlDocuments) {
 }
 
 /* The policy. `forMeta` drops what a <meta> CSP cannot express. */
-export function contentSecurityPolicy({ scripts, styles }, { forMeta = false, video = false } = {}) {
-  const frames = video ? VIDEO.frame : [];
+/* `images`: the origin(s) a build's published CMS images load from (the
+   media library's public domain) — present only when a published snapshot
+   brings such images; otherwise the policy is exactly as before. */
+export function contentSecurityPolicy({ scripts, styles }, { forMeta = false, video = false, donation = false, images = [] } = {}) {
+  const frames = [...(video ? VIDEO.frame : []), ...(donation ? DONATION_WIDGET.frame : [])];
+  const extra = (kind) => (donation ? DONATION_WIDGET[kind] : []);
   const directives = [
     ["default-src", "'self'"],
-    ["script-src", "'self'", ...scripts.map(sha256)],
+    ["script-src", "'self'", ...extra("script"), ...scripts.map(sha256)],
     [
       "style-src",
       "'self'",
@@ -109,8 +145,8 @@ export function contentSecurityPolicy({ scripts, styles }, { forMeta = false, vi
       ...(styles.length ? ["'unsafe-hashes'", ...styles.map(sha256)] : []),
     ],
     ["font-src", "'self'", ...APPROVED_ORIGINS.font],
-    ["img-src", "'self'"],
-    ["connect-src", "'self'", ...APPROVED_ORIGINS.connect],
+    ["img-src", "'self'", ...images, ...extra("img")],
+    ["connect-src", "'self'", ...APPROVED_ORIGINS.connect, ...extra("connect")],
     ["manifest-src", "'self'"],
     ["media-src", "'none'"],
     ["object-src", "'none'"],
@@ -151,10 +187,15 @@ const PERMISSIONS = [
 
 /* Every header, by path pattern, for the host. `reportOnly` sends the CSP
    as Content-Security-Policy-Report-Only (the discovery step). */
-export function securityHeaders(inline, { reportOnly = false, video = false } = {}) {
-  const csp = contentSecurityPolicy(inline, { video });
-  const permission = (f) =>
-    video && VIDEO.features.includes(f) ? `${f}=(self "${VIDEO.frame[0]}")` : `${f}=()`;
+export function securityHeaders(inline, { reportOnly = false, video = false, donation = false, images = [] } = {}) {
+  const csp = contentSecurityPolicy(inline, { video, donation, images });
+  const permission = (f) => {
+    const origins = [
+      ...(video && VIDEO.features.includes(f) ? VIDEO.frame : []),
+      ...(donation && DONATION_WIDGET.features.includes(f) ? DONATION_WIDGET.frame : []),
+    ];
+    return origins.length ? `${f}=(self ${origins.map((o) => `"${o}"`).join(" ")})` : `${f}=()`;
+  };
   return {
     "/*": {
       [reportOnly ? "Content-Security-Policy-Report-Only" : "Content-Security-Policy"]:

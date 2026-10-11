@@ -12,8 +12,19 @@
    shown) so a production release stays blocked until RBB writes its
    own. Keep bar messages SHORT — one line on a phone. */
 import { WORKING_PHOTOS } from "./photos.js";
+import { APPEALS, appealPath } from "./appeals.js";
+import { EVENTS, eventPath } from "./media.js";
 
 const MARKER = "Sample event — sample announcement";
+
+/* A message that points at one appeal or one event is shown only while
+   that page exists. A build from the CMS's published snapshot replaces
+   the sample appeals and events, and a message must never lead to a
+   missing page. Any other link is the site's own route and always kept. */
+const APPEAL_PAGE = /^\/appeals\/(emergency|campaigns)\/[^/]+$/;
+const EVENT_PAGE = /^\/media\/events\/[^/]+$/;
+const linkExists = (to) =>
+  APPEAL_PAGE.test(to) ? APPEALS.some((a) => appealPath(a) === to) : EVENT_PAGE.test(to) ? EVENTS.some((e) => eventPath(e) === to) : true;
 
 export const ANNOUNCEMENTS = {
   bar: {
@@ -40,7 +51,9 @@ export const ANNOUNCEMENTS = {
         text: "New volunteers welcome — find a role that suits you.",
         link: { label: "Volunteer", to: "/get-involved/volunteer" },
       },
-    ].map((item) => ({ ...item, releaseMarker: MARKER })),
+    ]
+      .filter((item) => linkExists(item.link.to))
+      .map((item) => ({ ...item, releaseMarker: MARKER })),
   },
 
   popup: {

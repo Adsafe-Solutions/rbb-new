@@ -1,0 +1,38 @@
+.box {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  color: var(--color-on-primary);
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-ease-standard),
+    border-color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+.box svg {
+  grid-area: 1 / 1;
+  opacity: 0;
+}
+input:hover:not(:disabled) + .box {
+  border-color: var(--color-border-control-hover);
+}
+input:checked + .box,
+input:indeterminate + .box {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+input:checked:not(:indeterminate) + .box .check,
+input:indeterminate + .box .minus {
+  opacity: 1;
+}
+input[aria-invalid="true"] + .box {
+  border-color: var(--color-danger-fg);
+}
+input:disabled + .box {
+  background: var(--color-bg-disabled);
+  border-color: var(--color-border-strong);
+  color: var(--color-text-disabled);
+}

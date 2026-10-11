@@ -212,6 +212,14 @@ export const STORIES = [
   },
 ];
 
+/* Where the stories come from (M15): this file's list — or, once the
+   organization has PUBLISHED a story in the CMS, the CMS's published
+   stories, which replace the list above entirely (the published snapshot
+   sets both; scripts/snapshot-adapter.mjs). The two are never mixed: a
+   reference made against one set — the website's own Impact page names
+   these stories by slug — is never resolved against the other. */
+export const STORY_SOURCE = { cms: false };
+
 /* ---------------- Lookups ----------------
    Everything goes through `published`, so a story that is not approved is
    never shown anywhere — not on a card, not at its own URL. */

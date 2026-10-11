@@ -8,13 +8,16 @@ import type { z } from "zod";
 export const ERROR_STATUS = {
   BAD_REQUEST: 400,
   VALIDATION_ERROR: 400,
-  UNAUTHORIZED: 401,
+  UNAUTHENTICATED: 401,
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   METHOD_NOT_ALLOWED: 405,
   CONFLICT: 409,
   PAYLOAD_TOO_LARGE: 413,
   UNSUPPORTED_MEDIA_TYPE: 415,
+  /* M18: a public form's fields failed validation — details carry
+     `fields.<name>` and a short code, never what was typed. */
+  UNPROCESSABLE_CONTENT: 422,
   RATE_LIMITED: 429,
   INTERNAL_ERROR: 500,
   SERVICE_UNAVAILABLE: 503,
@@ -49,12 +52,13 @@ export class ApiError extends Error {
 export const errors = {
   badRequest: (message = "The request is malformed.") => new ApiError("BAD_REQUEST", message),
   validation: (details: ErrorDetail[], message = "Request validation failed.") => new ApiError("VALIDATION_ERROR", message, { details }),
-  unauthorized: () => new ApiError("UNAUTHORIZED", "Authentication is required."),
+  unauthenticated: (message = "Authentication is required.") => new ApiError("UNAUTHENTICATED", message),
   forbidden: (message = "This request is not allowed.") => new ApiError("FORBIDDEN", message),
   notFound: (what = "resource") => new ApiError("NOT_FOUND", `The requested ${what} was not found.`),
   methodNotAllowed: (allowed: string[]) =>
     new ApiError("METHOD_NOT_ALLOWED", "This method is not allowed here.", { headers: { Allow: allowed.join(", ") } }),
   conflict: (message: string) => new ApiError("CONFLICT", message),
+  unprocessable: (details: ErrorDetail[], message = "Some fields need attention.") => new ApiError("UNPROCESSABLE_CONTENT", message, { details }),
   payloadTooLarge: (limit: number) => new ApiError("PAYLOAD_TOO_LARGE", `The request body is larger than ${limit} bytes.`),
   unsupportedMediaType: () => new ApiError("UNSUPPORTED_MEDIA_TYPE", "The request body must be application/json."),
   rateLimited: (retryAfterSeconds: number) =>

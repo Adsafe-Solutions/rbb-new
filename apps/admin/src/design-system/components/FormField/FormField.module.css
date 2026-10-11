@@ -1,0 +1,23 @@
+.field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.helper {
+  color: var(--color-text-muted);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-line);
+}
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: var(--color-danger-fg);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-line);
+  font-weight: 500;
+}
+.error svg {
+  flex: none;
+  margin-top: 1px;
+}

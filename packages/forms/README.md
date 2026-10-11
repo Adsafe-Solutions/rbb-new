@@ -20,12 +20,14 @@ can all load it without a build step.
 
 - `apps/web/src/lib/formSchema.js` re-exports `@rbb/forms/schema` for the
   site's form components and content.
-- `apps/web/server/handler.mjs`, the live form endpoint, imports
-  `validateSubmission`.
+- `apps/api/src/modules/forms/` (M18): the form endpoint,
+  `POST /api/v1/forms/:formId`. It imports `validateSubmission` and the
+  anti-spam constants. TypeScript types are in `src/*.d.ts`; keep them in
+  step with the JavaScript.
+- `apps/web/server/handler.mjs`: the previous endpoint. It stays until a
+  separate, reviewed change retires it.
 
-The endpoint itself (HTTP, anti-spam timing, rate limiting, email through
-Resend) still lives in `apps/web/server`. Moving it into `apps/api` depends on
-where the site is hosted, because the site posts to its own `/api/forms`. See
-`apps/api/README.md`.
+The HTTP handling, rate limiting and Resend email for the forms live in
+`apps/api` (see its README, "Public forms").
 
 Never here: React components, HTTP handlers, storage, email delivery.

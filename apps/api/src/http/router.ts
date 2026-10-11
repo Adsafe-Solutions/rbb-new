@@ -1,4 +1,5 @@
 import type { Logger } from "../logging/logger.ts";
+import type { AuthContext, Permission } from "../modules/auth/types.ts";
 
 /* A deliberately small router: method + path pattern ("/a/:slug"), path
    parameters returned raw — each route validates its own with Zod. No
@@ -14,6 +15,13 @@ export interface Context {
   params: Record<string, string>;
   requestId: string;
   log: Logger;
+  /* The client's address as the platform reported it (never a header the
+     client controls), or null. */
+  clientIp: string | null;
+  /* The resolved session — set by the app before the handler runs, for
+     routes that declare `auth`. Handlers never resolve sessions
+     themselves. */
+  auth: AuthContext | null;
 }
 
 export type Handler = (context: Context) => Response | Promise<Response>;
@@ -24,6 +32,11 @@ export interface Route {
   handler: Handler;
   /* Liveness routes answer even when the configuration is invalid. */
   live?: boolean;
+  /* "required": 401 without a valid session. "optional": the session is
+     resolved if present. Omitted: the route never sees a session. */
+  auth?: "required" | "optional";
+  /* Checked after authentication; 403 if the member lacks it. */
+  permission?: Permission;
 }
 
 export type Match =

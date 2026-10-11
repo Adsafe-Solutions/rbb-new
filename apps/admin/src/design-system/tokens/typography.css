@@ -1,0 +1,124 @@
+/* The type scale. Each role is a set of four tokens (size, line height,
+   weight, tracking) so a component can take the whole role or one part
+   of it. The admin is dense, so body copy is 14px, as in most product UI.
+
+     display     36/44  600   page-level hero numbers or titles (rare)
+     h1          28/36  600   the page title
+     h2          20/28  600   section titles
+     h3          16/24  600   card and panel titles
+     body        14/20  400   default copy
+     body-small  13/18  400   secondary copy, table cells
+     label       13/18  500   form labels, buttons, navigation
+     caption     12/16  400   helper text, metadata, section labels
+     mono        13/20  400   identifiers, code, keyboard hints
+
+   The `.ds-text-*` classes apply a whole role; components use the tokens. */
+
+:root {
+  --type-display-size: 2.25rem;
+  --type-display-line: 2.75rem;
+  --type-display-weight: 600;
+  --type-display-tracking: -0.025em;
+
+  --type-h1-size: 1.75rem;
+  --type-h1-line: 2.25rem;
+  --type-h1-weight: 600;
+  --type-h1-tracking: -0.02em;
+
+  --type-h2-size: 1.25rem;
+  --type-h2-line: 1.75rem;
+  --type-h2-weight: 600;
+  --type-h2-tracking: -0.015em;
+
+  --type-h3-size: 1rem;
+  --type-h3-line: 1.5rem;
+  --type-h3-weight: 600;
+  --type-h3-tracking: -0.01em;
+
+  --type-body-size: 0.875rem;
+  --type-body-line: 1.25rem;
+  --type-body-weight: 400;
+  --type-body-tracking: 0;
+
+  --type-body-small-size: 0.8125rem;
+  --type-body-small-line: 1.125rem;
+  --type-body-small-weight: 400;
+  --type-body-small-tracking: 0;
+
+  --type-label-size: 0.8125rem;
+  --type-label-line: 1.125rem;
+  --type-label-weight: 500;
+  --type-label-tracking: 0;
+
+  --type-caption-size: 0.75rem;
+  --type-caption-line: 1rem;
+  --type-caption-weight: 400;
+  --type-caption-tracking: 0.005em;
+
+  --type-mono-size: 0.8125rem;
+  --type-mono-line: 1.25rem;
+  --type-mono-weight: 400;
+  --type-mono-tracking: 0;
+}
+
+.ds-text-display,
+.ds-text-h1,
+.ds-text-h2,
+.ds-text-h3,
+.ds-text-body,
+.ds-text-body-small,
+.ds-text-label,
+.ds-text-caption {
+  font-family: var(--font-sans);
+}
+.ds-text-display {
+  font-size: var(--type-display-size);
+  line-height: var(--type-display-line);
+  font-weight: var(--type-display-weight);
+  letter-spacing: var(--type-display-tracking);
+}
+.ds-text-h1 {
+  font-size: var(--type-h1-size);
+  line-height: var(--type-h1-line);
+  font-weight: var(--type-h1-weight);
+  letter-spacing: var(--type-h1-tracking);
+}
+.ds-text-h2 {
+  font-size: var(--type-h2-size);
+  line-height: var(--type-h2-line);
+  font-weight: var(--type-h2-weight);
+  letter-spacing: var(--type-h2-tracking);
+}
+.ds-text-h3 {
+  font-size: var(--type-h3-size);
+  line-height: var(--type-h3-line);
+  font-weight: var(--type-h3-weight);
+  letter-spacing: var(--type-h3-tracking);
+}
+.ds-text-body {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-line);
+  font-weight: var(--type-body-weight);
+}
+.ds-text-body-small {
+  font-size: var(--type-body-small-size);
+  line-height: var(--type-body-small-line);
+  font-weight: var(--type-body-small-weight);
+}
+.ds-text-label {
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-line);
+  font-weight: var(--type-label-weight);
+}
+.ds-text-caption {
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-line);
+  font-weight: var(--type-caption-weight);
+  letter-spacing: var(--type-caption-tracking);
+}
+.ds-text-mono {
+  font-family: var(--font-mono);
+  font-size: var(--type-mono-size);
+  line-height: var(--type-mono-line);
+  font-weight: var(--type-mono-weight);
+}

@@ -167,6 +167,23 @@ export const impactStats = () =>
     status: m.status,
   }));
 
+/* The figures a `stats` block names (the homepage's, the Impact page's),
+   in the block's order: named, never restated, so both pages always show
+   the same values. A name that is not a figure stops the build. */
+export const metricStats = (ids, where) => {
+  const all = impactStats();
+  return ids.map((id) => {
+    const i = IMPACT.metrics.findIndex((m) => m.id === id);
+    if (i < 0) throw new Error(`${where}: no impact figure "${id}" (content/impact.js or the CMS's published figures)`);
+    return all[i];
+  });
+};
+
+/* The Impact page as the CMS published it (pages/Impact/CmsImpact draws
+   it). Set from the published snapshot only while the CMS's Impact page
+   is PUBLISHED; undefined, /impact is the page below. */
+export const PUBLISHED_IMPACT = { page: undefined };
+
 export const IMPACT_PAGES = {
   overview: {
     kicker: "Our impact",

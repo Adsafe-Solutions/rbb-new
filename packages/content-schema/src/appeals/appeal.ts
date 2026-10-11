@@ -3,7 +3,7 @@ import { recordFields } from "../common/record.ts";
 import { EntityId, IsoDate, MediaId, Paragraphs, Slug, text } from "../common/primitives.ts";
 import { SeoOverrides } from "../seo/seo.ts";
 import { sectionsFor } from "../sections/allowlists.ts";
-import { DonationDesignation, DonationFormOverrides } from "../donation/donation.ts";
+import { DonationCheckout, DonationDesignation, DonationFormOverrides } from "../donation/donation.ts";
 import { AppealKind } from "./kind.ts";
 
 /* A page whose purpose is a gift. Every one of them draws the same
@@ -26,10 +26,12 @@ export const AppealHighlight = z.strictObject({
   imageId: MediaId.optional(),
 });
 
-/* What the appeal's gifts are for, and any change to the form defaults. */
+/* What the appeal's gifts are for, any change to the form defaults, and
+   the provider checkout that takes them (absent: the site's own form). */
 export const AppealDonation = z.strictObject({
   designation: DonationDesignation.optional(),
   formOverrides: DonationFormOverrides.optional(),
+  checkout: DonationCheckout.optional(),
 });
 
 export const Appeal = z
@@ -72,6 +74,7 @@ export const GeneralDonationPage = z.strictObject({
   donation: z.strictObject({
     designation: DonationDesignation,
     formOverrides: DonationFormOverrides.optional(),
+    checkout: DonationCheckout.optional(),
   }),
   seo: SeoOverrides.optional(),
 });

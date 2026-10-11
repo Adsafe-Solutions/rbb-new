@@ -8,15 +8,23 @@
   },
   "scripts": {
     "dev": "node --env-file-if-exists=.env.local --watch src/server.ts",
-    "build": "pnpm run typecheck && esbuild src/vercel.ts src/server.ts src/scripts/ensure-indexes.ts --bundle --platform=node --target=node22 --format=esm --outbase=src --outdir=dist --external:mongodb --log-level=warning",
+    "build": "pnpm run typecheck && esbuild src/vercel.ts src/server.ts src/scripts/ensure-indexes.ts src/scripts/bootstrap-owner.ts src/scripts/media-cleanup.ts src/scripts/settings-import.ts src/scripts/scheduler-run.ts --bundle --platform=node --target=node22 --format=esm --outbase=src --outdir=dist --external:mongodb --log-level=warning",
     "start": "node --env-file-if-exists=.env.local dist/server.js",
     "typecheck": "tsc -p tsconfig.json",
-    "test": "node --test \"test/*.test.ts\"",
+    "test": "node --test \"test/*.test.ts\" \"test/media/*.test.ts\" \"test/settings/*.test.ts\" \"test/content/*.test.ts\"",
     "test:integration": "node --test --test-concurrency=1 \"test/integration/*.test.ts\"",
-    "db:indexes": "node --env-file-if-exists=.env.local dist/scripts/ensure-indexes.js"
+    "db:indexes": "node --env-file-if-exists=.env.local dist/scripts/ensure-indexes.js",
+    "auth:bootstrap": "node --env-file-if-exists=.env.local dist/scripts/bootstrap-owner.js",
+    "owner:setup": "env -u MONGODB_URI -u MONGODB_DB -u ORGANIZATION_ID -u NODE_ENV -u BOOTSTRAP_OWNER_PASSWORD -u BOOTSTRAP_ALLOW_TEST_TARGET node --env-file=.env --env-file=.env.bootstrap src/scripts/bootstrap-owner.ts --confirm",
+    "test:r2": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --test --test-concurrency=1 test/live/r2.live.test.ts",
+    "test:givebutter": "node --env-file-if-exists=.env.local --test test/live/givebutter.live.test.ts",
+    "media:cleanup": "node --env-file-if-exists=.env.local dist/scripts/media-cleanup.js",
+    "settings:import": "node --env-file-if-exists=.env.local dist/scripts/settings-import.js",
+    "scheduler:run": "node --env-file-if-exists=.env.local dist/scripts/scheduler-run.js"
   },
   "dependencies": {
     "@rbb/content-schema": "workspace:*",
+    "@rbb/forms": "workspace:*",
     "mongodb": "^7.7.0",
     "zod": "^4.6.5"
   },

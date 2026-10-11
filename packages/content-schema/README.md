@@ -28,7 +28,7 @@ or script, and every object is strict, so an unknown key is refused.
 | `id` | Stable identity: letters, digits, `-`, `_`. Never a list position |
 | `orgId` | The owning organization. Set by the API from the deployment, never by editors |
 | `schemaVersion` | `1`. The contract version the record was written against |
-| `status` | `draft` · `published` · `archived`. Only `published` is public |
+| `status` | `draft` · `submitted` · `approved` · `published` · `archived` (M14). Only `published` is public, and a snapshot holds nothing else |
 | `createdAt` `updatedAt` `publishedAt` | ISO instants, set by the API (absent in source content) |
 | `releaseMarker` | Internal. Marks sample or working content (see below) |
 
@@ -41,7 +41,7 @@ Three questions that the contract keeps separate:
 
 | Question | Answered by |
 |---|---|
-| Is the record live? (editorial lifecycle) | `status` |
+| Is the record live? (editorial lifecycle) | `status`: the CMS's editorial workflow (M14), `submitted` and `approved` being its review states. See docs/PUBLISHING.md |
 | Is it still sample content? | `releaseMarker`, read by the web's release scans |
 | Has the organization approved the subject for release? | `apps/web/release/approvals.mjs`, never a record field |
 | Is a figure verified? | `Metric.verification` |
@@ -56,6 +56,18 @@ The web's legacy editorial statuses map to the lifecycle as follows
 | `draft`, `pending-review` | `draft` |
 | `archived` | `archived` |
 
+The web's legacy `approved` is the organization's release sign-off for its
+own built-in content. It is a different thing from the CMS's editorial
+`approved`: an owner's approval of a revision for the next website publish.
+The importers never produce `submitted` or `approved`.
+
+Scheduled publishing (M15) adds no status. An approved record may carry a
+`PublicationSchedule` (`common/schedule.ts`): a UTC instant, the IANA zone
+it was chosen in, and a fingerprint of the approved content. It lives
+beside the record in storage, never in a record or a snapshot.
+`zonedTimeToInstant` turns a wall-clock time in a zone into that instant,
+and refuses a time daylight saving skips or repeats.
+
 Indexing still follows the approvals and the absence of sample content, so
 `seo.noIndex` can take a page out of the index but can never force one in.
 
@@ -69,7 +81,7 @@ Indexing still follows the approvals and the absence of sample content, so
 | `Event` | Date, `startTime`/`endTime` ("6:30 PM"), venue, schedule, `programId` (null = open to all) | `content/media.js` EVENTS |
 | `Announcement` | One bar message: `text`, `link?`, `order` | `content/announcements.js` bar |
 | `Popup` | `key` (the "closed" memory), heading, `highlight`, CTA, delay, frequency, `excludePaths` | `content/announcements.js` popup |
-| `Homepage` | Singleton with named slots (below) | `content/homepage.js` |
+| `Homepage` | Singleton: an ordered list of blocks (below) | `content/homepage.js` |
 | `Metric` | One headline figure + `verification` | `content/impact.js` metrics |
 | `Media` | Image or document: `alt` (required unless `decorative`), `focal`, future storage and provenance fields | `content/photos.js` |
 | `SiteSettings` | General, contact, social, SEO defaults, branding, analytics IDs, donation defaults, engagement toggles, features | `brand.js`, `contact.js`, `donation.js`, `announcements.js`, env flags |
@@ -111,11 +123,80 @@ holds the defaults, and `Appeal.donation.formOverrides` holds per-page
 changes. `resolveDonationForm()` merges the two, and the merged result must
 still be a valid `DonationFormConfig`.
 
-**The homepage has named slots, not a section list.** Its order and colour
-sequence are designed as one composition. Slots reuse block data (`whoWeAre`
-is `imageText`, `faq` is `faq`, `finalCta` is `cta`). Slots whose cards come
-from other records (programs, stories, Get Involved paths) hold only their
-own heading.
+**The homepage is an ordered list of blocks (M8).** M1 modelled it as named
+slots in a fixed order. M8 needs editors to add, reorder and hide blocks, so
+each slot became a block type in the shared envelope
+(`{ id, type, enabled, version, data }`), keeping its M1 data shape exactly:
+`hero`, `imageText` (who we are), `programs`, `approach`, `stats` (impact),
+`timeline`, `stories`, `video`, `trust` (transparency), `getInvolved`, `faq`
+and `cta` (the final ask).
+
+Three blocks reference other records by id instead of copying them:
+- `appealList`: the shared block, plus optional `appealIds`
+- `postList` and `eventList`: new in M8
+
+The registry (`homepage/registry.ts`) holds editor names and the rules (the
+hero comes first; single blocks appear once). It is plain data, so the admin
+imports it as `@rbb/content-schema/homepage-registry` without the schemas.
+Blocks whose cards come from other records (programs, stories, Get Involved
+paths) hold only their own heading.
+
+A disabled block stays in the record but never enters a snapshot. A
+snapshot's homepage may reference only posts, events and appeals published
+in the same snapshot.
+
+**The About page and the team (M9).**
+- `About` is a block page like the homepage: an ordered list of its own
+  chapters in the shared envelope, with its registry in
+  `about/registry.ts` (also importable plain as
+  `@rbb/content-schema/about-registry`).
+- `TeamMember` is a content record: one person on the team page, with
+  their profile. The `group` is `leadership` | `team`; there are no contact
+  details.
+- In a snapshot, `about` appears only while published, with enabled blocks
+  only. `team` holds published members in order, and each member's
+  photograph must have alt text.
+
+**Programs (M10).**
+- `Program` is a content record: one area of work, with its page's
+  sections as plain text and an `icon` from `PROGRAM_ICONS` (the website's
+  line glyphs).
+- In a snapshot, `programs` appears only once a program is published, and
+  holds published programs in order with unique ids and slugs.
+- When the key is present, every `programId` in the snapshot (posts,
+  events, homepage timeline items) must name one of them.
+
+**Impact and transparency (M11).**
+- `Metric` gains `slug` (the key `stats` blocks name it by) and `order`.
+  In a snapshot, `metrics` appears once a figure is published; when it is
+  present, every `stats` block must name a published figure.
+- `Impact` is a block page (registry `impact/registry.ts`, also
+  importable plain as `@rbb/content-schema/impact-registry`) of /impact's
+  chapters. Figures, programs and stories are named, never copied.
+- `Transparency` is one typed record: the chapter's words, a financial
+  overview whose shares add up to 100 (shares, never amounts), optional
+  governance, and "How we report".
+- `Report` is a transparency document: a category, title, optional year
+  and type, and an https `fileUrl` (the media library holds images only).
+
+**Projects and stories (M12).**
+- `Project` is an ordered record: a program's slug (never a copy of the
+  program), a description, a photograph, its page's sections and SEO.
+- Stories are `Post` records of type `story` (as M1 defined them), with a
+  `category` from `STORY_CATEGORY_IDS`.
+- In a snapshot, `projects` and `stories` appear once one is published:
+  - a project names a published program
+  - a story names published projects, programs and related stories
+  - at most one story is featured
+  - their images are described
+  - the Impact page's `storyIds` name published stories
+
+**Careers (M13).**
+- `Careers` is one typed record: the Careers page's header, optional "Why
+  work with us" and "How to apply" sections, "Open opportunities" with
+  its roles (title only, in order), the closing ask, and SEO without a
+  share image.
+- In a snapshot it appears only while published.
 
 ## Media
 
@@ -127,10 +208,11 @@ moves to R2, the id stays and only the resolver changes.
 ## SEO
 
 `seo?: { title?, description?, ogImageId?, noIndex? }` is on Appeal,
-GeneralDonationPage, Post, Event and Homepage. Without it, values come from
-the record itself (title, excerpt or summary, image), which is what the web
-does today. There is deliberately no canonical override: canonicals derive
-from the route. Site defaults live in `SiteSettings.seo`.
+GeneralDonationPage, Post, Event, Homepage, About, Program and Impact.
+Without it, values come from the record itself (title, excerpt or summary,
+image), which is what the web does today. There is deliberately no
+canonical override: canonicals derive from the route.
+Site defaults live in `SiteSettings.seo`.
 
 ## Links and text
 

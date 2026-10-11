@@ -1,0 +1,59 @@
+.wrap {
+  display: inline-flex;
+}
+.spinner {
+  flex: none;
+  animation: spin 700ms linear infinite;
+  color: currentColor;
+}
+.sm {
+  width: 14px;
+  height: 14px;
+}
+.md {
+  width: 18px;
+  height: 18px;
+}
+.lg {
+  width: 28px;
+  height: 28px;
+}
+.track {
+  stroke: currentColor;
+  opacity: 0.2;
+}
+.arc {
+  stroke: currentColor;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* Reduced motion: a spinner that does not spin still reads as "busy"
+   beside its label; slow it rather than stop it, per WCAG 2.3.3 guidance
+   that essential progress indication may remain. */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: spin 1.6s linear infinite !important;
+    animation-duration: 1.6s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
+
+.skeleton {
+  display: block;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-muted);
+  background-image: linear-gradient(90deg, transparent, var(--color-bg-hover), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+@keyframes shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}

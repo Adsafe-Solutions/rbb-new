@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && vite build --ssr src/entry-server.jsx --outDir dist-ssr && NODE_ENV=production node scripts/prerender.mjs",
+    "build": "node scripts/published-snapshot.mjs && vite build && vite build --ssr src/entry-server.jsx --outDir dist-ssr && NODE_ENV=production node scripts/prerender.mjs",
     "build:dev": "vite build --mode development",
-    "build:prod": "vite build --mode production && vite build --mode production --ssr src/entry-server.jsx --outDir dist-ssr && NODE_ENV=production node scripts/prerender.mjs",
+    "build:prod": "node scripts/published-snapshot.mjs && vite build --mode production && vite build --mode production --ssr src/entry-server.jsx --outDir dist-ssr && NODE_ENV=production node scripts/prerender.mjs",
     "preview": "vite preview",
+    "preview:cms": "node scripts/cms-preview.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "build:client": "vite build",
@@ -18,8 +19,10 @@
     "release:status": "node scripts/release-status.mjs",
     "release:check": "node scripts/release-check.mjs",
     "smoke": "node scripts/smoke-test.mjs",
+    "smoke:forms": "npx -y -p playwright -p axe-core node scripts/smoke-forms.mjs",
     "release:package": "node scripts/package-release.mjs",
-    "serve:local": "node --env-file-if-exists=server/local.env --env-file-if-exists=server/.env.local server/dev-server.mjs"
+    "serve:local": "node --env-file-if-exists=server/local.env --env-file-if-exists=server/.env.local server/dev-server.mjs",
+    "export:settings": "RBB_SNAPSHOT=off vite build --ssr src/entry-server.jsx --outDir build-meta/.export --logLevel error && node scripts/export-site-settings.mjs"
   },
   "dependencies": {
     "@rbb/forms": "workspace:*",

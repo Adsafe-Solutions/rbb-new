@@ -1,0 +1,46 @@
+/* Shared look of every text-entry control: Input, Textarea, Select. */
+.control {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  color: var(--color-text-strong);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-line);
+  transition:
+    border-color var(--motion-duration-fast) var(--motion-ease-standard),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-standard);
+}
+.control::placeholder {
+  color: var(--color-text-subtle);
+  opacity: 1;
+}
+.control:hover:not(:disabled) {
+  border-color: var(--color-border-control-hover);
+}
+/* Focus: the border takes the ring colour and a soft halo, plus the
+   global outline for keyboard focus. */
+.control:focus {
+  border-color: var(--color-focus-ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus-ring) 18%, transparent);
+  outline: none;
+}
+.control:focus-visible {
+  outline: none;
+}
+.control[aria-invalid="true"] {
+  border-color: var(--color-danger-fg);
+}
+.control[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger-fg) 16%, transparent);
+}
+.control:disabled {
+  cursor: not-allowed;
+  background: var(--color-bg-disabled);
+  border-color: var(--color-border);
+  color: var(--color-text-disabled);
+}
+.control:read-only:not(:disabled) {
+  background: var(--color-bg-subtle);
+}

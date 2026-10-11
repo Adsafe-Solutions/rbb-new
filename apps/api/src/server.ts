@@ -23,7 +23,8 @@ createServer(async (req, res) => {
     headers: toHeaders(req.headers),
     ...(method !== "GET" && method !== "HEAD" && { body: Readable.toWeb(req) as ReadableStream, duplex: "half" }),
   } as RequestInit);
-  const response = await app.handle(request);
+  /* The socket's address — the client as this server sees it. */
+  const response = await app.handle(request, { clientIp: req.socket.remoteAddress ?? null });
   res.writeHead(response.status, Object.fromEntries(response.headers));
   res.end(Buffer.from(await response.arrayBuffer()));
 }).listen(port, () => {

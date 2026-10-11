@@ -1,0 +1,29 @@
+.wrap {
+  position: relative;
+  display: block;
+}
+.select {
+  appearance: none;
+  height: 32px;
+  padding: 0 36px 0 var(--space-3);
+  cursor: pointer;
+}
+.sm {
+  height: 28px;
+  padding-left: var(--space-2);
+  font-size: var(--type-body-small-size);
+}
+.lg {
+  height: 40px;
+}
+.chevron {
+  position: absolute;
+  top: 50%;
+  right: var(--space-3);
+  translate: 0 -50%;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+.select:disabled + .chevron {
+  color: var(--color-text-disabled);
+}

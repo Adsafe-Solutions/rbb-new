@@ -4,6 +4,7 @@ import { cx } from "../../lib/cx.js";
 import { glideTo } from "../../animations/lenis.js";
 import Button from "../Button/Button.jsx";
 import Container from "../Container/Container.jsx";
+import DonationCheckoutCard from "../DonationCheckoutCard/DonationCheckoutCard.jsx";
 import DonationForm from "../DonationForm/DonationForm.jsx";
 import EditorialImage from "../EditorialImage/EditorialImage.jsx";
 import Faq from "../Faq/Faq.jsx";
@@ -13,6 +14,8 @@ import Section from "../Section/Section.jsx";
 import SectionHeading from "../SectionHeading/SectionHeading.jsx";
 import SectionKicker from "../SectionKicker/SectionKicker.jsx";
 import TrustPanel from "../TrustPanel/TrustPanel.jsx";
+import { RichBlock } from "../RichText/RichText.jsx";
+import { checkoutAvailable } from "../../integrations/donations/DonationCheckout.jsx";
 import { DONATION } from "../../content/index.js";
 
 /* THE donation page — one composition for every page whose purpose is a
@@ -22,6 +25,13 @@ import { DONATION } from "../../content/index.js";
 
    `experience` is built in content/donation.js — `generalDonation()`,
    `appealDonation(appeal)` — in one shape (documented there).
+
+   The FORM SLOT: the site's DonationForm — or, when the page's published
+   content configures a provider checkout (`experience.checkout`, from the
+   CMS) and this build can draw it, the provider's own widget in the same
+   card (components/DonationCheckoutCard). Only then does the page load the
+   provider's library, and only then does its security policy allow it
+   (scripts/prerender.mjs finds the widget in the page).
 
          paper   01 Hero + context + FORM   what you are supporting, why,
                                             a photograph — the form beside
@@ -62,7 +72,7 @@ export default function DonationExperience({ experience, children }) {
     <>
       <DonationHero experience={experience} formId={formId} />
 
-      {why?.body?.length > 0 && <Why index={next()} {...why} />}
+      {(why?.body?.length > 0 || why?.content?.length > 0) && <Why index={next()} {...why} />}
 
       {impact?.items?.length > 0 && <Impact index={next()} {...impact} />}
 
@@ -92,7 +102,7 @@ export default function DonationExperience({ experience, children }) {
    form on desktop. Motion is CSS at first paint (`data-enter-*`), as on
    every first screen. */
 function DonationHero({ experience, formId }) {
-  const { eyebrow, title, description, image, parent, context, donation, releaseMarker } = experience;
+  const { eyebrow, title, description, image, parent, context, donation, releaseMarker, checkout } = experience;
 
   return (
     <section data-tone="paper" className="relative -mt-[var(--header-h)] overflow-clip pt-[var(--header-h)]">
@@ -142,7 +152,11 @@ function DonationHero({ experience, formId }) {
           {/* The one form. `id` is the page's #donate anchor; the scroll
               margin keeps its top clear of the fixed header. */}
           <div id={experience.id} className="mx-auto w-full min-w-0 max-w-xl scroll-mt-[calc(var(--header-h)+1rem)] lg:mx-0">
-            <DonationForm config={DONATION.form.config} copy={DONATION.form.copy} donation={donation} formId={formId} />
+            {checkoutAvailable(checkout) ? (
+              <DonationCheckoutCard checkout={checkout} copy={DONATION.form.copy} formId={formId} />
+            ) : (
+              <DonationForm config={DONATION.form.config} copy={DONATION.form.copy} donation={donation} formId={formId} />
+            )}
           </div>
         </div>
       </Container>
@@ -163,13 +177,24 @@ function Crumb({ to, children }) {
 
 /* Why it matters — the heading beside the statement, the first paragraph
    as a pull-quote. */
-function Why({ id, index, kicker, heading, body, cta }) {
+const LEAD = "border-l-[6px] border-pop pl-6 text-[clamp(1.375rem,2.2vw,1.75rem)] font-bold leading-snug text-fg";
+const PARAGRAPH = "mt-6 max-w-[58ch] text-[19px] leading-relaxed text-copy";
+
+/* `body` is plain paragraphs (source content); `content` is structured
+   rich text (published from the CMS), drawn by components/RichText with
+   the same lead-then-paragraphs rhythm. */
+function Why({ id, index, kicker, heading, body = [], content, cta }) {
   const headingId = useId();
   return (
     <Section id={id} tone="white" pad="lg" aria-labelledby={headingId}>
       <div className="grid gap-10 lg:grid-cols-[5fr_7fr] lg:gap-16">
         <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} />
         <div data-anim="sequence" className="lg:pt-12">
+          {content?.map((block, i) => (
+            <div key={i} data-anim-item data-anim="soft">
+              <RichBlock block={block} index={i} paragraphClass={(n) => (n === 0 ? LEAD : PARAGRAPH)} />
+            </div>
+          ))}
           {body.map((text, i) => (
             <p
               key={text}

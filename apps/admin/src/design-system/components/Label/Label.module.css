@@ -1,0 +1,15 @@
+.label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  color: var(--color-text-strong);
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-line);
+  font-weight: var(--type-label-weight);
+}
+.required {
+  color: var(--color-danger-fg);
+}
+.disabled {
+  color: var(--color-text-subtle);
+}

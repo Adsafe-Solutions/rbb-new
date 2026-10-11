@@ -10,7 +10,8 @@ import GetInvolved from "../../components/GetInvolved/GetInvolved.jsx";
 import CtaSection from "../../components/CtaSection/CtaSection.jsx";
 import VideoFeature from "../../components/VideoFeature/VideoFeature.jsx";
 import Faq from "../../components/Faq/Faq.jsx";
-import { HOMEPAGE, programBySlug } from "../../content/index.js";
+import CmsHome from "./CmsHome.jsx";
+import { HOMEPAGE, PUBLISHED_HOMEPAGE, programBySlug } from "../../content/index.js";
 
 /* The homepage — Document 02, in its section order. Each section answers
    one question, and the page reads top to bottom as: who we are → what we
@@ -48,6 +49,9 @@ import { HOMEPAGE, programBySlug } from "../../content/index.js";
 const programOf = (slug) => programBySlug(slug)?.title;
 
 export default function Home() {
+  /* A homepage published from the CMS replaces this composition; without
+     one, the page below is the homepage, exactly as it always was. */
+  if (PUBLISHED_HOMEPAGE.page) return <CmsHome page={PUBLISHED_HOMEPAGE.page} />;
   const { hero, whoWeAre, programs, approach, impact, timeline, stories, video, transparency, getInvolved, faq, finalCta } =
     HOMEPAGE;
 

@@ -1,0 +1,9 @@
+/* The design system's global CSS, in layer order. Import once, from
+   src/design-system/index.ts. Brand values are not here: applyTheme()
+   writes them onto <html> from the theme config (src/theme/). */
+@import "@fontsource-variable/geist/wght.css";
+@import "@fontsource-variable/geist-mono/wght.css";
+@import "./primitives.css";
+@import "./typography.css";
+@import "./semantic.css";
+@import "./base.css";

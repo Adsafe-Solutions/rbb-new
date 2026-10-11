@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import useSeo from "../../hooks/useSeo.js";
+import { RichBlock } from "../../components/RichText/RichText.jsx";
 import { formatDate } from "../../lib/dates.js";
 import PageHeader from "../../components/PageHeader/PageHeader.jsx";
 import Section from "../../components/Section/Section.jsx";
@@ -58,6 +59,11 @@ const KINDS = {
   },
 };
 
+const paragraphClass = (i) =>
+  i === 0
+    ? "text-[20px] leading-[1.7] text-copy first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:rounded-lg first-letter:bg-bumble-honey first-letter:px-2.5 first-letter:text-[3.4em] first-letter:font-black first-letter:leading-[0.95] first-letter:text-night"
+    : "mt-6 text-[length:var(--text-body)] leading-[1.75] text-copy";
+
 function Detail({ item, kind }) {
   const k = KINDS[kind];
   const t = MEDIA_PAGES.article;
@@ -78,7 +84,7 @@ function Detail({ item, kind }) {
         crumb={item.title}
         aside={item.image && <EditorialImage image={item.image} tilt="r" cast="cast-lg" priority sizes="(min-width: 1024px) 40vw, 90vw" />}
       >
-        <p className="type-lead mt-7 max-w-[46ch] text-copy">{k.lead(item)}</p>
+        {k.lead(item) && <p className="type-lead mt-7 max-w-[46ch] text-copy">{k.lead(item)}</p>}
         <p className="type-meta mt-8 flex flex-wrap gap-x-5 gap-y-1 text-quiet">
           {item.author && (
             <span>
@@ -92,18 +98,17 @@ function Detail({ item, kind }) {
       <Section as="article" tone="white" pad="lg">
         <div className="reveal mx-auto max-w-[68ch]">
           {item.releaseMarker && <span hidden data-release-marker={item.releaseMarker} />}
-          {item.body.map((paragraph, i) => (
-            <p
-              key={paragraph}
-              className={
-                i === 0
-                  ? "text-[20px] leading-[1.7] text-copy first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:rounded-lg first-letter:bg-bumble-honey first-letter:px-2.5 first-letter:text-[3.4em] first-letter:font-black first-letter:leading-[0.95] first-letter:text-night"
-                  : "mt-6 text-[length:var(--text-body)] leading-[1.75] text-copy"
-              }
-            >
-              {paragraph}
-            </p>
-          ))}
+          {item.body.map((paragraph, i) =>
+            /* Source content is plain paragraphs; a published CMS post is
+               structured rich text (components/RichText). */
+            typeof paragraph === "string" ? (
+              <p key={paragraph} className={paragraphClass(i)}>
+                {paragraph}
+              </p>
+            ) : (
+              <RichBlock key={i} block={paragraph} index={i} paragraphClass={paragraphClass} />
+            )
+          )}
         </div>
       </Section>
 
@@ -123,6 +128,7 @@ export default function Article({ kind }) {
   const { slug } = useParams();
   const k = KINDS[kind];
   const item = k.byId(slug);
-  useSeo(item ? routeMeta(k.path(item), { title: item.title, description: k.lead(item) }) : notFoundMeta());
+  /* A CMS post's own SEO title/description, when it set them. */
+  useSeo(item ? routeMeta(k.path(item), { title: item.seo?.title ?? item.title, description: item.seo?.description ?? k.lead(item) }) : notFoundMeta());
   return item ? <Detail item={item} kind={kind} /> : <NotFound />;
 }

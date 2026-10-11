@@ -376,6 +376,14 @@ export const PROJECT_RECORDS = [
    anything else at build time). */
 export const PROJECTS = PROJECT_RECORDS.filter((p) => p.editorialStatus === "approved");
 
+/* Where the projects come from (M31.1), as STORY_SOURCE does for the
+   stories: false while PROJECT_RECORDS are the website's own; the build
+   sets it (scripts/snapshot-adapter.mjs) once the CMS publishes projects,
+   which are then the ONLY projects. The website's own stories name the
+   website's own projects, so content/validate.js never holds those
+   references against the CMS's projects. */
+export const PROJECT_SOURCE = { cms: false };
+
 /* ---------------- Lookups ---------------- */
 export const programBySlug = (slug) => PROGRAMS.find((p) => p.slug === slug);
 export const programByPath = (path) => PROGRAMS.find((p) => p.to === path);

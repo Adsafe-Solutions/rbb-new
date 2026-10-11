@@ -7,7 +7,8 @@ import ValuesList from "../../components/ValuesList/ValuesList.jsx";
 import ApproachFlow from "../../components/ApproachFlow/ApproachFlow.jsx";
 import TransparencySection from "../../components/TransparencySection/TransparencySection.jsx";
 import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
-import { ABOUT } from "../../content/index.js";
+import CmsAbout from "./CmsAbout.jsx";
+import { ABOUT, PUBLISHED_ABOUT } from "../../content/index.js";
 
 /* /about — THE About page. The About section is two pages: this one and
    Our Team (/about/team). Everything else that used to be its own page
@@ -32,6 +33,9 @@ import { ABOUT } from "../../content/index.js";
    its title. Every string comes from content/about.js and
    content/transparency.js. */
 export default function About() {
+  /* An About page published from the CMS replaces this composition;
+     without one, the page below is /about, exactly as it always was. */
+  if (PUBLISHED_ABOUT.page) return <CmsAbout page={PUBLISHED_ABOUT.page} />;
   const { hero, whoWeAre, missionVision, values, approach, closingCta } = ABOUT;
 
   return (

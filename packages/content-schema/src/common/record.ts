@@ -1,18 +1,24 @@
 import { z } from "zod";
 import { EntityId, IsoDateTime, OrgId, ReleaseMarker } from "./primitives.ts";
 
-/* The publication lifecycle a stored record moves through:
+/* The editorial lifecycle a stored record moves through (M14):
 
-     draft       being written; never on the public site
-     published   live on the public site
+     draft       being written or changed; not on the public site (a record
+                 that was published stays live in its published version)
+     submitted   this revision is waiting for an owner's review
+     approved    an owner approved this exact revision; it goes public at
+                 the next website publish
+     published   this exact revision is in the live published snapshot
      archived    retired; kept, never shown
+
+   A published snapshot holds `published` records only.
 
    This is the EDITORIAL lifecycle only. Whether the organization has
    approved a subject for release (apps/web/release/approvals.mjs) and
    whether a record is still sample content (`releaseMarker`) are separate
    questions, answered by the release system — a published record can
    still keep a production release blocked. */
-export const PublicationStatus = z.enum(["draft", "published", "archived"]);
+export const PublicationStatus = z.enum(["draft", "submitted", "approved", "published", "archived"]);
 export type PublicationStatus = z.infer<typeof PublicationStatus>;
 
 /* The fields every stored content record has. Spread into each record

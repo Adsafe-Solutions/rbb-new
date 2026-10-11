@@ -6,3 +6,6 @@ build-meta
 *.local
 .env.local
 release-artifacts
+.env
+.env.*
+!.env.example

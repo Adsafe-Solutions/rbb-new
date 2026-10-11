@@ -217,19 +217,49 @@ if (process.argv.includes("--browser")) {
     check("browser checks", false, "Playwright not found — npx -p playwright node scripts/smoke-test.mjs --browser");
   } else {
     const browser = await pw.chromium.launch();
-    const approved = new Set([new URL(base).origin, ...Object.values(APPROVED_ORIGINS).flat()]);
+    /* Plus the image origins the site's own policy declares (img-src): a
+       build from a published CMS snapshot loads its images from the media
+       library's public domain, which the build approved when it wrote the
+       policy (scripts/prerender.mjs). Without a snapshot there are none. */
+    const homeHtml = await fetch(`${base}/`).then((r) => r.text(), () => "");
+    const declaredImages = (/http-equiv="Content-Security-Policy" content="[^"]*img-src ([^;"]*)/.exec(homeHtml)?.[1] ?? "")
+      .split(/\s+/)
+      .filter((token) => token.startsWith("https://"));
+    const approved = new Set([new URL(base).origin, ...Object.values(APPROVED_ORIGINS).flat(), ...declaredImages]);
+    /* And, per page, the origins THAT page's policy declares: the donation
+       provider's widget is allowed only in the policy of a page that shows
+       it (scripts/security-policy.mjs DONATION_WIDGET), so its requests are
+       approved there and nowhere else. */
+    const pagePolicyOrigins = async (route) => {
+      const html = await fetch(base + route).then((r) => r.text(), () => "");
+      const policy = /http-equiv="Content-Security-Policy" content="([^"]*)"/.exec(html)?.[1] ?? "";
+      return new Set(policy.split(/[\s;]+/).filter((token) => token.startsWith("https://")));
+    };
     for (const width of [1280, 375]) {
       const ctx = await browser.newContext({ viewport: { width, height: 850 } });
       const page = await ctx.newPage();
       const errors = [];
       const thirdParty = new Set();
       const mixed = new Set();
+      let pageApproved = new Set();
+      const violations = new Set();
+      const providerFrame = new Set();
       page.on("console", (m) => m.type() === "error" && errors.push(m.text().slice(0, 100)));
       page.on("pageerror", (e) => errors.push(e.message.slice(0, 100)));
       page.on("request", (r) => {
         if (https && r.url().startsWith("http:")) mixed.add(r.url().slice(0, 80));
         const o = new URL(r.url()).origin;
-        if (!approved.has(o) && !o.startsWith("data:")) thirdParty.add(o);
+        /* A request made INSIDE an embedded provider frame (the donation
+           checkout) is the provider's, under its own policy — listed
+           separately so the site's own requests stay a strict check. */
+        let inProvider = false;
+        for (let f = r.frame(); f && f !== page.mainFrame(); f = f.parentFrame()) {
+          const fo = /^https:/.test(f.url()) ? new URL(f.url()).origin : null;
+          if (fo && pageApproved.has(fo) && f.parentFrame() === page.mainFrame()) inProvider = true;
+        }
+        if (inProvider) {
+          if (!approved.has(o) && !pageApproved.has(o)) providerFrame.add(o);
+        } else if (!approved.has(o) && !pageApproved.has(o) && !o.startsWith("data:")) thirdParty.add(o);
       });
       await page.addInitScript(() => {
         window.__csp = [];
@@ -238,25 +268,36 @@ if (process.argv.includes("--browser")) {
       let csp = 0;
       let storage = 0;
       for (const route of routes) {
+        pageApproved = await pagePolicyOrigins(route);
         const res = await page.goto(base + route, { waitUntil: "networkidle" });
         if (!res || res.status() !== 200) errors.push(`${route} → ${res?.status()}`);
-        csp += await page.evaluate(() => window.__csp.length);
+        const found = await page.evaluate(() => window.__csp.length);
+        if (found) violations.add(`${route} (${await page.evaluate(() => [...new Set(window.__csp)].join(", "))})`);
+        csp += found;
         storage += await page.evaluate(() => localStorage.length + sessionStorage.length);
       }
       const cookies = await ctx.cookies();
       check(`@${width}px: no console errors on ${routes.length} routes`, !errors.length, errors.slice(0, 3).join(" | "));
-      check(`@${width}px: no CSP violations`, csp === 0, `${csp}`);
-      check(`@${width}px: no cookies or web storage set`, cookies.length === 0 && storage === 0, `${cookies.length} cookies, ${storage} storage keys`);
+      check(`@${width}px: no CSP violations`, csp === 0, `${csp} on ${[...violations].join("; ")}`);
+      check(`@${width}px: no cookies or web storage set`, cookies.length === 0 && storage === 0, `${cookies.length} cookies (${[...new Set(cookies.map((c) => c.domain))].join(", ")}), ${storage} storage keys`);
       check(`@${width}px: no unapproved third-party requests`, !thirdParty.size, [...thirdParty].join(", "));
+      check(`@${width}px: no further third parties inside an embedded provider frame`, !providerFrame.size, [...providerFrame].sort().join(", "));
       if (https) check(`@${width}px: no mixed-content (http) requests`, !mixed.size, [...mixed].slice(0, 3).join(", "));
       await page.goto(base + "/", { waitUntil: "networkidle" });
       await page.keyboard.press("Tab");
       const skip = await page.evaluate(() => document.activeElement?.getAttribute("href"));
       check(`@${width}px: first Tab reaches the skip link`, skip === "#main", skip ?? "none");
       if (width === 375) {
-        await page.getByRole("button", { name: /menu/i }).first().click();
+        const menuButton = page.getByRole("button", { name: /menu/i }).first();
+        await menuButton.click();
         await page.waitForTimeout(400);
-        check("mobile menu opens with its links", await page.getByRole("link", { name: "Stories" }).last().isVisible());
+        /* The menu itself (the panel the button controls), not a link that
+           happens to be on the page — the homepage's own content varies. */
+        const panel = page.locator(`#${await menuButton.getAttribute("aria-controls")}`);
+        check(
+          "mobile menu opens with its links",
+          (await menuButton.getAttribute("aria-expanded")) === "true" && (await panel.isVisible()) && (await panel.getByRole("link", { name: "Contact Us" }).isVisible())
+        );
       }
 
       /* Regression guards for three fixed defects and the footer (Oct 2026). */

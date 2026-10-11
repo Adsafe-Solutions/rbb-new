@@ -1,0 +1,38 @@
+.grid {
+  display: grid;
+  gap: var(--space-4);
+}
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    align-items: start;
+    gap: var(--space-6);
+  }
+}
+.main {
+  justify-content: center;
+  min-height: 280px;
+}
+.facts {
+  display: grid;
+  gap: var(--space-3);
+}
+.facts > div {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: baseline;
+}
+.facts dt {
+  color: var(--color-text-muted);
+  font-size: var(--type-body-small-size);
+}
+.facts dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--color-text-strong);
+}
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--type-mono-size);
+}

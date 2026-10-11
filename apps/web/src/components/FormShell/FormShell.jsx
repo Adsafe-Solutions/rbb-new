@@ -231,6 +231,8 @@ export default function FormShell({
       noValidate
       onSubmit={onSubmit}
       aria-busy={submitting || undefined}
+      /* Which form this is — a stable hook for tests (smoke-forms.mjs). */
+      data-form={config.formId}
       /* The stacked form is printed on a sheet: white, the 2px border, the
          band's hard shadow, square to the page — a form is something you
          fill in, and a form on a slant feels unreliable. The inline

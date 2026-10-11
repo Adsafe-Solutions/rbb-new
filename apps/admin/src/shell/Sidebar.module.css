@@ -1,0 +1,190 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--color-bg-surface);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  height: var(--layout-topbar-height);
+  padding: 0 var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+.mark {
+  flex: none;
+  object-fit: contain;
+}
+.monogram {
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: 0.625rem;
+  font-weight: 700;
+}
+.brandText {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.close {
+  margin-right: calc(-1 * var(--space-1));
+}
+.product {
+  overflow: hidden;
+  color: var(--color-text-strong);
+  font-size: var(--type-body-size);
+  line-height: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.organization {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-line);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-3) var(--space-6);
+  scrollbar-width: thin;
+}
+.section + .section {
+  margin-top: var(--space-4);
+}
+.sectionLabel {
+  padding: 0 var(--space-2);
+  margin-bottom: var(--space-1);
+  color: var(--color-text-subtle);
+  font-size: 0.6875rem;
+  line-height: var(--type-caption-line);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.items {
+  display: grid;
+  gap: 1px;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 32px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--type-body-size);
+  font-weight: 450;
+  text-decoration: none;
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-ease-standard),
+    color var(--motion-duration-fast) var(--motion-ease-standard);
+}
+.icon {
+  flex: none;
+}
+.label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+a.item:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-strong);
+}
+a.item:active {
+  background: var(--color-bg-pressed);
+}
+a.item:focus-visible {
+  outline-offset: -2px;
+}
+.item[aria-current="page"] {
+  background: var(--color-bg-selected);
+  color: var(--color-primary);
+  font-weight: 500;
+}
+/* The active marker: a short bar in the brand accent. */
+.item[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: calc(-1 * var(--space-3));
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--color-accent);
+}
+.planned {
+  color: var(--color-text-subtle);
+  cursor: default;
+}
+.planned .icon {
+  opacity: 0.7;
+}
+.soon {
+  flex: none;
+}
+
+/* Rail: icons only. Names stay in the DOM (visually hidden) for screen
+   readers and appear in tooltips. */
+.rail .brand {
+  justify-content: center;
+  padding: 0;
+}
+.rail .brandText,
+.rail .soon {
+  display: none;
+}
+.rail .nav {
+  padding-inline: var(--space-2);
+}
+.rail .sectionLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.rail .section + .section {
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+.rail .item {
+  justify-content: center;
+  width: 40px;
+  height: 36px;
+  margin: 0 auto;
+  padding: 0;
+}
+.rail .label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.rail .item[aria-current="page"]::before {
+  left: calc(-1 * var(--space-2));
+}

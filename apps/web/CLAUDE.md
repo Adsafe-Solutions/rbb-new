@@ -116,6 +116,117 @@ payments (off/test/live), analytics, secrets and indexing. Deploy/launch:
 Host adapters use only `createServerApp` (`server/app.mjs`); no host is
 chosen yet — `docs/HOST_CONFIGURATION.md`.
 
+### The CMS's published snapshot
+
+`npm run build` first runs `scripts/published-snapshot.mjs`. With
+`RBB_SNAPSHOT_URL` set, it fetches the API's published snapshot once, and
+the `rbb-published-snapshot` Vite plugin sets the mapped exports in
+`brand.js`, `site.js` and `contact.js`. This happens in the client and
+server builds alike, so the HTML and the hydrated page agree. The mapping
+and its reasons are in `scripts/snapshot-adapter.mjs`. Without the URL,
+nothing changes: the source content is the site, byte for byte.
+
+A snapshot that carries content collections also replaces `NEWS`, `BLOGS`
+and `EVENTS` in `media.js` with the published CMS records. Their `body` and
+`about` are structured rich text, which the article and event pages render
+through `components/RichText`; source items stay plain paragraph strings.
+A collection the snapshot doesn't carry keeps its source items.
+
+A snapshot's published appeals replace `APPEALS` (`appeals.js`), and a
+published general donation page fills `PUBLISHED_GENERAL_DONATION`
+(`donation.js`), which `generalDonation()` prefers. A page whose
+`checkout` the build can draw (`integrations/donations/DonationCheckout`
+`checkoutAvailable`: Givebutter, and `VITE_GIVEBUTTER_ACCOUNT_ID` set)
+shows Givebutter's widget in the form slot. Every other page shows
+DonationForm.
+
+A snapshot's published homepage fills `PUBLISHED_HOMEPAGE`
+(`homepage.js`). `pages/Home` then draws its blocks through
+`pages/Home/CmsHome.jsx`: an explicit type → component table, reusing the
+source homepage's components. A build without one draws the source
+homepage, unchanged. The About page works the same way
+(`PUBLISHED_ABOUT`, `pages/About/CmsAbout.jsx`, one shared tone rule in
+`lib/bandTones.js`). The snapshot's team replaces `TEAM_MEMBERS` in its
+source shape, with media-library photographs (`imageId`). Its published
+programs replace `PROGRAMS` (`work.js`) the same way. The program routes,
+the Our Work menu and the homepage cards all derive from `PROGRAMS`, so
+never hard-code the list of program areas anywhere else.
+
+Published impact figures replace `IMPACT.metrics`. A `stats` block names
+figures and `metricStats` resolves them, so never copy a figure into a
+page. A published Impact page fills `PUBLISHED_IMPACT`
+(`pages/Impact/CmsImpact.jsx`). Published transparency fills
+`TRANSPARENCY` / `TRANSPARENCY_COPY` in their own shape. Trust panels read
+`transparencyLinks()`; never list transparency rows by hand.
+
+Published projects replace `PROJECT_RECORDS` and `PROJECTS` (`work.js`),
+and published stories replace `STORIES` (`stories.js`), each in its source
+shape. `STORY_SOURCE.cms` says which stories are the site's (M15): once the
+CMS's are, they are the ONLY stories — never resolve a reference made
+against the website's own stories (the source Impact page's
+`IMPACT.stories` slugs) against CMS stories, or the other way round. The
+source Impact page then shows its empty stories state, and the build warns;
+a CMS Impact page names CMS stories by id, and a story it names that the
+site does not show fails the build. `PROJECT_SOURCE.cms` does the same for
+projects (M31.1): `false` by default, set by the build when the snapshot
+carries published projects. While the projects are the CMS's but the
+stories are still the website's own, a source story naming a source
+project is a build WARNING, not an error, and its page shows no project
+link (`lib/storyProjects.js`). A CMS story's missing project still fails
+— the snapshot contract and `validate.js` both check it. The warning
+approves nothing: sample stories keep their `releaseMarker` and still
+block release readiness. A CMS story's `body` is structured rich text: render it through
+`components/RichText`'s `RichBlock`, never as HTML. Media-library images
+carry a `mediaId`; the validator and `publicImages` treat them as served
+by the library, not the build.
+
+A published Careers page fills `CAREERS` (`contact.js`) in its own shape.
+`CAREERS.to` stays the site's address, and its roles stay the "verified"
+roles the SEO rule counts.
+
+Published policies (M19: privacy, terms, donation) are merged BY ID into
+their records in `POLICIES` (`policies.js`), so the policy page, footer,
+forms' privacy link, donation form and SEO follow. The id and route stay
+the site's. A policy the snapshot does not carry keeps its source record.
+`policies.js` itself is untouched, so a build without a published policy
+is byte-identical. Never write policy text or dates on RBB's behalf, and
+never treat a published policy as satisfying the `policies` release
+approval.
+
+Published Get Involved pages (M20) are assigned into `GET_INVOLVED` and
+`GET_INVOLVED_PAGES` (`getInvolved.js`) through NESTED targets
+(`GET_INVOLVED.paths` by id, `GET_INVOLVED_PAGES.hub.closing` …). Every
+reader of the path records follows: menu, footer, cards, forms and SEO. A
+path's title, route, icon, images and form stay the site's, and a call to
+action is a target (`CTA_ROUTES`), never an address. Keep those nested
+objects where they are; the build fails if one moves.
+
+A published announcement bar (M21) replaces `ANNOUNCEMENTS.bar.items`.
+In every snapshot build, the published settings'
+`engagement.announcementBar` sets `ANNOUNCEMENTS.bar.enabled` and
+`.interval`, though `VITE_ANNOUNCEMENT_BAR` still overrides `enabled`.
+`content/validate.js` checks that every bar link is a pre-rendered page.
+
+A published popup (M22) replaces `ANNOUNCEMENTS.popup`'s fields (its `key`
+becomes the `id`; the parts it leaves out are cleared with null), and the
+published `engagement.popup.enabled` sets `.enabled` in every snapshot
+build. The popup's CTA must be one of the site's pages (`validate.js`),
+and its photograph's origin is added to the CSP (`imageOrigins`).
+
+A published Highlights strip (M23) sets `APPEAL_STORIES.order`. It also
+REWRITES one expression in `appeals.js` at build time (`STORY_REWRITE`:
+`APPEALS.filter((a) => a.story)`), so `storyAppeals` follows the strip's
+order without changing any build that has no strip. Keep that expression
+exactly as written, once; the build fails otherwise. The published
+`engagement.storyStrip.enabled` sets `APPEAL_STORIES.enabled` in every
+snapshot build.
+
+**Keep those exports as `export const NAME = { … }` objects (or `[ … ]`
+arrays for the collections, `APPEALS` and `POLICIES` included).** The build appends assignments to
+them, and it fails loudly if one disappears.
+Never fetch the CMS from a component: the build owns the snapshot. See
+`docs/PUBLISHING.md`.
+
 ## Conventions
 
 - One folder per component, one per page: `components/Button/Button.jsx`.

@@ -19,7 +19,7 @@ export {
   hasProfile,
   featuredMembers,
 } from "./team.js";
-export { TRANSPARENCY, TRANSPARENCY_COPY, publishedDocuments } from "./transparency.js";
+export { TRANSPARENCY, TRANSPARENCY_COPY, publishedDocuments, transparencyLinks } from "./transparency.js";
 export {
   ORG_CONTACT,
   CAREERS,
@@ -53,8 +53,8 @@ export {
   publishedPolicyLinks,
 } from "./policies.js";
 export { GIVING } from "./giving.js";
-export { HOMEPAGE } from "./homepage.js";
-export { IMPACT, IMPACT_PAGES, metricsNote, approachSteps, impactStats } from "./impact.js";
+export { HOMEPAGE, PUBLISHED_HOMEPAGE } from "./homepage.js";
+export { IMPACT, IMPACT_PAGES, PUBLISHED_IMPACT, metricsNote, approachSteps, impactStats, metricStats } from "./impact.js";
 export { GET_INVOLVED, GET_INVOLVED_PAGES, pathCards, pathByPath } from "./getInvolved.js";
 export {
   STORIES,
@@ -68,6 +68,7 @@ export {
   storyPath,
   latestStories,
   storyCard,
+  STORY_SOURCE,
 } from "./stories.js";
 export {
   WORK,
@@ -82,7 +83,7 @@ export {
 } from "./work.js";
 export { ZAKAT } from "./zakat.js";
 export { GIFTS } from "./gifts.js";
-export { ABOUT, HOW_WE_WORK } from "./about.js";
+export { ABOUT, HOW_WE_WORK, PUBLISHED_ABOUT } from "./about.js";
 export {
   NEWS,
   BLOGS,

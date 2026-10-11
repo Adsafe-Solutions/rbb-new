@@ -1,0 +1,6 @@
+.textarea {
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  resize: vertical;
+  min-height: 64px;
+}

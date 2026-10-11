@@ -91,4 +91,11 @@ export const ENV = {
   },
 };
 
+/* The donation provider's PUBLIC account identifier — what its widget
+   library is loaded with (src/integrations/givebutter). Not a secret: it
+   appears in every page that shows a widget. The provider's API key never
+   comes anywhere near the browser; it lives on the API server. A separate
+   export (not part of ENV) so a build with no widget carries nothing. */
+export const GIVEBUTTER_ACCOUNT_ID = env.VITE_GIVEBUTTER_ACCOUNT_ID || null;
+
 export default ENV;

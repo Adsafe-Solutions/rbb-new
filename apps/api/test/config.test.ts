@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { ConfigError, describeEnvironment, loadConfig } from "../src/config/env.ts";
 
 const SECRET_URI = "mongodb+srv://someone:very-secret-password@cluster.example.net/";
+const AUTH_SECRET = "a-test-auth-secret-that-is-long-enough-0123";
 
 const problemsOf = (env: Record<string, string | undefined>) => {
   try {
@@ -28,6 +29,7 @@ test("a valid production configuration loads", () => {
     ORGANIZATION_ID: "rbb",
     MONGODB_URI: SECRET_URI,
     MONGODB_DB: "rbb_production",
+    AUTH_SECRET,
     WEB_ORIGIN: "https://www.example.org",
     ADMIN_ORIGIN: "https://admin.example.org",
   });
@@ -38,7 +40,7 @@ test("a valid production configuration loads", () => {
 
 test("production refuses to start on development defaults", () => {
   const problems = problemsOf({ NODE_ENV: "production" });
-  for (const name of ["ORGANIZATION_ID", "MONGODB_URI", "MONGODB_DB"])
+  for (const name of ["ORGANIZATION_ID", "MONGODB_URI", "MONGODB_DB", "AUTH_SECRET"])
     assert.ok(problems.some((p) => p.startsWith(`${name} `)), `${name} should be required in production`);
 });
 
@@ -48,6 +50,7 @@ test("production origins must be https", () => {
     ORGANIZATION_ID: "rbb",
     MONGODB_URI: SECRET_URI,
     MONGODB_DB: "rbb",
+    AUTH_SECRET,
     WEB_ORIGIN: "http://www.example.org",
   });
   assert.deepEqual(problems, ["WEB_ORIGIN must be an https:// origin in production"]);

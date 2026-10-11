@@ -7,6 +7,7 @@
 import { FORM_COPY } from "../content/forms.js";
 import { antiSpamReady, antiSpamToken } from "./antiSpam.js";
 import { EMAIL_PATTERN, HONEYPOT_FIELD } from "./formSchema.js";
+import { fieldCodesFrom } from "./formResponse.js";
 
 /* A public endpoint: a same-origin path, or https. Anything else — a
    mailto:, plain http, a string with credentials in it — is refused. */
@@ -90,8 +91,8 @@ export function validateForm(fields, values) {
 
 const TIMEOUT_MS = 20000;
 
-/* The server's field codes (server/validate.mjs) as this form's own
-   messages — the server never sends wording, only a code. */
+/* The server's field codes (@rbb/forms validateSubmission) as this form's
+   own messages — the server never sends wording, only a code. */
 export function serverFieldMessage(field, code) {
   const m = FORM_COPY.messages;
   if (code === "required")
@@ -145,8 +146,10 @@ export async function submitForm(
     if (response.ok) return { outcome: "ok" };
     if (response.status === 429) return { outcome: "rate-limited" };
     if (response.status === 422) {
+      /* The API's error envelope (M18) or the old form server's shape —
+         lib/formResponse.js; codes only. */
       const body = await response.json().catch(() => null);
-      return { outcome: "invalid", fields: body?.fields ?? {} };
+      return { outcome: "invalid", fields: fieldCodesFrom(body) };
     }
     return { outcome: "error" };
   } catch {

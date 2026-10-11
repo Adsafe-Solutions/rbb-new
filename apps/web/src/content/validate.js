@@ -31,9 +31,10 @@
    This file ships nowhere: only the build (entry-server.jsx) imports it. */
 
 import { STORIES, STORY_CATEGORIES } from "./stories.js";
-import { PROGRAMS, PROJECT_RECORDS } from "./work.js";
+import { PROGRAMS, PROJECT_RECORDS, PROJECT_SOURCE } from "./work.js";
 import { TEAM_MEMBERS, TEAM_GROUPS } from "./team.js";
 import { POLICIES } from "./policies.js";
+import { ANNOUNCEMENTS } from "./announcements.js";
 import { DONATION } from "./donation.js";
 import { FORMS } from "./forms.js";
 import { TOPICS } from "../lib/formSchema.js";
@@ -41,6 +42,7 @@ import { ORG_CONTACT, CAREERS } from "./contact.js";
 import * as CONTENT from "./index.js";
 import { CREDENTIALS } from "../lib/releaseMarkers.js";
 import { contractConformance } from "../contract/conformance.js";
+import { storyProjectReference } from "../lib/storyProjects.js";
 
 /* The statuses of Document 18. "verified" is the older spelling several
    Document 05–09 modules use for the same meaning as "approved". */
@@ -105,7 +107,9 @@ export function validateContent({ pages = [], redirects = [], preview = false } 
     const src = typeof img === "string" ? img : img.src;
     const alt = typeof img === "string" ? undefined : img.alt;
     if (!text(src)) return err(where, "image has no `src`");
-    if (/^https?:\/\//.test(src))
+    /* A photograph from the CMS's media library (`mediaId`, M12 stories
+       and projects) is served from the library's public origin. */
+    if (/^https?:\/\//.test(src) && !img.mediaId)
       err(
         where,
         "image must be a local asset — external media needs the Document 17 technology review"
@@ -142,6 +146,14 @@ export function validateContent({ pages = [], redirects = [], preview = false } 
       "stories.js STORIES",
       `${featured.length} approved stories are marked \`featured\`; only one may be`
     );
+  /* M15: once the stories come from the CMS, the website's own Impact page
+     — which names the website's own stories — shows none (never a CMS story
+     by a coincidental slug). Said loudly, so it is never a silent gap. */
+  if (CONTENT.STORY_SOURCE.cms && !CONTENT.PUBLISHED_IMPACT.page && CONTENT.IMPACT.stories.length)
+    warn(
+      "impact.js IMPACT.stories",
+      `the stories now come from the CMS, so the website's own Impact page shows none of the ${CONTENT.IMPACT.stories.length} website stories it names — publish the Impact page from the CMS to choose CMS stories for /impact`
+    );
   for (const s of ALL_STORIES) {
     const where = `stories.js STORIES[${s?.id}]`;
     if (!s || !live(s.status)) continue;
@@ -153,8 +165,10 @@ export function validateContent({ pages = [], redirects = [], preview = false } 
     if (s.date != null && !validDate(s.date)) err(where, "`date` must be YYYY-MM-DD");
     if (s.programId != null && !programSlugs.has(s.programId))
       err(where, `\`programId\` "${s.programId}" is not a program`);
-    if (s.projectId != null && !approvedProjectSlugs.has(s.projectId))
-      err(where, `\`projectId\` "${s.projectId}" is not an approved project`);
+    const project = storyProjectReference({ projectId: s.projectId, approvedProjectSlugs, storiesFromCms: CONTENT.STORY_SOURCE.cms, projectsFromCms: PROJECT_SOURCE.cms });
+    if (project === "missing") err(where, `\`projectId\` "${s.projectId}" is not an approved project`);
+    if (project === "obsolete")
+      warn(where, `\`projectId\` "${s.projectId}" names a website project; the projects now come from the CMS, so the story shows no project link`);
     for (const rel of s.relatedStoryIds ?? []) {
       if (rel === s.slug) err(where, "`relatedStoryIds` includes the story itself");
       else if (!approvedStorySlugs.has(rel))
@@ -166,7 +180,9 @@ export function validateContent({ pages = [], redirects = [], preview = false } 
       if (!text(q?.text) || !text(q?.attribution))
         err(`${where}.quotes[${i}]`, "a quote needs `text` and `attribution`");
     });
-    if (s.body != null && !(Array.isArray(s.body) && s.body.every(text)))
+    /* Plain paragraphs (source), or the CMS's structured rich text — whose
+       blocks the content contract has already checked. */
+    if (s.body != null && !(Array.isArray(s.body) && s.body.every((b) => text(b) || (b && typeof b === "object" && typeof b.type === "string"))))
       err(where, "`body` must be a list of paragraphs");
   }
 
@@ -203,9 +219,12 @@ export function validateContent({ pages = [], redirects = [], preview = false } 
     if (!groupIds.has(m.category))
       err(where, `\`category\` must be one of ${[...groupIds].join(", ")}`);
     if (m.image != null) {
+      /* A photograph from the CMS's media library (a published snapshot,
+         `imageId`) is served from the library's public origin, which the
+         build approves; a source record's must be a local asset. */
       if (!text(m.image)) err(where, "`image` must be a local asset path");
-      else if (/^https?:\/\//.test(m.image)) err(where, "`image` must be a local asset");
-      if (!text(m.imageAlt)) err(where, "a photograph needs `imageAlt`");
+      else if (/^https?:\/\//.test(m.image) && !m.imageId) err(where, "`image` must be a local asset");
+      if (!text(m.imageAlt)) err(where, m.imageId ? "a photograph needs alt text — add it in the media library" : "a photograph needs `imageAlt`");
     }
     if (m.approvedAt != null && !validDate(m.approvedAt))
       err(where, "`approvedAt` must be YYYY-MM-DD");
@@ -218,6 +237,20 @@ export function validateContent({ pages = [], redirects = [], preview = false } 
     if (m.biography != null && !(Array.isArray(m.biography) && m.biography.every(text)))
       err(where, "`biography` must be a list of paragraphs");
   }
+
+  /* ---- Announcement bar (M21) ----
+     A message's link is drawn with the router: it must be one of the
+     site's pages (a CMS message's path is checked here, at build). */
+  for (const item of ANNOUNCEMENTS.bar.items) {
+    const to = item.link?.to;
+    if (to != null && !pageSet.has(String(to).split("#")[0]))
+      err(`announcements.js ANNOUNCEMENTS.bar.items[${item.id}]`, `link "${to}" is not a pre-rendered page`);
+  }
+
+  /* The popup's call to action is drawn with the router too (M22). */
+  const popupTo = ANNOUNCEMENTS.popup.cta?.to;
+  if (popupTo != null && !pageSet.has(String(popupTo).split("#")[0]))
+    err("announcements.js ANNOUNCEMENTS.popup.cta", `link "${popupTo}" is not a pre-rendered page`);
 
   /* ---- Policies (Document 13) ---- */
   const policyIds = new Set(POLICIES.map((p) => p.id));

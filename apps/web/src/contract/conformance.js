@@ -16,29 +16,47 @@
    must never be imported by anything that ships to the browser. */
 import { isDeepStrictEqual } from "node:util";
 import {
+  About,
   Announcement,
+  Careers,
   Appeal,
   Event,
   GeneralDonationPage,
   Homepage,
+  Impact,
   Media,
   Metric,
   Popup,
   Post,
+  Program,
+  Project,
+  Report,
   SiteSettings,
+  TeamMember,
+  Transparency,
 } from "@rbb/content-schema";
 import { APPEAL_RECORDS } from "../content/appeals.js";
+/* Images published through the CMS snapshot are media too (server build only). */
+import PUBLISHED_SNAPSHOT from "virtual:rbb-published-snapshot";
 import { MEDIA_LIBRARY } from "./media.js";
 import {
+  aboutRecord,
+  careersRecord,
   announcementRecords,
   eventRecords,
   generalDonationRecord,
   homepageRecord,
   mediaRecords,
   metricRecords,
+  impactRecord,
+  transparencyRecord,
+  reportRecords,
   popupRecord,
   postRecords,
+  programRecords,
+  projectRecords,
   siteSettingsRecord,
+  teamRecords,
 } from "./importers.js";
 
 /* Fields that hold media ids, wherever they appear in a record. */
@@ -60,12 +78,20 @@ export function contractConformance() {
       ["announcements", Announcement, announcementRecords()],
       ["popups", Popup, [popupRecord()]],
       ["homepage", Homepage, [homepageRecord()]],
+      ["about", About, [aboutRecord()]],
+      ["team", TeamMember, teamRecords()],
+      ["programs", Program, programRecords()],
+      ["careers", Careers, [careersRecord()]],
+      ["projects", Project, projectRecords()],
       ["metrics", Metric, metrics],
+      ["impact", Impact, [impactRecord()]],
+      ["transparency", Transparency, [transparencyRecord()]],
+      ["reports", Report, reportRecords()],
       ["media", Media, mediaRecords()],
       ["siteSettings", SiteSettings, [siteSettingsRecord()]],
     ];
     refs = {
-      metrics: new Set(metrics.map((m) => m.id)),
+      metrics: new Set(metrics.map((m) => m.slug)),
       posts: new Set(posts.map((p) => p.id)),
     };
   } catch (error) {
@@ -105,7 +131,7 @@ function references(value, path, refs, errors) {
     const at = `${path}.${key}`;
     if (MEDIA_FIELDS.has(key)) {
       const ids = typeof v === "string" ? [v] : Array.isArray(v) ? v : Object.values(v ?? {});
-      for (const id of ids) if (!MEDIA_LIBRARY[id]) errors.push(`${at}: no media with id "${id}"`);
+      for (const id of ids) if (!MEDIA_LIBRARY[id] && !PUBLISHED_SNAPSHOT?.media?.[id]) errors.push(`${at}: no media with id "${id}"`);
     } else if (key === "metricIds") {
       for (const id of v) if (!refs.metrics.has(id)) errors.push(`${at}: no metric with id "${id}"`);
     } else if (key === "relatedPostIds") {

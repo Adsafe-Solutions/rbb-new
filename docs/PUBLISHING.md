@@ -12,9 +12,14 @@ Web build ──GET /api/v1/public/snapshot──▶ API   (no session; this dep
    └─ scripts/published-snapshot.mjs → Vite plugin → client + server builds → prerender → static HTML
 ```
 
-The public website never queries the CMS at runtime. It reads the snapshot
-once per build and stays fully static. MongoDB being down never takes the
-site down.
+The public website is built static from the snapshot and stays so: the
+pre-rendered pages, search engines and a browser without JavaScript see
+the snapshot the build applied. On top of that, a build made with
+`RBB_SNAPSHOT_URL` also asks the API for the LATEST published snapshot in
+the visitor's browser, so a publication shows on the next page load
+without a rebuild — see "Runtime snapshot" below. MongoDB or the API
+being down never takes the site down: the browser keeps the build's own
+snapshot.
 
 ## Site settings
 
@@ -113,6 +118,95 @@ scheduled for later (M15, below). There is no preview environment.
 | `RBB_SNAPSHOT_REQUIRED=1` | Fail the build if the snapshot can't be fetched (use once the CMS is the source of truth) |
 | `RBB_SNAPSHOT_VERSION` | Fail if the snapshot is older than this (from the deploy hook) |
 | `RBB_SNAPSHOT=off` | Ignore the snapshot entirely |
+
+## Runtime snapshot
+
+Publishing used to reach the live website only through a rebuild (the
+deploy hook, or a manual Cloudflare Pages deployment). Since the runtime
+snapshot, a build made with `RBB_SNAPSHOT_URL` ALSO fetches the latest
+published snapshot in the browser, before the site's content modules
+load, and applies it in place of the baked one when it is newer.
+
+```
+browser ──GET /api/v1/public/snapshot (simple cross-origin GET, no session)──▶ API
+   │   304 / same version  → the baked snapshot, as pre-rendered (hydrate)
+   │   newer version       → structure + organization + the full content
+   │                         contract + "can this site draw it"
+   │                         → applied before any content module loads → render afresh
+   │   older / rejected    → the baked snapshot stays (never half-applied)
+   └── unreachable         → the browser's cached copy, checked the same way;
+                             with none, the baked snapshot stays
+```
+
+What this means in practice:
+
+| Situation | What the visitor sees |
+|---|---|
+| Nothing published since the build (the usual page load) | The pre-rendered page, hydrated. One small request, a 304 under the browser's own ETag revalidation (`Cache-Control: no-cache` + `ETag: "snapshot-v<N>"`). No validation runs: a version never changes |
+| A newer version is live | The pre-rendered page paints first; the newer content replaces it as soon as the request answers (default within 3 s), and the page is rendered afresh rather than hydrated against HTML it does not match. Everything derived from the content as the modules load — titles, the footer, the navigation, the routes — follows |
+| The API is down or slow | The baked snapshot: the last one known to be valid. Never the website's own sample content, which a runtime build no longer carries in place of published content |
+| An address the build did not pre-render (a story published after the build) | `404.html` answers with a "Loading…" status, then the page — the snapshot is loaded before the router runs. If the API could not be reached and the browser holds no copy, the page says it "cannot be shown right now", with a retry, instead of "not found" (still `noindex`) |
+| Drafts, submissions, approvals not yet published | Invisible: the browser reads only the API's public snapshot, which holds published content only |
+
+Rules and limits:
+
+- **Checks are the build's checks.** A runtime snapshot passes
+  `structuralProblems`, the `PublishedSnapshot` contract (loaded as its own
+  chunk only when a newer version arrives) and `overridesFrom` — one
+  failure rejects it whole. What the build cannot check at runtime stays
+  a build matter: the site's own content validation (`content/validate.js`,
+  links to pages that exist) runs at build time only.
+- **Secrets, sessions:** none. The public endpoint needs no session; the
+  request carries no custom header, so there is no preflight.
+- **CORS:** the API's `WEB_ORIGIN` must be the public site's origin
+  (`https://prod.risingbeyondborders.org` today), or the browser refuses
+  the response and the site keeps the baked snapshot (status
+  "unavailable"). This is an API environment setting, not a code change.
+- **The page policy** gains exactly one `connect-src` origin (the API's)
+  and the media library's origins in `img-src` — the origins of the baked
+  snapshot's media, plus `RBB_MEDIA_ORIGINS` for a media domain the baked
+  snapshot happens not to show yet. A page policy decided per page at
+  build time stays as built: a newly published Givebutter checkout or
+  homepage video is blocked by the CSP until the next build.
+- **New addresses** (a story, project, profile, appeal or post published
+  after the build) render in the browser, but the host answers them
+  with `404.html` (HTTP 404), and the sitemap does not list them, until
+  the next build. Keep the deploy hook: the rebuild is what makes a new
+  page a 200 for search engines; the runtime snapshot is what makes it
+  visible to people in the meantime.
+- **One fetch per page load.** Client-side navigation keeps the version
+  the page loaded with, so a visit never mixes two versions; a reload or
+  a new visit picks up the newest.
+- **Fail-safe:** should a chosen snapshot fail to apply to a module (a
+  target this build of the site no longer has), the page reloads once
+  without the runtime snapshot and shows the baked content.
+
+| Variable (build environment) | Effect |
+|---|---|
+| `RBB_SNAPSHOT_RUNTIME=off` | Keep the site fully static: the build bakes the snapshot and the browser never asks the API |
+| `RBB_SNAPSHOT_RUNTIME_TIMEOUT_MS` | How long the browser waits for the API before going on with the baked snapshot (default 3000; 500–30000) |
+| `RBB_MEDIA_ORIGINS` | Extra https origins (comma-separated) published images may load from |
+
+Runtime fetching is on only for a build that applied a snapshot; a
+source-content build (no `RBB_SNAPSHOT_URL`, or an unreachable API
+without `RBB_SNAPSHOT_REQUIRED=1`) is static as before.
+
+**Testing a publication end to end.**
+1. `pnpm web:test` — `scripts/test/runtime-snapshot.test.mjs` (every
+   outcome: fresh, unchanged, newer, malformed, API error, cached copy,
+   timeout) and `runtime-snapshot-render.test.mjs` (the real site's
+   modules, through the hook).
+2. Build with the API: `RBB_SNAPSHOT_URL=https://api.<domain>/api/v1/public/snapshot
+   pnpm web:build`. `build-meta/runtime-snapshot.json` records the
+   decision; `build-meta/security-headers.json` shows the API in
+   `connect-src`.
+3. Serve `dist/` (`pnpm web:serve`, or any static host) and open a page:
+   the Network panel shows one request to the snapshot endpoint (200 on
+   the first visit, 304 after).
+4. Publish in the admin, reload the page: the change shows; the console
+   has no hydration warning (the page rendered afresh).
+5. Stop the API (or block the request): reload — the baked content
+   shows, nothing else.
 
 What the snapshot drives (`scripts/snapshot-adapter.mjs`):
 - `general` → `BRAND`
@@ -1041,14 +1135,14 @@ snapshot.
 | Which appeals, in what order? | The PUBLISHED strip (`content.storyStrip`), else the site's rule: highlighted appeals, newest first |
 | Are the circles on? | `VITE_STORY_STRIP`, then the published settings' `engagement.storyStrip.enabled` in any snapshot build, then the site's own `enabled` |
 
-**How the order is applied.** `storyAppeals()` in `content/appeals.js`
-takes highlighted appeals in list order. Changing it would change every
-build, so a published strip REWRITES that one expression at build time
-(`STORY_REWRITE` in `scripts/snapshot-adapter.mjs`). The rewrite applies
-only in builds with a published strip, and the build fails unless the
-expression is found exactly once. The strip's order goes into
-`APPEAL_STORIES.order`. The appeal lists keep their own order, and every
-other part of every page is unchanged.
+**How the order is applied.** The strip's order goes into
+`APPEAL_STORIES.order` (`null` in the site's own content), and
+`storyAppeals()` in `content/appeals.js` follows it when it is set —
+the strip's appeals in its order, never one it names that is not there
+— and takes highlighted appeals in list order otherwise. (Until the
+runtime snapshot this was a build-time rewrite of one expression; a value
+the browser can apply replaced it.) The appeal lists keep their own
+order, and every other part of every page is unchanged.
 
 **Admin:** Engagement → Highlights (`/highlights`). Up to four circles,
 each choosing an appeal, reordered with Move up and Move down. Owners get

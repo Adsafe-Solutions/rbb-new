@@ -30,8 +30,11 @@ Nothing changed except the directory they sit in.
 | `apps/web/server/env.example` | people (template) | server variable names for the host's secret store |
 
 Publishing: `docs/PUBLISHING.md`. The web build reads an optional
-`RBB_SNAPSHOT_URL` (and `RBB_SNAPSHOT_REQUIRED` / `RBB_SNAPSHOT_VERSION`).
-These are build environment variables, not `VITE_` ones.
+`RBB_SNAPSHOT_URL` (and `RBB_SNAPSHOT_REQUIRED` / `RBB_SNAPSHOT_VERSION`,
+and for the runtime snapshot `RBB_SNAPSHOT_RUNTIME`,
+`RBB_SNAPSHOT_RUNTIME_TIMEOUT_MS`, `RBB_MEDIA_ORIGINS`). These are build
+environment variables, not `VITE_` ones; the build compiles the public
+part of the runtime configuration in itself.
 
 `apps/admin` reads only optional `VITE_API_BASE` / `VITE_ADMIN_DESIGN_SYSTEM` (and `ADMIN_API_PROXY` for its dev proxy); its branding is code, in `apps/admin/src/theme/`. `apps/api` has its own: `apps/api/.env.example`
 (placeholders) → `apps/api/.env.local` (git-ignored) locally, Vercel's

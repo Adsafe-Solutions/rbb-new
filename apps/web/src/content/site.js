@@ -46,6 +46,15 @@ export const SITE = {
     body: "The link may be out of date, or the page may have moved.",
     cta: { label: "Back to home", to: "/" },
   },
+  /* The same page when the site could not check for the latest published
+     content and has no copy of it (pages/NotFound, runtime snapshot):
+     it will not say "not found" about a page that may exist. Interface
+     copy; says nothing about the cause. */
+  unavailable: {
+    heading: "This page cannot be shown right now",
+    body: "We could not check for the latest published content. Please try again in a moment.",
+    cta: { label: "Try again" },
+  },
 
   /* The hint in the corner of the homepage hero. Interface copy, like
      the error and placeholder lines above — it describes the page, not

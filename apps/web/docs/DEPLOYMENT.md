@@ -186,6 +186,8 @@ Only `VITE_*` variables reach the browser — **never put a secret in one**.
 | `VITE_ENVIRONMENT` | `dev`, `preview` or `prod`. Optional measurement (none approved — Document 17) can only run in a production build with `prod` AND a verified `VITE_SITE_URL`; set `preview` on preview deployments. |
 | `VITE_FORM_ENDPOINT_*` | Public form endpoints (Document 12). Empty → forms stay disabled. |
 | `VITE_DESIGN_SYSTEM_ROUTE`, `VITE_COMPONENTS_ROUTE` | Dev tools; off in production unless set. |
+| `RBB_SNAPSHOT_URL`, `RBB_SNAPSHOT_REQUIRED`, `RBB_SNAPSHOT_VERSION` | The CMS's published snapshot the build applies (not `VITE_`: build-time only). See `docs/PUBLISHING.md`. |
+| `RBB_SNAPSHOT_RUNTIME`, `RBB_SNAPSHOT_RUNTIME_TIMEOUT_MS`, `RBB_MEDIA_ORIGINS` | The runtime snapshot: whether a build fetches a newer published snapshot in the browser (on whenever `RBB_SNAPSHOT_URL` is set and a snapshot was applied; `off` to stay fully static), how long it waits, and extra image origins. The API's `WEB_ORIGIN` must name the site's origin for the browser to be allowed the response. See `docs/PUBLISHING.md` "Runtime snapshot". |
 
 Files: `.env.development` (dev server), `.env.production` (production
 build), `.env.local` (untracked, per machine). A **preview** deployment
@@ -194,10 +196,14 @@ canonical site.
 
 ## Content freshness
 
-Pages are rendered at build time from the files in `src/content/`. A
-content change goes live with the next build and deploy. Only add
-**approved** records to those files: every record in them ships in the
-JavaScript bundle, even one the site never shows.
+Pages are rendered at build time from the files in `src/content/` and
+the CMS's published snapshot. A change to the source files goes live with
+the next build and deploy. A CMS publication shows on the next page load
+of a build made with `RBB_SNAPSHOT_URL` (the runtime snapshot,
+`docs/PUBLISHING.md`) — and becomes a pre-rendered page, listed in the
+sitemap, with the next build. Only add **approved** records to the source
+files: every record in them ships in the JavaScript bundle, even one the
+site never shows.
 
 ## Before launch — checklist
 

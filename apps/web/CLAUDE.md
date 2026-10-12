@@ -126,6 +126,23 @@ server builds alike, so the HTML and the hydrated page agree. The mapping
 and its reasons are in `scripts/snapshot-adapter.mjs`. Without the URL,
 nothing changes: the source content is the site, byte for byte.
 
+**The runtime snapshot** (`docs/PUBLISHING.md` "Runtime snapshot"): a
+build with the URL also asks the API for the latest published snapshot
+in the browser, BEFORE the content modules load. In such a build the
+plugin does not append assignments; every target module ends with a call
+to `applyRuntimeOverrides` (`src/lib/runtimeOverrides.js`), and
+`src/lib/runtimeBoot.js` — awaited at the top level, which every content
+module waits on through that hook — decides whether the baked values
+(compiled in as `__RBB_BAKED_OVERRIDES__`) or a newer, fully checked
+snapshot are applied. So anything derived from the content AS A MODULE
+LOADS (`SITE.name`, the footer's `SOCIALS`, `PAGES`, `BUILT` in App.jsx,
+`SECTIONS`) follows the chosen snapshot, as it follows the build's
+assignments. A newer snapshot means `main.jsx` renders afresh instead
+of hydrating. Never read the snapshot from a component, and never add a
+runtime fetch anywhere else: one decision, before the modules load, is
+what keeps every page consistent. `RBB_SNAPSHOT_RUNTIME=off` builds the
+fully static site.
+
 A snapshot that carries content collections also replaces `NEWS`, `BLOGS`
 and `EVENTS` in `media.js` with the published CMS records. Their `body` and
 `about` are structured rich text, which the article and event pages render
@@ -213,13 +230,13 @@ published `engagement.popup.enabled` sets `.enabled` in every snapshot
 build. The popup's CTA must be one of the site's pages (`validate.js`),
 and its photograph's origin is added to the CSP (`imageOrigins`).
 
-A published Highlights strip (M23) sets `APPEAL_STORIES.order`. It also
-REWRITES one expression in `appeals.js` at build time (`STORY_REWRITE`:
-`APPEALS.filter((a) => a.story)`), so `storyAppeals` follows the strip's
-order without changing any build that has no strip. Keep that expression
-exactly as written, once; the build fails otherwise. The published
-`engagement.storyStrip.enabled` sets `APPEAL_STORIES.enabled` in every
-snapshot build.
+A published Highlights strip (M23) sets `APPEAL_STORIES.order` (`null`
+in the source), and `storyAppeals` in `appeals.js` follows that order
+when it is set — the strip's appeals only, in its order — and the site's
+own rule (highlighted appeals, list order) otherwise. It is a plain
+value so the runtime snapshot can set it too; it used to be a build-time
+rewrite of the expression. The published `engagement.storyStrip.enabled`
+sets `APPEAL_STORIES.enabled` in every snapshot build.
 
 **Keep those exports as `export const NAME = { … }` objects (or `[ … ]`
 arrays for the collections, `APPEALS` and `POLICIES` included).** The build appends assignments to

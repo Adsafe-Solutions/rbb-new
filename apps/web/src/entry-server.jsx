@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { PublishedSnapshot } from "@rbb/content-schema";
 import PUBLISHED_SNAPSHOT from "virtual:rbb-published-snapshot";
+import { snapshotState } from "./lib/runtimeBoot.js";
 import { ORG_ID } from "./contract/org.js";
 import { imageOrigins as snapshotImageOrigins } from "../scripts/snapshot-adapter.mjs";
 import { renderToString } from "react-dom/server";
@@ -183,6 +184,14 @@ export const publishedSnapshotInfo = () => {
   const result = PublishedSnapshot.safeParse(PUBLISHED_SNAPSHOT);
   const problems = result.success ? [] : result.error.issues.map((i) => `${i.path.join(".") || "(snapshot)"}: ${i.message}`);
   if (PUBLISHED_SNAPSHOT.organization?.id !== ORG_ID) problems.push(`organization.id: must be this site's organization ("${ORG_ID}")`);
+  /* A runtime-snapshot build applies the baked values through the same
+     hook a visitor's browser uses (src/lib/runtimeOverrides.js): every
+     target it sets must have taken them while the modules loaded here. */
+  if (ENV.runtimeSnapshot) {
+    const state = snapshotState();
+    if (state.failed) problems.push(`runtime hook: ${state.failed.message}`);
+    for (const file of Object.keys(state.overrides ?? {})) if (!state.applied.includes(file)) problems.push(`runtime hook: ${file} never applied the snapshot — is it still a target module (scripts/vite-published-snapshot.mjs)?`);
+  }
   return {
     snapshot: { version: PUBLISHED_SNAPSHOT.version, generatedAt: PUBLISHED_SNAPSHOT.generatedAt, collections: Object.keys(PUBLISHED_SNAPSHOT.content ?? {}) },
     problems,

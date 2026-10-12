@@ -131,8 +131,11 @@ export function collectInline(htmlDocuments) {
 /* The policy. `forMeta` drops what a <meta> CSP cannot express. */
 /* `images`: the origin(s) a build's published CMS images load from (the
    media library's public domain) — present only when a published snapshot
-   brings such images; otherwise the policy is exactly as before. */
-export function contentSecurityPolicy({ scripts, styles }, { forMeta = false, video = false, donation = false, images = [] } = {}) {
+   brings such images; otherwise the policy is exactly as before.
+   `connect`: the API's origin, for a build that fetches the published
+   snapshot in the browser (scripts/runtime-snapshot.mjs) — the one
+   cross-origin request the pages make; otherwise nothing. */
+export function contentSecurityPolicy({ scripts, styles }, { forMeta = false, video = false, donation = false, images = [], connect = [] } = {}) {
   const frames = [...(video ? VIDEO.frame : []), ...(donation ? DONATION_WIDGET.frame : [])];
   const extra = (kind) => (donation ? DONATION_WIDGET[kind] : []);
   const directives = [
@@ -146,7 +149,7 @@ export function contentSecurityPolicy({ scripts, styles }, { forMeta = false, vi
     ],
     ["font-src", "'self'", ...APPROVED_ORIGINS.font],
     ["img-src", "'self'", ...images, ...extra("img")],
-    ["connect-src", "'self'", ...APPROVED_ORIGINS.connect, ...extra("connect")],
+    ["connect-src", "'self'", ...APPROVED_ORIGINS.connect, ...connect, ...extra("connect")],
     ["manifest-src", "'self'"],
     ["media-src", "'none'"],
     ["object-src", "'none'"],
@@ -187,8 +190,8 @@ const PERMISSIONS = [
 
 /* Every header, by path pattern, for the host. `reportOnly` sends the CSP
    as Content-Security-Policy-Report-Only (the discovery step). */
-export function securityHeaders(inline, { reportOnly = false, video = false, donation = false, images = [] } = {}) {
-  const csp = contentSecurityPolicy(inline, { video, donation, images });
+export function securityHeaders(inline, { reportOnly = false, video = false, donation = false, images = [], connect = [] } = {}) {
+  const csp = contentSecurityPolicy(inline, { video, donation, images, connect });
   const permission = (f) => {
     const origins = [
       ...(video && VIDEO.features.includes(f) ? VIDEO.frame : []),

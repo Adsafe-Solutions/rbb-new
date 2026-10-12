@@ -94,8 +94,8 @@
                        order) — only while it is PUBLISHED; absent, the
                        site's rule stays (highlighted appeals, newest
                        first). Each circle's label and photo stay the
-                       appeal's own. A published strip also REWRITES one
-                       expression in content/appeals.js (STORY_REWRITE)
+                       appeal's own; storyAppeals() in content/appeals.js
+                       follows the order
      settings.engagement.storyStrip → APPEAL_STORIES.enabled (M23) — in
                        every snapshot build; VITE_STORY_STRIP still
                        overrides it (config/sections.js)
@@ -776,28 +776,6 @@ export function storyStripFrom(snapshot) {
     if (!slug) throw new Error(`snapshot: Highlights name appeal "${id}", which is not published in this snapshot`);
     return slug;
   });
-}
-
-/* The one expression a published strip rewrites in content/appeals.js:
-   `storyAppeals` takes the strip's appeals in the strip's order instead of
-   the highlighted appeals in list order — leaving the appeal lists' own
-   order alone. Applied ONLY to builds with a published strip (so every
-   other build is byte for byte what it was), and the build fails unless
-   the expression is found exactly once. */
-export const STORY_REWRITE = {
-  file: "src/content/appeals.js",
-  find: "APPEALS.filter((a) => a.story)",
-  replace: "APPEAL_STORIES.order.map((id) => APPEALS.find((a) => a.id === id)).filter((a) => a?.story)",
-};
-export const rewritesFrom = (snapshot) => (storyStripFrom(snapshot) ? { [STORY_REWRITE.file]: [{ find: STORY_REWRITE.find, replace: STORY_REWRITE.replace }] } : {});
-
-/* Source rewrites, each found exactly once — or the build fails. */
-export function applyRewrites(code, file, rewrites = []) {
-  return rewrites.reduce((out, { find, replace }) => {
-    const count = out.split(find).length - 1;
-    if (count !== 1) throw new Error(`${file}: expected "${find}" exactly once, found it ${count} times — update scripts/snapshot-adapter.mjs`);
-    return out.replace(find, () => replace);
-  }, code);
 }
 
 /* Published figures → IMPACT.metrics, in the shape content/impact.js

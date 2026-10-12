@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import { HOMEPAGE_BLOCK_TYPES } from "@rbb/content-schema/homepage-registry";
 import { ABOUT_BLOCK_TYPES } from "@rbb/content-schema/about-registry";
 import { CTA_TARGETS, GET_INVOLVED_PAGE_IDS, GET_INVOLVED_ROUTES, IMPACT_BLOCK_TYPES, POLICY_IDS, POLICY_ROUTES, PROGRAM_ICONS } from "@rbb/content-schema";
-import { ABOUT_VIEW_TYPES, BY_ID, STORY_REWRITE, announcementsFrom, applyRewrites, popupFrom, rewritesFrom, storyStripFrom, CTA_ROUTES, GET_INVOLVED_IDS, IMPACT_VIEW_TYPES, getInvolvedFrom, POLICY_IDS as ADAPTER_POLICY_IDS, aboutFrom, careersFrom, policiesFrom, impactFrom, metricsFrom, programsFrom, projectsFrom, storiesFrom, transparencyFrom, teamFrom, HOMEPAGE_VIEW_TYPES, SOCIAL_LABELS, SNAPSHOT_TARGETS, appealsFrom, homepageFrom, appendOverrides, collectionsFrom, generalDonationFrom, hasCheckouts, imageOrigins, overridesFrom, structuralProblems } from "../snapshot-adapter.mjs";
+import { ABOUT_VIEW_TYPES, BY_ID, announcementsFrom, popupFrom, storyStripFrom, CTA_ROUTES, GET_INVOLVED_IDS, IMPACT_VIEW_TYPES, getInvolvedFrom, POLICY_IDS as ADAPTER_POLICY_IDS, aboutFrom, careersFrom, policiesFrom, impactFrom, metricsFrom, programsFrom, projectsFrom, storiesFrom, transparencyFrom, teamFrom, HOMEPAGE_VIEW_TYPES, SOCIAL_LABELS, SNAPSHOT_TARGETS, appealsFrom, homepageFrom, appendOverrides, collectionsFrom, generalDonationFrom, hasCheckouts, imageOrigins, overridesFrom, structuralProblems } from "../snapshot-adapter.mjs";
 
 /* The published-snapshot adapter (scripts/snapshot-adapter.mjs) and the
    build's fetch step (scripts/published-snapshot.mjs). */
@@ -654,7 +654,6 @@ const withStrip = (appealIds, appeals = [stripAppeal("a", { highlight: { label: 
 
 test("highlights: the strip's appeals by address, in its order; each gets a circle; the switch in every snapshot build", () => {
   assert.equal(storyStripFrom(snapshot()), undefined);
-  assert.deepEqual(rewritesFrom(snapshot()), {}, "no strip: no rewrite — the build is the site's own");
   assert.deepEqual(overridesFrom(snapshot({ engagement: { storyStrip: { enabled: false } } }))["src/content/appeals.js"], { APPEAL_STORIES: { enabled: false } }, "the switch alone");
   const snap = withStrip(["rec-bb", "rec-a"], undefined, { engagement: { storyStrip: { enabled: true } } });
   assert.deepEqual(storyStripFrom(snap), ["bb", "a"]);
@@ -663,7 +662,6 @@ test("highlights: the strip's appeals by address, in its order; each gets a circ
   const story = Object.fromEntries(o.APPEALS.map((a) => [a.id, a.story]));
   assert.deepEqual(story, { a: { label: "Short A" }, bb: {}, ccc: {} }, "listed appeals get a circle (bb: its title and photo); others keep their own");
   assert.deepEqual(o.APPEALS.map((a) => a.id), ["ccc", "bb", "a"], "the appeal lists keep their own order (newest first)");
-  assert.deepEqual(rewritesFrom(snap), { [STORY_REWRITE.file]: [{ find: STORY_REWRITE.find, replace: STORY_REWRITE.replace }] });
 });
 
 test("highlights: an unpublished strip, or one naming an unpublished appeal, fails the build", () => {
@@ -673,15 +671,6 @@ test("highlights: an unpublished strip, or one naming an unpublished appeal, fai
   assert.throws(() => overridesFrom(withStrip([])), /at least one appeal/);
 });
 
-test("highlights: the rewritten expression is in appeals.js exactly once, and orders the strip as told", () => {
-  const code = readFileSync(join(root, STORY_REWRITE.file), "utf8");
-  assert.equal(code.split(STORY_REWRITE.find).length - 1, 1);
-  assert.match(code, /export const APPEAL_STORIES = \{/);
-  assert.ok(applyRewrites(code, STORY_REWRITE.file, rewritesFrom(withStrip(["rec-a"]))[STORY_REWRITE.file]).includes(STORY_REWRITE.replace));
-  assert.throws(() => applyRewrites("nothing here", "x.js", [{ find: STORY_REWRITE.find, replace: "y" }]), /exactly once, found it 0 times/);
-  assert.throws(() => applyRewrites(`${STORY_REWRITE.find};${STORY_REWRITE.find}`, "x.js", [{ find: STORY_REWRITE.find, replace: "y" }]), /found it 2 times/);
-  // The rewritten selection, run: the strip's order, its appeals only, never a missing one.
-  const select = new Function("APPEALS", "APPEAL_STORIES", `return ${STORY_REWRITE.replace};`);
-  const APPEALS = [{ id: "x", story: {} }, { id: "a", story: {} }, { id: "bb", story: {} }, { id: "no-circle" }];
-  assert.deepEqual(select(APPEALS, { order: ["bb", "gone", "a", "no-circle"] }).map((a) => a.id), ["bb", "a"]);
-});
+/* How the order is applied — storyAppeals() in content/appeals.js reads
+   APPEAL_STORIES.order — is exercised on the real module in
+   runtime-snapshot-render.test.mjs. */

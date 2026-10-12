@@ -184,6 +184,17 @@ try {
   );
   if (published.snapshot) console.log(`  built from published snapshot version ${published.snapshot.version}`);
 
+  /* The runtime snapshot (scripts/runtime-snapshot.mjs), as the Vite
+     plugin decided it for this build: the pages may then ask the API's
+     origin for a newer snapshot, and show any of the media library's
+     images — both allowed in the page policy below, and nowhere else. */
+  const runtime = JSON.parse(await readFile(join(metaDir, "runtime-snapshot.json"), "utf8").catch(() => "null"));
+  if (runtime && !published.snapshot) fail("build-meta/runtime-snapshot.json names a runtime snapshot, but this build applied none — rebuild from scratch");
+  if (runtime && (!/^https:\/\//.test(runtime.origin) && !/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(runtime.origin))) fail(`runtime snapshot origin ${runtime.origin} is not https`);
+  const connectOrigins = runtime ? [runtime.origin] : [];
+  const imageOrigins = [...new Set([...published.imageOrigins, ...(runtime?.mediaOrigins ?? [])])].sort();
+  if (runtime) console.log(`  runtime snapshot: the pages may fetch a newer version from ${runtime.origin} (timeout ${runtime.timeoutMs}ms)`);
+
   /* Document 18: validate the content first. Any error stops the build —
      a malformed approved record never becomes a public page. */
   const check = ssr.validate();
@@ -276,7 +287,8 @@ try {
       forMeta: true,
       video: video && route === VIDEO_ROUTE,
       donation: donationRoutes.includes(route),
-      images: published.imageOrigins,
+      images: imageOrigins,
+      connect: connectOrigins,
     });
     const out = reportOnly
       ? html
@@ -359,7 +371,7 @@ try {
       if (m[1] !== ssr.siteOrigin()) origins.add(m[1]);
     }
   }
-  const obs = { ...ssr.observability(), thirdPartyOrigins: [...origins].sort() };
+  const obs = { ...ssr.observability(), thirdPartyOrigins: [...origins].sort(), runtimeSnapshotOrigin: runtime?.origin ?? null };
 
   /* No page may load from an origin the CSP does not approve — a new
      provider needs its own approved phase (scripts/security-policy.mjs). */
@@ -383,11 +395,11 @@ try {
   /* The published snapshot's image origin is approved for this build by
      the API that published it (img-src only — see above). */
   const unapproved = obs.thirdPartyOrigins.filter(
-    (o) => !approvedOriginList().includes(o) && !published.imageOrigins.includes(o)
+    (o) => !approvedOriginList().includes(o) && !imageOrigins.includes(o)
   );
   if (unapproved.length)
     fail(`unapproved third-party origin(s) in published pages: ${unapproved.join(", ")}`);
-  const hostHeaders = securityHeaders(inline, { reportOnly, video, donation, images: published.imageOrigins });
+  const hostHeaders = securityHeaders(inline, { reportOnly, video, donation, images: imageOrigins, connect: connectOrigins });
   await writeFile(
     join(metaDir, "security-headers.json"),
     JSON.stringify(
@@ -399,6 +411,8 @@ try {
         },
         video: video ? { page: VIDEO_ROUTE, frame: VIDEO.frame, features: VIDEO.features } : false,
         donationWidget: donation ? { pages: donationRoutes, provider: DONATION_WIDGET.provider } : false,
+        /* The one cross-origin request the pages make, when they do. */
+        runtimeSnapshot: runtime ? { connect: runtime.origin, images: runtime.mediaOrigins } : false,
         headers: hostHeaders,
       },
       null,
@@ -427,8 +441,13 @@ try {
      legitimately contains "http://localhost" (React Router's internal
      URL-parsing base, never output), so there only example domains
      count. */
+  /* One exception, never a production one: a LOCAL build against a local
+     API (RBB_SNAPSHOT_URL=http://localhost:…) names that origin in every
+     page's policy, by design and on record (build-meta/runtime-snapshot.json).
+     Only that exact origin is let through, and only when it is loopback. */
+  const localApi = runtime && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(runtime.origin) ? runtime.origin : null;
   for (const file of await htmlFiles(dist)) {
-    const text = await readFile(file, "utf8");
+    const text = (await readFile(file, "utf8")).split(localApi ?? "\0").join("");
     const pattern = file.endsWith(".js")
       ? /https?:\/\/(www\.)?example\.(com|org|net)\b/
       : /https?:\/\/(localhost|127\.0\.0\.1|(www\.)?example\.(com|org|net))\b/;

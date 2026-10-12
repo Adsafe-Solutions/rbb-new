@@ -263,11 +263,17 @@ export const APPEAL_STORIES = {
   enabled: true,
   limit: 4,
   label: "Featured appeals",
+  /* A published Highlights strip (M23) sets this: the ids of the appeals
+     it shows, in its order. null: the site's own rule below. */
+  order: null,
 };
 
-/* The appeals in the strip: `story`-marked, in order, at most `limit`. */
+/* The appeals in the strip: `story`-marked, in order, at most `limit` —
+   the published strip's appeals in ITS order when there is one (a
+   published snapshot sets APPEAL_STORIES.order, at build time or in the
+   browser), never one it names that is not here. */
 export const storyAppeals = () =>
-  APPEALS.filter((a) => a.story)
+  (APPEAL_STORIES.order ? APPEAL_STORIES.order.map((id) => APPEALS.find((a) => a.id === id)).filter((a) => a?.story) : APPEALS.filter((a) => a.story))
     .slice(0, APPEAL_STORIES.limit)
     .map((a) => ({
       id: a.id,

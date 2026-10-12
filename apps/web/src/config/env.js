@@ -44,8 +44,27 @@ export const DEV_TOOLS_IN_BUILD =
   env.VITE_DESIGN_SYSTEM_ROUTE === "true" ||
   env.VITE_COMPONENTS_ROUTE === "true";
 
+/* The runtime snapshot (docs/PUBLISHING.md "Runtime snapshot"): compiled
+   in by scripts/vite-published-snapshot.mjs for a build that applied a
+   published snapshot and may ask the API for a newer one in the browser —
+   { url, version, orgId, timeoutMs }, public values only — or null:
+   the site is then fully static. Read by src/lib/runtimeBoot.js. */
+const runtimeSnapshot = (value) => {
+  if (!value) return null;
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed.url === "string" && Number.isInteger(parsed.version) ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
 export const ENV = {
   name: pick(env.VITE_ENVIRONMENT, "dev"),
+  /* True during the build's pre-render (and any Node loader), false in a
+     browser: the runtime snapshot is never fetched outside a browser. */
+  ssr: Boolean(env.SSR),
+  runtimeSnapshot: runtimeSnapshot(env.VITE_RBB_RUNTIME_SNAPSHOT),
   /* True only in a production BUILD (vite build), never on the dev
      server — one of the conditions optional measurement needs
      (config/observability.js, Document 17). */

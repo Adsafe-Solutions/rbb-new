@@ -16,6 +16,8 @@
     "web:smoke": "pnpm --filter @rbb/web run smoke",
     "web:smoke:forms": "pnpm --filter @rbb/web run smoke:forms",
     "web:serve": "pnpm --filter @rbb/web run serve:local",
+    "deploy:web": "pnpm --filter @rbb/web run deploy:pages",
+    "deploy:web:check": "pnpm --filter @rbb/web run deploy:pages:check",
     "admin:dev": "pnpm --filter @rbb/admin run dev",
     "admin:build": "pnpm --filter @rbb/admin run build",
     "admin:typecheck": "pnpm --filter @rbb/admin run typecheck",

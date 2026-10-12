@@ -20,8 +20,11 @@
      RBB_SNAPSHOT_URL                 the endpoint — the same one the build
                                       fetched; runtime fetching is on only
                                       for a build that applied a snapshot
-     RBB_SNAPSHOT_RUNTIME=off         keep the site fully static (the build
-                                      bakes the snapshot and nothing more)
+     RBB_SNAPSHOT_RUNTIME=on|off      on (the default when unset): the browser
+                                      asks the API; off: keep the site fully
+                                      static (the build bakes the snapshot and
+                                      nothing more). Any other value stops the
+                                      build — never a typo silently on.
      RBB_SNAPSHOT_RUNTIME_TIMEOUT_MS  how long the browser waits for the
                                       API before showing the baked content
                                       (default 3000)
@@ -63,8 +66,11 @@ export const mediaOriginsOf = (snapshot) =>
    carries (`url`, the baked `version`, `orgId`, `timeoutMs`) and what the
    page policy needs (`origin`, `mediaOrigins`). Throws on a configuration
    that cannot be honoured — never silently off. */
+export const RUNTIME_MODES = ["on", "off"];
 export function runtimeSnapshotConfig({ env = process.env, snapshot }) {
-  if (!snapshot || env.RBB_SNAPSHOT === "off" || env.RBB_SNAPSHOT_RUNTIME === "off") return null;
+  const mode = env.RBB_SNAPSHOT_RUNTIME === undefined || env.RBB_SNAPSHOT_RUNTIME === "" ? "on" : env.RBB_SNAPSHOT_RUNTIME;
+  if (!RUNTIME_MODES.includes(mode)) throw new Error(`runtime snapshot: RBB_SNAPSHOT_RUNTIME must be "on" or "off" (or unset), not ${JSON.stringify(env.RBB_SNAPSHOT_RUNTIME)}`);
+  if (!snapshot || env.RBB_SNAPSHOT === "off" || mode === "off") return null;
   const url = env.RBB_SNAPSHOT_URL?.trim();
   if (!url) return null;
   if (!allowedSnapshotUrl(url)) throw new Error("runtime snapshot: RBB_SNAPSHOT_URL must be an https:// URL (http only for localhost)");

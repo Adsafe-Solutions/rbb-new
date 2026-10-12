@@ -183,7 +183,7 @@ Rules and limits:
 
 | Variable (build environment) | Effect |
 |---|---|
-| `RBB_SNAPSHOT_RUNTIME=off` | Keep the site fully static: the build bakes the snapshot and the browser never asks the API |
+| `RBB_SNAPSHOT_RUNTIME` | `on` (the default when unset): the browser asks the API; `off`: keep the site fully static — the build bakes the snapshot and the browser never asks. Any other value fails the build |
 | `RBB_SNAPSHOT_RUNTIME_TIMEOUT_MS` | How long the browser waits for the API before going on with the baked snapshot (default 3000; 500–30000) |
 | `RBB_MEDIA_ORIGINS` | Extra https origins (comma-separated) published images may load from |
 
@@ -197,7 +197,8 @@ without `RBB_SNAPSHOT_REQUIRED=1`) is static as before.
    timeout) and `runtime-snapshot-render.test.mjs` (the real site's
    modules, through the hook).
 2. Build with the API: `RBB_SNAPSHOT_URL=https://api.<domain>/api/v1/public/snapshot
-   pnpm web:build`. `build-meta/runtime-snapshot.json` records the
+   RBB_SNAPSHOT_REQUIRED=1 RBB_SNAPSHOT_RUNTIME=on pnpm web:build` (or
+   `pnpm deploy:web:check`, which also checks the result — apps/web/docs/DEPLOY_CLOUDFLARE_PAGES.md). `build-meta/runtime-snapshot.json` records the
    decision; `build-meta/security-headers.json` shows the API in
    `connect-src`.
 3. Serve `dist/` (`pnpm web:serve`, or any static host) and open a page:

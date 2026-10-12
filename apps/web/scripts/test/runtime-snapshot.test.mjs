@@ -40,6 +40,10 @@ test("configuration: on only for a build that applied a snapshot and knows the U
   assert.equal(runtimeSnapshotConfig({ env: {}, snapshot: snapshot() }), null, "no URL: static");
   assert.equal(runtimeSnapshotConfig({ env: { ...env, RBB_SNAPSHOT_RUNTIME: "off" }, snapshot: snapshot() }), null);
   assert.equal(runtimeSnapshotConfig({ env: { ...env, RBB_SNAPSHOT: "off" }, snapshot: snapshot() }), null);
+  assert.ok(runtimeSnapshotConfig({ env: { ...env, RBB_SNAPSHOT_RUNTIME: "on" }, snapshot: snapshot() }), "on, explicitly");
+  assert.ok(runtimeSnapshotConfig({ env: { ...env, RBB_SNAPSHOT_RUNTIME: "" }, snapshot: snapshot() }), "empty = unset = on");
+  assert.throws(() => runtimeSnapshotConfig({ env: { ...env, RBB_SNAPSHOT_RUNTIME: "ofF" }, snapshot: snapshot() }), /must be "on" or "off"/, "a typo never means on");
+  assert.throws(() => runtimeSnapshotConfig({ env: { ...env, RBB_SNAPSHOT_RUNTIME: "true" }, snapshot: null }), /must be "on" or "off"/, "checked even without a snapshot");
   const config = runtimeSnapshotConfig({ env, snapshot: snapshot({ version: 7, media: media("https://media.example.org") }) });
   assert.deepEqual(config, { url: env.RBB_SNAPSHOT_URL, origin: "https://api.example.org", version: 7, orgId: "rbb", timeoutMs: 3000, mediaOrigins: ["https://media.example.org"] });
   assert.deepEqual(runtimeSnapshotConfig({ env: { ...env, RBB_SNAPSHOT_RUNTIME_TIMEOUT_MS: "1500", RBB_MEDIA_ORIGINS: "https://cdn.example.org, https://media.example.org" }, snapshot: snapshot({ media: media("https://media.example.org") }) }).mediaOrigins, ["https://cdn.example.org", "https://media.example.org"]);

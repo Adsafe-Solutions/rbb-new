@@ -24,7 +24,7 @@ test, rollback and monitoring are in `docs/LAUNCH_RUNBOOK.md`.
 | Item | Owner / value |
 | --- | --- |
 | Production domain (`VITE_SITE_URL`) | *not decided* |
-| Hosting platform + serverless runtime | *not decided* |
+| Hosting platform + serverless runtime | Cloudflare Pages project `rbb-web` (production branch `main`, root `apps/web`, output `dist`), domain `prod.risingbeyondborders.org`. Terminal deployment: `docs/DEPLOY_CLOUDFLARE_PAGES.md` |
 | DNS provider and who changes records | *not decided* |
 | TLS certificates (issuer, renewal) | *not decided* (normally the host) |
 | Who deploys; who may roll back | *not decided* |
@@ -187,12 +187,19 @@ Only `VITE_*` variables reach the browser — **never put a secret in one**.
 | `VITE_FORM_ENDPOINT_*` | Public form endpoints (Document 12). Empty → forms stay disabled. |
 | `VITE_DESIGN_SYSTEM_ROUTE`, `VITE_COMPONENTS_ROUTE` | Dev tools; off in production unless set. |
 | `RBB_SNAPSHOT_URL`, `RBB_SNAPSHOT_REQUIRED`, `RBB_SNAPSHOT_VERSION` | The CMS's published snapshot the build applies (not `VITE_`: build-time only). See `docs/PUBLISHING.md`. |
-| `RBB_SNAPSHOT_RUNTIME`, `RBB_SNAPSHOT_RUNTIME_TIMEOUT_MS`, `RBB_MEDIA_ORIGINS` | The runtime snapshot: whether a build fetches a newer published snapshot in the browser (on whenever `RBB_SNAPSHOT_URL` is set and a snapshot was applied; `off` to stay fully static), how long it waits, and extra image origins. The API's `WEB_ORIGIN` must name the site's origin for the browser to be allowed the response. See `docs/PUBLISHING.md` "Runtime snapshot". |
+| `RBB_SNAPSHOT_RUNTIME`, `RBB_SNAPSHOT_RUNTIME_TIMEOUT_MS`, `RBB_MEDIA_ORIGINS` | The runtime snapshot: whether a build fetches a newer published snapshot in the browser — `on` (also the default when unset) or `off` (fully static); any other value fails the build — how long it waits, and extra image origins. The API's `WEB_ORIGIN` must name the site's origin for the browser to be allowed the response. See `docs/PUBLISHING.md` "Runtime snapshot". |
 
 Files: `.env.development` (dev server), `.env.production` (production
 build), `.env.local` (untracked, per machine). A **preview** deployment
 should build with `VITE_SITE_URL` empty, so previews never claim to be the
 canonical site.
+
+## Deploying from the terminal
+
+`pnpm deploy:web` (repository root) builds and uploads the site to the
+Cloudflare Pages project with the pinned Wrangler — a fallback while the
+project's Git integration is disconnected. Every check, the variables
+and the verification steps: `docs/DEPLOY_CLOUDFLARE_PAGES.md`.
 
 ## Content freshness
 

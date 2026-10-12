@@ -6,9 +6,11 @@ import { SITE } from "../../content/index.js";
    own, and the two in styles/index.css). Rendered only when
    config/sections.js `themeSwitcher` is on.
 
-   The choice is set as <html data-theme="…"> (no attribute = RBB's
-   palette) and remembered in the visitor's OWN browser (localStorage,
-   key "rbb-theme"). Nothing is written until a visitor actually picks a
+   The choice is set as <html data-theme="…"> (no attribute = RBB Blue,
+   "rbb") and remembered in the visitor's OWN browser (localStorage, key
+   "rbb-theme"). Every page starts in SITE.themes.default (index.html sets
+   it on <html>), so only a choice OTHER than the default is stored —
+   RBB Blue included. Nothing is written until a visitor actually picks a
    theme; index.html re-applies it before first paint on the next visit.
 
    The options are native radios in a fieldset, so arrow keys move
@@ -16,13 +18,14 @@ import { SITE } from "../../content/index.js";
    outside closes the card and returns focus to the button. */
 const KEY = "rbb-theme";
 const THEMES = SITE.themes.options;
+const DEFAULT = SITE.themes.default;
 
 function applyTheme(id) {
   const root = document.documentElement;
   if (id === "rbb") root.removeAttribute("data-theme");
   else root.setAttribute("data-theme", id);
   try {
-    if (id === "rbb") localStorage.removeItem(KEY);
+    if (id === DEFAULT) localStorage.removeItem(KEY);
     else localStorage.setItem(KEY, id);
   } catch {
     /* Storage blocked (private mode, settings): the theme still applies
@@ -33,9 +36,10 @@ function applyTheme(id) {
 export default function ThemeSwitcher() {
   const panelId = useId();
   const [open, setOpen] = useState(false);
-  /* "rbb" on the server and on the first client render, so hydration
-     matches; the real value is read from <html> once mounted. */
-  const [current, setCurrent] = useState("rbb");
+  /* The default on the server and on the first client render, so
+     hydration matches; the real value is read from <html> once mounted
+     (no attribute = RBB Blue). */
+  const [current, setCurrent] = useState(DEFAULT);
   const button = useRef(null);
   const panel = useRef(null);
 

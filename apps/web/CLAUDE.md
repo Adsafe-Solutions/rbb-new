@@ -250,6 +250,12 @@ poster/flyer language in `docs/REFERENCE_WEBSITE_REVERSE_ENGINEERING.md`
 (design principles only — never its copy, colours, font, assets or code).
 `/design-system` and `/components` render the whole system live.
 
+- **Default theme: Ivory & Cyan.** Every page starts in the "poster"
+  palette (`<html data-theme="poster">` in `index.html`, mirrored by
+  `content/site.js` `themes.default` — change both together; RBB's
+  request, Oct 2026). RBB Blue (no attribute) and Midnight stay
+  selectable in the theme switcher. The roles below describe the
+  tokens, which every theme re-maps.
 - **Three roles.** PAPER = a warm off-white ground (`--color-paper`
   `#f5efe6`, pending RBB approval) with white cards and prints on it;
   INK = Deep Trust Blue, for headings, borders, the footer and at most

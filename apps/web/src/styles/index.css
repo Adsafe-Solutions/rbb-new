@@ -979,10 +979,12 @@
 }
 
 /* ======================= Colour themes =======================
-   Two alternative palettes beside RBB's own, chosen by the visitor
-   (components/ThemeSwitcher) and set on <html data-theme="…"> — before
-   first paint, by the inline script in index.html, from the visitor's
-   own browser storage. No attribute = RBB's palette, exactly as above.
+   Two alternative palettes beside RBB's own, set on <html data-theme="…">.
+   Ivory & Cyan ("poster") is the DEFAULT: index.html sets it on every
+   page (RBB's request, Oct 2026). A visitor's own choice
+   (components/ThemeSwitcher) is applied before first paint by the inline
+   script in index.html, from their browser storage. No attribute = RBB
+   Blue, exactly as above.
 
    Both come from the reference site's two palettes (docs/REFERENCE_
    WEBSITE_REVERSE_ENGINEERING.md §4.1 and the dark "glass" theme), on

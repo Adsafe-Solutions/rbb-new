@@ -515,8 +515,15 @@ export function createApp(options: AppOptions = {}): App {
       throw errors.badRequest("The request path is malformed.");
     }
 
+    /* Without a valid configuration only the routes that need none are
+       registered (liveness, M2's internal appeal read). Any other path is
+       turned away as unavailable — never a 404 "route not found" for a
+       route that exists once the API is configured (which reads as a
+       routing fault, and hides the real one: the configuration). */
+    const notFound = () => (config ? errors.notFound("route") : errors.unavailable());
+
     if (request.method === "OPTIONS") {
-      if (match.kind === "not-found") throw errors.notFound("route");
+      if (match.kind === "not-found") throw notFound();
       const methods = match.kind === "route" ? [match.route.method] : match.allowed;
       const origin = request.headers.get("origin");
       if (!request.headers.get("access-control-request-method"))
@@ -525,7 +532,7 @@ export function createApp(options: AppOptions = {}): App {
       return new Response(null, { status: 204, headers: preflightHeaders(origin, [...methods, "OPTIONS"]) });
     }
 
-    if (match.kind === "not-found") throw errors.notFound("route");
+    if (match.kind === "not-found") throw notFound();
     if (match.kind === "method-not-allowed") throw errors.methodNotAllowed(match.allowed);
     if (!config && !match.route.live) throw errors.unavailable();
 

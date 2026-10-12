@@ -75,8 +75,11 @@ export const SITE = {
   /* The colour-theme switcher (components/ThemeSwitcher) — shown only
      when config/sections.js `themeSwitcher` is on. `swatches` are the
      theme's ground, ink and accent, for the little preview dots; the
-     palettes themselves live in styles/index.css. */
+     palettes themselves live in styles/index.css. `default` is the
+     theme every page starts in (RBB's request, Oct 2026): it is set on
+     <html data-theme> in index.html — change both together. */
   themes: {
+    default: "poster",
     toggle: "Colour theme",
     legend: "Choose a colour theme",
     options: [

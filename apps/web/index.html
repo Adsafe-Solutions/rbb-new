@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="poster">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,13 +9,18 @@
          and with it the fade-in starts from the same frame as before. -->
     <script>
       document.documentElement.classList.add("js");
-      /* The visitor's saved colour theme, before first paint so the page
-         never flashes RBB's palette first — only while the theme switcher
-         is switched on (config/sections.js, VITE_THEME_SWITCHER). */
+      /* The default colour theme is Ivory & Cyan ("poster"), set on
+         <html> above so every page starts in it (RBB's request, Oct 2026;
+         content/site.js themes.default names the same theme — change
+         both together). A visitor's saved choice is applied here, before
+         first paint, so the page never flashes another palette first —
+         only while the theme switcher is switched on (config/sections.js,
+         VITE_THEME_SWITCHER). "rbb" is RBB Blue: no attribute. */
       if ("%VITE_THEME_SWITCHER%" === "true") {
         try {
           var t = localStorage.getItem("rbb-theme");
-          if (t === "poster" || t === "midnight") document.documentElement.setAttribute("data-theme", t);
+          if (t === "rbb") document.documentElement.removeAttribute("data-theme");
+          else if (t === "poster" || t === "midnight") document.documentElement.setAttribute("data-theme", t);
         } catch (e) {}
       }
     </script>

@@ -229,11 +229,6 @@ export const PublishedSnapshot = z
     if (snapshot.settings.orgId !== snapshot.organization.id) issue(["settings", "orgId"], "must be the snapshot's organization");
     if (snapshot.settings.status !== "published") issue(["settings", "status"], "a snapshot holds published settings only");
     if (snapshot.settings.releaseMarker !== undefined) issue(["settings", "releaseMarker"], "is internal and never published");
-    /* Team templates: a member carrying a release marker is a template
-       (a role, not a person) and is never published. */
-    (snapshot.content.team ?? []).forEach((m, i) => {
-      if (m.releaseMarker !== undefined) issue(["content", "team", i, "releaseMarker"], "a template — a team member with a release marker — is never published");
-    });
     const referenced = new Set(snapshotMediaIds(snapshot.settings, snapshot.content));
 
     /* Content: published, this organization's, nothing internal, the

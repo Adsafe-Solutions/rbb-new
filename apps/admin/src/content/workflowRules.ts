@@ -16,12 +16,7 @@ import type { ContentStatus, ScheduleView, WorkflowAction } from "./client";
    M15: an approved revision may be SCHEDULED by an owner — queued for the
    website publication at a time chosen in an explicit IANA time zone. It
    is still approved (scheduling never approves), and it is not public
-   until that time: "Scheduled" never looks like "Published".
-
-   TEMPLATES (team): a record carrying a release marker is a template — a
-   role, not a person. It is never submitted, approved, scheduled or
-   published; the one move it has is an owner's "Unmark template", after
-   a confirmation, which leaves it an ordinary draft. */
+   until that time: "Scheduled" never looks like "Published". */
 
 /* A schedule's time as the owner chose it: "Oct 15, 2026 · 10:00 AM
    Asia/Kolkata" — in the schedule's own zone, never the browser's. */
@@ -31,8 +26,7 @@ export function formatSchedule(at: string, timeZone: string): string {
 }
 
 /* The badge: one of the design system's states, and its words. */
-export function badgeOf(status: ContentStatus | undefined, live = false, schedule: ScheduleView | null = null, template = false): { status: "draft" | "submitted" | "approved" | "published" | "archived" | "scheduled" | "warning"; label?: string } {
-  if (template && status !== "archived") return { status: "draft", label: "Template" };
+export function badgeOf(status: ContentStatus | undefined, live = false, schedule: ScheduleView | null = null): { status: "draft" | "submitted" | "approved" | "published" | "archived" | "scheduled" | "warning"; label?: string } {
   if (status === "archived" || status === "published") return { status };
   if (status === "approved" && schedule?.failedAt) return { status: "warning", label: "Schedule failed" };
   if (status === "approved" && schedule) return { status: "scheduled", label: live ? "Published · changes scheduled" : "Scheduled" };
@@ -60,10 +54,8 @@ export function actionsFor(
   status: ContentStatus,
   canEdit: boolean,
   canApprove: boolean,
-  { canPublish = false, schedule = null, template = false }: { canPublish?: boolean; schedule?: ScheduleView | null; template?: boolean } = {}
+  { canPublish = false, schedule = null }: { canPublish?: boolean; schedule?: ScheduleView | null } = {}
 ): { action: ReviewMove; label: string; primary: boolean }[] {
-  /* A template: no review, no publishing — only an owner's unmark, from a draft. */
-  if (template) return status === "draft" && canApprove ? [{ action: "unmark", label: "Unmark template", primary: false }] : [];
   if (status === "approved") {
     const moves: { action: ReviewMove; label: string; primary: boolean }[] = [];
     if (canPublish && !schedule) moves.push({ action: "publish", label: "Publish now", primary: true }, { action: "schedule", label: "Schedule", primary: false });
@@ -83,11 +75,7 @@ export function actionsFor(
 }
 
 /* What the state means, in a sentence. */
-export function explain(status: ContentStatus, live: boolean, noun: string, canApprove: boolean, schedule: ScheduleView | null = null, template = false): string {
-  if (template)
-    return canApprove
-      ? `A template — a role, not a person. It is never submitted for review or published. "Unmark template" turns it into a real ${noun}'s draft, which you can then edit and submit.`
-      : `A template — a role, not a person. It is never submitted for review or published. An owner can unmark it to make it a real ${noun}.`;
+export function explain(status: ContentStatus, live: boolean, noun: string, canApprove: boolean, schedule: ScheduleView | null = null): string {
   const keeps = live ? " Until then the website keeps showing the last published version." : "";
   if (status === "approved" && schedule?.failedAt)
     return `The website publication scheduled for ${formatSchedule(schedule.at, schedule.timeZone)} was refused — nothing changed on the website. Fix what it reports, then reschedule (or unschedule) it.${keeps}`;
@@ -117,5 +105,4 @@ export const ACTED: Record<WorkflowAction, { title: string; description: string 
   withdraw: { title: "Withdrawn from review", description: "It is a draft again." },
   approve: { title: "Approved", description: "It goes live at the next website publish." },
   reject: { title: "Returned to draft", description: "It is no longer in the review queue." },
-  unmark: { title: "Template unmarked", description: "It is an ordinary draft now: edit it and submit it for review when ready." },
 };

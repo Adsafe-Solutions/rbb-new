@@ -23,43 +23,25 @@ import { can } from "../auth/permissions.ts";
      it to draft) first
    · a plain save never changes the status, except reopening an archived
      record as a draft
-   Every transition names the revision it was based on (409 if stale).
-
-   TEMPLATES: a record carrying a release marker (`releaseMarker`, the
-   contract's "sample content" field — the team allows it in the CMS) is a
-   template: a role, not a person. It is edited like any draft but can
-   never be submitted, approved or scheduled, and the snapshot contract
-   refuses it. The ONLY way out is `unmark` — an owner's audited action
-   on the revision open — which removes the marker and leaves the record a
-   draft (it submits, approves and publishes nothing). A save cannot clear
-   the marker. */
+   Every transition names the revision it was based on (409 if stale). */
 
 export type EditorialStatus = "draft" | "submitted" | "approved" | "published" | "archived";
-export type WorkflowAction = "submit" | "withdraw" | "approve" | "reject" | "unmark";
-export const WORKFLOW_ACTIONS: readonly WorkflowAction[] = ["submit", "withdraw", "approve", "reject", "unmark"];
-/* The actions owners alone may take (content:approve). */
-export const OWNER_ACTIONS: readonly WorkflowAction[] = ["approve", "reject", "unmark"];
+export type WorkflowAction = "submit" | "withdraw" | "approve" | "reject";
+export const WORKFLOW_ACTIONS: readonly WorkflowAction[] = ["submit", "withdraw", "approve", "reject"];
 
 const RULES: Record<WorkflowAction, { from: readonly EditorialStatus[]; to: EditorialStatus; permission: Permission; past: string }> = {
   submit: { from: ["draft"], to: "submitted", permission: "content:update", past: "submitted" },
   withdraw: { from: ["submitted"], to: "draft", permission: "content:update", past: "withdrawn" },
   approve: { from: ["submitted"], to: "approved", permission: "content:approve", past: "approved" },
   reject: { from: ["submitted", "approved"], to: "draft", permission: "content:approve", past: "rejected" },
-  unmark: { from: ["draft"], to: "draft", permission: "content:approve", past: "unmarked" },
 };
-
-/* A template: the record carries a (non-blank) release marker. */
-export const isTemplate = (record: { releaseMarker?: unknown }) => typeof record.releaseMarker === "string" && record.releaseMarker.trim() !== "";
-export const TEMPLATE_LOCKED = (noun: string) => `This ${noun} is a template (it carries a release marker): it cannot be submitted, approved or scheduled. An owner can unmark it to make it a real ${noun}.`;
-export const NOT_TEMPLATE = (noun: string) => `This ${noun} is not a template: there is no release marker to remove.`;
-export const MARKER_BY_ACTION = "A save cannot remove a release marker: an owner unmarks a template with the Unmark action.";
 
 const NAMES: Record<EditorialStatus, string> = { draft: "a draft", submitted: "submitted for review", approved: "approved", published: "published", archived: "archived" };
 
 /* The status a transition leads to — or why it may not happen. */
 export function transition(auth: AuthContext, action: WorkflowAction, from: EditorialStatus, noun: string): { to: EditorialStatus; past: string } {
   const rule = RULES[action];
-  if (!can(auth, rule.permission)) throw errors.forbidden(OWNER_ACTIONS.includes(action) ? "Only an owner can approve content, return it to draft or unmark a template." : "You do not have permission to do this.");
+  if (!can(auth, rule.permission)) throw errors.forbidden(action === "approve" || action === "reject" ? "Only an owner can approve content or return it to draft." : "You do not have permission to do this.");
   if (!rule.from.includes(from))
     throw new ApiError("CONFLICT", `This ${noun} is ${NAMES[from]}: it cannot be ${rule.past}.`, { details: [{ path: "body.action", message: `${action} is not possible from ${from}` }] });
   return { to: rule.to, past: rule.past };

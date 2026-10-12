@@ -585,9 +585,6 @@ export class PublishService {
     /* Milestone 1: a policy approved before working text was refused is
        refused here — the website build would fail on it. */
     for (const p of content.policies ?? []) problems.push(...policyWorkingTextProblems(p, `content.policies.${p.id}`));
-    /* Team templates (release marker) are never published: the contract
-       refuses them above; this names the member plainly. */
-    for (const m of content.team ?? []) if (m.releaseMarker !== undefined) problems.push({ path: `content.team.${m.slug}`, message: "is a template (it carries a release marker) and cannot be published — an owner unmarks it first" });
     return { candidate, problems };
   }
 

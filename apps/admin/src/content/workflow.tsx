@@ -22,8 +22,8 @@ import styles from "./content.module.css";
 export { ACTED, formatSchedule, isLocked, isReady, readinessWord } from "./workflowRules";
 
 /* The status badge, live version and schedule included. */
-export function workflowBadge(status: ContentStatus | undefined, live = false, schedule: ScheduleView | null = null, template = false) {
-  const badge = badgeOf(status, live, schedule, template);
+export function workflowBadge(status: ContentStatus | undefined, live = false, schedule: ScheduleView | null = null) {
+  const badge = badgeOf(status, live, schedule);
   return <StatusBadge status={badge.status} label={badge.label} />;
 }
 
@@ -70,21 +70,19 @@ export interface WorkflowProps {
   onUnschedule?: () => Promise<void>;
   /* After "Publish now" published the website: reload what is on screen. */
   onPublished?: () => void;
-  /* A template (release marker): never reviewed or published; owners may unmark it. */
-  template?: boolean;
 }
 
 /* The state, what it means, and the moves this member may make. */
-export function WorkflowControls({ status, live, noun, canEdit, canApprove, dirty, busy, onAct, publishedAt, schedule = null, onSchedule, onUnschedule, onPublished, template = false }: WorkflowProps) {
+export function WorkflowControls({ status, live, noun, canEdit, canApprove, dirty, busy, onAct, publishedAt, schedule = null, onSchedule, onUnschedule, onPublished }: WorkflowProps) {
   const canPublish = useCan("publish:execute") && Boolean(onSchedule);
-  const [confirm, setConfirm] = useState<"approve" | "reject" | "schedule" | "unschedule" | "publish" | "unmark" | null>(null);
-  const actions = actionsFor(status, canEdit, canApprove, { canPublish, schedule, template });
+  const [confirm, setConfirm] = useState<"approve" | "reject" | "schedule" | "unschedule" | "publish" | null>(null);
+  const actions = actionsFor(status, canEdit, canApprove, { canPublish, schedule });
   const run = (action: ReviewMove) => (action === "submit" || action === "withdraw" ? void onAct(action) : setConfirm(action));
 
   return (
     <div className={styles.workflow} data-testid="workflow">
       <p className={styles.workflowState}>
-        <span>Status:</span> {workflowBadge(status, live, schedule, template)}
+        <span>Status:</span> {workflowBadge(status, live, schedule)}
       </p>
       {status === "approved" && schedule && (
         <p className={styles.workflowSchedule} data-testid="workflow-schedule">
@@ -92,7 +90,7 @@ export function WorkflowControls({ status, live, noun, canEdit, canApprove, dirt
         </p>
       )}
       <p className={styles.muted} data-testid="workflow-explain">
-        {explain(status, live, noun, canApprove, schedule, template)}
+        {explain(status, live, noun, canApprove, schedule)}
       </p>
       {schedule?.failedAt && schedule.problems && schedule.problems.length > 0 && (
         <ul className={styles.workflowProblems} aria-label="Why the scheduled publication was refused">
@@ -113,28 +111,6 @@ export function WorkflowControls({ status, live, noun, canEdit, canApprove, dirt
       {dirty && actions.length > 0 && <p className={styles.muted}>Save your changes first — review acts on the saved version.</p>}
       {status === "approved" && !canPublish && <p className={styles.muted}>{schedule ? "An owner scheduled its publication." : "An owner publishes the website to put it live."}</p>}
       {publishedAt && <p className={styles.muted}>First published {new Date(publishedAt).toLocaleString()}.</p>}
-      <Dialog
-        open={confirm === "unmark"}
-        onClose={() => setConfirm(null)}
-        size="sm"
-        title="Unmark this template?"
-        description={`This turns the template into a real ${noun}'s record. It stays a draft — nothing is submitted, approved or published — and the template note is removed. Only do this for a real person, with their consent.`}
-        footer={
-          <>
-            <Button onClick={() => setConfirm(null)}>Cancel</Button>
-            <Button
-              variant="primary"
-              loading={busy}
-              onClick={async () => {
-                await onAct("unmark");
-                setConfirm(null);
-              }}
-            >
-              Unmark template
-            </Button>
-          </>
-        }
-      />
       <Dialog
         open={confirm === "approve"}
         onClose={() => setConfirm(null)}

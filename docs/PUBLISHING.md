@@ -1284,29 +1284,6 @@ and approve leave the public snapshot and the built website byte-identical.
 Only the owner's publish replaces them, atomically, and the previous
 version stays intact. Stale edits, approvals and publishes get 409.
 
-### Team templates
-
-A team member that carries a `releaseMarker` is a **template** — a role,
-not a person (the website's six sample profiles are the model). The admin
-creates one with **New template** (`/team/new-template`), which puts the
-marker in the very first save, so no unmarked draft ever exists; editors
-and owners edit it like any draft, without a photograph.
-
-What a template can never do: be submitted, approved or scheduled (the
-API refuses with 409), enter a snapshot (the `PublishedSnapshot` contract
-refuses a team member with a marker, the publish names it and rejects
-the publish, and the website build's `teamFrom` throws), or count toward
-the Team presence rule. A save cannot clear the marker (`releaseMarker:
-null` is refused), and a member who has been published cannot become a
-template.
-
-The one way out is **Unmark template**: an owner's action
-(`POST /api/v1/team/:id/unmark`, `content:approve`, the revision on
-screen, confirmed in the admin). It removes the marker and leaves the
-record a draft — it submits, approves and publishes nothing — and is
-audited as `team_member.unmarked`. The member is then a real person's
-draft and follows the ordinary workflow.
-
 ## Impact stories and scheduled publishing (M15)
 
 ### Impact → Stories: one story world at a time

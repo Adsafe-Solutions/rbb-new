@@ -5,7 +5,7 @@ import type { RequestFacts } from "../audit/audit.ts";
 import { requireAuth } from "../auth/permissions.ts";
 import type { ContentRecordBase } from "./repository.ts";
 import type { ContentService } from "./service.ts";
-import { WORKFLOW_ACTIONS } from "./workflow.ts";
+import { OWNER_ACTIONS, WORKFLOW_ACTIONS } from "./workflow.ts";
 import { SCHEDULE_PERMISSION } from "../publishing/schedule.ts";
 
 /* The admin's routes for a content collection — thin: HTTP ↔ service.
@@ -75,7 +75,7 @@ export const contentRoutes = <R extends ContentRecordBase & { publishedAt?: stri
       method: "POST",
       path: `/api/v1/${base}/:id/${action}`,
       auth: "required",
-      permission: action === "approve" || action === "reject" ? "content:approve" : "content:update",
+      permission: OWNER_ACTIONS.includes(action) ? "content:approve" : "content:update",
       handler: async (context) => ok(await (await service()).act(requireAuth(context.auth), context.params.id!, action, await readJson(context.request, BODY_LIMIT), facts(context))),
     })
   ),

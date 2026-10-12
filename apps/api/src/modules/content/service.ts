@@ -8,7 +8,7 @@ import type { AuthContext } from "../auth/types.ts";
 import type { MediaStore } from "../media/repository.ts";
 import type { ContentRecordBase, ContentStore, StoredContent } from "./repository.ts";
 import { CONFLICT, LIST_INPUT, SLUG_CHANGE, changedFields, checkMedia, issuesOf, member, slugify, viewOf, type ContentView } from "./shared.ts";
-import { statusAfterEdit, transition, type EditorialStatus, type WorkflowAction } from "./workflow.ts";
+import { MARKER_BY_ACTION, NOT_TEMPLATE, TEMPLATE_LOCKED, isTemplate, statusAfterEdit, transition, type EditorialStatus, type WorkflowAction } from "./workflow.ts";
 import { UNSCHEDULE, droppedBecause, newSchedule, notApproved, notScheduled, parseScheduleRequest, requireScheduler } from "../publishing/schedule.ts";
 
 /* The lifecycle of a content collection, shared by posts and events. Each
@@ -197,9 +197,15 @@ export class ContentService<R extends ContentRecordBase & { publishedAt?: string
     const stored = await this.#find(id);
     if (stored.revision !== parsed.data.revision) throw errors.conflict(CONFLICT);
     const from = stored.record.status as EditorialStatus;
+    /* A template (release marker) never moves towards the website; `unmark`
+       is the one action that applies to it, and only to it. */
+    const template = isTemplate(stored.record as { releaseMarker?: unknown });
+    if (template && (action === "submit" || action === "approve")) throw new ApiError("CONFLICT", TEMPLATE_LOCKED(this.#config.kind), { details: [{ path: "body.action", message: `${action} is not possible for a template` }] });
+    if (action === "unmark" && !template) throw new ApiError("CONFLICT", NOT_TEMPLATE(this.#config.kind), { details: [{ path: "body.action", message: "unmark applies to a template only" }] });
     const { to, past } = transition(auth, action, from, this.#config.kind);
     const now = this.#now().toISOString();
     const candidate = { ...stored.record, status: to, updatedAt: now } as unknown as Record<string, unknown>;
+    if (action === "unmark") delete candidate.releaseMarker;
     const record = to === "draft" ? (candidate as unknown as R) : await this.#validate(candidate, this.#config.media, stored.record);
     const saved = await this.#store.replace(record.id, record, stored.revision, { id: auth.user.id, name: auth.user.name }, now, stored.slugHistory);
     if (!saved) throw errors.conflict(CONFLICT);
@@ -226,6 +232,7 @@ export class ContentService<R extends ContentRecordBase & { publishedAt?: string
     const stored = await this.#find(id);
     if (stored.revision !== request.revision) throw errors.conflict(CONFLICT);
     if (stored.record.status !== "approved") throw notApproved(this.#config.kind, stored.record.status);
+    if (isTemplate(stored.record as { releaseMarker?: unknown })) throw new ApiError("CONFLICT", TEMPLATE_LOCKED(this.#config.kind), { details: [{ path: "body.action", message: "schedule is not possible for a template" }] });
     await this.#validate({ ...stored.record } as unknown as Record<string, unknown>, this.#config.media, stored.record);
     const schedule = newSchedule(request, stored.record, stored.revision + 1, auth, now);
     const saved = await this.#store.setSchedule(id, stored.revision, schedule, { id: auth.user.id, name: auth.user.name }, now.toISOString());
@@ -274,6 +281,10 @@ export class ContentService<R extends ContentRecordBase & { publishedAt?: string
     const before = stored.record as Record<string, unknown>;
     const now = this.#now().toISOString();
     const { status: requested, ...content } = changes;
+    /* A release marker is removed by an owner's Unmark action only, and a
+       record that has been on the website never becomes a template. */
+    if (content.releaseMarker === null) throw errors.validation([{ path: "body.changes.releaseMarker", message: MARKER_BY_ACTION }], MARKER_BY_ACTION);
+    if (typeof content.releaseMarker === "string" && before.publishedAt) throw errors.validation([{ path: "body.changes.releaseMarker", message: `a ${this.#config.kind} that has been published cannot become a template` }]);
     const merged: Record<string, unknown> = { ...before, ...content, updatedAt: now };
     for (const [key, value] of Object.entries(content))
       if (value === null) {

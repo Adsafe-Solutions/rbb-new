@@ -8,6 +8,7 @@ import { navigate } from "../../router";
 import { publishApi, type PublishStatus } from "../../settings/client";
 import { PublishPanel } from "../settings/PublishPanel";
 import { TEAM_GROUPS } from "./groups";
+import { isTemplate } from "./template";
 import contentStyles from "../../content/content.module.css";
 import styles from "../../blocks/blocks.module.css";
 
@@ -19,7 +20,12 @@ import styles from "../../blocks/blocks.module.css";
 
    Real people only, with their consent: nothing here is sample data. A
    member reaches the website only once an owner marks them published and
-   publishes the site. */
+   publishes the site.
+
+   TEMPLATES: "New template" creates a member that is a role, not a person
+   (a release marker is set in the very first save). A template can be
+   edited, never submitted or published; an owner unmarks it to make it a
+   real member. */
 
 export default function TeamPage() {
   const canCreate = useCan("content:create");
@@ -40,9 +46,14 @@ export default function TeamPage() {
   const shown = members.filter((m) => (status ? m.record.status === status : m.record.status !== "archived"));
 
   const create = canCreate && (
-    <Button variant="primary" leadingIcon={<Plus />} onClick={() => navigate("/team/new")}>
-      New team member
-    </Button>
+    <>
+      <Button variant="primary" leadingIcon={<Plus />} onClick={() => navigate("/team/new")}>
+        New team member
+      </Button>
+      <Button leadingIcon={<Plus />} onClick={() => navigate("/team/new-template")}>
+        New template
+      </Button>
+    </>
   );
 
   return (
@@ -101,7 +112,7 @@ export default function TeamPage() {
                             <button type="button" className={styles.blockSelect} onClick={() => navigate(`/team/${m.record.id}`)}>
                               <span className={styles.blockTitle}>
                                 {m.record.name}
-                                {statusBadge(m.record.status, m.live, m.schedule)}
+                                {statusBadge(m.record.status, m.live, m.schedule, isTemplate(m.record))}
                                 {m.record.featured && <Badge>Featured</Badge>}
                               </span>
                               <span className={styles.blockSummary}>{m.record.role}</span>

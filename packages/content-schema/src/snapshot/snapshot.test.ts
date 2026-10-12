@@ -113,3 +113,10 @@ test("content: published appeals and the general donation page", () => {
   ];
   for (const [name, content] of bad) assert.ok(issues({ ...s, content }).length > 0, name);
 });
+
+test("team templates: a member carrying a release marker is never published; members without one — every stored snapshot — still pass", () => {
+  const member = (o: Record<string, unknown> = {}) => ({ id: "m1", orgId: fx.settings().orgId, schemaVersion: 1, status: "published", publishedAt: "2026-10-07T10:00:00.000Z", slug: "executive-director", name: "Executive Director", role: "Leadership", group: "leadership", order: 0, ...o });
+  assert.deepEqual(issues(snapshot({ content: { team: [member()] } })), [], "a published member as the publish copy writes it");
+  const marked = issues(snapshot({ content: { team: [member({ releaseMarker: "Sample profile — a role, not a real person." })] } }));
+  assert.ok(marked.some((i) => i.startsWith("content.team.0.releaseMarker: a template")), marked.join(" | "));
+});

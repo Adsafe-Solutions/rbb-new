@@ -15,14 +15,18 @@ import { isSubmission } from "../content/workflow.ts";
    owner-only publishing.
 
    Editable: name, address, role, group, featured, short bio, biography,
-   photograph, department/area, location, social and related links. ORDER
+   photograph, department/area, location, social and related links — and
+   `releaseMarker`, which makes a member a TEMPLATE (a role, not a
+   person: content/workflow.ts): editable, never submitted, approved,
+   scheduled or published; an owner's `unmark` turns it into a real
+   draft. ORDER
    is the ordered collection's (content/ordered.ts): a new member goes to
    the end, and POST /api/v1/team/order sets everyone's position at once —
    naming the revision each member was read at, so nobody's edit is
    overwritten. */
 
 const editable = Object.fromEntries(
-  ["name", "slug", "role", "group", "featured", "shortBio", "biography", "imageId", "departmentOrArea", "location", "socialLinks", "relatedLinks"].map((f) => [f, z.unknown()])
+  ["name", "slug", "role", "group", "featured", "shortBio", "biography", "imageId", "departmentOrArea", "location", "socialLinks", "relatedLinks", "releaseMarker"].map((f) => [f, z.unknown()])
 );
 
 /* The team's own check: a person's photograph is described (its alt

@@ -82,3 +82,16 @@ test("Scheduled is its own badge — never Published — and says when, in the s
   assert.match(explain("approved", false, "story", true, scheduled), /queued for the website publication on Oct 15, 2026 · 10:00 AM Asia\/Kolkata\. It is not public before then\./);
   assert.match(explain("approved", true, "story", true, failed), /was refused — nothing changed on the website.*keeps showing the last published version/);
 });
+
+test("templates (team): no review moves, only an owner's unmark from a draft; the badge and the words say template", () => {
+  const t = { template: true };
+  assert.deepEqual(actionsFor("draft", true, true, t).map((a) => a.action), ["unmark"]);
+  assert.deepEqual(actionsFor("draft", true, false, t), [], "an editor cannot unmark");
+  assert.deepEqual(actionsFor("submitted", true, true, t), []);
+  assert.deepEqual(actionsFor("approved", true, true, { ...t, canPublish: true }), [], "never publish, schedule, approve");
+  assert.deepEqual(badgeOf("draft", false, null, true), { status: "draft", label: "Template" });
+  assert.deepEqual(badgeOf("draft", false, null, false), { status: "draft" }, "unchanged without the flag");
+  assert.match(explain("draft", false, "team member", true, null, true), /A template — a role, not a person/);
+  assert.match(explain("draft", false, "team member", false, null, true), /An owner can unmark it/);
+  assert.deepEqual(actionsFor("draft", true, true), [{ action: "submit", label: "Submit for review", primary: true }], "ordinary members are unchanged");
+});

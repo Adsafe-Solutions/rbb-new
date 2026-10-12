@@ -8,26 +8,36 @@ import { ItemList, ParagraphsField, TextField } from "../../blocks/fields";
 import { MediaPicker } from "../../media/MediaPicker";
 import type { PageProps } from "../../routes";
 import { slugify } from "../posts/slug";
-import { TEAM_GROUPS } from "./groups";
+import { TEAM_GROUPS, TEAM_TEMPLATE_NOTE } from "./groups";
+import { isTemplate } from "./template";
 import styles from "../../content/content.module.css";
 
 /* One team member. Sections: basic information, profile, photograph,
    links, publishing. Only what the Our Team page and the profile draw; no
    contact details. A profile page (/about/team/<address>) exists only for
    someone with a biography. The address follows the name until edited by
-   hand. Order is set on the team list. */
+   hand. Order is set on the team list.
 
-const FIELDS = ["name", "slug", "role", "group", "featured", "shortBio", "biography", "imageId", "departmentOrArea", "location", "socialLinks", "relatedLinks"] as const;
+   /team/new-template: a TEMPLATE — a role, not a person. Its release
+   marker (TEAM_TEMPLATE_NOTE) is part of the very first save, so no
+   unmarked draft ever exists. A template is edited like any draft and is
+   never submitted or published; an owner's "Unmark template" (workflow
+   controls, confirmed) turns it into a real member's draft. */
+
+const FIELDS = ["name", "slug", "role", "group", "featured", "shortBio", "biography", "imageId", "departmentOrArea", "location", "socialLinks", "relatedLinks", "releaseMarker"] as const;
 
 export default function TeamEditorPage({ params }: PageProps) {
-  const canEdit = useCan(params.id === "new" ? "content:create" : "content:update");
+  const newTemplate = params.id === "new-template";
+  const isNew = params.id === "new" || newTemplate;
+  const canEdit = useCan(isNew ? "content:create" : "content:update");
   const canArchive = useCan("content:delete");
   const canApprove = useCan("content:approve");
-  const editor = useContentEditor<TeamMember>({ api: teamApi, id: params.id!, base: "team", fields: FIELDS, initial: { group: "team", status: "draft" }, kind: "team member" });
-  const [slugTouched, setSlugTouched] = useState(params.id !== "new");
+  const editor = useContentEditor<TeamMember>({ api: teamApi, id: isNew ? "new" : params.id!, base: "team", fields: FIELDS, initial: { group: "team", status: "draft", ...(newTemplate && { releaseMarker: TEAM_TEMPLATE_NOTE }) }, kind: newTemplate ? "team template" : "team member" });
+  const [slugTouched, setSlugTouched] = useState(!isNew);
   const d = editor.draft;
   const err = (path: string) => editor.errors.get(path);
   const readOnly = !canEdit || isLocked(editor.view?.record.status);
+  const template = isTemplate(editor.view?.record ?? d);
 
   if (editor.status === "loading") return <PageContainer width="narrow"><Spinner label="Loading the team member" /></PageContainer>;
   if (editor.status === "missing" || editor.status === "error")
@@ -41,8 +51,13 @@ export default function TeamEditorPage({ params }: PageProps) {
 
   return (
     <PageContainer width="narrow">
-      <PageHeader title={editor.view ? editor.view.record.name : "New team member"} eyebrow={editor.view && statusBadge(editor.view.record.status, editor.view.live, editor.view.schedule)} description={editor.view ? `Last edited ${new Date(editor.view.updatedAt).toLocaleString()} by ${editor.view.updatedBy.isYou ? "you" : editor.view.updatedBy.name}.` : "Someone on the Our Team page — with their consent."} />
+      <PageHeader title={editor.view ? editor.view.record.name : newTemplate ? "New team template" : "New team member"} eyebrow={editor.view && statusBadge(editor.view.record.status, editor.view.live, editor.view.schedule, template)} description={editor.view ? `Last edited ${new Date(editor.view.updatedAt).toLocaleString()} by ${editor.view.updatedBy.isYou ? "you" : editor.view.updatedBy.name}.` : newTemplate ? "A template: a role, not a person. It is never published." : "Someone on the Our Team page — with their consent."} />
       <EditorNotices editor={editor} kind="team member" canEdit={canEdit} />
+      {template && (
+        <Alert tone="info" title="Template" className={styles.notice} data-testid="template-notice">
+          A role, not a person — it describes how a profile will appear. It cannot be submitted for review or published. An owner can unmark it (Publishing, below) to make it a real team member's draft.
+        </Alert>
+      )}
       <div className={styles.sections}>
         <Panel title="Basic information" as="h2">
           <div className={styles.fields}>
@@ -134,9 +149,9 @@ export default function TeamEditorPage({ params }: PageProps) {
         <Panel title="Publishing" as="h2">
           <div className={styles.fields}>
             {editor.view ? (
-              <WorkflowControls status={editor.view.record.status} live={editor.view.live} noun="team member" canEdit={canEdit} canApprove={canApprove} dirty={editor.dirty} busy={editor.acting} onAct={editor.act} publishedAt={editor.view.record.publishedAt} schedule={editor.view.schedule} onSchedule={editor.schedule} onUnschedule={editor.unschedule} onPublished={editor.reload} />
+              <WorkflowControls status={editor.view.record.status} live={editor.view.live} noun="team member" canEdit={canEdit} canApprove={canApprove} dirty={editor.dirty} busy={editor.acting} onAct={editor.act} publishedAt={editor.view.record.publishedAt} schedule={editor.view.schedule} onSchedule={editor.schedule} onUnschedule={editor.unschedule} onPublished={editor.reload} template={template} />
             ) : (
-              <p className={styles.muted}>Create them first; then submit them for review.</p>
+              <p className={styles.muted}>{newTemplate ? "Create the template first. A template is never submitted for review." : "Create them first; then submit them for review."}</p>
             )}
             {!canEdit && <Alert tone="info">You can view this team member but not change them.</Alert>}
           </div>

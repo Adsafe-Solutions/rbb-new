@@ -8,7 +8,7 @@ import type { Pagination } from "../media/client";
 export type { Appeal, Event, Metric, Post, Program, Project, Report, TeamMember };
 /* M14: the editorial workflow's states (content/workflow.tsx). */
 export type ContentStatus = "draft" | "submitted" | "approved" | "published" | "archived";
-export type WorkflowAction = "submit" | "withdraw" | "approve" | "reject";
+export type WorkflowAction = "submit" | "withdraw" | "approve" | "reject" | "unmark";
 /* M15: when an approved revision joins a website publication (the API's
    publishing/schedule.ts view): a UTC instant, and the IANA zone it was
    chosen in. */

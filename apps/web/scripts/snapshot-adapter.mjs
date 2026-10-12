@@ -426,6 +426,9 @@ export function aboutFrom(snapshot) {
 export function teamFrom(snapshot) {
   const team = snapshot.content?.team;
   if (!team) return undefined;
+  /* A team TEMPLATE (a release marker: a role, not a person) never
+     reaches the website; the API refuses to publish one, and so does this. */
+  for (const m of team) if (m?.releaseMarker !== undefined) throw new Error(`snapshot: team member "${m?.slug}" is a template (it carries a release marker) and must not be published`);
   return [...team]
     .sort((a, b) => a.order - b.order || a.id.localeCompare(b.id))
     .map((m) => {

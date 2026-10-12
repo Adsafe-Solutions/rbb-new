@@ -247,7 +247,7 @@ export function useContentEditor<R extends { id: string; status: ContentStatus }
 }
 
 /* The record's status badge (M14: its live version included). */
-export const statusBadge = (status: ContentStatus | undefined, live = false, schedule: ScheduleView | null = null) => workflowBadge(status, live, schedule);
+export const statusBadge = (status: ContentStatus | undefined, live = false, schedule: ScheduleView | null = null, template = false) => workflowBadge(status, live, schedule, template);
 
 /* Above the form: the archived banner and the problem alert. */
 export function EditorNotices<R extends { status: ContentStatus }>({ editor, kind, canEdit }: { editor: EditorState<R>; kind: string; canEdit: boolean }) {

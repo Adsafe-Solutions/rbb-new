@@ -314,6 +314,7 @@ test("about: the published About page's enabled chapters, in order; team members
   assert.deepEqual([team[0].status, team[0].category, team[0].image, team[0].imageAlt, team[0].imageId], ["approved", "leadership", "https://media.example.org/rbb/media/u/a.png", "A test image", "img"]);
   assert.deepEqual(team[0].relatedLinks, [{ label: "Transparency", to: "/about#transparency" }]);
   assert.deepEqual(teamFrom(withContent({ team: [] })), [], "managed, nobody published: the team page shows its empty state");
+  assert.throws(() => teamFrom(withContent({ team: [member({ id: "t", slug: "executive-director", name: "Executive Director", releaseMarker: "Sample profile — a role, not a real person." })] })), /team member "executive-director" is a template/, "a template never reaches the website");
   assert.deepEqual(imageOrigins(withContent({ team: [member({ id: "a", slug: "a", name: "A", order: 0, imageId: "img" })] })), ["https://media.example.org"]);
   const o = overridesFrom(withContent({ about: about(sections), team: [] }));
   assert.equal(o["src/content/about.js"].PUBLISHED_ABOUT.page.sections.length, 4);

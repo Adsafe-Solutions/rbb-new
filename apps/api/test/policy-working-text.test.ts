@@ -97,28 +97,14 @@ test("RBB's own text goes through: submit, approve and publish", async () => {
   await h2.policies.privacy.act(editor, "submit", { revision: hinted.revision }, FACTS);
 });
 
-test("a bracketed confirmation placeholder ([RBB to confirm: …], [TBC]) is working text: allowed in a draft, refused at submission and at publish", async () => {
-  const { h, data } = await site();
-  const PLACEHOLDER = "Online donations are processed by [RBB to confirm: the payment provider].";
-  const draft = await draftWith(h, { sections: [section("payments", [PLACEHOLDER])] });
-  assert.equal(draft.record!.status, "draft", "a draft may hold it while counsel reviews");
-  await assert.rejects(h.policies.privacy.act(editor, "submit", { revision: draft.revision }, FACTS), (error: unknown) => {
-    assert.ok(error instanceof ApiError && error.code === "VALIDATION_ERROR", String(error));
-    assert.match(JSON.stringify(error.details), /confirmation placeholder/);
-    return true;
-  });
-  const tbc = await h.policies.privacy.update(editor, { revision: draft.revision, changes: { sections: [section("payments", ["Refunds within [TBC] days."])] } }, FACTS);
-  await assert.rejects(h.policies.privacy.act(editor, "submit", { revision: tbc.revision }, FACTS), /./);
-  /* An ordinary bracketed aside is not a placeholder. */
-  const aside = await h.policies.privacy.update(editor, { revision: tbc.revision, changes: { sections: [section("payments", ["Payments (cards and bank transfers) [see below] are processed securely."])] } }, FACTS);
-  assert.equal((await h.policies.privacy.act(editor, "submit", { revision: aside.revision }, FACTS)).record!.status, "submitted");
-  /* Approved before the rule existed, then publishing: refused by name. */
-  const approved = await h.policies.privacy.act(owner, "approve", { revision: (await h.policies.privacy.get(owner)).revision }, FACTS);
+test("bracketed confirmation placeholders ([RBB to confirm: …], [TBC]) do NOT block (decision, 2026-10-13): submitted, approved and published", async () => {
+  const { h } = await site();
+  const draft = await draftWith(h, { sections: [section("payments", ["Online donations are processed by [RBB to confirm: the payment provider].", "Refunds within [TBC] days."])] });
+  const submitted = await h.policies.privacy.act(editor, "submit", { revision: draft.revision }, FACTS);
+  assert.equal(submitted.record!.status, "submitted");
+  const approved = await h.policies.privacy.act(owner, "approve", { revision: submitted.revision }, FACTS);
   assert.equal(approved.record!.status, "approved");
-  tamper(data, { sections: [section("payments", [PLACEHOLDER])] });
-  await assert.rejects(h.publishing.publish(owner, FACTS), (error: unknown) => {
-    assert.ok(error instanceof ApiError, String(error));
-    assert.match(JSON.stringify(error.details), /confirmation placeholder/);
-    return true;
-  });
+  await h.publishing.publish(owner, FACTS);
+  const snapshot = (await h.publishing.publicSnapshot())!;
+  assert.ok(JSON.stringify(snapshot.content.policies).includes("[RBB to confirm: the payment provider]"), "published as written");
 });

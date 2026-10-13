@@ -9,7 +9,11 @@
    decide what counts as working content there). It is copied, not
    imported, because the website's module ships in its bundle;
    apps/web scripts/test/working-text-parity.test.mjs fails if the two
-   lists drift apart. */
+   lists drift apart.
+
+   Bracketed confirmation placeholders ("[RBB to confirm: …]", "[TBC]")
+   are NOT working text (decision, 2026-10-13): they never block saving,
+   approval or publishing. */
 
 export const WORKING_TEXT_RULES: readonly (readonly [string, RegExp])[] = [
   ["demo text", /Demo text —/],
@@ -32,7 +36,6 @@ export const WORKING_TEXT_RULES: readonly (readonly [string, RegExp])[] = [
   ["sample profile", /\bSample profile\b/],
   ["sample video", /\bSample video\b/],
   ["sample event", /\bSample event\b/],
-  ["confirmation placeholder", /\[(RBB to confirm|to be confirmed|TBC|TODO)\b[^\]]*\]/i],
   ["example.* address or URL", /\b[\w.+-]*@?example\.(org|com|net)\b/i],
   ["fictional 555 phone number", /\+?1?[\s.-]?\(?555\)?[\s.-]?01\d\d\b/],
   ["platform home page as social link", /https?:\/\/(www\.)?(instagram|facebook|linkedin|youtube|x|twitter|tiktok)\.com\/?(?=["'\s<)]|$)/],

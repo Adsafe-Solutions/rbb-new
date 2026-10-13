@@ -18,3 +18,10 @@ test("both find the same things", () => {
   for (const text of ["Demo — x", "Sample story", "write to hello@example.org", "name@example.com", "img/demo-field.jpg", "A real paragraph.", "Call +1 555 0123", "Processed by [RBB to confirm: the payment provider].", "[TBC]", "A [bracketed] aside."])
     assert.deepEqual(workingTextFindings(text), workingContentFindings(text), text);
 });
+
+test("bracketed confirmation placeholders are not working text — they never block (decision, 2026-10-13)", () => {
+  for (const text of ["Processed by [RBB to confirm: the payment provider].", "Refunds within [TBC] days.", "[To be confirmed]", "[TODO: date]"]) {
+    assert.deepEqual(workingTextFindings(text), [], text);
+    assert.deepEqual(workingContentFindings(text), [], text);
+  }
+});

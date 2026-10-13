@@ -183,7 +183,7 @@ section has no draft wording at all, and "International transfers" /
 
 ## Checklist before publishing
 
-- [ ] Text supplied by RBB and reviewed by counsel; no "Demo —" or placeholder wording anywhere (the CMS refuses it).
+- [ ] Text supplied by RBB and reviewed by counsel; no "Demo —" wording anywhere (the CMS refuses it). `[RBB to confirm: …]` placeholders are NOT refused (decision, 2026-10-13): they publish as written, so replace them before publishing.
 - [ ] Both dates set to RBB's dates.
 - [ ] Section anchors exactly as listed (other pages and forms link to them).
 - [ ] "Transfers" and "Governing law" sections included only if confirmed.

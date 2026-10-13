@@ -157,8 +157,8 @@ test("leakage: drafts, users, sessions, audit, credentials and private media nev
   const pending = await intent("pending-upload.png");
 
   const current = await settingsOf(appA, "ownerA");
-  assert.equal((await call(appA, "/api/v1/settings", patch("ownerA", { revision: current.revision, changes: { branding: { logoId: pending.mediaId } } }))).status, 400, "pending media cannot be referenced");
-  assert.equal((await call(appA, "/api/v1/settings", patch("ownerA", { revision: current.revision, changes: { branding: { logoId: logo.mediaId } } }))).status, 200);
+  assert.equal((await call(appA, "/api/v1/settings", patch("ownerA", { revision: current.revision, changes: { seo: { ...current.settings.seo, ogImageId: pending.mediaId } } }))).status, 400, "pending media cannot be referenced");
+  assert.equal((await call(appA, "/api/v1/settings", patch("ownerA", { revision: current.revision, changes: { seo: { ...current.settings.seo, ogImageId: logo.mediaId } } }))).status, 200);
   assert.equal((await publish(appA, "ownerA")).status, 200);
 
   // A later DRAFT edit that is never published.
@@ -199,7 +199,7 @@ test("leakage: drafts, users, sessions, audit, credentials and private media nev
 test("a publish that fails validation changes nothing public", async () => {
   // M16: the media library refuses to delete a logo the settings use (409).
   const current = await settingsOf(appA, "ownerA");
-  const logoId = current.settings.branding.logoId;
+  const logoId = current.settings.seo.ogImageId;
   const refused = await call(appA, `/api/v1/media/${logoId}`, as("ownerA", { method: "DELETE" }));
   assert.equal(refused.status, 409);
   assert.ok((await jsonOf(refused)).error.details.some((d: { message: string }) => d.message === "Site settings"));
@@ -218,7 +218,7 @@ test("audit: settings.updated with field names; publish.completed with versions"
   const updated = entries.filter((e) => e.action === "settings.updated");
   assert.ok(updated.length >= 2);
   assert.ok(updated.every((e) => Array.isArray(e.metadata.fields) && e.actorUserId && e.requestId));
-  assert.ok(updated.some((e) => e.metadata.fields.includes("branding.logoId")));
+  assert.ok(updated.some((e) => e.metadata.fields.includes("seo.ogImageId")));
   const published = entries.filter((e) => e.action === "publish.completed").map((e) => e.metadata.version);
   assert.deepEqual(published.sort(), [1, 2]);
   assert.ok(entries.some((e) => e.action === "publish.rejected"));

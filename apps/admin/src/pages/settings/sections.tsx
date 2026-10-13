@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { Alert, Button, Checkbox, FormField, Input, Plus, Select, Switch, Textarea, Trash2 } from "../../design-system";
+import { Alert, Button, FormField, Input, Plus, Select, Textarea, Trash2 } from "../../design-system";
 import { MediaPicker } from "../../media/MediaPicker";
+import { CountryPicker } from "../../impact/CountryPicker";
 import type { SiteSettings } from "../../settings/client";
 import styles from "./SettingsPage.module.css";
 
@@ -30,16 +30,6 @@ export function GeneralSection({ value, onChange, readOnly, errorFor }: SectionP
       <FormField label="Summary" required helper="One sentence about the organization. Up to 300 characters." error={errorFor("summary")} disabled={readOnly}>
         <Textarea rows={3} maxLength={300} value={value.summary} onChange={(e) => onChange({ ...value, summary: e.target.value })} />
       </FormField>
-    </div>
-  );
-}
-
-export function BrandingSection({ value, onChange, readOnly, errorFor }: SectionProps<"branding">) {
-  return (
-    <div className={styles.fields}>
-      <Alert tone="info">Branding images are published with the settings. The public website uses its built-in logo files until it reads branding from settings.</Alert>
-      <MediaPicker label="Logo" helper="A ready image from the media library." value={value.logoId} onChange={(logoId) => onChange({ ...value, logoId })} disabled={readOnly} error={errorFor("logoId")} />
-      <MediaPicker label="Favicon" helper="A small, square image from the media library." value={value.faviconId} onChange={(faviconId) => onChange({ ...value, faviconId })} disabled={readOnly} error={errorFor("faviconId")} />
     </div>
   );
 }
@@ -166,62 +156,20 @@ export function SeoSection({ value, onChange, readOnly, errorFor }: SectionProps
   );
 }
 
-export function AnalyticsSection({ value, onChange, readOnly, errorFor }: SectionProps<"analytics">) {
+/* Settings → General: countries selected for the organization, from the
+   full list (ISO 3166-1) — the same selector as the Impact page's Where
+   We Work block. Saved with the settings; NEVER published (the website
+   does not show it). Being on the list, or selected here, does not make a
+   country a place RBB works: that is the Where We Work block, published
+   through review. */
+const NOTHING_TAKEN = new Map<string, string>();
+export function CountriesField({ value, onChange, readOnly, error }: { value: string[]; onChange: (countries: string[]) => void; readOnly: boolean; error?: string }) {
   return (
     <div className={styles.fields}>
-      <Alert tone="info">Public measurement IDs only — never keys or passwords. The website measures nothing until the organization approves measurement and a production build switches it on.</Alert>
-      <FormField label="Google Analytics measurement ID" helper="Starts with G-, for example G-XXXXXXX." error={errorFor("googleAnalyticsId")} disabled={readOnly}>
-        <Input maxLength={23} value={value.googleAnalyticsId ?? ""} onChange={(e) => onChange({ ...value, googleAnalyticsId: orUndefined(e.target.value.toUpperCase()) })} />
-      </FormField>
-      <FormField label="Microsoft Clarity project ID" helper="Lowercase letters and digits, from Clarity's settings." error={errorFor("clarityProjectId")} disabled={readOnly}>
-        <Input maxLength={20} value={value.clarityProjectId ?? ""} onChange={(e) => onChange({ ...value, clarityProjectId: orUndefined(e.target.value.toLowerCase()) })} />
-      </FormField>
+      <Alert tone="info">
+        Every country is listed; nothing is selected until you select it. This selection is saved in the admin only — it is not published and the website does not show it. The countries shown as where Rising Beyond Borders works are chosen on the Impact page (Where We Work) and published through review.
+      </Alert>
+      <CountryPicker label="Countries" helper="Optional." value={value} onChange={onChange} taken={NOTHING_TAKEN} max={249} disabled={readOnly} error={error} />
     </div>
   );
 }
-
-export function DonationsSection({ value, onChange, readOnly, errorFor }: SectionProps<"donations">) {
-  const form = value.form;
-  const setForm = (changes: Partial<typeof form>) => onChange({ ...value, form: { ...form, ...changes } });
-  const [presets, setPresets] = useState(form.presetAmounts.join(", "));
-  useEffect(() => setPresets(form.presetAmounts.join(", ")), [form.presetAmounts]);
-  return (
-    <div className={styles.fields}>
-      <Alert tone="info">The defaults for donation forms managed here. The donation pages and the Givebutter checkout are not changed by these settings.</Alert>
-      <fieldset className={styles.group}>
-        <legend className={styles.legend}>Frequencies offered</legend>
-        <Checkbox label="One-time" checked={form.frequencyOptions.oneTime} disabled={readOnly} onChange={(e) => setForm({ frequencyOptions: { ...form.frequencyOptions, oneTime: e.target.checked } })} />
-        <Checkbox label="Monthly" checked={form.frequencyOptions.monthly} disabled={readOnly} onChange={(e) => setForm({ frequencyOptions: { ...form.frequencyOptions, monthly: e.target.checked } })} />
-        {errorFor("form.frequencyOptions") && <p className={styles.error}>{errorFor("form.frequencyOptions")}</p>}
-      </fieldset>
-      <div className={styles.methodRow}>
-        <FormField label="Currency" helper="ISO code such as USD. Empty: amounts show as plain numbers." error={errorFor("form.currency")} disabled={readOnly}>
-          <Input maxLength={3} value={form.currency ?? ""} onChange={(e) => setForm({ currency: e.target.value.trim() === "" ? null : e.target.value.toUpperCase() })} />
-        </FormField>
-        <FormField label="Minimum amount" error={errorFor("form.minimumAmount")} disabled={readOnly}>
-          <Input type="number" min={0} step="any" value={String(form.minimumAmount)} onChange={(e) => setForm({ minimumAmount: Number(e.target.value) })} />
-        </FormField>
-        <FormField label="Maximum amount" error={errorFor("form.maximumAmount")} disabled={readOnly}>
-          <Input type="number" min={0} step="any" value={String(form.maximumAmount)} onChange={(e) => setForm({ maximumAmount: Number(e.target.value) })} />
-        </FormField>
-      </div>
-      <FormField label="Preset amounts" helper="Separated by commas, for example 25, 50, 100. Up to 8." error={errorFor("form.presetAmounts")} disabled={readOnly}>
-        <Input
-          value={presets}
-          onChange={(e) => {
-            setPresets(e.target.value);
-            setForm({ presetAmounts: e.target.value.split(",").map((v) => v.trim()).filter(Boolean).map(Number) });
-          }}
-        />
-      </FormField>
-      <Switch label="Allow a custom amount" checked={form.allowCustomAmount} disabled={readOnly} onChange={(e) => setForm({ allowCustomAmount: e.target.checked })} />
-      <FormField label="Closing heading" required helper="The heading of the band that closes every donation page." error={errorFor("closing.heading")} disabled={readOnly}>
-        <Input maxLength={160} value={value.closing.heading} onChange={(e) => onChange({ ...value, closing: { ...value.closing, heading: e.target.value } })} />
-      </FormField>
-      <FormField label="Closing button label" required error={errorFor("closing.buttonLabel")} disabled={readOnly}>
-        <Input maxLength={40} value={value.closing.buttonLabel} onChange={(e) => onChange({ ...value, closing: { ...value.closing, buttonLabel: e.target.value } })} />
-      </FormField>
-    </div>
-  );
-}
-

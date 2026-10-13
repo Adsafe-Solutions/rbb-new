@@ -85,6 +85,12 @@ test("fields the contract does not define are refused (no styling, no stray keys
   fails(SiteSettings, { ...fx.settings(), analytics: { mongodbUri: "mongodb+srv://x" } });
 });
 
+test("settings: branding, analytics, donations and features are retired — optional, still valid where already stored", () => {
+  ok(SiteSettings, fx.settings());
+  ok(SiteSettings, fx.legacySettings());
+  fails(SiteSettings, { ...fx.legacySettings(), features: { themeSwitcher: "yes" } });
+});
+
 /* ---------------- Links and URLs ---------------- */
 
 test("links accept site paths, #sections, https, mailto and tel", () => {

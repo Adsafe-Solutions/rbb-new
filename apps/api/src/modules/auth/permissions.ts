@@ -5,9 +5,9 @@ import { PERMISSIONS, type AuthContext, type Permission, type Role } from "./typ
    they need (`permission` on the route, or `requirePermission` inside a
    handler); nothing checks a role name directly except `requireRole`.
 
-     OWNER    everything — including users, audit and organization settings
+     OWNER    everything — including users and organization settings
      EDITOR   editorial work: read settings, create/update/delete content,
-              media and appeals. Never users, audit, settings changes or
+              media and appeals. Never users, settings changes or
               publishing.
 
    Approval and publishing are OWNER-only (M14): editors prepare content

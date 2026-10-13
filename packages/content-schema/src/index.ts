@@ -88,6 +88,7 @@ export { TeamGroup, TeamMember } from "./team/member.ts";
 export { PROGRAM_ICONS, Program } from "./programs/program.ts";
 export { PROJECT_IMPACT_MAX, PROJECT_PARTNERS_MAX, Project, ProjectImpact, projectMediaIds } from "./projects/project.ts";
 export { CareerRole, Careers, CareersSeo } from "./careers/careers.ts";
+export { HowWeWork } from "./howWeWork/howWeWork.ts";
 export { POLICY_IDS, POLICY_ROUTES, Policy, PolicyId, PolicySection, PolicySeo, policyApprovalProblems } from "./policies/policy.ts";
 export {
   CTA_TARGETS,
@@ -107,8 +108,10 @@ export {
 } from "./getInvolved/getInvolved.ts";
 export type { GetInvolvedPageId } from "./getInvolved/getInvolved.ts";
 export { WORKING_TEXT_RULES, workingTextFindings } from "./common/workingText.ts";
-export { IMPACT_SECTION_SCHEMAS, Impact, ImpactIntroData, ImpactSection, ImpactSections, ImpactStoriesData, MeasurementData, ProgramImpactData, TeasersData, impactMediaIds, impactReferences } from "./impact/impact.ts";
-export { IMPACT_BLOCKS, IMPACT_BLOCK_TYPES } from "./impact/registry.ts";
+export { COUNTRIES, COUNTRY_NAMES, isCountryName } from "./common/countries.ts";
+export type { Country } from "./common/countries.ts";
+export { ApproachData, GeographyData, IMPACT_SECTION_SCHEMAS, Impact, ImpactIntroData, ImpactSection, ImpactSections, ImpactStoriesData, MeasurementData, ProgramImpactData, TeasersData, impactMediaIds, impactReferences } from "./impact/impact.ts";
+export { IMPACT_BLOCKS, IMPACT_BLOCK_TYPES, IMPACT_CHAPTER_TYPES } from "./impact/registry.ts";
 export type { ImpactBlockInfo, ImpactBlockType } from "./impact/registry.ts";
 export { FinancialOverview, FinancialShare, Governance, Transparency } from "./transparency/transparency.ts";
 export { REPORT_CATEGORIES, Report, ReportCategory } from "./transparency/report.ts";

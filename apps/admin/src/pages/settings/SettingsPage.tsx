@@ -3,7 +3,7 @@ import { ApiRequestError } from "../../api";
 import { useCan } from "../../auth";
 import { Alert, Button, Card, EmptyState, PageContainer, PageHeader, Settings, Spinner, Tabs, useToast } from "../../design-system";
 import { publishApi, settingsApi, type PublishStatus, type SectionKey, type SettingsView, type SiteSettings } from "../../settings/client";
-import { AnalyticsSection, BrandingSection, ContactSection, DonationsSection, GeneralSection, SeoSection, SocialSection, type SectionProps } from "./sections";
+import { ContactSection, CountriesField, GeneralSection, SeoSection, SocialSection, type SectionProps } from "./sections";
 import { PublishPanel } from "./PublishPanel";
 import styles from "./SettingsPage.module.css";
 
@@ -12,28 +12,37 @@ import styles from "./SettingsPage.module.css";
    The API is the authority on everything: permissions, validation and
    conflicts; this page shows what it says. There is no Footer or
    Navigation section: the content contract holds neither yet, so the
-   footer and menus stay source-controlled in the website. */
+   footer and menus stay source-controlled in the website. Branding,
+   analytics and donation defaults are not managed here (retired,
+   2026-10-13): the website keeps its built-in logo and favicon, measures
+   nothing, and online donations come later through Givebutter. */
 
-type EditableKey = "general" | "branding" | "contact" | "social" | "seo" | "analytics" | "donations";
+type EditableKey = "general" | "contact" | "social" | "seo";
 const SECTIONS: { id: EditableKey; label: string; description: string }[] = [
-  { id: "general", label: "General", description: "The organization's name and summary." },
-  { id: "branding", label: "Branding", description: "Logo and favicon, from the media library." },
+  { id: "general", label: "General", description: "The organization's name and summary, and the countries selected for the organization." },
   { id: "contact", label: "Contact", description: "How people reach the organization." },
   { id: "social", label: "Social", description: "The organization's social media accounts." },
   { id: "seo", label: "SEO", description: "Defaults for search results and link previews." },
-  { id: "analytics", label: "Analytics", description: "Public measurement IDs." },
-  { id: "donations", label: "Donations", description: "Default donation form settings." },
 ];
 
-/* Empty optional values are absent, as the contract expects. */
-function clean<K extends EditableKey>(key: K, value: SiteSettings[K]): SiteSettings[K] {
+/* What a save sends: each tab's section, and `countries` — saved like a
+   section but shown on the General tab, and never published (the API
+   leaves it out of the website's snapshot). */
+type SavedKey = EditableKey | "countries";
+const TAB_OF: Record<SavedKey, EditableKey> = { general: "general", contact: "contact", social: "social", seo: "seo", countries: "general" };
+const SAVED_KEYS = Object.keys(TAB_OF) as SavedKey[];
+
+/* Empty optional values are absent, as the contract expects. Nothing
+   selected is the same as never selected. */
+function clean<K extends SavedKey>(key: K, value: SiteSettings[K]): SiteSettings[K] {
+  if (key === "countries") return ((value as string[] | undefined) ?? []) as SiteSettings[K];
   const drop = <T extends object>(o: T) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined && v !== "")) as T;
   if (key === "contact") {
     const c = value as SiteSettings["contact"];
     const office = c.office && Object.values(c.office).some((v) => typeof v === "string" && v.trim() !== "") ? drop(c.office) : undefined;
     return drop({ ...c, methods: c.methods.map((m) => drop(m)), office }) as SiteSettings[K];
   }
-  if (key === "branding" || key === "analytics" || key === "seo") return drop(value as object) as SiteSettings[K];
+  if (key === "seo") return drop(value as object) as SiteSettings[K];
   return value;
 }
 
@@ -70,7 +79,9 @@ export default function SettingsPage() {
   useEffect(() => void reload(), [reload]);
 
   const saved = load.status === "ready" ? load.view.settings : null;
-  const dirty = useMemo(() => (saved && draft ? SECTIONS.filter((s) => !same(clean(s.id, draft[s.id]), saved[s.id])).map((s) => s.id) : []), [saved, draft]);
+  const dirty = useMemo(() => (saved && draft ? SAVED_KEYS.filter((k) => !same(clean(k, draft[k]), k === "countries" ? clean(k, saved[k]) : saved[k])) : []), [saved, draft]);
+  /* The tabs with unsaved changes (countries count as General's). */
+  const dirtyTabs = [...new Set(dirty.map((k) => TAB_OF[k]))];
 
   // Leaving the page with unsaved edits asks first.
   useEffect(() => {
@@ -90,14 +101,16 @@ export default function SettingsPage() {
       setLoad({ status: "ready", view });
       setDraft(structuredClone(view.settings));
       setPublish(await publishApi.status());
-      toast({ title: "Settings saved", description: canPublishNote(publish), tone: "success" });
+      /* Only the country selection changed: nothing to publish — it never goes live. */
+      const onlyCountries = dirty.every((k) => k === "countries");
+      toast({ title: "Settings saved", description: onlyCountries ? "The country selection is saved in the admin only; it is not published." : canPublishNote(publish), tone: "success" });
     } catch (caught) {
       if (caught instanceof ApiRequestError && caught.status === 409) setProblem({ kind: "conflict", message: caught.message, fields: new Map() });
       else if (caught instanceof ApiRequestError && caught.status === 400) {
         const fields = new Map(caught.details.map((d) => [d.path.replace(/^body\.changes\./, ""), d.message]));
         setProblem({ kind: "invalid", message: "Some settings need attention before they can be saved.", fields });
-        const first = [...fields.keys()][0]?.split(".")[0] as EditableKey | undefined;
-        if (first && SECTIONS.some((s) => s.id === first)) setTab(first);
+        const first = [...fields.keys()][0]?.split(".")[0] as SavedKey | undefined;
+        if (first && first in TAB_OF) setTab(TAB_OF[first]);
       } else setProblem({ kind: "error", message: "The settings could not be saved. Try again.", fields: new Map() });
     } finally {
       setSaving(false);
@@ -142,13 +155,20 @@ export default function SettingsPage() {
     errorFor: (path) => problem?.fields.get(`${key}.${path}`),
   });
   const editors: Record<EditableKey, JSX.Element> = {
-    general: <GeneralSection {...sectionProps("general")} />,
-    branding: <BrandingSection {...sectionProps("branding")} />,
+    general: (
+      <>
+        <GeneralSection {...sectionProps("general")} />
+        <CountriesField
+          value={draft.countries ?? []}
+          onChange={(countries) => setDraft((d) => (d ? { ...d, countries } : d))}
+          readOnly={!canWrite}
+          error={problem?.fields.get("countries") ?? [...(problem?.fields.entries() ?? [])].find(([path]) => path.startsWith("countries."))?.[1]}
+        />
+      </>
+    ),
     contact: <ContactSection {...sectionProps("contact")} />,
     social: <SocialSection {...sectionProps("social")} />,
     seo: <SeoSection {...sectionProps("seo")} />,
-    analytics: <AnalyticsSection {...sectionProps("analytics")} />,
-    donations: <DonationsSection {...sectionProps("donations")} />,
   };
 
   return (
@@ -182,7 +202,7 @@ export default function SettingsPage() {
           label: (
             <>
               {s.label}
-              {dirty.includes(s.id) && (
+              {dirtyTabs.includes(s.id) && (
                 <span className={styles.dirtyDot} aria-label="(unsaved changes)">
                   •
                 </span>
@@ -200,7 +220,7 @@ export default function SettingsPage() {
       {canWrite && (
         <div className={styles.saveBar} data-dirty={dirty.length > 0 || undefined}>
           <span className={styles.saveState} aria-live="polite">
-            {saving ? "Saving…" : dirty.length ? `Unsaved changes in ${dirty.map((d) => SECTIONS.find((s) => s.id === d)!.label).join(", ")}` : `All changes saved${load.view.updatedBy ? ` · last by ${load.view.updatedBy.isYou ? "you" : load.view.updatedBy.name}` : ""}`}
+            {saving ? "Saving…" : dirty.length ? `Unsaved changes in ${dirtyTabs.map((d) => SECTIONS.find((s) => s.id === d)!.label).join(", ")}` : `All changes saved${load.view.updatedBy ? ` · last by ${load.view.updatedBy.isYou ? "you" : load.view.updatedBy.name}` : ""}`}
           </span>
           <span className={styles.saveActions}>
             <Button variant="ghost" disabled={!dirty.length || saving} onClick={() => (setDraft(structuredClone(load.view.settings)), setProblem(null))}>

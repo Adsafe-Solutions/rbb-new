@@ -43,7 +43,11 @@
                        block names — homepage and /impact) — present once
                        the organization has PUBLISHED a figure
      content.impact → PUBLISHED_IMPACT (/impact: the Impact page's blocks —
-                       only while it is PUBLISHED; pages/Impact/CmsImpact)
+                       only while it is PUBLISHED; pages/Impact/CmsImpact);
+                       its `approach` block → IMPACT.approach
+                       (/impact/our-approach, #5) and its `geography` block
+                       → IMPACT.geography (/impact/where-we-work, #6) —
+                       the words of those pages, never drawn on /impact
      content.transparency → TRANSPARENCY / TRANSPARENCY_COPY (the
                        Transparency chapter of /about, and the rows every
                        trust panel shows) — only while it is PUBLISHED
@@ -56,6 +60,10 @@
                        says so (M15): the CMS's stories are then the only
                        stories, and the website's own Impact page (which
                        names the website's own stories) shows none
+     content.howWeWork → HOW_WE_WORK (/about/how-we-work, #7: its header,
+                       "In practice" cards and passages; the posters and
+                       closing ask stay the site's) — only while it is
+                       PUBLISHED
      content.careers → CAREERS (/about-us/careers: its header, sections,
                        open roles and closing ask) — only while it is
                        PUBLISHED
@@ -114,17 +122,14 @@
    draws. Public ids only: the account id is the build's own
    VITE_GIVEBUTTER_ACCOUNT_ID, and no key is ever in a snapshot.
 
-   NOT driven yet, on purpose — the settings exist, the site does not read
-   them from the CMS until the milestone that owns each:
-     branding (logo/favicon)  the site's logo is supplied artwork; using R2
-                              media needs the CSP and image pipeline first
-     analytics                measurement is environment configuration and
-                              off until RBB approves it (config/env.js)
-     donations                the site-wide form defaults (the CMS's
-                              donation pages above carry their own checkout)
-     features                 the theme switcher (the announcement bar's,
-                              the popup's and the story strip's switches
-                              ARE driven since M21–M23, above) */
+   Never driven — RETIRED settings (scope decision, 2026-10-13): branding
+   (the site keeps its built-in logo and favicon), analytics (the site
+   measures nothing), donations (site-wide form defaults; online donations
+   come later through Givebutter — the CMS's donation pages above carry
+   their own checkout) and features (the theme switcher stays a
+   deployment switch, VITE_THEME_SWITCHER). Older settings may still carry
+   them; nothing here reads them. The announcement bar's, the popup's and
+   the story strip's switches ARE driven since M21–M23, above. */
 
 import { workingContentFindings } from "../src/lib/releaseMarkers.js";
 import { focalPosition } from "../src/lib/focal.js";
@@ -141,11 +146,11 @@ export const SNAPSHOT_TARGETS = {
   "src/content/appeals.js": "APPEALS, APPEAL_STORIES",
   "src/content/donation.js": "PUBLISHED_GENERAL_DONATION",
   "src/content/homepage.js": "PUBLISHED_HOMEPAGE",
-  "src/content/about.js": "PUBLISHED_ABOUT",
+  "src/content/about.js": "PUBLISHED_ABOUT, HOW_WE_WORK, HOW_WE_WORK.practices",
   "src/content/team.js": "TEAM_MEMBERS",
   "src/content/work.js": "PROGRAMS, PROJECT_RECORDS, PROJECTS, PROJECT_SOURCE",
   "src/content/stories.js": "STORIES, STORY_SOURCE",
-  "src/content/impact.js": "IMPACT, PUBLISHED_IMPACT",
+  "src/content/impact.js": "IMPACT, IMPACT.approach, IMPACT.geography, PUBLISHED_IMPACT",
   "src/content/transparency.js": "TRANSPARENCY, TRANSPARENCY_COPY",
   "src/content/policies.js": "POLICIES (by id)",
   "src/content/getInvolved.js": "GET_INVOLVED.paths (by id), GET_INVOLVED_PAGES.hub",
@@ -561,6 +566,19 @@ export function storiesFrom(snapshot) {
    are the record's, in order ("verified" is the site's word for a role
    that may be shown — and, as before, the page is indexed only with one).
    Without its own SEO description the page falls back to the site's. */
+/* The published How We Work page (#7) → HOW_WE_WORK (content/about.js),
+   in its own shape: the header and passages on the object, the cards on
+   its nested `practices` (so whatever else those objects hold — the
+   posters, the closing ask — stays the site's). */
+export function howWeWorkFrom(snapshot) {
+  const h = snapshot.content?.howWeWork;
+  if (!h || h.status !== "published") return undefined;
+  return {
+    HOW_WE_WORK: { kicker: h.kicker ?? null, heading: h.heading, body: h.body, rows: h.rows.map((r) => drop({ id: r.id, heading: r.heading, body: r.body, items: r.items })) },
+    "HOW_WE_WORK.practices": { kicker: h.practices.kicker ?? null, heading: h.practices.heading, items: h.practices.items.map((p) => ({ title: p.title, description: p.description, icon: p.icon })) },
+  };
+}
+
 export function careersFrom(snapshot) {
   const c = snapshot.content?.careers;
   if (!c || c.status !== "published") return undefined;
@@ -806,13 +824,37 @@ const IMPACT_VIEWS = {
 };
 export const IMPACT_VIEW_TYPES = Object.keys(IMPACT_VIEWS);
 
+/* The Impact page's sub-page blocks (#5, #6; registry `page`) → the
+   objects the website's own pages read, as nested targets so whatever
+   else those objects hold stays the site's. Published by an owner means
+   approved — but an empty block approves nothing: the page keeps its
+   "to be provided" lines, and Where We Work stays out of search engines,
+   until there is something to show. Never a sample. */
+const IMPACT_PAGE_VIEWS = {
+  approach: (d) => ({ intro: d.intro ?? null, principles: d.principles, status: d.intro || d.principles.length ? "approved" : "placeholder" }),
+  geography: (d) => ({
+    summary: d.summary ?? null,
+    regions: d.regions.map((r) => ({ id: r.id, name: r.name, countries: r.countries })),
+    countries: d.countries,
+    status: d.regions.length || d.countries.length ? "verified" : "placeholder",
+  }),
+};
+export const IMPACT_PAGE_VIEW_TYPES = Object.keys(IMPACT_PAGE_VIEWS);
+
+export function impactPagesFrom(snapshot) {
+  const page = snapshot.content?.impact;
+  if (!page || page.status !== "published") return undefined;
+  const targets = Object.fromEntries(page.sections.filter((s) => s.enabled && Object.hasOwn(IMPACT_PAGE_VIEWS, s.type)).map((s) => [`IMPACT.${s.type}`, IMPACT_PAGE_VIEWS[s.type](s.data)]));
+  return Object.keys(targets).length ? targets : undefined;
+}
+
 export function impactFrom(snapshot) {
   const page = snapshot.content?.impact;
   if (!page || page.status !== "published") return undefined;
   const img = (id) => imageOf(snapshot, id);
   return {
     sections: page.sections
-      .filter((s) => s.enabled)
+      .filter((s) => s.enabled && !Object.hasOwn(IMPACT_PAGE_VIEWS, s.type))
       .map((s) => {
         const view = IMPACT_VIEWS[s.type];
         if (!view) throw new Error(`snapshot: the Impact page has a "${s.type}" block, which this site cannot draw`);
@@ -914,7 +956,9 @@ export function overridesFrom(snapshot) {
     ...appealsOverrides(snapshot),
     ...(generalDonationFrom(snapshot) && { "src/content/donation.js": { PUBLISHED_GENERAL_DONATION: { page: generalDonationFrom(snapshot) } } }),
     ...(homepageFrom(snapshot) && { "src/content/homepage.js": { PUBLISHED_HOMEPAGE: { page: homepageFrom(snapshot) } } }),
-    ...(aboutFrom(snapshot) && { "src/content/about.js": { PUBLISHED_ABOUT: { page: aboutFrom(snapshot) } } }),
+    ...((aboutFrom(snapshot) || howWeWorkFrom(snapshot)) && {
+      "src/content/about.js": { ...(aboutFrom(snapshot) && { PUBLISHED_ABOUT: { page: aboutFrom(snapshot) } }), ...howWeWorkFrom(snapshot) },
+    }),
     ...(teamFrom(snapshot) && { "src/content/team.js": { TEAM_MEMBERS: teamFrom(snapshot) } }),
     ...((programsFrom(snapshot) || projectsFrom(snapshot)) && {
       "src/content/work.js": {
@@ -927,6 +971,7 @@ export function overridesFrom(snapshot) {
       "src/content/impact.js": {
         ...(metricsFrom(snapshot) && { IMPACT: { metrics: metricsFrom(snapshot) } }),
         ...(impactFrom(snapshot) && { PUBLISHED_IMPACT: { page: impactFrom(snapshot) } }),
+        ...impactPagesFrom(snapshot),
       },
     }),
     ...(transparencyFrom(snapshot) && { "src/content/transparency.js": transparencyFrom(snapshot) }),

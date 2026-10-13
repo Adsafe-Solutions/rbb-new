@@ -11,6 +11,7 @@ import { slugify } from "../posts/slug";
 import styles from "../../content/content.module.css";
 import { nextSeo } from "../../content/seo";
 import { NoIndexField } from "../../content/NoIndexField";
+import { LINE_GLYPHS } from "../../content/glyphs";
 
 /* One program area. Sections: basic information, its page's sections,
    SEO, publishing — exactly what the program page, Our Work, the menu and
@@ -20,22 +21,8 @@ import { NoIndexField } from "../../content/NoIndexField";
 
 const FIELDS = ["title", "slug", "icon", "description", "missingNote", "why", "activities", "impact", "stories", "seo"] as const;
 
-/* The site's line glyphs a program can use (the contract's PROGRAM_ICONS). */
-const ICONS: { value: Program["icon"]; label: string }[] = [
-  { value: "education", label: "Education (book)" },
-  { value: "health", label: "Health (heart)" },
-  { value: "livelihoods", label: "Livelihoods (growth)" },
-  { value: "community", label: "Community (people)" },
-  { value: "donate", label: "Donate" },
-  { value: "volunteer", label: "Volunteer" },
-  { value: "partner", label: "Partner" },
-  { value: "fellowship", label: "Fellowship" },
-  { value: "travel", label: "Travel" },
-  { value: "fundraise", label: "Fundraise" },
-  { value: "document", label: "Document" },
-  { value: "shield", label: "Shield" },
-  { value: "chart", label: "Chart" },
-];
+/* The site's line glyphs a program can use (content/glyphs.ts). */
+const ICONS = LINE_GLYPHS;
 
 /* The program page's list sections, by their headings on the website. */
 type Lines = "activities" | "impact" | "stories";

@@ -201,6 +201,18 @@ A published Careers page fills `CAREERS` (`contact.js`) in its own shape.
 `CAREERS.to` stays the site's address, and its roles stay the "verified"
 roles the SEO rule counts.
 
+A published Impact page's two sub-page blocks are never drawn on /impact:
+`approach` sets `IMPACT.approach` (/impact/our-approach: intro and
+principles) and `geography` sets
+`IMPACT.geography` (/impact/where-we-work), both as nested targets. Our
+Approach quotes the mission from the published About page's Mission &
+Vision block, the source mission otherwise. A published How We Work page
+sets `HOW_WE_WORK` and `HOW_WE_WORK.practices` (`about.js`); its posters,
+closing ask and SEO stay the site's. Never write their words, countries or
+regions on RBB's behalf (D11, D14), and an empty block approves nothing.
+The Listen → Partner → Act → Sustain framework was rejected by RBB (D11):
+never introduce it. Where We Work has no map (D14).
+
 Published policies (M19: privacy, terms, donation) are merged BY ID into
 their records in `POLICIES` (`policies.js`), so the policy page, footer,
 forms' privacy link, donation form and SEO follow. The id and route stay

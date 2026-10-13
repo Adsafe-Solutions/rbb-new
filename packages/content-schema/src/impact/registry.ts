@@ -6,7 +6,12 @@
 
    The blocks are exactly the chapters /impact has (apps/web pages/Impact):
    nothing speculative. Each appears at most once — several are chapters
-   with their own address (#at-a-glance, #measurement, #stories). */
+   with their own address (#at-a-glance, #measurement, #stories).
+
+   Two are not chapters of /impact but the words of its two sub-pages
+   (`page`): Our Approach (#5) and Where We Work (#6). They live on this
+   record — published with it, through the same review — and are never
+   drawn on /impact itself. */
 
 export interface ImpactBlockInfo {
   type: ImpactBlockType;
@@ -14,9 +19,11 @@ export interface ImpactBlockInfo {
   description: string;
   single: boolean;
   first?: boolean;
+  /* Not drawn on /impact: the website page whose words it holds. */
+  page?: string;
 }
 
-export const IMPACT_BLOCK_TYPES = ["intro", "stats", "programImpact", "teasers", "measurement", "stories", "trust", "cta"] as const;
+export const IMPACT_BLOCK_TYPES = ["intro", "stats", "programImpact", "teasers", "measurement", "stories", "trust", "cta", "approach", "geography"] as const;
 export type ImpactBlockType = (typeof IMPACT_BLOCK_TYPES)[number];
 
 export const IMPACT_BLOCKS: readonly ImpactBlockInfo[] = [
@@ -28,4 +35,9 @@ export const IMPACT_BLOCKS: readonly ImpactBlockInfo[] = [
   { type: "stories", label: "Stories of change", description: "Impact stories, chosen from the website's stories.", single: true },
   { type: "trust", label: "Reports and transparency", description: "A statement with the transparency links beneath it.", single: true },
   { type: "cta", label: "Closing call to action", description: "A closing ask with one or two buttons.", single: true },
+  { type: "approach", label: "Our Approach page", description: "The Our Approach page's words: how the work is done, and its principles. Opens with the mission from the About page.", single: true, page: "/impact/our-approach" },
+  { type: "geography", label: "Where We Work page", description: "The countries and regions the work reaches, verified by RBB. Never a sample.", single: true, page: "/impact/where-we-work" },
 ];
+
+/* The block types drawn on /impact itself (the others feed a sub-page). */
+export const IMPACT_CHAPTER_TYPES = IMPACT_BLOCKS.filter((b) => !b.page).map((b) => b.type);

@@ -81,3 +81,11 @@ test("an inherited object name in a path is not a page (no prototype lookups)", 
   }
   assert.deepEqual(at("content.policies.constructor: x"), ["Policies · constructor", "/policies", "x"]);
 });
+
+test("the How We Work page (#7): the card, passage or header, and its editor", () => {
+  assert.deepEqual(at("content.howWeWork.rows.2.heading: must not be empty"), ["How We Work page · passage 3", "/how-we-work", "must not be empty"]);
+  assert.deepEqual(at("content.howWeWork.practices.items.0.icon: Invalid option"), ["How We Work page · card 1", "/how-we-work", "Invalid option"]);
+  assert.deepEqual(at("content.howWeWork.heading: contains working-placeholder text"), ["How We Work page · page header", "/how-we-work", "contains working-placeholder text"]);
+  assert.deepEqual(at("content.howWeWork.status: a snapshot holds published records only"), ["How We Work page", "/how-we-work", "a snapshot holds published records only"]);
+  assert.deepEqual(at("schedule.How We Work page.how_we_work: no longer matches the approved revision"), ["How We Work page · scheduled publication", "/how-we-work", "no longer matches the approved revision"]);
+});

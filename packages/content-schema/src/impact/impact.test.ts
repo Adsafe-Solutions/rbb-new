@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { IMPACT_BLOCKS, IMPACT_BLOCK_TYPES, IMPACT_SECTION_SCHEMAS, Impact, Metric, PublishedSnapshot } from "../index.ts";
+import { IMPACT_BLOCKS, IMPACT_BLOCK_TYPES, IMPACT_CHAPTER_TYPES, IMPACT_SECTION_SCHEMAS, Impact, Metric, PublishedSnapshot } from "../index.ts";
 import * as fx from "../test/fixtures.ts";
 
 /* Metric and the Impact page (M11), and both in a published snapshot.
@@ -20,6 +20,37 @@ const issues = (schema: { safeParse(v: unknown): { success: boolean; error?: { i
 test("impact registry: one schema per block type, one entry per type", () => {
   assert.deepEqual(Object.keys(IMPACT_SECTION_SCHEMAS).sort(), [...IMPACT_BLOCK_TYPES].sort());
   assert.deepEqual(IMPACT_BLOCKS.map((b) => b.type).sort(), [...IMPACT_BLOCK_TYPES].sort());
+});
+
+test("impact registry: Our Approach and Where We Work feed their own pages, not /impact's chapters", () => {
+  assert.deepEqual(IMPACT_BLOCKS.filter((b) => b.page).map((b) => [b.type, b.page]), [["approach", "/impact/our-approach"], ["geography", "/impact/where-we-work"]]);
+  assert.deepEqual([...IMPACT_CHAPTER_TYPES].sort(), ["cta", "intro", "measurement", "programImpact", "stats", "stories", "teasers", "trust"]);
+});
+
+test("approach (#5) and geography (#6): structure only — words and places are RBB's", () => {
+  const approach = (data: unknown) => page([intro(), block("approach", "approach", data)]);
+  const geography = (data: unknown) => page([intro(), block("where-we-work", "geography", data)]);
+  assert.deepEqual(issues(Impact, approach({ intro: "How the work is done.", principles: ["One.", "Two."] })), []);
+  assert.deepEqual(issues(Impact, approach({ principles: [] })), [], "nothing yet: the page shows its own 'to be provided' lines");
+  assert.deepEqual(issues(Impact, geography({ regions: [], countries: [] })), [], "empty: no list, not indexed");
+  /* Test data only — names from the list, not where RBB works. */
+  assert.deepEqual(issues(Impact, geography({ summary: "S.", regions: [{ id: "region-a", name: "Region A", countries: ["Kenya", "Uganda"] }], countries: ["Peru"] })), []);
+  const bad: [string, unknown][] = [
+    ["approach: the mission restated", approach({ mission: "M.", principles: [] })],
+    ["approach: a principle in HTML", approach({ principles: ["<b>x</b>"] })],
+    ["approach: empty principle", approach({ principles: [" "] })],
+    ["approach: twice", page([intro(), block("a", "approach", { principles: [] }), block("b", "approach", { principles: [] })])],
+    ["geography: a region with no country", geography({ regions: [{ id: "r", name: "R", countries: [] }], countries: [] })],
+    ["geography: a country twice", geography({ regions: [], countries: ["Kenya", "Kenya"] })],
+    ["geography: a country not on the list", geography({ regions: [], countries: ["Atlantis"] })],
+    ["geography: a name not as the list writes it", geography({ regions: [], countries: ["kenya"] })],
+    ["geography: a country in two regions", geography({ regions: [{ id: "r", name: "R", countries: ["Kenya"] }, { id: "s", name: "S", countries: ["Kenya"] }], countries: [] })],
+    ["geography: a country in a region and ungrouped", geography({ regions: [{ id: "r", name: "R", countries: ["Kenya"] }], countries: ["Kenya"] })],
+    ["geography: duplicate region id", geography({ regions: [{ id: "r", name: "R", countries: ["Kenya"] }, { id: "r", name: "S", countries: ["Peru"] }], countries: [] })],
+    ["geography: a figure, not a list", geography({ regions: [], countries: [], count: 25 })],
+    ["geography: map coordinates (no map — D14)", geography({ regions: [{ id: "r", name: "R", countries: ["Kenya"], lat: 1 }], countries: [] })],
+  ];
+  for (const [name, value] of bad) assert.ok(issues(Impact, value).length > 0, name);
 });
 
 test("metric: a keyed figure with its verification, nothing else", () => {
@@ -93,4 +124,13 @@ test("snapshot: published metrics in order; every stats block names a published 
     ["impact share image missing", { impact: page([intro()], { seo: { ogImageId: "missing" } }) }],
   ];
   for (const [name, content] of bad) assert.ok(issues(PublishedSnapshot, snapshot(content)).length > 0, name);
+});
+
+test("countries (D14): the full ISO 3166-1 list, each code and name once — options, not RBB's coverage", async () => {
+  const { COUNTRIES, COUNTRY_NAMES, isCountryName } = await import("../index.ts");
+  assert.equal(COUNTRIES.length, 249);
+  assert.equal(new Set(COUNTRIES.map((c) => c.code)).size, 249);
+  assert.equal(new Set(COUNTRY_NAMES).size, 249);
+  assert.ok(COUNTRIES.every((c) => /^[A-Z]{2}$/.test(c.code)));
+  assert.ok(isCountryName("Côte d'Ivoire") && !isCountryName("Atlantis"));
 });

@@ -6,7 +6,7 @@ import { api } from "../api";
    browser); the API validates every save against it. */
 
 export type { SiteSettings };
-export type SectionKey = "general" | "contact" | "social" | "seo" | "branding" | "analytics" | "donations" | "engagement" | "features";
+export type SectionKey = "general" | "contact" | "social" | "seo" | "engagement" | "countries";
 
 export interface SettingsView {
   settings: SiteSettings;

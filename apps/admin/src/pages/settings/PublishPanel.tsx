@@ -8,9 +8,8 @@ import { publishProblemLine } from "../../settings/publishProblems";
 import styles from "./SettingsPage.module.css";
 
 const SECTION_LABELS: Record<string, string> = {
-  general: "General", branding: "Branding", contact: "Contact", social: "Social", seo: "SEO",
-  analytics: "Analytics", donations: "Donations", engagement: "Engagement", features: "Features",
-  news: "News", blogs: "Blogs", events: "Events", appeals: "Appeals", generalDonation: "Donation page", homepage: "Homepage", about: "About page", team: "Team", programs: "Programs", metrics: "Impact figures", impact: "Impact page", transparency: "Transparency", reports: "Transparency documents", stories: "Stories", projects: "Projects", careers: "Careers page",
+  general: "General", contact: "Contact", social: "Social", seo: "SEO", engagement: "Engagement",
+  news: "News", blogs: "Blogs", events: "Events", appeals: "Appeals", generalDonation: "Donation page", homepage: "Homepage", about: "About page", team: "Team", programs: "Programs", metrics: "Impact figures", impact: "Impact page", transparency: "Transparency", reports: "Transparency documents", stories: "Stories", projects: "Projects", careers: "Careers page", howWeWork: "How We Work page",
 };
 
 const when = (iso: string) => new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });

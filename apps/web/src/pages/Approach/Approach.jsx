@@ -1,7 +1,7 @@
 import PageHeader from "../../components/PageHeader/PageHeader.jsx";
 import ContentRows from "../../components/ContentRows/ContentRows.jsx";
 import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
-import { ABOUT, IMPACT, IMPACT_PAGES } from "../../content/index.js";
+import { ABOUT, IMPACT, IMPACT_PAGES, PUBLISHED_ABOUT } from "../../content/index.js";
 
 /* /impact/our-approach — how RBB works towards sustainable growth and
    lasting change.
@@ -9,13 +9,18 @@ import { ABOUT, IMPACT, IMPACT_PAGES } from "../../content/index.js";
    Built on the one thing the supplied material does say: the mission,
    quoted as it stands (read from content/about.js, not copied). The
    detailed approach and any principles are placeholders until RBB
-   supplies them.
+   supplies them. Once the About page is published in the CMS, the mission
+   is ITS Mission & Vision block's, so the two pages never disagree (#5);
+   the intro and principles come from the Impact page's `approach` block
+   (scripts/snapshot-adapter.mjs → IMPACT.approach).
 
-   ⚠ The Listen → Partner → Act → Sustain steps are NOT on this page.
-   They are a structure Document 02 proposed for the homepage; here, on
-   the page titled "Our Approach", they would read as RBB's official
-   method, which Document 05 forbids until RBB approves it. They are kept
-   in content/impact.js (approach.proposedFramework) for that day. */
+   D11 (2026-10-13): the page reuses the existing approved content —
+   the mission, and IMPACT.approach's intro and principles. The
+   Listen → Partner → Act → Sustain framework was REJECTED by RBB: it is
+   not RBB's method and must never appear here. */
+const missionStatement = () =>
+  PUBLISHED_ABOUT.page?.sections.find((s) => s.type === "missionVision")?.data.mission?.statement ?? ABOUT.missionVision.mission.statement;
+
 export default function Approach() {
   const t = IMPACT_PAGES.approach;
   const { approach } = IMPACT;
@@ -33,7 +38,7 @@ export default function Approach() {
           {
             id: "foundation",
             heading: t.foundationLabel,
-            body: ABOUT.missionVision.mission.statement,
+            body: missionStatement(),
           },
           {
             id: "how-we-work",

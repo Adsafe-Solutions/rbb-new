@@ -26,9 +26,19 @@ snapshot.
 - **Contract:** `SiteSettings` in `packages/content-schema`, the M1
   contract, used unchanged. It's one record per organization, with these
   sections:
-  - `general`, `contact`, `social`, `seo`
-  - `branding` (media ids), `analytics` (public measurement IDs)
-  - `donations` (form defaults), `engagement`, `features`
+  - `general`, `contact`, `social`, `seo`, `engagement`
+  - `countries` (#15): the admin's country selection (Settings → General,
+    from the full ISO 3166-1 list). INTERNAL: saved like a section, never
+    published — every snapshot leaves it out, and it is not a change to
+    publish. The public Where We Work list is the Impact page's geography
+    block.
+  - retired (scope decision, 2026-10-13): `branding`, `analytics`,
+    `donations` (form defaults) and `features`. Not editable in the admin
+    or the API, never read by the website; the contract keeps them
+    OPTIONAL only so the settings already stored and the snapshots already
+    published stay valid. The website keeps its built-in logo and favicon,
+    measures nothing, and leaves online donations to a later Givebutter
+    phase; the theme switcher stays a deployment switch.
 - **Not in the contract:** footer and navigation. They stay source-controlled
   in the website, and no editor for them exists yet.
 - **Storage:** MongoDB `site_settings`, one document per organization: the
@@ -219,12 +229,10 @@ The values are set at the end of the module that defines them, in both the
 client and server builds, so the HTML and the hydrated page agree, and
 everything derived from them (titles, footer) follows.
 
-Not yet driven, on purpose:
-- branding (needs the R2 image pipeline and CSP)
-- analytics (environment-based and consent-gated)
-- donations: the site-wide form defaults (the CMS donation pages carry
-  their own Givebutter checkout, as described below)
-- engagement and features
+Never driven: the retired `branding`, `analytics`, `donations` and
+`features` (above). The CMS donation pages carry their own Givebutter
+checkout, as described below; `engagement` drives the announcement bar,
+the popup and Highlights (M21–M23).
 
 ## Content collections: posts and events (M6)
 
@@ -602,6 +610,32 @@ chapters, each at most once, with the introduction first:
 - `trust`
 - `cta`
 
+Two more blocks are not drawn on /impact; they hold the words of its two
+sub-pages (registry `page`), published with the Impact page:
+- `approach` (#5) → `IMPACT.approach` (/impact/our-approach): `intro` and
+  `principles`. The page opens with the mission, read from the published
+  About page's Mission & Vision block (the source mission otherwise) —
+  never restated on the Impact page.
+- `geography` (#6) → `IMPACT.geography` (/impact/where-we-work): `summary`,
+  `regions` (each with its countries) and ungrouped `countries`. Verified
+  coverage only, never a sample. With both lists empty the page shows no
+  list and stays `noindex`; with either, it is indexed.
+
+Either, published empty, approves nothing (`status: "placeholder"`). The
+source Impact record (`src/contract/importers.js`) carries the approach's
+approved source words, and a geography block only once the source has a
+verified list. The release approval `geography` (release/approvals.mjs) is
+RBB's sign-off and is not set by a publish.
+
+Decisions (2026-10-13): **D11** — Our Approach reuses the existing approved
+content; the Listen → Partner → Act → Sustain framework is rejected and was
+removed from the code (it must not be introduced); How We Work still awaits
+RBB's wording. **D14** — countries are chosen in the admin from the full
+ISO 3166-1 list (`packages/content-schema/src/common/countries.ts`), stored
+by name, each once per block; the contract refuses any other name. The list
+is the options, not RBB's coverage: the selection starts empty and only
+what is selected and published is shown. No map.
+
 Audit: `impact.created`, `impact.updated` and `impact.archived`, with
 block paths.
 
@@ -845,6 +879,26 @@ published, gives byte-identical HTML across all 109 pages (normalised for
 asset hashes), with identical CSS and routes. Drafting it again brings the
 source page back.
 
+**The How We Work page** (#7, `/about/how-we-work`) is ONE typed record
+per organization (`how_we_work_pages`; `/api/v1/how-we-work`,
+GET/POST/PATCH/DELETE), on the single-page service with named parts, as
+Careers.
+- **Fields:** the header (kicker, heading, opening line); "In practice" —
+  a kicker, a heading and one to eight cards (title, line, one of the
+  site's line glyphs); one to eight numbered passages (heading, passage,
+  optional list). The two posters, the closing ask and the page's SEO stay
+  the site's.
+- **Audit:** `how_we_work.created`, `.updated`, `.archived`, with part paths.
+- **Index:** `orgId_unique` only.
+- **Snapshot:** `content.howWeWork`, only while PUBLISHED.
+- **Website:** fills `HOW_WE_WORK` (`about.js`) — the header and passages on
+  the object, the cards on `HOW_WE_WORK.practices` — so `pages/HowWeWork`
+  works unchanged.
+- **Admin:** `/how-we-work`, one editor. The words are RBB's (D11); nothing
+  is pre-filled.
+- Migration: the rehearsal lists the page as `excluded-by-policy` — its
+  source wording is working placeholder prose awaiting D11.
+
 ## Policies (M19)
 
 **The site policies** are exactly THREE records per organization, each with
@@ -958,7 +1012,8 @@ imported. A page that is not published, and any part a published page
 leaves out, keeps the website's own words.
 
 The legacy giving pages (`/giving`, `/gifts`, `/giving/major-giving`,
-`/giving/zakat`) are not part of M20.
+`/giving/zakat`) were retired (D35, 2026-10-13); the first three forward to
+Donate (`/appeals`).
 
 - **Path** (`packages/content-schema/src/getInvolved/getInvolved.ts`):
   - `shortDescription`: the card line and the page lead.

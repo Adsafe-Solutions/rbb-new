@@ -15,6 +15,7 @@ import { Transparency } from "../transparency/transparency.ts";
 import { Report } from "../transparency/report.ts";
 import { Project, projectMediaIds } from "../projects/project.ts";
 import { Careers } from "../careers/careers.ts";
+import { HowWeWork } from "../howWeWork/howWeWork.ts";
 import { POLICY_IDS, Policy, policyApprovalProblems } from "../policies/policy.ts";
 import { GET_INVOLVED_PAGE_IDS, GetInvolvedPage, getInvolvedApprovalProblems } from "../getInvolved/getInvolved.ts";
 import { AnnouncementBar, Popup, StoryStrip, announcementBarApprovalProblems, popupCmsProblems, storyStripApprovalProblems } from "../engagement/engagement.ts";
@@ -85,6 +86,9 @@ import { AnnouncementBar, Popup, StoryStrip, announcementBarApprovalProblems, po
                   careers          the Careers page (M13) — only while it
                                    is PUBLISHED; absent, the website keeps
                                    its own Careers page
+                  howWeWork        the How We Work page (#7) — only while
+                                   it is PUBLISHED; absent, the website
+                                   keeps its own
                   projects         Project records, in order — present once
                                    at least one is PUBLISHED (stories and
                                    program pages point at projects); each
@@ -152,7 +156,7 @@ export type PublishedMedia = z.infer<typeof PublishedMedia>;
 
 /* Every media id a SiteSettings record points at. */
 export const settingsMediaIds = (settings: SiteSettings): string[] =>
-  [settings.branding.logoId, settings.branding.faviconId, settings.seo.ogImageId].filter((id): id is string => Boolean(id));
+  [settings.branding?.logoId, settings.branding?.faviconId, settings.seo.ogImageId].filter((id): id is string => Boolean(id));
 
 /* Every media id a post or an event points at. */
 export const recordMediaIds = (record: { imageId?: string; galleryIds?: string[]; seo?: { ogImageId?: string } }): string[] =>
@@ -187,6 +191,7 @@ export const SnapshotContent = z.strictObject({
   stories: z.array(Post).min(1).optional(),
   projects: z.array(Project).min(1).optional(),
   careers: Careers.optional(),
+  howWeWork: HowWeWork.optional(),
   policies: z.array(Policy).min(1).max(POLICY_IDS.length).optional(),
   getInvolved: z.array(GetInvolvedPage).min(1).max(GET_INVOLVED_PAGE_IDS.length).optional(),
   announcementBar: AnnouncementBar.optional(),
@@ -229,6 +234,7 @@ export const PublishedSnapshot = z
     if (snapshot.settings.orgId !== snapshot.organization.id) issue(["settings", "orgId"], "must be the snapshot's organization");
     if (snapshot.settings.status !== "published") issue(["settings", "status"], "a snapshot holds published settings only");
     if (snapshot.settings.releaseMarker !== undefined) issue(["settings", "releaseMarker"], "is internal and never published");
+    if (snapshot.settings.countries !== undefined) issue(["settings", "countries"], "is internal (the admin's country selection) and never published");
     const referenced = new Set(snapshotMediaIds(snapshot.settings, snapshot.content));
 
     /* Content: published, this organization's, nothing internal, the
@@ -443,6 +449,13 @@ export const PublishedSnapshot = z
       if (careers.status !== "published") issue([...at, "status"], "a snapshot holds published records only");
       if (careers.orgId !== snapshot.organization.id) issue([...at, "orgId"], "must be the snapshot's organization");
       if (careers.releaseMarker !== undefined) issue([...at, "releaseMarker"], "is internal and never published");
+    }
+    const howWeWork = snapshot.content.howWeWork;
+    if (howWeWork) {
+      const at = ["content", "howWeWork"];
+      if (howWeWork.status !== "published") issue([...at, "status"], "a snapshot holds published records only");
+      if (howWeWork.orgId !== snapshot.organization.id) issue([...at, "orgId"], "must be the snapshot's organization");
+      if (howWeWork.releaseMarker !== undefined) issue([...at, "releaseMarker"], "is internal and never published");
     }
     /* Policies: published, complete, in the fixed order, each once; a
        contact a policy names is one of the published settings' methods. */

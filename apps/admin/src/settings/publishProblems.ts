@@ -40,6 +40,7 @@ const CONTENT: Record<string, { label: string; href: string; detail?: (segment: 
   stories: { label: "Stories", href: "/stories" },
   projects: { label: "Projects", href: "/projects" },
   careers: { label: "Careers page", href: "/careers" },
+  howWeWork: { label: "How We Work page", href: "/how-we-work" },
   policies: { label: "Policies", href: "/policies", detail: (s) => (Object.hasOwn(POLICY_PAGES, s) ? `/policies/${s}` : null) },
   getInvolved: { label: "Get Involved", href: "/get-involved", detail: (s) => (Object.hasOwn(GET_INVOLVED_PAGES, s) ? `/get-involved/${s}` : null) },
   announcementBar: { label: "Announcements", href: "/announcements" },
@@ -67,6 +68,7 @@ const SCHEDULED: Record<string, { href: string; record?: true }> = {
   "Impact page": { href: "/impact" },
   Transparency: { href: "/transparency" },
   "Careers page": { href: "/careers" },
+  "How We Work page": { href: "/how-we-work" },
   "Privacy Policy": { href: "/policies/privacy" },
   "Terms of Use": { href: "/policies/terms" },
   "Donation Policy": { href: "/policies/donation" },
@@ -78,6 +80,16 @@ const SCHEDULED: Record<string, { href: string; record?: true }> = {
   "Announcement bar": { href: "/announcements" },
   Popup: { href: "/popups" },
   Highlights: { href: "/highlights" },
+};
+
+/* The How We Work page (#7): a problem inside it names the part of the
+   editor — "card 2", "passage 3", "page header". */
+const howWeWorkPart = (rest: string[]): string | null => {
+  const [part, a, b] = rest;
+  if (part === "rows") return /^\d+$/.test(a ?? "") ? `passage ${Number(a) + 1}` : "passages";
+  if (part === "practices") return a === "items" && /^\d+$/.test(b ?? "") ? `card ${Number(b) + 1}` : "In practice";
+  if (part === "kicker" || part === "heading" || part === "body") return "page header";
+  return null;
 };
 
 /* Pages built from blocks: a problem inside one names its block. */
@@ -117,6 +129,8 @@ export function describePublishProblem(raw: string): PublishProblem {
     if (detail) {
       href = detail;
       where = `${page.label} · ${key === "policies" ? POLICY_PAGES[first!] : GET_INVOLVED_PAGES[first!]}`;
+    } else if (key === "howWeWork" && howWeWorkPart(rest)) {
+      where = `${page.label} · ${howWeWorkPart(rest)}`;
     } else if (BLOCK_PAGES.has(key) && first === "sections" && /^\d+$/.test(rest[1] ?? "")) {
       where = `${page.label} · block ${Number(rest[1]) + 1}`;
     } else if (first !== undefined && /^\d+$/.test(first)) {

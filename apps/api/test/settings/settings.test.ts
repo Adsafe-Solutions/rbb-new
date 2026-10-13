@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ApiError } from "../../src/errors.ts";
 import { CONFLICT_MESSAGE, changedPaths } from "../../src/modules/settings/service.ts";
-import { settingsRecord } from "../fixtures/settings.ts";
+import { legacySettingsRecord, settingsRecord } from "../fixtures/settings.ts";
 import { FACTS, member } from "../media/memory.ts";
 import { addMedia, harness, sharedData } from "./memory.ts";
 
@@ -40,14 +40,14 @@ test("import: creates the first record once, as this organization's working copy
 test("update: whole sections, contract-validated, revision-checked, audited by field name", async () => {
   const h = await imported();
   const owner = member("org-a", "OWNER");
-  const saved = await h.settings.update(owner, { revision: 1, changes: { general: { shortName: "TEST", name: "Test Organization", summary: "A new summary." }, analytics: { googleAnalyticsId: "G-ABC1234" } } }, FACTS);
+  const saved = await h.settings.update(owner, { revision: 1, changes: { general: { shortName: "TEST", name: "Test Organization", summary: "A new summary." }, seo: { description: "A new description." } } }, FACTS);
   assert.equal(saved.revision, 2);
   assert.equal(saved.settings.general.summary, "A new summary.");
   assert.equal(saved.updatedBy.isYou, true);
   const entry = h.audit.find((e) => e.action === "settings.updated")!;
-  assert.deepEqual(entry.metadata.fields, ["analytics.googleAnalyticsId", "general.summary"]);
+  assert.deepEqual(entry.metadata.fields, ["general.summary", "seo.description"]);
   assert.equal(entry.actorUserId, owner.user.id);
-  assert.ok(!JSON.stringify(entry).includes("A new summary") && !JSON.stringify(entry).includes("G-ABC1234"), "names, never values");
+  assert.ok(!JSON.stringify(entry).includes("A new summary") && !JSON.stringify(entry).includes("A new description"), "names, never values");
 
   await rejects(h.settings.update(owner, { revision: 1, changes: { general: { shortName: "A", name: "B", summary: "C" } } }, FACTS), "CONFLICT", CONFLICT_MESSAGE);
   assert.equal((await h.settings.get(owner))!.settings.general.shortName, "TEST", "a stale save changes nothing");
@@ -66,10 +66,13 @@ test("update: invalid or unknown input is refused, never silently dropped", asyn
     { social: [{ platform: "instagram", url: "http://insecure.example" }] },
     { social: [{ platform: "instagram", url: "https://a.example" }, { platform: "instagram", url: "https://b.example" }] },
     { social: [{ platform: "instagram", url: "javascript:alert(1)" }] },
-    { analytics: { googleAnalyticsId: "UA-12345-1" } },
+    /* Retired sections (2026-10-13): no longer editable at all. */
+    { analytics: { googleAnalyticsId: "G-ABC1234" } },
     { analytics: { resendApiKey: "re_123456789012345" } },
+    { branding: {} },
+    { features: { themeSwitcher: true } },
     { contact: { methods: [{ id: "m1", type: "email", label: "Email", value: "a@b.example" }, { id: "m1", type: "phone", label: "Phone", value: "+1 555 0100" }] } },
-    { donations: { ...base.donations, form: { ...base.donations.form, minimumAmount: 500, maximumAmount: 10 } } },
+    { donations: { closing: { heading: "Every contribution helps.", buttonLabel: "Donate" } } },
     {},
   ])
     await rejects(h.settings.update(owner, { revision: 1, changes }, FACTS), "VALIDATION_ERROR");
@@ -77,15 +80,26 @@ test("update: invalid or unknown input is refused, never silently dropped", asyn
   assert.equal((await h.settings.get(owner))!.revision, 1, "nothing was saved");
 });
 
-test("branding: only ready media of this organization can be referenced", async () => {
+test("share image: only ready media of this organization can be referenced", async () => {
   const data = sharedData();
   const h = await imported(harness("org-a", data));
   const owner = member("org-a", "OWNER");
   const ready = addMedia(data, "org-a", "ready");
+  const seo = settingsRecord("org-a").seo;
   for (const bad of [addMedia(data, "org-a", "pending"), addMedia(data, "org-a", "deleted"), addMedia(data, "org-a", "failed"), addMedia(data, "org-b", "ready")])
-    await rejects(h.settings.update(owner, { revision: 1, changes: { branding: { logoId: bad.id } } }, FACTS), "VALIDATION_ERROR");
-  const saved = await h.settings.update(owner, { revision: 1, changes: { branding: { logoId: ready.id, faviconId: ready.id } } }, FACTS);
-  assert.equal(saved.settings.branding.logoId, ready.id);
+    await rejects(h.settings.update(owner, { revision: 1, changes: { seo: { ...seo, ogImageId: bad.id } } }, FACTS), "VALIDATION_ERROR");
+  const saved = await h.settings.update(owner, { revision: 1, changes: { seo: { ...seo, ogImageId: ready.id } } }, FACTS);
+  assert.equal(saved.settings.seo.ogImageId, ready.id);
+});
+
+test("retired sections (2026-10-13): a stored record that still has them stays valid, and they are kept untouched by other saves", async () => {
+  const h = harness();
+  const owner = member("org-a", "OWNER");
+  assert.equal((await h.settings.importInitial(legacySettingsRecord("org-a"), { id: null, name: "Settings import" })).created, true);
+  const saved = await h.settings.update(owner, { revision: 1, changes: { general: { shortName: "TEST", name: "Test Organization", summary: "Changed." } } }, FACTS);
+  const legacy = legacySettingsRecord("org-a");
+  for (const key of ["branding", "analytics", "donations", "features"] as const) assert.deepEqual(saved.settings[key], legacy[key], key);
+  await rejects(h.settings.update(owner, { revision: saved.revision, changes: { features: { themeSwitcher: true } } }, FACTS), "VALIDATION_ERROR");
 });
 
 test("organization isolation: another organization's context is refused; records never cross", async () => {

@@ -65,7 +65,7 @@ test("delete: refused while the live website, approved, scheduled or published c
   const s = await createApproved(h.stories, owner, story({ title: "Scheduled story", imageId: scheduled.id }), FACTS);
   await h.stories.schedule(owner, s.record.id, { revision: s.revision, localTime: instantToZonedTime(new Date(h.time.now().getTime() + HOUR).toISOString(), "UTC"), timeZone: "UTC" }, FACTS);
   const settings = await h.settings.get(owner);
-  await h.settings.update(owner, { revision: settings!.revision, changes: { branding: { ...settings!.settings.branding, logoId: logo.id } } }, FACTS);
+  await h.settings.update(owner, { revision: settings!.revision, changes: { seo: { ...settings!.settings.seo, ogImageId: logo.id } } }, FACTS);
   await h.stories.create(editor, story({ title: "Draft story", imageId: draftOnly.id }), FACTS);
 
   const refused = async (id: string, where: RegExp) =>
@@ -167,7 +167,7 @@ test("organization isolation: B cannot read, complete, edit, delete, reference o
   // B's content cannot reference it, and B's settings cannot use it.
   await rejects(b.h.stories.create(member("org-b", "EDITOR"), story({ imageId: ready.id }), FACTS), "VALIDATION_ERROR", "this organization's media library");
   const bs = await b.h.settings.get(bOwner);
-  await rejects(b.h.settings.update(bOwner, { revision: bs!.revision, changes: { branding: { ...bs!.settings.branding, logoId: ready.id } } }, FACTS), "VALIDATION_ERROR");
+  await rejects(b.h.settings.update(bOwner, { revision: bs!.revision, changes: { seo: { ...bs!.settings.seo, ogImageId: ready.id } } }, FACTS), "VALIDATION_ERROR");
   // B's publish never carries A's media.
   await b.h.publishing.publish(bOwner, FACTS);
   assert.ok(!JSON.stringify(await b.h.publishing.publicSnapshot()).includes(ready.id));

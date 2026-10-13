@@ -89,10 +89,10 @@ export const ABOUT = {
   },
 
   /* 05 — How We Work. Foundation: the mission's own "sustainable growth and
-     lasting change". Intro: PROPOSED general prose (decision D11). The
-     proposed Listen → Partner → Act → Sustain framework is deliberately
-     NOT here: it is not RBB's adopted method, and the one pending copy of
-     it lives in content/impact.js (`proposedFramework`), hidden. */
+     lasting change". Intro: PROPOSED general prose (decision D11 — the
+     How We Work wording is still awaiting RBB). The Listen → Partner →
+     Act → Sustain framework was REJECTED by RBB (D11, 2026-10-13) and must
+     not be introduced. */
   approach: {
     id: "how-we-work",
     kicker: "How we work",
@@ -208,7 +208,8 @@ export const HOW_WE_WORK = {
    organization PUBLISHES its About page in the CMS, `page` holds its
    blocks in order — { sections: [{ id, type, data }], seo? } — and
    pages/About draws those instead (pages/About/CmsAbout). Other pages
-   that quote ABOUT (the mission line elsewhere) keep reading ABOUT. */
+   that quote ABOUT (the mission line elsewhere) keep reading ABOUT —
+   except Our Approach (#5), which quotes the published mission. */
 export const PUBLISHED_ABOUT = {};
 
 export default ABOUT;

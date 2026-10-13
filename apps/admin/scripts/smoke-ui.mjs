@@ -109,7 +109,7 @@ try {
   check("Dashboard is the current nav item", (await page.locator('a[aria-current="page"]').getAttribute("data-nav-item")) === "dashboard");
   const planned = await page.locator("[data-planned]").count();
   const plannedLinks = await page.locator("a[data-planned]").count();
-  check("future modules are shown but are not links", planned === 2 && plannedLinks === 0, `${planned} planned, ${plannedLinks} links`);
+  check("no planned (\"Soon\") modules remain: Pages and Audit Log are not required", planned === 0 && plannedLinks === 0, `${planned} planned, ${plannedLinks} links`);
   for (const section of ["Main", "Content", "Engagement", "System"]) {
     check(`nav section "${section}" present`, await page.getByRole("heading", { level: 2, name: section, exact: true }).count());
   }

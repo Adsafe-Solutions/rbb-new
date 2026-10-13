@@ -11,7 +11,6 @@ import {
   HandHelping,
   HeartHandshake,
   House,
-  History,
   Image,
   Landmark,
   LayoutDashboard,
@@ -55,6 +54,7 @@ export const NAVIGATION: NavSection[] = [
     items: [
       { id: "homepage", label: "Homepage", icon: House, status: "available", href: "/homepage" },
       { id: "about", label: "About page", icon: FileText, status: "available", href: "/about" },
+      { id: "how-we-work", label: "How We Work page", icon: FileText, status: "available", href: "/how-we-work" },
       { id: "team", label: "Team", icon: Users, status: "available", href: "/team" },
       { id: "programs", label: "Programs", icon: LayoutGrid, status: "available", href: "/programs" },
       { id: "projects", label: "Projects", icon: FolderKanban, status: "available", href: "/projects" },
@@ -65,7 +65,6 @@ export const NAVIGATION: NavSection[] = [
       { id: "careers", label: "Careers page", icon: Briefcase, status: "available", href: "/careers" },
       { id: "policies", label: "Policies", icon: Scale, status: "available", href: "/policies" },
       { id: "get-involved", label: "Get Involved", icon: HandHelping, status: "available", href: "/get-involved" },
-      { id: "pages", label: "Pages", icon: FileText, status: "planned" },
       { id: "appeals", label: "Appeals", icon: HeartHandshake, status: "available", href: "/appeals" },
       { id: "donation-page", label: "Donation page", icon: HandCoins, status: "available", href: "/donation-page" },
       { id: "posts", label: "Posts", icon: Newspaper, status: "available", href: "/posts" },
@@ -88,7 +87,6 @@ export const NAVIGATION: NavSection[] = [
     items: [
       { id: "settings", label: "Settings", icon: Settings, status: "available", href: "/settings" },
       { id: "users", label: "Users & Roles", icon: Users, status: "available", href: "/users", permission: "users:read" },
-      { id: "audit", label: "Audit Log", icon: History, status: "planned" },
     ],
   },
   ...(SHOW_DESIGN_SYSTEM

@@ -71,7 +71,7 @@ test("the session cookie is HttpOnly, SameSite, Path=/, host-only; Secure when c
 test("OWNER has every permission; EDITOR only editorial ones", () => {
   assert.deepEqual([...permissionsFor("OWNER")].sort(), [...PERMISSIONS].sort());
   const editor = permissionsFor("EDITOR");
-  for (const p of ["users:read", "users:write", "audit:read", "settings:write", "publish:execute"] as const) assert.ok(!editor.includes(p), `EDITOR must not have ${p}`);
+  for (const p of ["users:read", "users:write", "settings:write", "publish:execute"] as const) assert.ok(!editor.includes(p), `EDITOR must not have ${p}`);
   for (const p of ["content:read", "content:create", "content:update", "content:delete", "media:write", "appeals:write", "settings:read"] as const)
     assert.ok(editor.includes(p), `EDITOR needs ${p}`);
   assert.ok(editor.every((p) => ROLE_PERMISSIONS.OWNER.includes(p)), "EDITOR is a subset of OWNER");

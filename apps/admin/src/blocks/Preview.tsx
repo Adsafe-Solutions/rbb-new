@@ -22,6 +22,9 @@ export interface PreviewOptions {
   headingOf?: (block: Block) => string | undefined;
   /* How many records a block chose, when it chooses some. */
   countOf?: (block: Block) => number | undefined;
+  /* Block types that hold another page's words and are not drawn on this
+     one (the Impact page's Our Approach and Where We Work, #5/#6). */
+  elsewhere?: ReadonlySet<string>;
 }
 
 function Thumb({ id }: { id: string }) {
@@ -37,13 +40,16 @@ function Thumb({ id }: { id: string }) {
 }
 
 export function Preview({ sections, options }: { sections: Block[]; options: PreviewOptions }) {
-  const shown = sections.filter((s) => s.enabled);
-  const hidden = sections.length - shown.length;
+  const enabled = sections.filter((s) => s.enabled);
+  const shown = enabled.filter((s) => !options.elsewhere?.has(s.type));
+  const away = enabled.filter((s) => options.elsewhere?.has(s.type));
+  const hidden = sections.length - enabled.length;
   let n = 0;
   return (
     <div className={styles.preview}>
       <Alert tone="info">Draft preview — only here, in the admin. It is not the website and is never published; the website changes only when an owner publishes.</Alert>
       {hidden > 0 && <p className={styles.help}>{hidden} hidden block{hidden === 1 ? " is" : "s are"} not shown.</p>}
+      {away.length > 0 && <p className={styles.help}>Not on this page — {away.map((s) => options.info(s.type).label).join(", ")}: {away.length === 1 ? "it holds" : "they hold"} the words of {away.length === 1 ? "its own page" : "their own pages"}.</p>}
       {shown.length === 0 && <p className={styles.help}>No blocks are shown yet.</p>}
       <ol className={styles.bands} aria-label={`${options.title} draft, top to bottom`}>
         {shown.map((s) => {

@@ -135,7 +135,7 @@ const SLUG_SPACE = { story: "post", news: "post", blog: "post" };
 const PAGE_NOTES = {
   impact: ["Its stories block names stories by id. The CMS gives migrated stories new ids, so the block is re-pointed (by slug) when stories are written — and while the website's own stories are the site's, it names theirs (docs/PUBLISHING.md \"Moving to CMS stories\")."],
   transparency: ["The website publishes accountability text as verified whatever its status (scripts/snapshot-adapter.mjs transparencyFrom); the source's is pending review."],
-  about: ["Two other pages read the SOURCE mission statement (/impact/our-approach, the Team intro), so a CMS edit of it does not reach them."],
+  about: ["The Team intro reads the SOURCE mission statement, so a CMS edit of it does not reach it. /impact/our-approach quotes the PUBLISHED About page's mission (#5)."],
 };
 
 export const COLLECTION_ORDER = ["program", "metric", "project", "team_member", "story", "news", "blog", "event", "report", "appeal"];

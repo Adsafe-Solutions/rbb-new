@@ -47,6 +47,7 @@ const ProjectsPage = lazy(() => import("./pages/projects/ProjectsPage"));
 const ProjectEditorPage = lazy(() => import("./pages/projects/ProjectEditorPage"));
 const StoriesPage = lazy(() => import("./pages/stories/StoriesPage"));
 const CareersPage = lazy(() => import("./pages/careers/CareersPage"));
+const HowWeWorkPage = lazy(() => import("./pages/howWeWork/HowWeWorkPage"));
 const PoliciesPage = lazy(() => import("./pages/policies/PoliciesPage"));
 const PolicyEditorPage = lazy(() => import("./pages/policies/PolicyEditorPage"));
 const GetInvolvedPage = lazy(() => import("./pages/getInvolved/GetInvolvedPage"));
@@ -78,6 +79,7 @@ export const ROUTES: RouteDefinition[] = [
   { path: "/stories", title: "Stories", breadcrumb: [{ label: "Content" }, { label: "Stories" }], component: StoriesPage },
   { path: "/stories/:id", title: "Story", breadcrumb: [{ label: "Content" }, { label: "Stories", href: "/stories" }, { label: "Edit story" }], component: StoryEditorPage },
   { path: "/careers", title: "Careers page", breadcrumb: [{ label: "Content" }, { label: "Careers page" }], component: CareersPage },
+  { path: "/how-we-work", title: "How We Work page", breadcrumb: [{ label: "Content" }, { label: "How We Work page" }], component: HowWeWorkPage },
   { path: "/policies", title: "Policies", breadcrumb: [{ label: "Content" }, { label: "Policies" }], component: PoliciesPage },
   { path: "/get-involved", title: "Get Involved", breadcrumb: [{ label: "Content" }, { label: "Get Involved" }], component: GetInvolvedPage },
   { path: "/get-involved/:id", title: "Get Involved page", breadcrumb: [{ label: "Content" }, { label: "Get Involved", href: "/get-involved" }, { label: "Edit page" }], component: GetInvolvedEditorPage },

@@ -7,8 +7,8 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { HOMEPAGE_BLOCK_TYPES } from "@rbb/content-schema/homepage-registry";
 import { ABOUT_BLOCK_TYPES } from "@rbb/content-schema/about-registry";
-import { CTA_TARGETS, GET_INVOLVED_PAGE_IDS, GET_INVOLVED_ROUTES, IMPACT_BLOCK_TYPES, POLICY_IDS, POLICY_ROUTES, PROGRAM_ICONS } from "@rbb/content-schema";
-import { ABOUT_VIEW_TYPES, BY_ID, announcementsFrom, popupFrom, storyStripFrom, CTA_ROUTES, GET_INVOLVED_IDS, IMPACT_VIEW_TYPES, getInvolvedFrom, POLICY_IDS as ADAPTER_POLICY_IDS, aboutFrom, careersFrom, policiesFrom, impactFrom, metricsFrom, programsFrom, projectsFrom, storiesFrom, transparencyFrom, teamFrom, HOMEPAGE_VIEW_TYPES, SOCIAL_LABELS, SNAPSHOT_TARGETS, appealsFrom, homepageFrom, appendOverrides, collectionsFrom, generalDonationFrom, hasCheckouts, imageOrigins, overridesFrom, structuralProblems } from "../snapshot-adapter.mjs";
+import { CTA_TARGETS, GET_INVOLVED_PAGE_IDS, GET_INVOLVED_ROUTES, IMPACT_BLOCK_TYPES, IMPACT_CHAPTER_TYPES, POLICY_IDS, POLICY_ROUTES, PROGRAM_ICONS } from "@rbb/content-schema";
+import { ABOUT_VIEW_TYPES, BY_ID, announcementsFrom, popupFrom, storyStripFrom, CTA_ROUTES, GET_INVOLVED_IDS, IMPACT_PAGE_VIEW_TYPES, IMPACT_VIEW_TYPES, getInvolvedFrom, howWeWorkFrom, impactPagesFrom, POLICY_IDS as ADAPTER_POLICY_IDS, aboutFrom, careersFrom, policiesFrom, impactFrom, metricsFrom, programsFrom, projectsFrom, storiesFrom, transparencyFrom, teamFrom, HOMEPAGE_VIEW_TYPES, SOCIAL_LABELS, SNAPSHOT_TARGETS, appealsFrom, homepageFrom, appendOverrides, collectionsFrom, generalDonationFrom, hasCheckouts, imageOrigins, overridesFrom, structuralProblems } from "../snapshot-adapter.mjs";
 
 /* The published-snapshot adapter (scripts/snapshot-adapter.mjs) and the
    build's fetch step (scripts/published-snapshot.mjs). */
@@ -392,10 +392,55 @@ test("impact: published figures → IMPACT.metrics by key, in order; the publish
 test("impact: every block type in the contract's registry has a view, a renderer and a tone rule", () => {
   const cms = readFileSync(join(root, "src/pages/Impact/CmsImpact.jsx"), "utf8");
   const keys = (name) => [...cms.slice(cms.indexOf(`const ${name} = {`), cms.indexOf("};", cms.indexOf(`const ${name} = {`))).matchAll(/^  (\w+):/gm)].map((m) => m[1]).sort();
-  const types = [...IMPACT_BLOCK_TYPES].sort();
+  const types = [...IMPACT_CHAPTER_TYPES].sort();
   assert.deepEqual([...IMPACT_VIEW_TYPES].sort(), types, "snapshot adapter views");
   assert.deepEqual(keys("RENDERERS"), types, "CmsImpact renderers");
   assert.deepEqual(keys("TONES"), types, "CmsImpact tones");
+  assert.deepEqual([...IMPACT_VIEW_TYPES, ...IMPACT_PAGE_VIEW_TYPES].sort(), [...IMPACT_BLOCK_TYPES].sort(), "every block: drawn on /impact, or feeding a sub-page");
+});
+
+test("impact sub-pages (#5, #6): approach → IMPACT.approach, geography → IMPACT.geography; never drawn on /impact; empty approves nothing", () => {
+  const record = { orgId: "rbb", schemaVersion: 1, status: "published" };
+  const block = (id, type, data, enabled = true) => ({ id, type, enabled, version: 1, data });
+  const impact = (sections, o = {}) => withContent({ impact: { ...record, id: "impact", sections, ...o } });
+  const intro = block("intro", "intro", { title: "Our Impact", body: "B." });
+  const approach = block("approach", "approach", { intro: "How.", principles: ["One.", "Two."] });
+  const geography = block("where", "geography", { summary: "S.", regions: [{ id: "r", name: "Region", countries: ["A", "B"] }], countries: ["C"] });
+  const both = impact([intro, approach, geography]);
+  assert.deepEqual(impactFrom(both).sections.map((s) => s.type), ["intro"], "not chapters of /impact");
+  assert.deepEqual(impactPagesFrom(both), {
+    "IMPACT.approach": { intro: "How.", principles: ["One.", "Two."], status: "approved" },
+    "IMPACT.geography": { summary: "S.", regions: [{ id: "r", name: "Region", countries: ["A", "B"] }], countries: ["C"], status: "verified" },
+  });
+  assert.deepEqual(Object.keys(overridesFrom(both)["src/content/impact.js"]), ["PUBLISHED_IMPACT", "IMPACT.approach", "IMPACT.geography"]);
+  assert.deepEqual(impactPagesFrom(impact([intro, block("a", "approach", { principles: [] }), block("g", "geography", { regions: [], countries: [] })])), {
+    "IMPACT.approach": { intro: null, principles: [], status: "placeholder" },
+    "IMPACT.geography": { summary: null, regions: [], countries: [], status: "placeholder" },
+  });
+  assert.equal(impactPagesFrom(impact([intro, { ...approach, enabled: false }])), undefined, "a disabled block: the source stays");
+  assert.equal(impactPagesFrom(impact([intro, approach], { status: "draft" })), undefined, "an unpublished page: the source stays");
+  const code = appendOverrides("export const IMPACT = { approach: { intro: 'x', principles: [], status: 'approved', note: 'kept' }, geography: { summary: null, regions: [], countries: [], status: 'placeholder' } };", "src/content/impact.js", impactPagesFrom(both));
+  const IMPACT = new Function(`${code.replace("export const IMPACT", "const IMPACT")}; return IMPACT;`)();
+  assert.equal(IMPACT.approach.note, "kept", "the rest of the object stays the site's");
+  assert.equal(IMPACT.geography.status, "verified");
+});
+
+test("how we work (#7): the published page → HOW_WE_WORK in its own shape; the posters and closing ask stay the site's; only while published", () => {
+  const record = { orgId: "rbb", schemaVersion: 1, status: "published", id: "how_we_work" };
+  const page = { ...record, heading: "H", body: "B.", practices: { heading: "P.", items: [{ title: "T", description: "D.", icon: "community" }] }, rows: [{ id: "a", heading: "A", body: "Ab.", items: ["One."] }, { id: "b", heading: "B", body: "Bb." }] };
+  assert.equal(howWeWorkFrom(snapshot()), undefined, "no key: the source page stays");
+  assert.equal(howWeWorkFrom(withContent({ howWeWork: { ...page, status: "draft" } })), undefined);
+  const o = howWeWorkFrom(withContent({ howWeWork: page }));
+  assert.deepEqual(o, {
+    HOW_WE_WORK: { kicker: null, heading: "H", body: "B.", rows: [{ id: "a", heading: "A", body: "Ab.", items: ["One."] }, { id: "b", heading: "B", body: "Bb." }] },
+    "HOW_WE_WORK.practices": { kicker: null, heading: "P.", items: [{ title: "T", description: "D.", icon: "community" }] },
+  });
+  assert.deepEqual(Object.keys(overridesFrom(withContent({ howWeWork: page }))["src/content/about.js"]), ["HOW_WE_WORK", "HOW_WE_WORK.practices"], "the About page itself stays the source's");
+  const code = appendOverrides("export const HOW_WE_WORK = { kicker: 'K', heading: 'x', body: 'y', practices: { heading: 'p', items: [] }, rows: [], related: { approach: {} }, closing: { heading: 'c' } };", "src/content/about.js", o);
+  const HOW_WE_WORK = new Function(`${code.replace("export const HOW_WE_WORK", "const HOW_WE_WORK")}; return HOW_WE_WORK;`)();
+  assert.deepEqual(HOW_WE_WORK.closing, { heading: "c" }, "the closing ask stays the site's");
+  assert.deepEqual(HOW_WE_WORK.related, { approach: {} }, "the posters stay the site's");
+  assert.equal(HOW_WE_WORK.practices.items.length, 1);
 });
 
 test("transparency: the published record and documents → transparency.js's own shape; each part only when carried", () => {

@@ -114,11 +114,11 @@ try {
   await page.getByTestId("publish-panel").waitFor();
   check("sidebar: Settings is current", (await nav.getAttribute("aria-current")) === "page");
   const tabs = await page.getByRole("tab").allInnerTexts();
-  check("sections: General, Branding, Contact, Social, SEO, Analytics, Donations", JSON.stringify(tabs.map((t) => t.trim())) === JSON.stringify(["General", "Branding", "Contact", "Social", "SEO", "Analytics", "Donations"]), tabs.join(","));
+  check("sections: General, Contact, Social, SEO (branding, analytics and donations retired)", JSON.stringify(tabs.map((t) => t.trim())) === JSON.stringify(["General", "Contact", "Social", "SEO"]), tabs.join(","));
   check("no demo/sample/coming-soon wording", !/\b(demo|sample|coming soon)\b/i.test(await page.locator("main").innerText()));
   await page.getByRole("tab", { name: "General" }).focus();
   await page.keyboard.press("ArrowRight");
-  check("tabs: arrow keys move between sections", (await page.getByRole("tab", { name: "Branding" }).getAttribute("aria-selected")) === "true");
+  check("tabs: arrow keys move between sections", (await page.getByRole("tab", { name: "Contact" }).getAttribute("aria-selected")) === "true");
   await page.getByRole("tab", { name: "General" }).click();
   await shot(page, "settings-owner");
   await axe(page, "settings (owner)");
@@ -155,7 +155,7 @@ try {
   check("save: everything saved", await visibleSoon(page.getByText(/^All changes saved/)));
   check("publish panel: unpublished changes, naming the sections", await visibleSoon(page.getByText(/Changed since then: .*General/)) && (await page.getByTestId("publish-state").innerText()).includes("Unpublished changes"));
 
-  // Branding through the media picker (an image uploaded for this test).
+  // The default share image through the media picker (an image uploaded for this test).
   const png = readFileSync(new URL("../../api/test/fixtures/media/sample.png", import.meta.url)).toString("base64");
   const uploaded = await page.evaluate(async (b64) => {
     const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
@@ -166,13 +166,13 @@ try {
     return { id: intent.mediaId, put: put.status, status: done.data?.status };
   }, png);
   check("setup: a ready test image exists", uploaded.status === "ready", JSON.stringify(uploaded));
-  await page.getByRole("tab", { name: "Branding" }).click();
-  await page.getByRole("group", { name: "Logo" }).getByRole("button", { name: "Choose image" }).click();
-  const picker = page.getByRole("dialog", { name: "Choose: Logo" });
+  await page.getByRole("tab", { name: "SEO" }).click();
+  await page.getByRole("group", { name: "Default share image" }).getByRole("button", { name: "Choose image" }).click();
+  const picker = page.getByRole("dialog", { name: "Choose: Default share image" });
   await picker.waitFor();
   await axe(page, "media picker");
   await picker.locator(`[data-media-id="${uploaded.id}"]`).click();
-  check("picker: the chosen image is shown", await visibleSoon(page.getByRole("group", { name: "Logo" }).getByText("smoke-settings-logo.png")));
+  check("picker: the chosen image is shown", await visibleSoon(page.getByRole("group", { name: "Default share image" }).getByText("smoke-settings-logo.png")));
   await page.getByRole("button", { name: "Save changes" }).click();
   await visibleSoon(page.getByText(/^All changes saved/));
 
@@ -205,8 +205,8 @@ try {
   check("publish: confirmed with the new version", await visibleSoon(toast(page, `Published version ${expected}`), 10_000));
   check("publish: panel shows it live and up to date", await visibleSoon(page.getByText(`Live: version ${expected}`)) && (await page.getByTestId("publish-state").innerText()).includes("Up to date"));
   const snapshot = (await apiCall(page, "/api/v1/public/snapshot")).body?.data;
-  check("public snapshot: carries the published values", snapshot?.version === expected && snapshot.settings.contact.methods.some((m) => m.value === "smoke-test@example.org") && snapshot.settings.branding.logoId === uploaded.id);
-  check("public snapshot: the logo resolves to its public URL", Boolean(snapshot?.media?.[uploaded.id]?.url));
+  check("public snapshot: carries the published values", snapshot?.version === expected && snapshot.settings.contact.methods.some((m) => m.value === "smoke-test@example.org") && snapshot.settings.seo.ogImageId === uploaded.id);
+  check("public snapshot: the share image resolves to its public URL", Boolean(snapshot?.media?.[uploaded.id]?.url));
   await shot(page, "settings-published");
 
   // Editor: read-only, cannot publish — enforced by the API too.
@@ -244,7 +244,7 @@ try {
   if (original && ownerPage) {
     try {
       const now = (await apiCall(ownerPage, "/api/v1/settings")).body.data;
-      const restore = Object.fromEntries(["general", "contact", "social", "seo", "branding", "analytics", "donations"].map((k) => [k, original.settings[k]]));
+      const restore = Object.fromEntries(["general", "contact", "social", "seo"].map((k) => [k, original.settings[k]]));
       const saved = await apiCall(ownerPage, "/api/v1/settings", { method: "PATCH", body: JSON.stringify({ revision: now.revision, changes: restore }) });
       const status = (await apiCall(ownerPage, "/api/v1/publish/status")).body.data;
       const published = status.hasUnpublishedChanges ? await apiCall(ownerPage, "/api/v1/publish", { method: "POST" }) : { status: 200 };

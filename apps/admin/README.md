@@ -35,8 +35,11 @@ ADMIN_SMOKE_EMAIL=<owner> ADMIN_SMOKE_PASSWORD=… pnpm admin:smoke:users # user
 
 ## Settings and publishing
 
-`/settings` edits the organization's site settings: General, Branding,
-Contact, Social, SEO, Analytics and Donations.
+`/settings` edits the organization's site settings: General, Contact,
+Social and SEO. General also holds a country selection (all countries,
+searchable, several at once), saved with the settings but never published. Branding, analytics, donation defaults and features are
+not managed in the admin (retired, 2026-10-13); the general Pages editor
+and the Audit Log are not part of the admin either.
 - **Fields are typed,** with the contract's limits. The API validates every
   save, and its field errors are shown inline.
 - **Unsaved edits** are marked per section. A conflict offers "Reload latest

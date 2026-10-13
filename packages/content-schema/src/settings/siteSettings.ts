@@ -4,6 +4,7 @@ import { EntityId, MediaId, text } from "../common/primitives.ts";
 import { Href, HttpsUrl } from "../common/link.ts";
 import { SeoDefaults } from "../seo/seo.ts";
 import { DonationSettings } from "../donation/donation.ts";
+import { countryList } from "../common/countryField.ts";
 
 /* Organization-level settings — one record per organization.
 
@@ -60,31 +61,52 @@ export const SiteSettings = z.strictObject({
     .max(10)
     .refine((list) => new Set(list.map((s) => s.platform)).size === list.length, "one account per platform"),
   seo: SeoDefaults,
-  /* FUTURE: brand assets as media. Today they are files in the web app. */
-  branding: z.strictObject({
-    logoId: MediaId.optional(),
-    faviconId: MediaId.optional(),
-  }),
-  /* Public measurement IDs only. Measurement also needs the organization's
-     consent decision and runs only in a production build. */
-  analytics: z.strictObject({
-    googleAnalyticsId: z
-      .string()
-      .regex(/^G-[A-Z0-9]{4,20}$/, 'must be a GA4 measurement ID like "G-XXXXXXX"')
-      .optional(),
-    clarityProjectId: z
-      .string()
-      .regex(/^[a-z0-9]{6,20}$/, "must be a Clarity project ID")
-      .optional(),
-  }),
-  donations: DonationSettings,
+  /* INTERNAL — countries selected in Admin → Settings → General, from the
+     full list (common/countries.ts). Optional; empty until someone
+     selects. NEVER PUBLISHED: the publish leaves it out of every snapshot
+     (the snapshot contract refuses it), so the website never shows it and
+     it is not a "change to publish". Being on this list does not make a
+     country a place RBB works: the public Where We Work list is the Impact
+     page's geography block, published through review. */
+  countries: countryList(0).optional(),
+  /* RETIRED (scope decision, 2026-10-13): branding, analytics, donation
+     defaults and features are not managed in the admin and are not read by
+     the website. The website keeps its built-in logo and favicon; it
+     measures nothing; online donations come later through Givebutter; the
+     theme switcher stays a deployment switch. The four keys stay here,
+     OPTIONAL and unchanged in shape, only so the settings record already
+     stored and the snapshots already published remain valid — nothing
+     writes them any more (the API refuses changes to them) and no
+     destructive migration is run. Remove them once no stored or published
+     settings carry them. */
+  branding: z
+    .strictObject({
+      logoId: MediaId.optional(),
+      faviconId: MediaId.optional(),
+    })
+    .optional(),
+  analytics: z
+    .strictObject({
+      googleAnalyticsId: z
+        .string()
+        .regex(/^G-[A-Z0-9]{4,20}$/, 'must be a GA4 measurement ID like "G-XXXXXXX"')
+        .optional(),
+      clarityProjectId: z
+        .string()
+        .regex(/^[a-z0-9]{6,20}$/, "must be a Clarity project ID")
+        .optional(),
+    })
+    .optional(),
+  donations: DonationSettings.optional(),
   engagement: z.strictObject({
     announcementBar: z.strictObject({ enabled: z.boolean(), intervalMs: z.int().min(2000).max(30000) }),
     popup: z.strictObject({ enabled: z.boolean() }),
     storyStrip: z.strictObject({ enabled: z.boolean() }),
   }),
-  features: z.strictObject({
-    themeSwitcher: z.boolean(),
-  }),
+  features: z
+    .strictObject({
+      themeSwitcher: z.boolean(),
+    })
+    .optional(),
 });
 export type SiteSettings = z.infer<typeof SiteSettings>;

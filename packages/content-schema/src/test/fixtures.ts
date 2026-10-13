@@ -110,13 +110,20 @@ export const settings = () => ({
   contact: { methods: [] },
   social: [{ platform: "instagram", url: "https://www.instagram.com/rbb" }],
   seo: { description: "Rising Beyond Borders is a non-profit." },
-  branding: {},
-  analytics: { googleAnalyticsId: "G-ABC1234" },
-  donations: { form: donationForm(), closing: { heading: "Every contribution helps.", buttonLabel: "Donate" } },
   engagement: {
     announcementBar: { enabled: true, intervalMs: 5000 },
     popup: { enabled: true },
     storyStrip: { enabled: true },
   },
+});
+
+/* Settings as stored before branding, analytics, donations and features
+   were retired (2026-10-13) — still valid, so existing records and
+   published snapshots keep working. */
+export const legacySettings = () => ({
+  ...settings(),
+  branding: {},
+  analytics: { googleAnalyticsId: "G-ABC1234" },
+  donations: { form: donationForm(), closing: { heading: "Every contribution helps.", buttonLabel: "Donate" } },
   features: { themeSwitcher: false },
 });

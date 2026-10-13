@@ -95,7 +95,7 @@ export const DonationCheckout = z.strictObject({
 });
 export type DonationCheckout = z.infer<typeof DonationCheckout>;
 
-/* Site-wide donation settings (SiteSettings.donations). */
+/* Site-wide donation settings (SiteSettings.donations — retired 2026-10-13: kept only so stored settings stay valid; online donations come later through Givebutter). */
 export const DonationSettings = z.strictObject({
   form: DonationFormConfig,
   /* The closing band of every donation page: a heading and the button

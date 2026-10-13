@@ -6,6 +6,7 @@ import { SeoOverrides } from "../seo/seo.ts";
 import { CtaData, StatsData, TrustData, highlightIn, highlightIssue, sectionBlock } from "../sections/blocks.ts";
 import { MAX_SECTIONS } from "../sections/allowlists.ts";
 import { IMPACT_BLOCKS, IMPACT_BLOCK_TYPES } from "./registry.ts";
+import { countryList } from "../common/countryField.ts";
 
 /* The Impact page (M11) — one per organization, an ordered list of blocks
    in the shared envelope { id, type, enabled, version, data }, exactly as
@@ -23,6 +24,12 @@ import { IMPACT_BLOCKS, IMPACT_BLOCK_TYPES } from "./registry.ts";
      trust          the shared block — reports and transparency (TrustPanel);
                     the links beneath it come from the transparency records
      cta            the shared block — the closing ask (ClosingCta)
+
+   and, not drawn on /impact (registry `page`), the words of its two
+   sub-pages:
+
+     approach       #5 — /impact/our-approach: how the work is done, principles
+     geography      #6 — /impact/where-we-work: verified regions and countries
 
    The figures, programs and transparency links are REFERENCED, never
    copied: a `stats` block names Metric records, so the homepage and this
@@ -84,6 +91,53 @@ export const ImpactStoriesData = z
   })
   .refine(highlightIn, highlightIssue);
 
+/* #5 — Our Approach (/impact/our-approach). How the work is done, and its
+   principles. The page opens with the mission, which is the About page's
+   own (its Mission & Vision block) — never restated here. */
+export const ApproachData = z.strictObject({
+  intro: text(1200).optional(),
+  principles: z.array(text(300)).max(12),
+});
+
+/* #6 — Where We Work (/impact/where-we-work). Coverage RBB has verified:
+   regions with their countries, and countries not grouped in a region.
+   Text, not a map (D14: no map); never a sample, and never a figure turned
+   into names ("25 countries" is not a list). Empty lists are allowed —
+   and are where it starts: the page then shows no list and stays out of
+   search engines.
+
+   D14 (2026-10-13): a country is chosen from the full list
+   (common/countries.ts, ISO 3166-1) and stored by its name. The list is
+   the options, not RBB's coverage: only what is selected here is shown,
+   and each country appears once in the block (in one region, or among the
+   ungrouped). */
+const countriesOf = countryList;
+
+export const GeographyData = z.strictObject({
+  summary: text(600).optional(),
+  regions: z
+    .array(z.strictObject({ id: Slug, name: text(120), countries: countriesOf(1, 60) }))
+    .max(20)
+    .superRefine((regions, ctx) => {
+      const ids = new Set<string>();
+      regions.forEach((region, i) => {
+        if (ids.has(region.id)) ctx.addIssue({ code: "custom", path: [i, "id"], message: `duplicate region id "${region.id}"` });
+        ids.add(region.id);
+      });
+    }),
+  countries: countriesOf(0, 100),
+}).superRefine((geography, ctx) => {
+  /* A country in one place only: one region, or the ungrouped list. */
+  const where = new Map<string, string>();
+  const place = (country: string, label: string, path: (string | number)[]) => {
+    const first = where.get(country);
+    if (first) ctx.addIssue({ code: "custom", path, message: `"${country}" is already listed in ${first}` });
+    else where.set(country, label);
+  };
+  geography.regions.forEach((region, r) => region.countries.forEach((country, c) => place(country, `"${region.name}"`, ["regions", r, "countries", c])));
+  geography.countries.forEach((country, c) => place(country, "the countries not in a region", ["countries", c]));
+});
+
 export const IMPACT_SECTION_SCHEMAS = {
   intro: ImpactIntroData,
   stats: StatsData,
@@ -93,6 +147,8 @@ export const IMPACT_SECTION_SCHEMAS = {
   stories: ImpactStoriesData,
   trust: TrustData,
   cta: CtaData,
+  approach: ApproachData,
+  geography: GeographyData,
 } as const satisfies Record<(typeof IMPACT_BLOCK_TYPES)[number], z.ZodType>;
 
 /* Any Impact block; an unknown `type` is refused. */
@@ -105,6 +161,8 @@ export const ImpactSection = z.discriminatedUnion("type", [
   sectionBlock("stories", ImpactStoriesData),
   sectionBlock("trust", TrustData),
   sectionBlock("cta", CtaData),
+  sectionBlock("approach", ApproachData),
+  sectionBlock("geography", GeographyData),
 ]);
 export type ImpactSection = z.infer<typeof ImpactSection>;
 

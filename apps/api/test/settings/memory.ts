@@ -10,10 +10,11 @@ import { SettingsService } from "../../src/modules/settings/service.ts";
 import { clock, memoryAuditStore, memoryData, silentLog } from "../auth/memory.ts";
 import { MemoryMediaStore } from "../media/memory.ts";
 import { MemoryContentStore } from "../content/memory.ts";
-import type { About, Appeal, Careers, Event, GeneralDonationPage, Homepage, Impact, Metric, Post, Program, Project, PublicationSchedule, Report, TeamMember, Transparency } from "@rbb/content-schema";
+import type { About, Appeal, Careers, Event, HowWeWork, GeneralDonationPage, Homepage, Impact, Metric, Post, Program, Project, PublicationSchedule, Report, TeamMember, Transparency } from "@rbb/content-schema";
 import { StoryService } from "../../src/modules/stories/service.ts";
 import { ProjectService } from "../../src/modules/projects/service.ts";
 import { CareersService } from "../../src/modules/careers/service.ts";
+import { HowWeWorkService } from "../../src/modules/how-we-work/service.ts";
 import { PolicyDirectory, PolicyService } from "../../src/modules/policies/service.ts";
 import { POLICY_IDS, type PolicyId, GET_INVOLVED_PAGE_IDS, type GetInvolvedPageId } from "@rbb/content-schema";
 import { GetInvolvedDirectory, GetInvolvedService } from "../../src/modules/get-involved/service.ts";
@@ -63,6 +64,8 @@ export interface SharedData {
   impacts: Map<string, StoredHomepage>;
   transparencies: Map<string, StoredHomepage>;
   careers: Map<string, StoredHomepage>;
+  /* #7. */
+  howWeWork: Map<string, StoredHomepage>;
   /* One map per policy (M19), each keyed by organization. */
   policies: Record<PolicyId, Map<string, StoredHomepage>>;
   /* One map per Get Involved page (M20), each keyed by organization. */
@@ -72,7 +75,7 @@ export interface SharedData {
   storyStrips: Map<string, StoredHomepage>;
   base: ReturnType<typeof memoryData>;
 }
-export const sharedData = (): SharedData => ({ settings: new Map(), publish: new Map(), snapshots: [], media: [], posts: [], events: [], appeals: [], donationPages: new Map(), homepages: new Map(), abouts: new Map(), team: [], programs: [], metrics: [], reports: [], projects: [], impacts: new Map(), transparencies: new Map(), careers: new Map(), policies: { privacy: new Map(), terms: new Map(), donation: new Map() }, getInvolved: { hub: new Map(), volunteer: new Map(), fellowship: new Map(), partner: new Map(), travel: new Map() }, announcementBars: new Map(), popups: new Map(), storyStrips: new Map(), base: memoryData() });
+export const sharedData = (): SharedData => ({ settings: new Map(), publish: new Map(), snapshots: [], media: [], posts: [], events: [], appeals: [], donationPages: new Map(), homepages: new Map(), abouts: new Map(), team: [], programs: [], metrics: [], reports: [], projects: [], impacts: new Map(), transparencies: new Map(), careers: new Map(), howWeWork: new Map(), policies: { privacy: new Map(), terms: new Map(), donation: new Map() }, getInvolved: { hub: new Map(), volunteer: new Map(), fellowship: new Map(), partner: new Map(), travel: new Map() }, announcementBars: new Map(), popups: new Map(), storyStrips: new Map(), base: memoryData() });
 
 /* An in-memory block-page store (homepage, About) over a shared map. */
 const memoryBlockPageStore = <R extends { orgId: string }>(pages: Map<string, { record: R; revision: number; createdAt: string; updatedAt: string; updatedBy: { id: string | null; name: string } }>, orgId: string) => ({
@@ -248,6 +251,7 @@ export function harness(orgId = "org-a", data: SharedData = sharedData(), deploy
   const impactStore = memoryBlockPageStore<Impact>(data.impacts as never, orgId);
   const transparencyStore = memoryBlockPageStore<Transparency>(data.transparencies as never, orgId);
   const careersStore = memoryBlockPageStore<Careers>(data.careers as never, orgId);
+  const howWeWorkStore = memoryBlockPageStore<HowWeWork>(data.howWeWork as never, orgId);
   const policyStores = Object.fromEntries(POLICY_IDS.map((id) => [id, memoryBlockPageStore(data.policies[id] as never, orgId)])) as Record<PolicyId, never>;
   const policies = Object.fromEntries(POLICY_IDS.map((id) => [id, new PolicyService(id, policyStores[id], settingsStore, media, audit, { orgId, now: time.now, lock })])) as Record<PolicyId, PolicyService>;
   const getInvolvedStores = Object.fromEntries(GET_INVOLVED_PAGE_IDS.map((id) => [id, memoryBlockPageStore(data.getInvolved[id] as never, orgId)])) as Record<GetInvolvedPageId, never>;
@@ -273,6 +277,7 @@ export function harness(orgId = "org-a", data: SharedData = sharedData(), deploy
     projects: new ProjectService(projectStore, media, { programs: programStore, stories: storyStore }, audit, { orgId, now: time.now, lock }),
     transparency: new TransparencyService(transparencyStore as never, media, audit, { orgId, now: time.now, lock }),
     careers: new CareersService(careersStore as never, media, audit, { orgId, now: time.now, lock }),
+    howWeWork: new HowWeWorkService(howWeWorkStore as never, media, audit, { orgId, now: time.now, lock }),
     policies,
     policyDirectory: new PolicyDirectory(policies, settingsStore, orgId),
     getInvolved,
@@ -287,7 +292,7 @@ export function harness(orgId = "org-a", data: SharedData = sharedData(), deploy
     time,
     audit: data.base.audit,
     settings: new SettingsService(settingsStore, media, audit, { orgId, now: time.now }),
-    publishing: new PublishService({ publish: publishStore, settings: settingsStore, media, posts: postStore, events: eventStore, appeals: appealStore, donationPage: donationPageStore, homepage: homepageStore, about: aboutStore as never, team: teamStore, programs: programStore, metrics: metricStore, reports: reportStore, impact: impactStore as never, transparency: transparencyStore as never, stories: storyStore, projects: projectStore, careers: careersStore as never, policies: policyStores, getInvolved: getInvolvedStores, announcementBar: announcementBarStore as never, popup: popupStore as never, storyStrip: storyStripStore as never }, audit, deploy, {
+    publishing: new PublishService({ publish: publishStore, settings: settingsStore, media, posts: postStore, events: eventStore, appeals: appealStore, donationPage: donationPageStore, homepage: homepageStore, about: aboutStore as never, team: teamStore, programs: programStore, metrics: metricStore, reports: reportStore, impact: impactStore as never, transparency: transparencyStore as never, stories: storyStore, projects: projectStore, careers: careersStore as never, howWeWork: howWeWorkStore as never, policies: policyStores, getInvolved: getInvolvedStores, announcementBar: announcementBarStore as never, popup: popupStore as never, storyStrip: storyStripStore as never }, audit, deploy, {
       orgId,
       log: silentLog,
       now: time.now,

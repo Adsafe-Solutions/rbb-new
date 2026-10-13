@@ -35,6 +35,7 @@ import { reportRoutes } from "./modules/reports/routes.ts";
 import { ImpactService, MongoImpactStore } from "./modules/impact/service.ts";
 import { MongoTransparencyStore, TransparencyService } from "./modules/transparency/service.ts";
 import { CareersService, MongoCareersStore } from "./modules/careers/service.ts";
+import { HowWeWorkService, MongoHowWeWorkStore } from "./modules/how-we-work/service.ts";
 import { MongoPolicyStore, PolicyDirectory, PolicyService } from "./modules/policies/service.ts";
 import { policyRoutes } from "./modules/policies/routes.ts";
 import { GetInvolvedDirectory, GetInvolvedService, MongoGetInvolvedStore } from "./modules/get-involved/service.ts";
@@ -75,7 +76,7 @@ import { MongoSettingsStore } from "./modules/settings/repository.ts";
 import { settingsRoutes } from "./modules/settings/routes.ts";
 import { SettingsService } from "./modules/settings/service.ts";
 import { GET_INVOLVED_PAGE_IDS, POLICY_IDS, type GetInvolvedPageId, type PolicyId } from "@rbb/content-schema";
-import type { AnnouncementBar, Popup, StoryStrip, About, Appeal, Careers, Event, Impact, Metric, Post, Program, Project, Report, TeamMember, Transparency } from "@rbb/content-schema";
+import type { AnnouncementBar, Popup, StoryStrip, About, Appeal, Careers, Event, HowWeWork, Impact, Metric, Post, Program, Project, Report, TeamMember, Transparency } from "@rbb/content-schema";
 import { MongoContentStore } from "./modules/content/repository.ts";
 import { contentRoutes } from "./modules/content/routes.ts";
 import { ContentService } from "./modules/content/service.ts";
@@ -310,6 +311,7 @@ export function createApp(options: AppOptions = {}): App {
         stories: storyStore(db),
         projects: projectStore(db),
         careers: new MongoCareersStore(db, config.orgId),
+        howWeWork: new MongoHowWeWorkStore(db, config.orgId),
         policies: Object.fromEntries(POLICY_IDS.map((id) => [id, new MongoPolicyStore(db, config.orgId, id)])),
         getInvolved: Object.fromEntries(GET_INVOLVED_PAGE_IDS.map((id) => [id, new MongoGetInvolvedStore(db, config.orgId, id)])),
         announcementBar: new MongoAnnouncementBarStore(db, config.orgId),
@@ -401,6 +403,11 @@ export function createApp(options: AppOptions = {}): App {
     if (!config || !mongo) throw errors.unavailable("The database is not configured.");
     const db = await mongo.db();
     return new CareersService(new MongoCareersStore(db, config.orgId), new MongoMediaStore(db, config.orgId), auditFor(db, config), { orgId: config.orgId, ...(options.now && { now: options.now }), lock: lockFor(db) });
+  };
+  const howWeWork = async () => {
+    if (!config || !mongo) throw errors.unavailable("The database is not configured.");
+    const db = await mongo.db();
+    return new HowWeWorkService(new MongoHowWeWorkStore(db, config.orgId), new MongoMediaStore(db, config.orgId), auditFor(db, config), { orgId: config.orgId, ...(options.now && { now: options.now }), lock: lockFor(db) });
   };
   const policy = async (id: PolicyId) => {
     if (!config || !mongo) throw errors.unavailable("The database is not configured.");
@@ -495,6 +502,7 @@ export function createApp(options: AppOptions = {}): App {
     ...(config ? storyRoutes(stories) : []),
     ...(config ? projectRoutes(projects) : []),
     ...(config ? blockPageRoutes<Careers>("careers", careers) : []),
+    ...(config ? blockPageRoutes<HowWeWork>("how-we-work", howWeWork) : []),
     ...(config ? policyRoutes(policyDirectory, policy) : []),
     ...(config ? getInvolvedRoutes(getInvolvedDirectory, getInvolvedPage) : []),
     ...(config ? blockPageRoutes<AnnouncementBar>("announcement-bar", announcementBar) : []),

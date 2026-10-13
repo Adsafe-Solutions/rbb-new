@@ -65,7 +65,7 @@ test("media: only referenced, ready media of this organization is published — 
   addMedia(data, "org-a", "ready", { originalFilename: "unrelated.png" });
   addMedia(data, "org-a", "pending");
   const v = (await h.settings.get(owner))!;
-  await h.settings.update(owner, { revision: v.revision, changes: { branding: { logoId: logo.id } } }, FACTS);
+  await h.settings.update(owner, { revision: v.revision, changes: { seo: { ...v.settings.seo, ogImageId: logo.id } } }, FACTS);
   await h.publishing.publish(owner, FACTS);
   const snapshot = (await h.publishing.publicSnapshot())!;
   assert.deepEqual(Object.keys(snapshot.media), [logo.id]);
@@ -80,7 +80,7 @@ test("a reference that stopped being valid makes the publish FAIL, and the publi
   const h = await ready(harness("org-a", data));
   const logo = addMedia(data, "org-a", "ready");
   const v = (await h.settings.get(owner))!;
-  await h.settings.update(owner, { revision: v.revision, changes: { branding: { logoId: logo.id } } }, FACTS);
+  await h.settings.update(owner, { revision: v.revision, changes: { seo: { ...v.settings.seo, ogImageId: logo.id } } }, FACTS);
   await h.publishing.publish(owner, FACTS);
   await summary(h, "Changed again.");
   logo.status = "deleted";
@@ -148,5 +148,5 @@ test("deployment trigger: a webhook is told the version; its failure never fails
 test("contentHash ignores timestamps and status, sees content", () => {
   const record = { ...settingsRecord("org-a"), status: "draft" } as never;
   assert.equal(contentHash(record), contentHash({ ...(record as object), status: "published", updatedAt: "2026-01-01T00:00:00Z" } as never));
-  assert.notEqual(contentHash(record), contentHash({ ...(record as object), features: { themeSwitcher: true } } as never));
+  assert.notEqual(contentHash(record), contentHash({ ...(record as object), seo: { description: "Changed." } } as never));
 });

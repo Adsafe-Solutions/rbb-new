@@ -12,6 +12,7 @@ import {
   projectMediaIds,
   type About,
   type Careers,
+  type HowWeWork,
   type Policy,
   type PolicyId,
   type GetInvolvedPage,
@@ -49,7 +50,7 @@ import { can } from "../auth/permissions.ts";
 import type { AuthContext } from "../auth/types.ts";
 import type { MediaStore } from "../media/repository.ts";
 import type { SettingsStore } from "../settings/repository.ts";
-import { SECTIONS } from "../settings/service.ts";
+import { PUBLIC_SECTIONS, publicSettings } from "../settings/service.ts";
 import type { DeploymentOutcome, DeploymentTrigger } from "./deploy.ts";
 import type { DeploymentState, PublishStore, StoredSnapshot } from "./repository.ts";
 import { canonical, fingerprintOf } from "./schedule.ts";
@@ -117,7 +118,9 @@ function stamp(content: SnapshotContent, at: string): SnapshotContent {
 }
 
 export function contentHash(record: SiteSettings, collections: SnapshotContent = {}, framing: Framing = {}): string {
-  const { id: _i, orgId: _o, schemaVersion: _s, status: _st, createdAt: _c, updatedAt: _u, publishedAt: _p, releaseMarker: _r, ...settings } = record;
+  /* The internal country selection is never published, so it is never a
+     change to publish either. */
+  const { id: _i, orgId: _o, schemaVersion: _s, status: _st, createdAt: _c, updatedAt: _u, publishedAt: _p, releaseMarker: _r, ...settings } = publicSettings(record) as SiteSettings;
   // Settings alone hash exactly as they did before content existed.
   const source = Object.keys(collections).length ? { settings, content: collections } : settings;
   /* Milestone 2: an image's focal point or caption is part of what goes
@@ -136,7 +139,7 @@ const forSnapshot = <R extends { createdAt?: string; updatedAt?: string }>({ cre
 
 /* Collections (arrays of records) and single pages in `content`. */
 export const COLLECTION_KEYS = ["news", "blogs", "events", "appeals", "team", "programs", "metrics", "reports", "stories", "projects"] as const;
-export const CONTENT_KEYS = [...COLLECTION_KEYS, "generalDonation", "homepage", "about", "impact", "transparency", "careers", "policies", "getInvolved", "announcementBar", "popup", "storyStrip"] as const;
+export const CONTENT_KEYS = [...COLLECTION_KEYS, "generalDonation", "homepage", "about", "impact", "transparency", "careers", "howWeWork", "policies", "getInvolved", "announcementBar", "popup", "storyStrip"] as const;
 
 /* Defence in depth on top of the strict contract: no key that names a
    credential, and no value that looks like one, anywhere in a snapshot. */
@@ -255,6 +258,7 @@ export class PublishService {
   readonly #stories: ContentStore<Post & { title: string }> | null;
   readonly #projects: ContentStore<Project> | null;
   readonly #careers: BlockPageStore<Careers> | null;
+  readonly #howWeWork: BlockPageStore<HowWeWork> | null;
   readonly #policies: Partial<Record<PolicyId, BlockPageStore<Policy>>>;
   readonly #getInvolved: Partial<Record<GetInvolvedPageId, BlockPageStore<GetInvolvedPage>>>;
   readonly #announcementBar: BlockPageStore<AnnouncementBar> | null;
@@ -287,6 +291,7 @@ export class PublishService {
       stories?: ContentStore<Post & { title: string }>;
       projects?: ContentStore<Project>;
       careers?: BlockPageStore<Careers>;
+      howWeWork?: BlockPageStore<HowWeWork>;
       policies?: Partial<Record<PolicyId, BlockPageStore<Policy>>>;
       getInvolved?: Partial<Record<GetInvolvedPageId, BlockPageStore<GetInvolvedPage>>>;
       announcementBar?: BlockPageStore<AnnouncementBar>;
@@ -315,6 +320,7 @@ export class PublishService {
     this.#stories = stores.stories ?? null;
     this.#projects = stores.projects ?? null;
     this.#careers = stores.careers ?? null;
+    this.#howWeWork = stores.howWeWork ?? null;
     this.#policies = stores.policies ?? {};
     this.#getInvolved = stores.getInvolved ?? {};
     this.#announcementBar = stores.announcementBar ?? null;
@@ -455,6 +461,8 @@ export class PublishService {
         .map((x) => forSnapshot(x.record));
     const careersPage = page(this.#careers, careers, live?.careers, "Careers page");
     if (careersPage) content.careers = forSnapshot(careersPage);
+    const howWeWorkPage = page(this.#howWeWork, (await this.#howWeWork?.get()) ?? null, live?.howWeWork, "How We Work page");
+    if (howWeWorkPage) content.howWeWork = forSnapshot(howWeWorkPage);
     /* Policies (M19): each one published (or approved and due) — or, while
        a newer revision waits, the version already live — in the fixed
        order; the key only once at least one is publishable, so a policy
@@ -491,7 +499,7 @@ export class PublishService {
   }
   #pages(): [string, { get(): Promise<{ record: { id: string; status: string }; schedule?: StoredContent<ContentRecordBase>["schedule"] } | null>; markScheduleFailed(at: string, failedAt: string, problems: string[]): Promise<void> } | null][] {
     return [
-      ["Donation page", this.#donationPage], ["Homepage", this.#homepage], ["About page", this.#about], ["Impact page", this.#impact], ["Transparency", this.#transparency], ["Careers page", this.#careers],
+      ["Donation page", this.#donationPage], ["Homepage", this.#homepage], ["About page", this.#about], ["Impact page", this.#impact], ["Transparency", this.#transparency], ["Careers page", this.#careers], ["How We Work page", this.#howWeWork],
       ...POLICY_IDS.map((id) => [POLICY_SECTIONS[id], this.#policies[id] ?? null]),
       ...GET_INVOLVED_PAGE_IDS.map((id) => [GET_INVOLVED_LABELS[id], this.#getInvolved[id] ?? null]),
       ["Announcement bar", this.#announcementBar],
@@ -550,7 +558,9 @@ export class PublishService {
      the whole content contract, the secret scan. Not the donation
      provider's checks (the publish asks it, last). */
   async #candidate(working: SiteSettings, content: SnapshotContent, generatedAt: string): Promise<{ candidate: Omit<PublishedSnapshot, "version"> & { version: number }; problems: ErrorDetail[] }> {
-    const { releaseMarker: _internal, ...record } = working;
+    /* Internal parts stay behind: the release marker and the admin's
+       country selection (settings `countries`) are never published. */
+    const { releaseMarker: _internal, ...record } = publicSettings(working) as SiteSettings;
     const settings: SiteSettings = { ...record, status: "published", publishedAt: generatedAt };
     const problems: ErrorDetail[] = [];
     const media: Record<string, PublishedMedia> = {};
@@ -625,7 +635,7 @@ export class PublishService {
     const sourceHash = settings ? contentHash(settings.record, keyed, await this.#framing(settings.record, keyed)) : null;
     const changedSections = settings
       ? [
-          ...SECTIONS.filter((section) => !live || canonical(settings.record[section]) !== canonical(live.snapshot.settings[section])),
+          ...PUBLIC_SECTIONS.filter((section) => !live || canonical(settings.record[section]) !== canonical(live.snapshot.settings[section])),
           ...CONTENT_KEYS.filter((key) => (live ? canonical(collections[key]) !== canonical(live.snapshot.content[key]) : collections[key] !== undefined)),
         ]
       : [];
@@ -821,7 +831,7 @@ export class PublishService {
           deployment: deployment.status,
           trigger,
           ...(scheduled.length && { scheduled: scheduled.map((s) => ({ section: s.section, id: s.id, at: s.at })) }),
-          counts: { ...Object.fromEntries(COLLECTION_KEYS.filter((k) => content[k]).map((k) => [k, content[k]!.length])), ...(content.generalDonation && { generalDonation: 1 }), ...(content.homepage && { homepage: content.homepage.sections.length }), ...(content.about && { about: content.about.sections.length }), ...(content.impact && { impact: content.impact.sections.length }), ...(content.transparency && { transparency: 1 }), ...(content.careers && { careers: content.careers.opportunities.roles.length }), ...(content.policies && { policies: content.policies.length }), ...(content.getInvolved && { getInvolved: content.getInvolved.length }), ...(content.announcementBar && { announcementBar: content.announcementBar.items.length }), ...(content.popup && { popup: 1 }), ...(content.storyStrip && { storyStrip: content.storyStrip.appealIds.length }) },
+          counts: { ...Object.fromEntries(COLLECTION_KEYS.filter((k) => content[k]).map((k) => [k, content[k]!.length])), ...(content.generalDonation && { generalDonation: 1 }), ...(content.homepage && { homepage: content.homepage.sections.length }), ...(content.about && { about: content.about.sections.length }), ...(content.impact && { impact: content.impact.sections.length }), ...(content.transparency && { transparency: 1 }), ...(content.careers && { careers: content.careers.opportunities.roles.length }), ...(content.howWeWork && { howWeWork: content.howWeWork.rows.length }), ...(content.policies && { policies: content.policies.length }), ...(content.getInvolved && { getInvolved: content.getInvolved.length }), ...(content.announcementBar && { announcementBar: content.announcementBar.items.length }), ...(content.popup && { popup: 1 }), ...(content.storyStrip && { storyStrip: content.storyStrip.appealIds.length }) },
         },
       },
       facts

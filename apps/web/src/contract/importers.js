@@ -32,7 +32,6 @@ import { TRANSPARENCY, TRANSPARENCY_COPY, publishedDocuments } from "../content/
 import { STORIES, STORY_SOURCE } from "../content/stories.js";
 import { BLOGS, EVENTS, NEWS } from "../content/media.js";
 import { CAREERS, ORG_CONTACT, verifiedOnly } from "../content/contact.js";
-import { ENV } from "../config/env.js";
 
 /* ---------------- Shared conversions ---------------- */
 
@@ -365,7 +364,17 @@ export function aboutRecord() {
    own order (pages/Impact). Its figures, programs and stories are NAMED
    (the figures' keys are their source ids). The two posters are the ones
    /impact shows today: with no verified geography, Our approach and Our
-   work. */
+   work.
+
+   The two sub-page blocks (#5, #6) carry the source's own words only
+   where the source has APPROVED them: the approach's intro and principles
+   (its status), and the geography only once it is verified and lists a
+   place — never a sample, never a figure turned into names. (The
+   rejected Listen → Partner → Act → Sustain framework is not content at
+   all — D11.) */
+const approvedBlock = (b) => ["verified", "approved"].includes(b?.status);
+/* A source region is { name, countries }: its CMS id comes from its name. */
+const regionIdOf = (name) => name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "region";
 export function impactRecord() {
   const t = IMPACT_PAGES.overview;
   const { geography, approach, measurement } = IMPACT;
@@ -389,6 +398,10 @@ export function impactRecord() {
       block(t.stories.id, "stories", compact({ kicker: t.stories.kicker, heading: t.stories.heading, storyIds: STORY_SOURCE.cms ? [] : IMPACT.stories.map((slug) => STORIES.find((s) => s.slug === slug)?.id ?? `missing:${slug}`), cta: link(t.stories.cta) })),
       block("reports", "trust", compact({ kicker: t.reports.kicker, heading: t.reports.heading, body: t.reports.body, cta: link(t.reports.cta) })),
       block("closing", "cta", compact({ heading: t.closing.heading, primary: link(t.closing.ctas.primary), secondary: link(t.closing.ctas.secondary) })),
+      ...(approvedBlock(approach) ? [block("approach", "approach", compact({ intro: approach.intro ?? undefined, principles: approach.principles }))] : []),
+      ...(approvedBlock(geography) && hasGeography
+        ? [block("where-we-work", "geography", compact({ summary: geography.summary ?? undefined, regions: geography.regions.map((r) => ({ id: r.id ?? regionIdOf(r.name), name: r.name, countries: r.countries })), countries: geography.countries }))]
+        : []),
     ],
   });
 }
@@ -533,7 +546,9 @@ export function programRecords() {
 }
 
 /* Organization settings — public configuration only. Contact details:
-   only what content/contact.js marks verified. */
+   only what content/contact.js marks verified. Branding, analytics,
+   donation defaults and features are retired (2026-10-13) and not
+   exported. */
 export function siteSettingsRecord() {
   const office = ORG_CONTACT.office;
   const shown = (block) => (block.status === "verified" && block.value ? block.value : undefined);
@@ -553,17 +568,10 @@ export function siteSettingsRecord() {
     }),
     social: verifiedOnly(ORG_CONTACT.social).map((s) => ({ platform: s.platform, url: s.url })),
     seo: { description: SITE.description },
-    branding: {},
-    analytics: {},
-    donations: {
-      form: DONATION.form.config,
-      closing: { heading: DONATION.closing.heading, buttonLabel: DONATION.closing.cta },
-    },
     engagement: {
       announcementBar: { enabled: ANNOUNCEMENTS.bar.enabled, intervalMs: ANNOUNCEMENTS.bar.interval },
       popup: { enabled: ANNOUNCEMENTS.popup.enabled },
       storyStrip: { enabled: APPEAL_STORIES.enabled },
     },
-    features: { themeSwitcher: ENV.themeSwitcher },
   };
 }

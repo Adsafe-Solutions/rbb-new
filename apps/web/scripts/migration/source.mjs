@@ -20,9 +20,11 @@ const MIME = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "i
 const notMapped = (c) => [
   { type: "policy", count: c.POLICIES.filter((p) => p.route).length, decision: "excluded-by-policy", reason: "The source policies are working placeholder text. RBB's own policy text is never written on its behalf (docs/PUBLISHING.md); the build refuses working text in a published policy." },
   { type: "story_strip", count: 1, decision: "not-mapped", reason: "Derived from the appeals' highlight order; plan it once the appeals are in the CMS." },
-  { type: "page:/about/how-we-work", count: 1, decision: "schema-gap", reason: "No CMS model (HOW_WE_WORK stays in code)." },
-  { type: "page:/impact/our-approach", count: 1, decision: "schema-gap", reason: "No CMS model (IMPACT.approach and its principles)." },
-  { type: "page:/impact/where-we-work", count: 1, decision: "schema-gap", reason: "No CMS model (IMPACT.geography; never a sample)." },
+  { type: "page:/about/how-we-work", count: 1, decision: "excluded-by-policy", reason: "The CMS model exists (#7), but HOW_WE_WORK is working placeholder prose awaiting RBB's wording (decision D11); it is not migrated as RBB's words." },
+  /* /impact/our-approach (#5) is migrated: the Impact page record carries its approved words (importers.js impactRecord, `approach` block). */
+  ...(c.IMPACT.geography.regions.length || c.IMPACT.geography.countries.length
+    ? []
+    : [{ type: "page:/impact/where-we-work", count: 1, decision: "excluded-by-policy", reason: "No verified geography to migrate (decision D14) — never a sample. The Impact page's `geography` block (#6) holds it once RBB supplies it." }]),
 ];
 
 export async function loadSource({ root = WEB } = {}) {

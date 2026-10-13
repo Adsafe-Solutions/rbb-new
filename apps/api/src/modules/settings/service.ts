@@ -16,8 +16,13 @@ import type { SettingsStore, StoredSettings } from "./repository.ts";
    · a save names the revision it was based on; an older one conflicts
    · only the editable SECTIONS can be sent, and each is validated whole
      (strict — an unknown field is an error, never silently dropped)
-   · media references (logo, favicon, share image) must name ready media of
-     this organization
+   · the share image must name ready media of this organization
+   · `countries` (Settings → General) is INTERNAL: saved and audited here,
+     never published (INTERNAL_SECTIONS, publicSettings)
+   · branding, analytics, donations and features are RETIRED (scope
+     decision, 2026-10-13): not sections any more, so a change to one is
+     refused; a value already stored stays untouched (the contract keeps the
+     keys optional so existing records and snapshots remain valid)
    · this is the WORKING copy: nothing here is public until an owner
      publishes (modules/publishing)
 
@@ -26,8 +31,18 @@ import type { SettingsStore, StoredSettings } from "./repository.ts";
    nothing is invented here. */
 
 export const SETTINGS_ID = "site-settings";
-export const SECTIONS = ["general", "contact", "social", "seo", "branding", "analytics", "donations", "engagement", "features"] as const;
+export const SECTIONS = ["general", "contact", "social", "seo", "engagement", "countries"] as const;
 export type Section = (typeof SECTIONS)[number];
+
+/* Saved like any section, never published (modules/publishing leaves it
+   out of every snapshot): the admin's own country selection, from the
+   full list. Not where RBB works — that is the Impact page's Where We Work
+   block, published through review. */
+export const INTERNAL_SECTIONS: readonly Section[] = ["countries"];
+export const PUBLIC_SECTIONS = SECTIONS.filter((s) => !INTERNAL_SECTIONS.includes(s));
+
+/* A settings record as it may be published: without the internal parts. */
+export const publicSettings = <R extends { countries?: unknown }>({ countries: _internal, ...record }: R): Omit<R, "countries"> => record;
 
 export const CONFLICT_MESSAGE = "These settings were changed elsewhere. Reload the latest version before saving.";
 
@@ -128,7 +143,6 @@ export class SettingsService {
     const ids = record.contact.methods.map((m) => m.id);
     if (new Set(ids).size !== ids.length) problems.push({ path: "body.changes.contact.methods", message: "each contact method needs its own id" });
     const references: [string, string | undefined][] = [
-      ...(sections.includes("branding") ? ([["body.changes.branding.logoId", record.branding.logoId], ["body.changes.branding.faviconId", record.branding.faviconId]] as [string, string | undefined][]) : []),
       ...(sections.includes("seo") ? ([["body.changes.seo.ogImageId", record.seo.ogImageId]] as [string, string | undefined][]) : []),
     ];
     for (const [path, id] of references) {

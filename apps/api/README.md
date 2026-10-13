@@ -56,7 +56,7 @@ Base path: **`/api/v1`**.
 | PATCH | `/api/v1/media/:id` | `media:write` | `{ version, alt?, caption?, credit?, license?, consent? }` — nothing else is editable |
 | DELETE | `/api/v1/media/:id` | `media:write` | Soft delete; then the object is removed from storage (retried by cleanup if that fails) |
 | GET | `/api/v1/settings` | `settings:read` | The organization's working site settings (`null` until imported) with `revision` |
-| PATCH | `/api/v1/settings` | `settings:write` (OWNER) | `{ revision, changes: { <section>: … } }`, validated against the contract. A stale revision gives 409 |
+| PATCH | `/api/v1/settings` | `settings:write` (OWNER) | `{ revision, changes: { <section>: … } }` — sections `general`, `contact`, `social`, `seo`, `engagement`, and `countries` (internal: never published) — validated against the contract. A stale revision gives 409. The retired `branding`, `analytics`, `donations` and `features` are refused |
 | GET | `/api/v1/publish/status` | `settings:read` | The live version, unpublished changes (by section), whether you can publish. Also (M14) the review queue (`review.approved` / `review.submitted`), `blockers` and the `changesKey` naming what would be published |
 | POST | `/api/v1/publish` | `publish:execute` (OWNER) | Validates and publishes a new immutable snapshot version from the saved settings and the APPROVED content (M14). Optional `{ changesKey }`: 409 if what would be published changed since that review |
 | GET | `/api/v1/posts`, `/api/v1/events` | `content:read` | `?search=&status=&type=(posts)&sort=updated\|date\|title&page=&pageSize=` → `{ data, pagination }` |
@@ -100,7 +100,8 @@ The `AuthView` returned by login and `/me` is
 It never contains a password hash, token, token hash or storage field.
 
 These deliberately don't exist: no registration or signup route, no email
-invitation, no email (or owner-driven) password reset, and no audit listing.
+invitation, no email (or owner-driven) password reset, and no audit listing
+(out of scope: the trail is written, never listed in the admin).
 Owners manage the team over `/api/v1/members` (M17.1) and hand new members a
 setup link (M17.2); see "Team management" and "Account setup and password
 change" below.
@@ -192,7 +193,7 @@ The central table is `modules/auth/permissions.ts`.
 | Permission | OWNER | EDITOR |
 |---|---|---|
 | `content:read/create/update/delete`, `media:read/write`, `appeals:read/write`, `settings:read` | ✓ | ✓ |
-| `settings:write`, `publish:execute`, `content:approve` (M14), `users:read/write`, `audit:read` | ✓ | — |
+| `settings:write`, `publish:execute`, `content:approve` (M14), `users:read/write` | ✓ | — |
 
 - Routes declare `auth` and `permission`. The app enforces both before the
   handler runs.
@@ -666,7 +667,6 @@ These are unverified until the first deploy:
 
 - Owner-driven password reset for a member who already has a password
 - Email invitations, email password reset and email verification
-- Audit listing (the `audit:read` permission exists; no route yet)
 - Media folders/tags, image resizing, documents (PDF), EXIF/GPS stripping
 - Givebutter changes
 - Newsletter and Travel forms (M18 keeps both off; Newsletter waits for

@@ -91,6 +91,9 @@ import type { Db, IndexDescription } from "mongodb";
    careers_pages                   the Careers page (M13)
      orgId_unique                  ONE Careers page per organization — its only
                                    query (read, save and publish all go by orgId)
+   how_we_work_pages               the How We Work page (#7)
+     orgId_unique                  ONE How We Work page per organization —
+                                   its only query, as careers_pages
    policies                        the site policies (M19): privacy, terms,
                                    donation — at most one of each per
                                    organization, the policy's id in `policyId`
@@ -144,6 +147,7 @@ export const COLLECTIONS = {
   reports: "reports",
   projects: "projects",
   careersPages: "careers_pages",
+  howWeWorkPages: "how_we_work_pages",
   policies: "policies",
   getInvolvedPages: "get_involved_pages",
   announcementBars: "announcement_bars",
@@ -245,6 +249,7 @@ export const INDEXES: Record<keyof typeof COLLECTIONS, IndexDescription[]> = {
     { name: "orgId_order", key: { orgId: 1, "record.order": 1, "record.id": 1 } },
   ],
   careersPages: [{ name: "orgId_unique", key: { orgId: 1 }, unique: true }],
+  howWeWorkPages: [{ name: "orgId_unique", key: { orgId: 1 }, unique: true }],
   policies: [{ name: "orgId_policyId_unique", key: { orgId: 1, policyId: 1 }, unique: true }],
   getInvolvedPages: [{ name: "orgId_pageId_unique", key: { orgId: 1, pageId: 1 }, unique: true }],
   announcementBars: [{ name: "orgId_unique", key: { orgId: 1 }, unique: true }],

@@ -3,6 +3,7 @@ import { ApiRequestError } from "../api";
 import { useCan } from "../auth";
 import { Button, Dialog, FormField, Input, Select, StatusBadge, useToast } from "../design-system";
 import { publishApi, type PublishStatus } from "../settings/client";
+import { PublishProblemText } from "../settings/PublishProblemText";
 import type { ContentStatus, ScheduleInput, ScheduleView, WorkflowAction } from "./client";
 import { actionsFor, badgeOf, explain, formatSchedule, type ReviewMove } from "./workflowRules";
 import styles from "./content.module.css";
@@ -95,7 +96,9 @@ export function WorkflowControls({ status, live, noun, canEdit, canApprove, dirt
       {schedule?.failedAt && schedule.problems && schedule.problems.length > 0 && (
         <ul className={styles.workflowProblems} aria-label="Why the scheduled publication was refused">
           {schedule.problems.map((p) => (
-            <li key={p}>{p.replace(/^(snapshot\.|settings\.)+/, "")}</li>
+            <li key={p}>
+              <PublishProblemText problem={p} />
+            </li>
           ))}
         </ul>
       )}
@@ -317,7 +320,19 @@ function PublishNowDialog({ open, onClose, onPublished }: { open: boolean; onClo
               ))}
             </ul>
           )}
-          {blocked && <p className={styles.problem}>Something must be fixed first: {status.blockers[0]!.replace(/^(snapshot\.|settings\.)+/, "")}</p>}
+          {blocked && (
+            <div className={styles.problem}>
+              <p>Something must be fixed first{status.blockers.length > 1 ? ` (${status.blockers.length} problems)` : ""}:</p>
+              <ul className={styles.workflowProblems}>
+                {status.blockers.slice(0, 4).map((b) => (
+                  <li key={b}>
+                    <PublishProblemText problem={b} />
+                  </li>
+                ))}
+                {status.blockers.length > 4 && <li>and {status.blockers.length - 4} more — see the publish panel</li>}
+              </ul>
+            </div>
+          )}
         </div>
       )}
       {error && (

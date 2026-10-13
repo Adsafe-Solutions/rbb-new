@@ -3,6 +3,8 @@ import { Badge, Button, CircleCheck, Dialog, Surface, TriangleAlert, useToast } 
 import { publishApi, type PublishStatus, type ReviewItem, type ScheduledItem } from "../../settings/client";
 import { formatSchedule } from "../../content/workflowRules";
 import { ApiRequestError } from "../../api";
+import { PublishProblemText } from "../../settings/PublishProblemText";
+import { publishProblemLine } from "../../settings/publishProblems";
 import styles from "./SettingsPage.module.css";
 
 const SECTION_LABELS: Record<string, string> = {
@@ -80,7 +82,7 @@ export function PublishPanel({ status, unsaved, onPublished }: { status: Publish
     } catch (caught) {
       setError(
         caught instanceof ApiRequestError && caught.status === 400
-          ? `These changes can't be published yet — ${caught.details.map((d) => `${d.path.replace(/^(snapshot\.|settings\.)+/, "")}: ${d.message}`).join("; ")}. Fix them and save first. The live website is unchanged.`
+          ? `These changes can't be published yet — ${caught.details.map((d) => publishProblemLine(`${d.path}: ${d.message}`)).join("; ")}. Fix them and save first. The live website is unchanged.`
           : caught instanceof ApiRequestError && caught.status === 409
             ? caught.message
             : "The changes could not be published. Try again."
@@ -125,7 +127,9 @@ export function PublishPanel({ status, unsaved, onPublished }: { status: Publish
             <p className={styles.reviewHeading}>Blocked — must be fixed before publishing</p>
             <ul className={styles.reviewList}>
               {status.blockers.slice(0, SHOWN).map((b) => (
-                <li key={b}>{b.replace(/^(snapshot\.|settings\.)+/, "")}</li>
+                <li key={b}>
+                  <PublishProblemText problem={b} />
+                </li>
               ))}
               {status.blockers.length > SHOWN && <li>and {status.blockers.length - SHOWN} more</li>}
             </ul>

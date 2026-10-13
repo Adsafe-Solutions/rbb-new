@@ -40,7 +40,7 @@ export interface BrandIdentity {
 export interface ThemeConfig {
   identity: BrandIdentity;
   colors: BrandColors;
-  /** Only "light" is designed; "dark" exists to prove the architecture. */
+  /** The mode people get until they choose one with the topbar switch. */
   defaultMode: ThemeMode;
 }
 

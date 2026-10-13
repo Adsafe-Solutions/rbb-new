@@ -98,7 +98,7 @@ try {
   }));
   check("Geist Sans is the body font and loaded", type.sans.startsWith('"Geist Variable"') && type.sansLoaded, type.sans);
   check("Geist Mono loaded", type.monoLoaded);
-  check("light theme applied from the theme config", type.theme === "light" && type.primary.toUpperCase() === "#10437C", `${type.theme} ${type.primary}`);
+  check("light theme applied from the theme config", type.theme === "light" && type.primary.toUpperCase() === "#28282B", `${type.theme} ${type.primary}`);
   check("document title uses the product name", type.title === "Dashboard · RBB Studio", type.title);
 
   // Desktop: expanded sidebar.

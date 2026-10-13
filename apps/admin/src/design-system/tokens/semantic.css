@@ -16,9 +16,9 @@
    - A status is never colour alone: StatusBadge pairs every tone with an
      icon and a word.
 
-   Themes: `[data-theme="light"]` is the designed default. The
-   `[data-theme="dark"]` block proves the architecture — every semantic
-   token has a dark value — but it has not been designed or reviewed. */
+   Themes: `[data-theme="light"]` is the default. `[data-theme="dark"]`
+   is the alternative people choose with the topbar's theme switch
+   (src/theme/mode.ts); every semantic token has a dark value. */
 
 :root,
 [data-theme="light"] {
@@ -55,9 +55,11 @@
   --color-text-subtle: var(--primitive-neutral-500);
   --color-text-disabled: var(--primitive-neutral-400);
   --color-text-inverse: var(--primitive-neutral-0);
-  --color-text-link: var(--brand-primary);
+  /* Not the primary: RBB's primary is ink, the same as body text, so a
+     link would not stand out. A darkened accent instead. */
+  --color-text-link: color-mix(in srgb, var(--brand-accent) 45%, #000);
 
-  /* The brand action colour (Deep Trust Blue for RBB) */
+  /* The brand action colour (ink #28282B for RBB) */
   --color-primary: var(--brand-primary);
   --color-primary-hover: color-mix(in srgb, var(--brand-primary) 86%, #000);
   --color-primary-pressed: color-mix(in srgb, var(--brand-primary) 74%, #000);
@@ -113,6 +115,9 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
+  /* RBB's primary is ink (#28282B), which vanishes on a dark ground: dark
+     mode's action colour is the brand's light surface, with dark text. */
+
   --color-bg-canvas: var(--primitive-neutral-950);
   --color-bg-surface: var(--primitive-neutral-900);
   --color-bg-raised: var(--primitive-neutral-800);
@@ -139,10 +144,10 @@
   --color-text-inverse: var(--primitive-neutral-900);
   --color-text-link: var(--brand-accent);
 
-  --color-primary: color-mix(in srgb, var(--brand-primary) 70%, #fff);
-  --color-primary-hover: color-mix(in srgb, var(--brand-primary) 60%, #fff);
-  --color-primary-pressed: color-mix(in srgb, var(--brand-primary) 50%, #fff);
-  --color-primary-subtle: color-mix(in srgb, var(--brand-primary) 30%, var(--primitive-neutral-900));
+  --color-primary: var(--brand-surface);
+  --color-primary-hover: color-mix(in srgb, var(--brand-surface) 86%, #000);
+  --color-primary-pressed: color-mix(in srgb, var(--brand-surface) 74%, #000);
+  --color-primary-subtle: color-mix(in srgb, var(--brand-surface) 12%, var(--primitive-neutral-900));
   --color-on-primary: var(--primitive-neutral-950);
 
   --color-accent-subtle: color-mix(in srgb, var(--brand-accent) 18%, var(--primitive-neutral-900));
@@ -168,7 +173,7 @@
   --color-scheduled-border: color-mix(in srgb, var(--primitive-violet-700) 45%, var(--primitive-neutral-900));
   --color-brand-fg: var(--color-primary);
   --color-brand-bg: var(--color-primary-subtle);
-  --color-brand-border: color-mix(in srgb, var(--brand-primary) 50%, var(--primitive-neutral-900));
+  --color-brand-border: color-mix(in srgb, var(--brand-surface) 30%, var(--primitive-neutral-900));
 
   --shadow-dropdown: 0 0 0 1px rgb(255 255 255 / 0.04), 0 8px 20px rgb(0 0 0 / 0.5);
   --shadow-popover: 0 0 0 1px rgb(255 255 255 / 0.04), 0 10px 28px rgb(0 0 0 / 0.55);

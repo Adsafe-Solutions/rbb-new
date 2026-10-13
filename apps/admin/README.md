@@ -87,7 +87,9 @@ imports only from its `index.ts`. The design language is Geist-inspired
 
 **Rules the tokens encode:**
 - Sky Blue (the accent) is never text on a light surface, because it is
-  2.5:1 on white. Text and the focus ring use darkened mixes of it.
+  2.5:1 on white. Links and the focus ring use darkened mixes of it.
+- The primary is ink `#28282B` (2026-10-13, in place of Deep Trust Blue
+  `#10437C`), the website's own replacement for it.
 - A status is never colour alone. `StatusBadge` always pairs an icon with
   a word.
 - Cards use 1px borders. Shadows are only for things that float: menus,
@@ -97,9 +99,14 @@ imports only from its `index.ts`. The design language is Geist-inspired
 the logo, then point `src/theme/index.ts` at the copy. No component
 changes.
 
-**Themes:** `<html data-theme="light">` is the designed default.
-`[data-theme="dark"]` has a value for every semantic token. It exists to
-prove the architecture and has not been designed.
+**Themes:** light is the default. People switch to dark with the
+topbar's sun/moon button; the choice is remembered per browser
+(`src/theme/mode.ts`) and applied before the first render.
+`[data-theme="dark"]` has a value for every semantic token; its action
+colour is the brand's (white) surface.
+
+**Tables** are compact by default (`Table` `density`); pass
+`density="default"` for the roomier spacing.
 
 **Icons:** Lucide (ISC) is the only icon set. Import icons from
 `src/design-system/icons.ts`, never from `lucide-react` directly.

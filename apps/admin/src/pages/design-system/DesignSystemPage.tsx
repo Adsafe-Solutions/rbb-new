@@ -64,6 +64,7 @@ import {
   type Status,
 } from "../../design-system";
 import { theme } from "../../theme";
+import { preferredMode } from "../../theme/mode";
 import { contrastRatio, toHex, tokenColor } from "./contrast";
 import styles from "./DesignSystemPage.module.css";
 
@@ -75,10 +76,10 @@ import styles from "./DesignSystemPage.module.css";
    labelled examples, not data from the API. */
 
 export default function DesignSystemPage() {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(() => preferredMode() === "dark");
   useEffect(() => {
-    setThemeMode(dark ? "dark" : theme.defaultMode);
-    return () => setThemeMode(theme.defaultMode);
+    setThemeMode(dark ? "dark" : "light");
+    return () => setThemeMode(preferredMode());
   }, [dark]);
 
   return (
@@ -87,7 +88,7 @@ export default function DesignSystemPage() {
         eyebrow={<Badge tone="warning">Internal · development only</Badge>}
         title="Design system"
         description="Tokens and components of the admin, rendered live. Everything below uses semantic tokens only; brand values come from the theme config."
-        actions={<Switch label="Dark theme" description="Architecture preview — not designed" checked={dark} onChange={(e) => setDark(e.target.checked)} />}
+        actions={<Switch label="Dark theme" description="Preview only — the topbar switch sets your theme" checked={dark} onChange={(e) => setDark(e.target.checked)} />}
       />
       <div className={styles.sections}>
         <BrandSection />

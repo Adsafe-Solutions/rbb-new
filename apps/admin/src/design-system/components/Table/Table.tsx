@@ -18,11 +18,13 @@ import styles from "./Table.module.css";
    labelled region so keyboard users can scroll it too. */
 
 type Density = "default" | "compact";
-const DensityContext = createContext<Density>("default");
+const DensityContext = createContext<Density>("compact");
 
 export interface TableProps extends HTMLAttributes<HTMLTableElement> {
   /** Names the table (and its scroll region) for screen readers. */
   label: string;
+  /** Compact by default: the admin is a working tool, so tables show as
+   * many rows as fit. "default" is the roomier spacing. */
   density?: Density;
   /** Marks the table busy while rows load. */
   loading?: boolean;
@@ -33,7 +35,7 @@ export interface TableProps extends HTMLAttributes<HTMLTableElement> {
   children: ReactNode;
 }
 
-export function Table({ label, density = "default", loading = false, stickyHeader, maxHeight, className, children, ...rest }: TableProps) {
+export function Table({ label, density = "compact", loading = false, stickyHeader, maxHeight, className, children, ...rest }: TableProps) {
   return (
     <DensityContext.Provider value={density}>
       <div className={styles.frame} role="region" aria-label={label} tabIndex={0} style={maxHeight !== undefined ? { maxHeight } : undefined}>

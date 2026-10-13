@@ -15,7 +15,7 @@ export const rbbTheme: ThemeConfig = {
     logo: { src: mark, monogram: "RBB" },
   },
   colors: {
-    primary: "#10437C", // Deep Trust Blue
+    primary: "#28282B", // Ink — the website's colour in place of Deep Trust Blue (2026-10-13)
     onPrimary: "#FFFFFF",
     accent: "#00ADEF", // Sky Blue
     success: "#5CB85C", // Growth Green

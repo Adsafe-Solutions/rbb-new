@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { chooseMode, preferredMode } from "../theme/mode";
 import type { AuthView } from "../api";
 import { useAuth } from "../auth";
 import {
@@ -14,8 +15,10 @@ import {
   MenuItem,
   MenuLabel,
   MenuSeparator,
+  Moon,
   PanelLeft,
   Search,
+  Sun,
   Tooltip,
   UserRound,
   type BreadcrumbItem,
@@ -60,9 +63,30 @@ export function Topbar({ view, breadcrumb, onToggleNavigation, navigationLabel, 
         <Tooltip content="Notifications are not available yet" side="bottom">
           <IconButton label="Notifications" icon={<Bell />} aria-disabled="true" className={styles.placeholder} />
         </Tooltip>
+        <ThemeSwitch />
         <UserMenu view={view} />
       </div>
     </header>
+  );
+}
+
+/* Light (the default) or dark, remembered in this browser. */
+function ThemeSwitch() {
+  const [mode, setMode] = useState(preferredMode);
+  const next = mode === "dark" ? "light" : "dark";
+  const label = next === "dark" ? "Switch to dark theme" : "Switch to light theme";
+  return (
+    <Tooltip content={label} side="bottom" labelOnly>
+      <IconButton
+        label={label}
+        icon={mode === "dark" ? <Sun /> : <Moon />}
+        onClick={() => {
+          chooseMode(next);
+          setMode(next);
+        }}
+        data-testid="theme-switch"
+      />
+    </Tooltip>
   );
 }
 

@@ -17,6 +17,14 @@ export type FormKind = BuiltInFormId | "career";
 /* The fields every form keeps (replies need a name and an address). */
 export const SYSTEM_FIELD_IDS = ["name", "email"] as const;
 
+/* The advertising / news emails checkbox every form keeps (2026-10-13):
+   optional for the visitor, TICKED when the form opens (owner decision;
+   see docs/ADMIN_IMPLEMENTATION_PLAN.md #18 — a pre-ticked box is not
+   valid consent under UK/EU or Indian law). Admin → Audience lists each
+   person's latest choice. */
+export const MARKETING_FIELD_ID = "marketing";
+export const MARKETING_LABEL = "Send me news and updates from Rising Beyond Borders by email. I can unsubscribe at any time.";
+
 /* Uploads (career forms): PDF, Word — at most 4 MB each. */
 export const FILE_TYPES = { "application/pdf": "PDF", "application/msword": "DOC", "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "DOCX" } as const;
 export const MAX_FILE_BYTES = 4 * 1024 * 1024;
@@ -34,6 +42,8 @@ export interface FormFieldDefinition {
   required: boolean;
   options?: string[];
   maxLength?: number;
+  /* A checkbox ticked when the form opens. */
+  defaultChecked?: boolean;
 }
 
 export interface FormDefinitionData {
@@ -54,6 +64,7 @@ const ERROR = "Sorry, your message could not be sent. Please try again in a mome
 const NAME: FormFieldDefinition = { id: "name", type: "text", label: "Your name", required: true, maxLength: 200 };
 const EMAIL: FormFieldDefinition = { id: "email", type: "email", label: "Email address", required: true, maxLength: 254 };
 const message = (label: string): FormFieldDefinition => ({ id: "message", type: "textarea", label, required: true, maxLength: 5000 });
+const MARKETING: FormFieldDefinition = { id: MARKETING_FIELD_ID, type: "checkbox", label: MARKETING_LABEL, required: false, defaultChecked: true };
 
 export const DEFAULT_FORMS: Record<BuiltInFormId, FormDefinitionData> = {
   contact: {
@@ -69,6 +80,7 @@ export const DEFAULT_FORMS: Record<BuiltInFormId, FormDefinitionData> = {
       EMAIL,
       { id: "topic", type: "select", label: "What is your message about?", required: false, options: ["A general question", "Donate", "Volunteer", "Fellowship", "Partner With Us", "Travel With Us"] },
       message("Your message"),
+      MARKETING,
     ],
   },
   volunteer: {
@@ -79,7 +91,7 @@ export const DEFAULT_FORMS: Record<BuiltInFormId, FormDefinitionData> = {
     submitLabel: "Send",
     successMessage: SUCCESS,
     errorMessage: ERROR,
-    fields: [NAME, EMAIL, message("How would you like to help?")],
+    fields: [NAME, EMAIL, message("How would you like to help?"), MARKETING],
   },
   partner: {
     id: "partner",
@@ -89,7 +101,7 @@ export const DEFAULT_FORMS: Record<BuiltInFormId, FormDefinitionData> = {
     submitLabel: "Send",
     successMessage: SUCCESS,
     errorMessage: ERROR,
-    fields: [NAME, { id: "organization", type: "text", label: "Organization", required: false, maxLength: 200 }, EMAIL, message("What would you like to explore?")],
+    fields: [NAME, { id: "organization", type: "text", label: "Organization", required: false, maxLength: 200 }, EMAIL, message("What would you like to explore?"), MARKETING],
   },
 };
 
@@ -104,5 +116,5 @@ export const newCareerForm = (roleId: string, roleTitle: string): FormDefinition
   submitLabel: "Send application",
   successMessage: "Thank you — your application has been sent to Rising Beyond Borders.",
   errorMessage: "Sorry, your application could not be sent. Please try again in a moment.",
-  fields: [NAME, EMAIL, { id: "cv", type: "file", label: "Your CV", help: "PDF or Word document, up to 4 MB.", required: true }, { id: "message", type: "textarea", label: "Why are you interested in this role?", required: false, maxLength: 5000 }],
+  fields: [NAME, EMAIL, { id: "cv", type: "file", label: "Your CV", help: "PDF or Word document, up to 4 MB.", required: true }, { id: "message", type: "textarea", label: "Why are you interested in this role?", required: false, maxLength: 5000 }, MARKETING],
 });

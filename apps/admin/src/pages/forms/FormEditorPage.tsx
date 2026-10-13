@@ -5,7 +5,7 @@ import { ItemList } from "../../blocks/fields";
 import { navigate } from "../../router";
 import type { PageProps } from "../../routes";
 import { formsApi, type FormDefinitionData, type FormFieldDefinition, type FormListItem } from "../../forms/client";
-import { FILE_TYPE_NAMES, TYPE_LABELS, builderProblems, cleanForm, isSystemField, newField, retype, typesFor } from "../../forms/builder";
+import { FILE_TYPE_NAMES, TYPE_LABELS, builderProblems, cleanForm, isMarketingField, isSystemField, marketingField, newField, retype, typesFor } from "../../forms/builder";
 import styles from "../../content/content.module.css";
 
 /* /forms/:id — one website form (owners only). Its words, and its fields
@@ -76,15 +76,20 @@ export default function FormEditorPage({ params }: PageProps) {
 
   const fieldEditor = (field: FormFieldDefinition, setField: (f: FormFieldDefinition) => void, i: number) => {
     const system = isSystemField(field.id);
+    const marketing = isMarketingField(field.id);
     return (
       <div className={styles.fields}>
         <FormField label="Label" required error={err(`fields.${i}.label`)}>
           <Input maxLength={120} value={field.label} onChange={(e) => setField({ ...field, label: e.target.value })} />
         </FormField>
-        <FormField label="Type" helper={system ? "Needed for replies: its type cannot change." : undefined}>
-          <Select disabled={system} options={types.map((t) => ({ value: t, label: TYPE_LABELS[t] }))} value={field.type} onChange={(e) => setField(retype(field, e.target.value as FormFieldDefinition["type"]))} />
+        <FormField label="Type" helper={system ? "Needed for replies: its type cannot change." : marketing ? "The marketing emails choice (Audience): always a checkbox, never required." : undefined}>
+          <Select disabled={system || marketing} options={types.map((t) => ({ value: t, label: TYPE_LABELS[t] }))} value={field.type} onChange={(e) => setField(retype(field, e.target.value as FormFieldDefinition["type"]))} />
         </FormField>
-        <Checkbox label="Required" checked={system || field.required} disabled={system} onChange={(e) => setField({ ...field, required: e.target.checked })} />
+        <Checkbox label="Required" checked={!marketing && (system || field.required)} disabled={system || marketing} onChange={(e) => setField({ ...field, required: e.target.checked })} />
+        {field.type === "checkbox" && (
+          <Checkbox label="Ticked when the form opens" checked={Boolean(field.defaultChecked)} onChange={(e) => setField({ ...field, defaultChecked: e.target.checked || undefined })} />
+        )}
+        {marketing && field.defaultChecked && <p className={styles.muted}>Ticked by default (owner decision). Note: a pre-ticked box is generally not valid consent for marketing emails under UK/EU or Indian law.</p>}
         <FormField label="Help text" helper="Optional. Shown under the label.">
           <Input maxLength={300} value={field.help ?? ""} onChange={(e) => setField({ ...field, help: e.target.value || undefined })} />
         </FormField>
@@ -159,6 +164,13 @@ export default function FormEditorPage({ params }: PageProps) {
               make={() => newField("text", draft.fields)}
               render={fieldEditor}
             />
+            {!draft.fields.some((f) => isMarketingField(f.id)) && (
+              <div>
+                <Button size="sm" onClick={() => set({ fields: [...draft.fields, marketingField()] })}>
+                  Restore marketing checkbox
+                </Button>
+              </div>
+            )}
             {local.length > 0 && (
               <Alert tone="warning">
                 <ul style={{ margin: 0 }}>

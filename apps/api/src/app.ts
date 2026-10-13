@@ -68,6 +68,8 @@ import { formUploadRoutes } from "./modules/forms/routes.ts";
 import { MAX_FILE_BYTES } from "@rbb/content-schema";
 import { submissionRoutes } from "./modules/submissions/routes.ts";
 import { SubmissionService } from "./modules/submissions/service.ts";
+import { AudienceService } from "./modules/audience/service.ts";
+import { audienceRoutes } from "./modules/audience/routes.ts";
 import { MemberService } from "./modules/members/service.ts";
 import { MongoMediaStore } from "./modules/media/repository.ts";
 import { createDeliverer, refusingTransport, resendTransport, type EmailTransport, type OutgoingEmail } from "./modules/forms/email.ts";
@@ -288,6 +290,13 @@ export function createApp(options: AppOptions = {}): App {
     const db = await mongo.db();
     const store = new MongoFormDefinitionStore(db, config.orgId);
     return { uploads: formUploads(db, config), definitions: { live: (id: string) => store.get(id) } };
+  };
+
+  /* Admin → Audience: every person across the forms — owners only. */
+  const audience = async () => {
+    if (!config || !mongo) throw errors.unavailable("The database is not configured.");
+    const db = await mongo.db();
+    return new AudienceService(new MongoSubmissionStore(db, config.orgId), auditFor(db, config));
   };
 
   /* The website forms in the admin — owners only, live when saved. */
@@ -531,6 +540,7 @@ export function createApp(options: AppOptions = {}): App {
     ...(config ? formRoutes(forms, config.cors.web) : []),
     ...(config ? submissionRoutes(submissions) : []),
     ...(config ? formDefinitionRoutes(formDefinitions) : []),
+    ...(config ? audienceRoutes(audience) : []),
     ...(config ? formUploadRoutes(uploadDeps, config.cors.web) : []),
     ...(config ? donationRoutes(donationProvider) : []),
     ...(config ? mediaRoutes(media) : []),

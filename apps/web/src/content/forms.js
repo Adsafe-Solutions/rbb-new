@@ -68,6 +68,11 @@ const field = (name, extra) => ({ name, ...FIELD_RULES[name], ...extra });
 const NAME = field("name", { label: "Your name", autoComplete: "name", missing: "Enter your name" });
 const EMAIL = field("email", { label: "Email address", autoComplete: "email", missing: "Enter your email address" });
 const message = (label, missing) => field("message", { label, missing });
+/* News and updates by email (2026-10-13): on every form, TICKED when the
+   form opens — the owner's decision; see docs/ADMIN_IMPLEMENTATION_PLAN.md
+   #18 for why a pre-ticked box is not valid consent everywhere. The same
+   words as the admin's default (packages/content-schema MARKETING_LABEL). */
+const MARKETING = field("marketing", { label: "Send me news and updates from Rising Beyond Borders by email. I can unsubscribe at any time.", defaultChecked: true });
 
 /* What every config starts from. A form still needs its endpoint, the
    server's own delivery configuration and the published Privacy Policy
@@ -125,6 +130,7 @@ export const FORMS = {
         ],
       }),
       message("Your message", "Enter your message"),
+      MARKETING,
     ],
   },
 
@@ -134,7 +140,7 @@ export const FORMS = {
     ...pending("volunteer"),
     heading: "Tell us you are interested",
     submitLabel: "Send",
-    fields: [NAME, EMAIL, message("How would you like to help?", "Tell us how you would like to help")],
+    fields: [NAME, EMAIL, message("How would you like to help?", "Tell us how you would like to help"), MARKETING],
   },
 
   /* /get-involved/partner — no packages, tiers or organisation types. */
@@ -147,6 +153,7 @@ export const FORMS = {
       field("organization", { label: "Organization", autoComplete: "organization" }),
       EMAIL,
       message("What would you like to explore?", "Tell us what you would like to explore"),
+      MARKETING,
     ],
   },
 
@@ -223,6 +230,7 @@ const webField = (f, endpoint) => ({
   ...((f.maxLength ?? MAX_LENGTH[f.type]) && { maxLength: f.maxLength ?? MAX_LENGTH[f.type] }),
   ...(f.options && { options: f.options.map((o) => ({ value: o, label: o })) }),
   ...(AUTOCOMPLETE[f.id] && { autoComplete: AUTOCOMPLETE[f.id] }),
+  ...(f.type === "checkbox" && f.defaultChecked && { defaultChecked: true }),
   ...(f.type === "file" && { accept: UPLOAD_ACCEPT, maxBytes: UPLOAD_MAX_BYTES, uploadEndpoint: endpoint ? `${endpoint}/files` : null }),
 });
 

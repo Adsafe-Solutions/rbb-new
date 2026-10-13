@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { IsoDateTime, OrgId, Slug, text } from "../common/primitives.ts";
-import { BUILT_IN_FORM_IDS, DEFAULT_MAX_LENGTH, FORM_FIELD_TYPES, MAX_FILE_FIELDS } from "./defaults.ts";
+import { BUILT_IN_FORM_IDS, DEFAULT_MAX_LENGTH, FORM_FIELD_TYPES, MARKETING_FIELD_ID, MAX_FILE_FIELDS } from "./defaults.ts";
 
 /* A website form as edited in the admin (owners only; live when saved —
    owner decision, 2026-10-13): Contact Us, Volunteer, Partner With Us, and
@@ -24,6 +24,7 @@ export const FormField = z
     required: z.boolean(),
     options: z.array(text(80)).min(1).max(30).optional(),
     maxLength: z.int().min(1).max(5000).optional(),
+    defaultChecked: z.boolean().optional(),
   })
   .superRefine((f, ctx) => {
     if (f.type === "select" && !f.options) ctx.addIssue({ code: "custom", path: ["options"], message: "a dropdown needs at least one option" });
@@ -32,6 +33,7 @@ export const FormField = z
     const limit = DEFAULT_MAX_LENGTH[f.type];
     if (f.maxLength !== undefined && (limit === undefined || f.maxLength > limit)) ctx.addIssue({ code: "custom", path: ["maxLength"], message: limit ? `at most ${limit}` : "this field type has no length" });
     if ((f.type === "checkbox" || f.type === "file" || f.type === "select") && f.placeholder) ctx.addIssue({ code: "custom", path: ["placeholder"], message: "this field type has no placeholder" });
+    if (f.defaultChecked !== undefined && f.type !== "checkbox") ctx.addIssue({ code: "custom", path: ["defaultChecked"], message: "only a checkbox starts ticked" });
   });
 export type FormField = z.infer<typeof FormField>;
 
@@ -66,6 +68,8 @@ export const FormDefinition = z
       const f = byId.get(id);
       if (!f || f.type !== type || !f.required) ctx.addIssue({ code: "custom", path: ["fields"], message: `every form keeps a required "${id}" field (${type})` });
     }
+    const marketing = byId.get(MARKETING_FIELD_ID);
+    if (!marketing || marketing.type !== "checkbox" || marketing.required) ctx.addIssue({ code: "custom", path: ["fields"], message: `every form keeps the optional "${MARKETING_FIELD_ID}" checkbox (news and updates by email)` });
     if (d.fields.filter((f) => f.type === "file").length > MAX_FILE_FIELDS) ctx.addIssue({ code: "custom", path: ["fields"], message: `at most ${MAX_FILE_FIELDS} file uploads` });
   });
 export type FormDefinition = z.infer<typeof FormDefinition>;

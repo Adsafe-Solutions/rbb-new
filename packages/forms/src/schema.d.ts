@@ -1,7 +1,7 @@
 /* Types for ./schema.js — for the TypeScript API (M18). The JavaScript is
    the source of truth; keep these in step with it. */
 export type FormId = "contact" | "volunteer" | "partner" | "travel" | "fundraise" | "newsletter";
-export type FieldName = "name" | "email" | "organization" | "phone" | "topic" | "message" | "consent";
+export type FieldName = "name" | "email" | "organization" | "phone" | "topic" | "message" | "consent" | "marketing";
 export interface FieldRule {
   type: "text" | "email" | "select" | "textarea" | "checkbox";
   required: boolean;

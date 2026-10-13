@@ -1,4 +1,4 @@
-import { DEFAULT_MAX_LENGTH, FILE_TYPES, MAX_FILE_FIELDS, SYSTEM_FIELD_IDS, type FormDefinitionData, type FormFieldDefinition, type FormFieldType } from "@rbb/content-schema/form-defaults";
+import { DEFAULT_MAX_LENGTH, FILE_TYPES, MARKETING_FIELD_ID, MARKETING_LABEL, MAX_FILE_FIELDS, SYSTEM_FIELD_IDS, type FormDefinitionData, type FormFieldDefinition, type FormFieldType } from "@rbb/content-schema/form-defaults";
 import { idFrom } from "../blocks/ids.ts";
 
 /* The form builder's rules, as plain functions (unit-tested): field ids,
@@ -19,6 +19,9 @@ export const TYPE_LABELS: Record<FormFieldType, string> = {
 export const typesFor = (kind: FormDefinitionData["kind"]): FormFieldType[] => (Object.keys(TYPE_LABELS) as FormFieldType[]).filter((t) => t !== "file" || kind === "career");
 
 export const isSystemField = (id: string) => (SYSTEM_FIELD_IDS as readonly string[]).includes(id);
+/* The marketing emails checkbox every form keeps (never required). */
+export const isMarketingField = (id: string) => id === MARKETING_FIELD_ID;
+export const marketingField = (): FormFieldDefinition => ({ id: MARKETING_FIELD_ID, type: "checkbox", label: MARKETING_LABEL, required: false, defaultChecked: true });
 
 /* A field id from its label ("Your city" → "your_city"), unique on the
    form; fixed once the form is saved (submissions are keyed by it). */
@@ -51,6 +54,7 @@ export function retype(field: FormFieldDefinition, type: FormFieldType): FormFie
 export function builderProblems(form: Pick<FormDefinitionData, "kind" | "fields">): string[] {
   const problems: string[] = [];
   for (const id of SYSTEM_FIELD_IDS) if (!form.fields.some((f) => f.id === id)) problems.push(`The “${id}” field is needed for replies and cannot be removed.`);
+  if (!form.fields.some((f) => f.id === MARKETING_FIELD_ID)) problems.push("The marketing emails checkbox stays on every form (Audience reads it). Add it back with “Restore marketing checkbox”.");
   form.fields.forEach((f, i) => {
     if (!f.label.trim()) problems.push(`Field ${i + 1} needs a label.`);
     if (f.type === "select" && !(f.options ?? []).some((o) => o.trim())) problems.push(`“${f.label || `Field ${i + 1}`}” needs at least one option.`);
@@ -75,7 +79,8 @@ export function cleanForm<F extends Pick<FormDefinitionData, "title" | "heading"
       label: t(f.label),
       ...(t(f.help) && { help: t(f.help) }),
       ...(t(f.placeholder) && { placeholder: t(f.placeholder) }),
-      required: f.type === "email" && f.id === "email" ? true : f.id === "name" ? true : f.required,
+      required: f.id === MARKETING_FIELD_ID ? false : f.type === "email" && f.id === "email" ? true : f.id === "name" ? true : f.required,
+      ...(f.type === "checkbox" && f.defaultChecked && { defaultChecked: true }),
       ...(f.type === "select" && { options: [...new Set((f.options ?? []).map((o) => o.trim()).filter(Boolean))] }),
       ...(f.maxLength && { maxLength: f.maxLength }),
     })),

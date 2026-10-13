@@ -29,13 +29,17 @@ export const FIELD_RULES = {
   topic: { type: "select", required: false, options: TOPICS, singleLine: true },
   message: { type: "textarea", required: true, maxLength: 5000 },
   consent: { type: "checkbox", required: true },
+  /* Advertising / news emails (2026-10-13): optional; the website shows it
+     TICKED by default (owner decision — see docs/ADMIN_IMPLEMENTATION_PLAN.md
+     #18 on why a pre-ticked box is not valid consent everywhere). */
+  marketing: { type: "checkbox", required: false },
 };
 
 /* Which fields each form sends, in order. Anything else is rejected. */
 export const FORM_SCHEMA = {
-  contact: ["name", "email", "topic", "message"],
-  volunteer: ["name", "email", "message"],
-  partner: ["name", "organization", "email", "message"],
+  contact: ["name", "email", "topic", "message", "marketing"],
+  volunteer: ["name", "email", "message", "marketing"],
+  partner: ["name", "organization", "email", "message", "marketing"],
   travel: ["name", "email", "phone", "message"],
   fundraise: ["name", "email", "message"],
   newsletter: ["email", "consent"],

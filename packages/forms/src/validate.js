@@ -57,7 +57,9 @@ export function validateSubmission(body) {
     if (rule.type === "checkbox") {
       if (raw !== undefined && typeof raw !== "boolean") return bad("bad-request");
       if (rule.required && raw !== true) errors[name] = "required";
-      else data[name] = raw === true;
+      /* An optional box the page did not send (a page from before it
+         existed) records no answer — not a "no". */
+      else if (raw !== undefined) data[name] = raw === true;
       continue;
     }
 

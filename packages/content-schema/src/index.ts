@@ -90,7 +90,7 @@ export { PROJECT_IMPACT_MAX, PROJECT_PARTNERS_MAX, Project, ProjectImpact, proje
 export { CareerRole, Careers, CareersSeo } from "./careers/careers.ts";
 export { HowWeWork } from "./howWeWork/howWeWork.ts";
 export { FormDefinition, FormField, FormFieldId, FormId } from "./forms/formDefinition.ts";
-export { BUILT_IN_FORM_IDS, DEFAULT_FORMS, DEFAULT_MAX_LENGTH, FILE_TYPES, FORM_FIELD_TYPES, MAX_FILE_BYTES, MAX_FILE_FIELDS, SYSTEM_FIELD_IDS, newCareerForm } from "./forms/defaults.ts";
+export { BUILT_IN_FORM_IDS, DEFAULT_FORMS, DEFAULT_MAX_LENGTH, FILE_TYPES, FORM_FIELD_TYPES, MARKETING_FIELD_ID, MARKETING_LABEL, MAX_FILE_BYTES, MAX_FILE_FIELDS, SYSTEM_FIELD_IDS, newCareerForm } from "./forms/defaults.ts";
 export type { BuiltInFormId, FormDefinitionData, FormFieldDefinition, FormFieldType, FormKind } from "./forms/defaults.ts";
 export { POLICY_IDS, POLICY_ROUTES, Policy, PolicyId, PolicySection, PolicySeo, policyApprovalProblems } from "./policies/policy.ts";
 export {

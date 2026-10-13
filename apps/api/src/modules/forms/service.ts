@@ -124,7 +124,8 @@ export class FormService {
     } else {
       const result = validateSubmission(body);
       if (!result.ok) return refuse(result.status, result.fields as Record<string, string> | undefined);
-      data = result.data as Record<string, string>;
+      /* Checkboxes (the marketing emails choice) are kept as Yes / No. */
+      data = Object.fromEntries(Object.entries(result.data as Record<string, unknown>).map(([k, v]) => [k, typeof v === "boolean" ? (v ? "Yes" : "No") : (v as string)]));
     }
 
     /* Attachments: uploads made for this form's file fields, unclaimed. */

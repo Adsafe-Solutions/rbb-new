@@ -82,6 +82,7 @@ export const NAVIGATION: NavSection[] = [
       { id: "highlights", label: "Highlights", icon: Sparkles, status: "available", href: "/highlights" },
       { id: "forms", label: "Forms", icon: FileText, status: "available", href: "/forms", permission: "forms:write" },
       { id: "submissions", label: "Form submissions", icon: Inbox, status: "available", href: "/submissions", permission: "submissions:read" },
+      { id: "audience", label: "Audience", icon: Users, status: "available", href: "/audience", permission: "submissions:read" },
     ],
   },
   {

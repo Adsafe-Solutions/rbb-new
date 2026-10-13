@@ -29,7 +29,9 @@ and the problems met while entering content on 2026-10-12/13.
 | 14 | Audit Log screen | M | Removed — not required (scope decision, 2026-10-13) |
 | 15 | Settings → General: country selection | S | Implemented — not yet tested or committed |
 | 16 | Website forms stored + Admin → Form submissions | M | Done — committed, pushed and live (`e77f3df`, replies `669f561`) |
-| 17 | Form builder: edit every website form; career application forms with CV uploads | L | Implemented — tests run; not yet committed or deployed |
+| 17 | Form builder: edit every website form; career application forms with CV uploads | L | Done — committed, pushed and live (`97d5def`) |
+| 18 | Audience, and a marketing emails checkbox on every form (ticked by default) | M | Implemented — tests run; not yet committed or deployed |
+| 19 | Footer link to the Careers page | S | Implemented — not yet committed or deployed |
 
 ## 1. Remove stale references from record pickers — done
 
@@ -425,6 +427,50 @@ the database; **owners only**; a saved form is **live at once** (no review).
   web `published-snapshot.test.mjs` (forms mapping). A scratch build from
   a fixture snapshot draws the saved Contact form and the Careers role's
   application form with its file field.
+
+## 18. Audience and the marketing emails checkbox — implemented
+
+Owner decisions (2026-10-13): an **Audience** section listing every unique
+person from all forms; a **marketing emails** checkbox on **every form**,
+**ticked by default** (the visitor can untick it), shown in Audience as a
+column.
+
+⚠ Recorded risk, raised before building and accepted by the owner: a
+pre-ticked box is generally **not valid consent** for marketing emails under
+UK/EU law (GDPR/PECR; CJEU *Planet49*) or India's DPDP Act. "Yes" in Audience
+records that the box was left ticked, not that consent was actively given.
+Check with RBB / counsel before emailing that list. Unticking it by default
+is a one-line change per form (Admin → Forms → "Ticked when the form opens";
+the built-in forms in `apps/web/src/content/forms.js` MARKETING).
+
+- Forms: `marketing` (checkbox, optional) on Contact, Volunteer and Partner
+  (`packages/forms` FORM_SCHEMA; the website's `content/forms.js`), and a
+  fixed field of every saved form (`FormDefinition`: kept, never required;
+  `defaultChecked`); `DEFAULT_FORMS` / `newCareerForm` carry it ticked. The
+  website ticks such a box when the form opens (`FormShell`). Stored with
+  each submission as Yes / No; a page that did not send the box records no
+  answer (`@rbb/forms` no longer turns a missing optional checkbox into
+  "no").
+- API: `modules/audience/` — `GET /api/v1/audience` (search, marketing
+  yes/no/not asked, form, pages of 50; totals) and `GET
+  /api/v1/audience/export` (CSV, formula-safe, audited by row count),
+  owners only (`submissions:read`). Grouped from the stored submissions by
+  email, case ignored (`audienceOf`): name, forms used, submissions, first
+  and last contact, the LATEST marketing answer and when it was given.
+  Nothing is stored twice: deleting a person's submissions removes them.
+- Admin: Engagement → **Audience** (`/audience`): totals, filters, table with
+  the Marketing emails column, Load more, Export CSV, and a note about the
+  consent risk. The form builder keeps the marketing checkbox (type and
+  "not required" locked; wording and "Ticked when the form opens"
+  editable; "Restore marketing checkbox" if removed).
+- Tests: API `test/audience.test.ts` (3); content-schema
+  `formDefinition.test.ts`; admin `form-builder.test.mjs`. A scratch build
+  pre-renders the box ticked on Contact, Volunteer and Partner.
+
+## 19. Footer link to the Careers page — implemented
+
+`apps/web/src/content/footer.js`: "Careers" (`/about-us/careers`) in the
+footer's Information column, on every page.
 
 ## 14. Audit Log screen — removed, not required
 

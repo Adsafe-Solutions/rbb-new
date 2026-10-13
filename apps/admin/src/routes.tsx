@@ -64,6 +64,7 @@ const ReportEditorPage = lazy(() => import("./pages/transparency/ReportEditorPag
 const UsersPage = lazy(() => import("./pages/users/UsersPage"));
 const SubmissionsPage = lazy(() => import("./pages/submissions/SubmissionsPage"));
 const FormsPage = lazy(() => import("./pages/forms/FormsPage"));
+const AudiencePage = lazy(() => import("./pages/audience/AudiencePage"));
 const FormEditorPage = lazy(() => import("./pages/forms/FormEditorPage"));
 const AccountPage = lazy(() => import("./pages/account/AccountPage"));
 
@@ -106,6 +107,7 @@ export const ROUTES: RouteDefinition[] = [
   { path: "/highlights", title: "Highlights", breadcrumb: [{ label: "Engagement" }, { label: "Highlights" }], component: HighlightsPage },
   { path: "/forms", title: "Forms", breadcrumb: [{ label: "Engagement" }, { label: "Forms" }], component: FormsPage, permission: "forms:write" },
   { path: "/forms/:id", title: "Form", breadcrumb: [{ label: "Engagement" }, { label: "Forms", href: "/forms" }, { label: "Edit form" }], component: FormEditorPage, permission: "forms:write" },
+  { path: "/audience", title: "Audience", breadcrumb: [{ label: "Engagement" }, { label: "Audience" }], component: AudiencePage, permission: "submissions:read" },
   { path: "/submissions", title: "Form submissions", breadcrumb: [{ label: "Engagement" }, { label: "Form submissions" }], component: SubmissionsPage, permission: "submissions:read" },
   { path: "/settings", title: "Settings", breadcrumb: [{ label: "System" }, { label: "Settings" }], component: SettingsPage },
   { path: "/users", title: "Users & Roles", breadcrumb: [{ label: "System" }, { label: "Users & Roles" }], component: UsersPage, permission: "users:read" },

@@ -67,6 +67,44 @@ export interface SubmissionCounts {
   byForm: Record<string, { total: number; new: number }>;
 }
 
+/* One person across every form (Admin → Audience): matched by email
+   address (case ignored), newest contact first. `marketing` is their
+   LATEST answer to the marketing emails checkbox ("Yes" / "No"), or null
+   when no submission of theirs carried it. */
+export interface AudienceMember {
+  email: string;
+  name: string;
+  forms: string[];
+  submissions: number;
+  firstAt: string;
+  lastAt: string;
+  marketing: "Yes" | "No" | null;
+  marketingAt: string | null;
+}
+
+/* The audience from submissions (any order in), grouped by email. */
+export function audienceOf(rows: readonly Pick<StoredSubmission, "formId" | "fields" | "createdAt">[]): AudienceMember[] {
+  const people = new Map<string, AudienceMember>();
+  for (const r of [...rows].sort((a, b) => (a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0))) {
+    const email = r.fields.email?.trim();
+    if (!email) continue;
+    const key = email.toLowerCase();
+    const p = people.get(key) ?? { email, name: "", forms: [], submissions: 0, firstAt: r.createdAt, lastAt: r.createdAt, marketing: null, marketingAt: null };
+    p.email = email;
+    if (r.fields.name) p.name = r.fields.name;
+    if (!p.forms.includes(r.formId)) p.forms.push(r.formId);
+    p.submissions += 1;
+    p.lastAt = r.createdAt;
+    const m = r.fields.marketing;
+    if (m === "Yes" || m === "No") {
+      p.marketing = m;
+      p.marketingAt = r.createdAt;
+    }
+    people.set(key, p);
+  }
+  return [...people.values()].sort((a, b) => (a.lastAt < b.lastAt ? 1 : a.lastAt > b.lastAt ? -1 : a.email.localeCompare(b.email)));
+}
+
 export interface SubmissionStore {
   insert(submission: StoredSubmission): Promise<void>;
   list(query: SubmissionQuery): Promise<StoredSubmission[]>;
@@ -74,6 +112,8 @@ export interface SubmissionStore {
   setStatus(id: string, status: SubmissionStatus, at: string): Promise<StoredSubmission | null>;
   remove(id: string): Promise<boolean>;
   counts(): Promise<SubmissionCounts>;
+  /* Every person across the forms (audienceOf). */
+  audience(): Promise<AudienceMember[]>;
   /* Records a sent reply; the submission becomes read. */
   addReply(id: string, reply: SubmissionReply): Promise<StoredSubmission | null>;
 }
@@ -152,6 +192,13 @@ export class MongoSubmissionStore implements SubmissionStore {
   async setStatus(id: string, status: SubmissionStatus, at: string) {
     const doc = await this.#collection.findOneAndUpdate({ orgId: this.#orgId, id }, { $set: { status, updatedAt: new Date(at) } }, { returnDocument: "after" });
     return doc ? fromDocument(doc) : null;
+  }
+
+  async audience() {
+    const docs = await this.#collection
+      .find({ orgId: this.#orgId, "fields.email": { $type: "string" } }, { projection: { _id: 0, formId: 1, "fields.email": 1, "fields.name": 1, "fields.marketing": 1, createdAt: 1 } })
+      .toArray();
+    return audienceOf(docs.map((d) => ({ formId: d.formId, fields: d.fields, createdAt: d.createdAt.toISOString() })));
   }
 
   async addReply(id: string, reply: SubmissionReply) {

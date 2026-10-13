@@ -128,7 +128,10 @@ export default function FormShell({
   const ready = formState(config) === "ready";
   const fields = ready ? formFields(config) : [];
 
-  const [values, setValues] = useState({});
+  /* Checkboxes that start ticked (the marketing emails box, 2026-10-13)
+     are ticked when the form opens and again after a successful send. */
+  const initialValues = () => Object.fromEntries((config?.fields ?? []).filter((f) => f.type === "checkbox" && f.defaultChecked).map((f) => [f.name, true]));
+  const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [status, setStatus] = useState("ready");
@@ -193,7 +196,7 @@ export default function FormShell({
     busy.current = false;
     if (result.outcome === "ok") {
       key.current = null;
-      setValues({});
+      setValues(initialValues());
       setStatus("success");
     } else if (result.outcome === "invalid") {
       /* The server disagreed with the browser's checks: show its field

@@ -5,7 +5,7 @@
    arrow and the rel/target pair — the design marks off-site links rather
    than letting them look like the rest of the list. */
 import { BRAND } from "./brand.js";
-import { ORG_CONTACT, verifiedOnly } from "./contact.js";
+import { CAREERS, ORG_CONTACT, verifiedOnly } from "./contact.js";
 import {
   ABOUT_SECTION,
   APPEALS_SECTION,
@@ -50,9 +50,11 @@ export const FOOTER_COLUMNS = [
       { label: "Meet the Team", to: "/about/team" },
     ],
   },
+  /* Careers (2026-10-13): the page at its long-standing address
+     (contact.js CAREERS.to), where open roles take applications. */
   {
     heading: "Information",
-    links: [{ label: "Contact Us", to: CONTACT_PAGE.to }, ...legalLinks()],
+    links: [{ label: "Contact Us", to: CONTACT_PAGE.to }, { label: "Careers", to: CAREERS.to }, ...legalLinks()],
   },
 ];
 

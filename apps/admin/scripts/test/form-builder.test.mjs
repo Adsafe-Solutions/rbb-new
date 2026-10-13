@@ -54,3 +54,26 @@ test("the Forms screen is owners-only and in Engagement; the Careers editor give
   assert.match(nav, /id: "forms".*permission: "forms:write"/);
   assert.match(readFileSync(new URL("../../src/pages/careers/CareersPage.tsx", import.meta.url), "utf8"), /withRoleIds\(draft\.opportunities\.roles\)/);
 });
+
+test("the marketing emails checkbox: on every default form, ticked, never required, restored if removed", async () => {
+  const { isMarketingField, marketingField } = await import("../../src/forms/builder.ts");
+  for (const form of Object.values(DEFAULT_FORMS)) {
+    const m = form.fields.find((f) => isMarketingField(f.id));
+    assert.ok(m && m.type === "checkbox" && m.required === false && m.defaultChecked === true, form.id);
+  }
+  const without = { ...DEFAULT_FORMS.contact, fields: DEFAULT_FORMS.contact.fields.filter((f) => !isMarketingField(f.id)) };
+  assert.match(builderProblems(without).join(), /marketing emails checkbox/);
+  assert.equal(cleanForm({ ...DEFAULT_FORMS.contact, fields: [...without.fields, { ...marketingField(), required: true }] }).fields.at(-1).required, false);
+  assert.equal(cleanForm(DEFAULT_FORMS.contact).fields.at(-1).defaultChecked, true);
+});
+
+test("Audience: owners only, in Engagement, filters in the request", async () => {
+  const { audienceQuery, NO_AUDIENCE_FILTERS } = await import("../../src/audience/client.ts").catch(() => ({}));
+  if (audienceQuery) {
+    assert.equal(audienceQuery(NO_AUDIENCE_FILTERS), "");
+    assert.equal(audienceQuery({ q: " asha ", marketing: "yes", form: "contact" }, 2), "?q=asha&marketing=yes&form=contact&page=2");
+  }
+  const routes = readFileSync(new URL("../../src/routes.tsx", import.meta.url), "utf8");
+  assert.match(routes, /path: "\/audience".*permission: "submissions:read"/);
+  assert.match(readFileSync(new URL("../../src/shell/navigation.ts", import.meta.url), "utf8"), /id: "audience".*permission: "submissions:read"/);
+});

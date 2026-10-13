@@ -71,3 +71,20 @@ export interface AuthView {
   permissions: string[];
   session: { id: string; expiresAt: string };
 }
+
+/* A file from the API (a CSV export), with the same credentials as every
+   call; a refusal throws as `api` does. */
+export async function apiDownload(path: string): Promise<{ blob: Blob; name: string | null }> {
+  let response: Response;
+  try {
+    response = await fetch(`${BASE}${path}`, { credentials: BASE ? "include" : "same-origin" });
+  } catch {
+    throw new ApiRequestError(0, "NETWORK_ERROR", "The server could not be reached.");
+  }
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;
+    throw new ApiRequestError(response.status, body?.error?.code ?? "UNKNOWN", body?.error?.message ?? "The download failed.");
+  }
+  const name = /filename="([^"]+)"/.exec(response.headers.get("Content-Disposition") ?? "")?.[1] ?? null;
+  return { blob: await response.blob(), name };
+}

@@ -131,6 +131,14 @@ and Email stay on every form. **Saving puts the form on the website at
 once.** A built-in form can be reset to the website's own; a career form
 deleted.
 
+## Audience (owners only)
+
+`/audience` (Engagement → Audience) lists every unique person who sent a
+website form (one row per email address): name, forms used, submissions,
+first and last contact, and their latest answer to the **marketing emails**
+checkbox that every form carries (ticked by default — owner decision; see
+the plan's #18 on consent). Search, filter, Load more, and Export CSV.
+
 ## Form submissions (owners only)
 
 `/submissions` (Engagement → Form submissions) lists what visitors sent

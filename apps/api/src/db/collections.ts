@@ -100,6 +100,14 @@ import type { Db, IndexDescription } from "mongodb";
      orgId_policyId_unique         ONE record per policy per organization — its
                                    only query (read, save and publish all go by
                                    orgId and policyId)
+   form_submissions                what visitors send through the website's
+                                   Contact, Volunteer and Partner forms
+                                   (2026-10-13) — kept until an owner deletes
+     orgId_id_unique               one submission, by id
+     orgId_createdAt               the admin's list, newest first (and its
+                                   date filter)
+     orgId_formId_createdAt        the list filtered by form
+     orgId_status_createdAt        the list filtered by new / read
    story_strips                    Highlights — the story strip (M23)
      orgId_unique                  ONE strip per organization — its only query
    popups                          the site popup (M22)
@@ -155,6 +163,7 @@ export const COLLECTIONS = {
   storyStrips: "story_strips",
   impactPages: "impact_pages",
   transparencyPages: "transparency_pages",
+  formSubmissions: "form_submissions",
 } as const;
 
 export const INDEXES: Record<keyof typeof COLLECTIONS, IndexDescription[]> = {
@@ -255,6 +264,12 @@ export const INDEXES: Record<keyof typeof COLLECTIONS, IndexDescription[]> = {
   announcementBars: [{ name: "orgId_unique", key: { orgId: 1 }, unique: true }],
   popups: [{ name: "orgId_unique", key: { orgId: 1 }, unique: true }],
   storyStrips: [{ name: "orgId_unique", key: { orgId: 1 }, unique: true }],
+  formSubmissions: [
+    { name: "orgId_id_unique", key: { orgId: 1, id: 1 }, unique: true },
+    { name: "orgId_createdAt", key: { orgId: 1, createdAt: -1, id: -1 } },
+    { name: "orgId_formId_createdAt", key: { orgId: 1, formId: 1, createdAt: -1, id: -1 } },
+    { name: "orgId_status_createdAt", key: { orgId: 1, status: 1, createdAt: -1, id: -1 } },
+  ],
   impactPages: [
     { name: "orgId_unique", key: { orgId: 1 }, unique: true },
     { name: "orgId_status", key: { orgId: 1, "record.status": 1 } },

@@ -40,7 +40,15 @@ export const BUILD_COMMAND = ["pnpm", ["--filter", "@rbb/web", "run", "build"]];
 /* The env files Vite reads for a production build (apps/web), in its order. */
 export const VITE_ENV_FILES = [".env", ".env.local", ".env.production", ".env.production.local"];
 /* The variables the preflight looks at — names only, never values. */
-export const KNOWN_VARIABLES = ["RBB_SNAPSHOT_URL", "RBB_SNAPSHOT_REQUIRED", "RBB_SNAPSHOT_RUNTIME", "RBB_SNAPSHOT", "RBB_SNAPSHOT_VERSION", "RBB_SNAPSHOT_RUNTIME_TIMEOUT_MS", "RBB_MEDIA_ORIGINS", "RBB_PREVIEW", "VITE_SITE_URL", "VITE_ENVIRONMENT", "CLOUDFLARE_API_TOKEN", "CLOUDFLARE_ACCOUNT_ID"];
+/* The website forms that post to the production API (2026-10-13: Contact
+   Us, Volunteer, Partner With Us — stored for owners in the admin). When
+   set, each must be exactly its production endpoint. */
+export const FORM_ENDPOINTS = {
+  VITE_FORM_ENDPOINT_CONTACT: "https://api.risingbeyondborders.org/api/v1/forms/contact",
+  VITE_FORM_ENDPOINT_VOLUNTEER: "https://api.risingbeyondborders.org/api/v1/forms/volunteer",
+  VITE_FORM_ENDPOINT_PARTNER: "https://api.risingbeyondborders.org/api/v1/forms/partner",
+};
+export const KNOWN_VARIABLES = ["RBB_SNAPSHOT_URL", "RBB_SNAPSHOT_REQUIRED", "RBB_SNAPSHOT_RUNTIME", "RBB_SNAPSHOT", "RBB_SNAPSHOT_VERSION", "RBB_SNAPSHOT_RUNTIME_TIMEOUT_MS", "RBB_MEDIA_ORIGINS", "RBB_PREVIEW", "VITE_SITE_URL", "VITE_ENVIRONMENT", ...Object.keys(FORM_ENDPOINTS), "CLOUDFLARE_API_TOKEN", "CLOUDFLARE_ACCOUNT_ID"];
 
 const web = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repo = resolve(web, "../..");
@@ -68,6 +76,12 @@ export function preflightProblems({ env, git, envFiles = [] }) {
   if (site !== undefined && site !== "" && site !== PRODUCTION_SITE_ORIGIN) problems.push(`VITE_SITE_URL, when set, must be the production origin (${PRODUCTION_SITE_ORIGIN})`);
   const environment = value("VITE_ENVIRONMENT");
   if (environment !== undefined && environment !== "" && environment !== "prod") problems.push('VITE_ENVIRONMENT, when set, must be "prod" for a production deployment');
+  for (const [name, endpoint] of Object.entries(FORM_ENDPOINTS)) {
+    const set = value(name);
+    if (set !== undefined && set !== "" && set !== endpoint) problems.push(`${name}, when set, must be exactly the production form endpoint (${endpoint})`);
+  }
+  for (const name of ["VITE_FORM_ENDPOINT_TRAVEL", "VITE_FORM_ENDPOINT_FUNDRAISE", "VITE_FORM_ENDPOINT_NEWSLETTER"])
+    if (value(name)) problems.push(`${name} is set — only the Contact, Volunteer and Partner forms are taken in production`);
   const token = value("CLOUDFLARE_API_TOKEN");
   if (token !== undefined && token !== "" && !value("CLOUDFLARE_ACCOUNT_ID")) problems.push("CLOUDFLARE_API_TOKEN is set but CLOUDFLARE_ACCOUNT_ID is not — set both, or neither and use `wrangler login`");
   if (git.branch !== PAGES_BRANCH) problems.push(`the checkout is on "${git.branch}", not ${PAGES_BRANCH} — only ${PAGES_BRANCH} is deployed to production`);

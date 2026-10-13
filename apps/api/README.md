@@ -70,7 +70,11 @@ Base path: **`/api/v1`**.
 | GET | `/api/v1/internal/scheduler/run` | `Authorization: Bearer <CRON_SECRET>` (no session) | M15: the scheduler — publishes what is approved and due, finishes a stopped publish, retries a failed deployment trigger. 503 without CRON_SECRET, 401 without the secret. Also `pnpm api:scheduler:run` |
 | GET | `/api/v1/public/snapshot` | — public | The active published snapshot (`no-cache` + ETag; 404 before the first publish) |
 | GET | `/api/v1/public/snapshot/:version` | — public | One published version (immutable cache) |
-| POST | `/api/v1/forms/:formId` | — public; Origin must be exactly `WEB_ORIGIN` | M18: a website form → `{ data: { reference } }`. Contact, Volunteer, Partner, Fundraise when configured; Newsletter and Travel 503. JSON ≤ 16 KiB (415/413/400), 422 with `fields.<name>` codes, 429 + Retry-After, 503 when off, unconfigured or the email could not be sent. Email only — nothing stored |
+| POST | `/api/v1/forms/:formId` | — public; Origin must be exactly `WEB_ORIGIN` | M18: a website form → `{ data: { reference } }`. Contact, Volunteer, Partner, Fundraise when configured; Newsletter and Travel 503. JSON ≤ 16 KiB (415/413/400), 422 with `fields.<name>` codes, 429 + Retry-After, 503 when off, unconfigured or the email could not be sent. Contact, Volunteer and Partner are stored (2026-10-13) and taken even with email off; see "Public forms" |
+| GET | `/api/v1/submissions` | `submissions:read` (OWNER) | Stored form submissions, newest first: `?form&status&from&to&q&before&limit` → `{ items, next, counts }` |
+| GET | `/api/v1/submissions/:id` | `submissions:read` (OWNER) | One submission, every field |
+| POST | `/api/v1/submissions/:id/status` | `submissions:write` (OWNER) | `{ status: "new" \| "read" }` |
+| DELETE | `/api/v1/submissions/:id` | `submissions:write` (OWNER) | Deletes it for good |
 
 The donation provider is Givebutter, behind `modules/donations/provider.ts`.
 - **Client:** `GET` only, with an 8 s timeout and no retries. Failures become
@@ -193,7 +197,7 @@ The central table is `modules/auth/permissions.ts`.
 | Permission | OWNER | EDITOR |
 |---|---|---|
 | `content:read/create/update/delete`, `media:read/write`, `appeals:read/write`, `settings:read` | ✓ | ✓ |
-| `settings:write`, `publish:execute`, `content:approve` (M14), `users:read/write` | ✓ | — |
+| `settings:write`, `publish:execute`, `content:approve` (M14), `users:read/write`, `submissions:read/write` | ✓ | — |
 
 - Routes declare `auth` and `permission`. The app enforces both before the
   handler runs.
@@ -404,8 +408,19 @@ only, and the service checks again.
 
 The website's Contact, Volunteer, Partner and Fundraise forms post to
 `POST /api/v1/forms/:formId` (`modules/forms/`). The field schema and
-validation are `@rbb/forms`, shared with the website. **Email only:**
-nothing a visitor sends is stored, logged or audited.
+validation are `@rbb/forms`, shared with the website.
+
+Contact Us, Volunteer and Partner With Us submissions are STORED
+(owner decision, 2026-10-13) in `form_submissions` — the validated fields
+only, never the IP address or user agent — for owners to read in Admin →
+Form submissions (filters: form, new/read, dates, text), until an owner
+deletes one (no automatic expiry). They are also emailed once email is
+configured for the form; if that email fails, the stored submission is
+still received. Other forms stay email-only. The log and the audit trail
+still carry only the form, outcome and reference. Routes: `modules/submissions/` (owners only). Indexes:
+`form_submissions` (`orgId_id_unique`, `orgId_createdAt`,
+`orgId_formId_createdAt`, `orgId_status_createdAt`) — created by
+`api:db:indexes`.
 
 - **Checks, in order.**
   1. Exact `Origin` = `WEB_ORIGIN`. The app's CSRF check already refuses

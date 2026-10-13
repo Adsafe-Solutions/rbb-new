@@ -5,24 +5,34 @@ import type { Logger } from "../../logging/logger.ts";
 import type { AuditService } from "../audit/audit.ts";
 import type { ThrottleStore } from "../auth/repository.ts";
 import { pseudonym } from "../auth/tokens.ts";
-import { formEnabled, type FormId, type FormsConfig } from "./config.ts";
+import { FORM_IDS, formEnabled, type FormId, type FormsConfig } from "./config.ts";
+import type { SubmissionStore } from "../submissions/repository.ts";
+import { STORED_FORM_IDS } from "../submissions/service.ts";
 import { createDeliverer, type EmailTransport, type OutgoingEmail } from "./email.ts";
 import { acknowledgement, notification, type SubmissionData } from "./templates.ts";
 
-/* M18 — a public form submission, end to end (Document 21). Email only:
-   NOTHING a visitor sends is stored, logged or audited — the log and the
-   audit trail carry the form, the outcome and a reference, never a name,
-   address, message or IP address.
+/* M18 — a public form submission, end to end (Document 21).
 
-     enabled form? ──▶ rate limit (shared, per client + form) ──▶ bot?
-       ──▶ validate (@rbb/forms) ──▶ notify RBB ──▶ acknowledge (optional)
+   STORED since 2026-10-13 (owner decision): a Contact, Volunteer or
+   Partner submission is kept in `form_submissions` — its validated fields
+   only, never the IP address or user agent — for owners to read in the
+   admin, until an owner deletes it; and it is ALSO emailed when email is
+   configured for that form. The log and the audit trail still carry only
+   the form, the outcome and a reference — never a name, address, message
+   or IP address.
+
+     accepting? (stored, or email enabled) ──▶ rate limit (shared, per
+       client + form) ──▶ bot? ──▶ validate (@rbb/forms) ──▶ store
+       ──▶ notify RBB (if email is on) ──▶ acknowledge (optional)
 
    Every attempt on an enabled form counts against the limit — bots
    included — so nothing can flood the inbox or the audit trail. A bot
    (honeypot filled, or filled impossibly fast) gets exactly the answer a
    person gets and nothing is sent. A submission is "sent" only once the
    mode's delivery has completed: test mode renders it, staging and live
-   have the provider accept it — otherwise the visitor gets a 503. */
+   have the provider accept it. A STORED submission is received even if
+   the email then fails (that is logged); an email-only form still answers
+   503 when its email fails, as before. */
 
 export interface SubmitFacts {
   requestId: string | null;
@@ -30,7 +40,7 @@ export interface SubmitFacts {
   idempotencyKey: string | null;
 }
 
-type Outcome = "delivered" | "spam_discarded" | "invalid" | "rate_limited" | "provider_rejected" | "provider_unavailable";
+type Outcome = "delivered" | "stored" | "stored_and_delivered" | "stored_email_failed" | "spam_discarded" | "invalid" | "rate_limited" | "provider_rejected" | "provider_unavailable";
 
 /* Crockford-style alphabet: no 0/O or 1/I to misread over the phone. */
 const B32 = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -46,7 +56,13 @@ export interface FormServiceOptions {
   now?: () => Date;
   /* Test mode hands each rendered email here instead of sending it. */
   capture?: (email: OutgoingEmail) => void;
+  /* Where Contact, Volunteer and Partner submissions are kept. Without it
+     (or for any other form) the form is email-only, as in M18. */
+  submissions?: SubmissionStore;
 }
+
+const isFormId = (id: string): id is FormId => (FORM_IDS as readonly string[]).includes(id);
+const STORED = new Set<string>(STORED_FORM_IDS);
 
 export class FormService {
   readonly #throttle: ThrottleStore;
@@ -64,7 +80,9 @@ export class FormService {
   async submit(formId: string, body: unknown, facts: SubmitFacts): Promise<{ reference: string }> {
     const { config } = this.#options;
     if (!Object.hasOwn(FORM_SCHEMA, formId)) throw errors.notFound("form");
-    if (!formEnabled(config, formId)) throw errors.unavailable("This form is not taking submissions at the moment.");
+    const emailing = formEnabled(config, formId);
+    const storing = Boolean(this.#options.submissions) && STORED.has(formId);
+    if ((!emailing && !storing) || !isFormId(formId)) throw errors.unavailable("This form is not taking submissions at the moment.");
     if (body && typeof body === "object" && !Array.isArray(body) && (body as { formId?: unknown }).formId !== formId)
       throw errors.badRequest("The request does not match this form.");
 
@@ -91,14 +109,32 @@ export class FormService {
     const submittedAt = this.#now().toISOString().slice(0, 16).replace("T", " ");
     const meta = { reference, submittedAt };
     const idem = facts.idempotencyKey && IDEMPOTENCY_KEY.test(facts.idempotencyKey) ? facts.idempotencyKey : randomUUID();
-    const deliver = createDeliverer(config, this.#options.transport, this.#options.capture);
+    if (storing) {
+      const at = this.#now().toISOString();
+      try {
+        await this.#options.submissions!.insert({ id: randomUUID(), orgId: this.#options.orgId, formId, reference, fields: storedFields(data), status: "new", createdAt: at, updatedAt: at });
+      } catch {
+        this.#options.log.error("form submission could not be stored", { form: formId, reference });
+        throw errors.unavailable("Your message could not be sent. Please try again in a moment.");
+      }
+      if (!emailing) {
+        await this.#record(formId, "stored", reference, facts);
+        return { reference };
+      }
+    }
 
+    const deliver = createDeliverer(config, this.#options.transport, this.#options.capture);
     const sent = await deliver({ to: config.recipients[formId]!, replyTo: data.email, ...notification(formId, data, meta) }, `${formId}:${idem}:notify`);
     if (!sent.ok) {
+      if (storing) {
+        /* Kept already: the visitor's message is received; RBB reads it in the admin. */
+        await this.#record(formId, "stored_email_failed", reference, facts);
+        return { reference };
+      }
       await this.#record(formId, `provider_${sent.category}`, reference, facts);
       throw errors.unavailable("Your message could not be sent. Please try again in a moment.");
     }
-    await this.#record(formId, "delivered", reference, facts);
+    await this.#record(formId, storing ? "stored_and_delivered" : "delivered", reference, facts);
 
     /* The submitter's copy, only where enabled. Its failure does not undo
        the delivered notification; it is recorded. */
@@ -135,4 +171,14 @@ export class FormService {
       { requestId: facts.requestId, clientIp: null, userAgent: null }
     );
   }
+}
+
+/* What is kept: the validated text fields, trimmed, empty ones left out —
+   never consent flags, the honeypot or timing. */
+function storedFields(data: SubmissionData): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(data as unknown as Record<string, unknown>)
+      .filter(([, v]) => typeof v === "string" && v.trim() !== "")
+      .map(([k, v]) => [k, (v as string).trim()])
+  );
 }

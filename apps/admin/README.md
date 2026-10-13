@@ -120,6 +120,15 @@ Modules that aren't built yet appear in the sidebar marked "Soon". They
 aren't links. Search, help and notifications in the topbar are marked as
 unavailable.
 
+## Form submissions (owners only)
+
+`/submissions` (Engagement → Form submissions) lists what visitors sent
+through the website's Contact Us, Volunteer and Partner With Us forms,
+newest first, with totals per form and filters (form, new/read, dates,
+text). Opening one shows every field and marks it read; it can be marked
+new again, answered in the member's own mail program, or deleted for good.
+The route and the API need `submissions:read` / `submissions:write`.
+
 ## Users & Roles, your account, setup links (M17.3)
 
 - **`/users` (owners only).** The route needs `users:read`; anyone else gets

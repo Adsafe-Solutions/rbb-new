@@ -28,6 +28,7 @@ and the problems met while entering content on 2026-10-12/13.
 | 13 | Pages (general page editor) | L | Removed — not required (scope decision, 2026-10-13) |
 | 14 | Audit Log screen | M | Removed — not required (scope decision, 2026-10-13) |
 | 15 | Settings → General: country selection | S | Implemented — not yet tested or committed |
+| 16 | Website forms stored + Admin → Form submissions | M | Implemented — tests run, not yet committed or deployed |
 
 ## 1. Remove stale references from record pickers — done
 
@@ -326,6 +327,39 @@ list (all 249, ISO 3166-1, `packages/content-schema/src/common/countries.ts`).
   block (#6), published through review. No map; no "25 countries".
 - Tests written, **not yet run**: API `test/settings/countries.test.ts`;
   admin `scripts/test/settings-countries.test.mjs`.
+
+## 16. Website forms stored, and Admin → Form submissions — implemented
+
+Owner decisions (2026-10-13): the website's **Contact Us**, **Volunteer**
+and **Partner With Us** forms go live; what visitors send is **stored**
+and readable by **owners only**, kept **until an owner deletes it**, and
+**also emailed** once email is configured.
+
+- One form system, as before: one component (`FormShell`), one field
+  schema (`@rbb/forms`), one endpoint `POST /api/v1/forms/:formId` — the
+  form id is the identifier stored with each submission.
+- API: `modules/submissions/` — `MongoSubmissionStore` (`form_submissions`;
+  four indexes, created by `api:db:indexes`), `SubmissionService` and
+  routes (`GET /api/v1/submissions` with form, status, date and text
+  filters, cursor pages and counts; `GET …/:id`; `POST …/:id/status`;
+  `DELETE …/:id`), permissions `submissions:read` / `submissions:write`
+  (owners). `modules/forms/service.ts` stores the validated fields only
+  (no IP, user agent, honeypot or timing) for those three forms, emails
+  when configured, and still answers the visitor if the email fails;
+  bots and invalid input are never stored. Audit: by id and form only.
+- Admin: Engagement → **Form submissions** (`/submissions`, owners only):
+  totals per form, filters, table, a dialog with every field that marks
+  it read, Mark as new, Reply by email (the member's own mail program),
+  Delete (confirmed).
+- Website: shown when the production deploy sets
+  `VITE_FORM_ENDPOINT_CONTACT/_VOLUNTEER/_PARTNER` (exact production
+  endpoints, enforced by `scripts/deploy-pages.mjs`).
+- Not done here: the production `form_submissions` indexes
+  (`api:db:indexes` against production — a separate, authorized step);
+  email (API `EMAIL_*` settings and RBB's inbox, D21); the Privacy Policy
+  wording about stored submissions (RBB's text).
+- Tests: API `test/submissions.test.ts`; admin
+  `scripts/test/submissions.test.mjs`; web `deploy-pages.test.mjs`.
 
 ## 14. Audit Log screen — removed, not required
 

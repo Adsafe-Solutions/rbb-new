@@ -376,7 +376,9 @@ try {
   /* No page may load from an origin the CSP does not approve — a new
      provider needs its own approved phase (scripts/security-policy.mjs). */
   /* Document 21: a form endpoint must be same-origin, or an approved
-     connect origin — the CSP's connect-src is built from that list. */
+     connect origin — the CSP's connect-src is built from that list — or
+     (2026-10-13) RBB's own API: the origin the runtime snapshot comes
+     from, which this build's connect-src already allows. */
   for (const [id, form] of Object.entries(ssr.FORMS)) {
     const endpoint = form.endpoint;
     if (!endpoint || (endpoint.startsWith("/") && !endpoint.startsWith("//"))) continue;
@@ -386,7 +388,7 @@ try {
     } catch {
       origin = null;
     }
-    if (!origin || !APPROVED_ORIGINS.connect.includes(origin))
+    if (!origin || !(APPROVED_ORIGINS.connect.includes(origin) || (runtime?.origin && origin === runtime.origin)))
       fail(
         `form "${id}" posts to ${endpoint}, which is not same-origin or an approved connect origin`
       );

@@ -59,6 +59,9 @@ import { donationRoutes } from "./modules/donations/routes.ts";
 import { R2Storage } from "./modules/media/r2.ts";
 import { mongoMemberLeases, teamLock } from "./modules/members/lock.ts";
 import { memberRoutes } from "./modules/members/routes.ts";
+import { MongoSubmissionStore } from "./modules/submissions/repository.ts";
+import { submissionRoutes } from "./modules/submissions/routes.ts";
+import { SubmissionService } from "./modules/submissions/service.ts";
 import { MemberService } from "./modules/members/service.ts";
 import { MongoMediaStore } from "./modules/media/repository.ts";
 import { refusingTransport, resendTransport, type EmailTransport, type OutgoingEmail } from "./modules/forms/email.ts";
@@ -250,7 +253,9 @@ export function createApp(options: AppOptions = {}): App {
   const auditFor = (db: Awaited<ReturnType<MongoProvider["db"]>>, cfg: Config) =>
     new AuditService(mongoAuditStore(db, cfg.orgId), { orgId: cfg.orgId, secret: cfg.auth.secret, log, ...(options.now && { now: options.now }) });
 
-  /* M18: the public forms. Email only — nothing a visitor sends is stored. */
+  /* M18: the public forms. Contact, Volunteer and Partner submissions are
+     stored for owners to read (2026-10-13) and emailed when email is
+     configured; other forms stay email-only. */
   const emailTransport = options.emailTransport ?? (config?.env === "test" ? refusingTransport : resendTransport());
   const forms = async () => {
     if (!config || !mongo) throw errors.unavailable("The database is not configured.");
@@ -263,7 +268,15 @@ export function createApp(options: AppOptions = {}): App {
       log,
       ...(options.now && { now: options.now }),
       ...(options.formsCapture && { capture: options.formsCapture }),
+      submissions: new MongoSubmissionStore(db, config.orgId),
     });
+  };
+
+  /* Form submissions in the admin — owners only. */
+  const submissions = async () => {
+    if (!config || !mongo) throw errors.unavailable("The database is not configured.");
+    const db = await mongo.db();
+    return new SubmissionService(new MongoSubmissionStore(db, config.orgId), auditFor(db, config), { ...(options.now && { now: options.now }) });
   };
 
   const members = async () => {
@@ -483,6 +496,7 @@ export function createApp(options: AppOptions = {}): App {
     ...(config ? authRoutes(auth, config.auth.cookie) : []),
     ...(config ? memberRoutes(members) : []),
     ...(config ? formRoutes(forms, config.cors.web) : []),
+    ...(config ? submissionRoutes(submissions) : []),
     ...(config ? donationRoutes(donationProvider) : []),
     ...(config ? mediaRoutes(media) : []),
     ...(config ? settingsRoutes(settings) : []),

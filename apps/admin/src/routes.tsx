@@ -62,6 +62,7 @@ const TransparencyPage = lazy(() => import("./pages/transparency/TransparencyPag
 const ReportsPage = lazy(() => import("./pages/transparency/ReportsPage"));
 const ReportEditorPage = lazy(() => import("./pages/transparency/ReportEditorPage"));
 const UsersPage = lazy(() => import("./pages/users/UsersPage"));
+const SubmissionsPage = lazy(() => import("./pages/submissions/SubmissionsPage"));
 const AccountPage = lazy(() => import("./pages/account/AccountPage"));
 
 const DesignSystemPage = SHOW_DESIGN_SYSTEM ? lazy(() => import("./pages/design-system/DesignSystemPage")) : null;
@@ -101,6 +102,7 @@ export const ROUTES: RouteDefinition[] = [
   { path: "/announcements", title: "Announcement bar", breadcrumb: [{ label: "Engagement" }, { label: "Announcements" }], component: AnnouncementsPage },
   { path: "/popups", title: "Popup", breadcrumb: [{ label: "Engagement" }, { label: "Popups" }], component: PopupPage },
   { path: "/highlights", title: "Highlights", breadcrumb: [{ label: "Engagement" }, { label: "Highlights" }], component: HighlightsPage },
+  { path: "/submissions", title: "Form submissions", breadcrumb: [{ label: "Engagement" }, { label: "Form submissions" }], component: SubmissionsPage, permission: "submissions:read" },
   { path: "/settings", title: "Settings", breadcrumb: [{ label: "System" }, { label: "Settings" }], component: SettingsPage },
   { path: "/users", title: "Users & Roles", breadcrumb: [{ label: "System" }, { label: "Users & Roles" }], component: UsersPage, permission: "users:read" },
   { path: "/account", title: "Your account", breadcrumb: [{ label: "Your account" }], component: AccountPage },

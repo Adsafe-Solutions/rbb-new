@@ -12,6 +12,7 @@ import {
   HeartHandshake,
   House,
   Image,
+  Inbox,
   Landmark,
   LayoutDashboard,
   LayoutGrid,
@@ -79,6 +80,7 @@ export const NAVIGATION: NavSection[] = [
       { id: "announcements", label: "Announcements", icon: Megaphone, status: "available", href: "/announcements" },
       { id: "popups", label: "Popups", icon: AppWindow, status: "available", href: "/popups" },
       { id: "highlights", label: "Highlights", icon: Sparkles, status: "available", href: "/highlights" },
+      { id: "submissions", label: "Form submissions", icon: Inbox, status: "available", href: "/submissions", permission: "submissions:read" },
     ],
   },
   {

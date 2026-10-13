@@ -23,6 +23,10 @@ export const PERMISSIONS = [
   "publish:execute",
   "users:read",
   "users:write",
+  /* Form submissions from the website (2026-10-13) — owners only:
+     visitors' names, addresses and messages. */
+  "submissions:read",
+  "submissions:write",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 

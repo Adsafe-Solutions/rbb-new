@@ -12,7 +12,9 @@ in production yet** — see *Activation* below.
   - Field schema and validation are shared, from `@rbb/forms`.
   - Rate limiting is shared in MongoDB across API instances.
   - Email goes through Resend, in modes `off`, `test`, `staging` or `live`.
-  - **Email only:** nothing a visitor sends is stored.
+  - **Stored and emailed (2026-10-13):** Contact Us, Volunteer and
+    Partner With Us submissions are kept for owners in Admin → Form
+    submissions, and emailed once email is configured.
 - **Newsletter stays off.** It has `status: "draft"` in `content/forms.js`,
   and the API refuses it whatever the environment says, until its consent
   wording, recipient and subscriber processing are approved.
@@ -65,9 +67,19 @@ browser (static site)
 - The browser never talks to Resend. The key never reaches the browser:
   it is not a `VITE_*` variable, not under `src/`, not in `dist/`
   (verified by scan).
-- **No database.** Submissions are forwarded by email only; nothing is
-  stored. Persistent storage would be a separate approved decision
-  (retention, access, backups, privacy).
+- **Stored (owner decision, 2026-10-13).** Contact Us, Volunteer and Partner With Us submissions are STORED
+  (owner decision, 2026-10-13) in `form_submissions` — the validated fields
+  only, never the IP address or user agent — for owners to read in Admin →
+  Form submissions (filters: form, new/read, dates, text), until an owner
+  deletes one (no automatic expiry). They are also emailed once email is
+  configured for the form; if that email fails, the stored submission is
+  still received. Other forms stay email-only. The log and the audit trail
+  still carry only the form, outcome and reference.
+  The Privacy Policy must say so before RBB relies on it.
+- **Live on the website** when the production deploy sets
+  `VITE_FORM_ENDPOINT_CONTACT`, `_VOLUNTEER` and `_PARTNER` to the API's
+  endpoints (`deploy.env.example`; `scripts/deploy-pages.mjs` accepts only
+  those exact values and refuses Travel, Fundraise and Newsletter).
 
 ## Files
 

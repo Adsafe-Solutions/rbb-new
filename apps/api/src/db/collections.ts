@@ -100,6 +100,14 @@ import type { Db, IndexDescription } from "mongodb";
      orgId_policyId_unique         ONE record per policy per organization — its
                                    only query (read, save and publish all go by
                                    orgId and policyId)
+   form_definitions                the website forms as saved in the admin
+                                   (2026-10-13; live when saved)
+     orgId_formId_unique           ONE definition per form per organization
+   form_uploads                    files visitors attach to a career form
+                                   (bytes in the media bucket under
+                                   private/forms/, never by a public URL)
+     orgId_id_unique               one upload, by id
+     orgId_used_createdAt          unclaimed uploads, for cleanup
    form_submissions                what visitors send through the website's
                                    Contact, Volunteer and Partner forms
                                    (2026-10-13) — kept until an owner deletes
@@ -164,6 +172,8 @@ export const COLLECTIONS = {
   impactPages: "impact_pages",
   transparencyPages: "transparency_pages",
   formSubmissions: "form_submissions",
+  formDefinitions: "form_definitions",
+  formUploads: "form_uploads",
 } as const;
 
 export const INDEXES: Record<keyof typeof COLLECTIONS, IndexDescription[]> = {
@@ -264,6 +274,11 @@ export const INDEXES: Record<keyof typeof COLLECTIONS, IndexDescription[]> = {
   announcementBars: [{ name: "orgId_unique", key: { orgId: 1 }, unique: true }],
   popups: [{ name: "orgId_unique", key: { orgId: 1 }, unique: true }],
   storyStrips: [{ name: "orgId_unique", key: { orgId: 1 }, unique: true }],
+  formDefinitions: [{ name: "orgId_formId_unique", key: { orgId: 1, formId: 1 }, unique: true }],
+  formUploads: [
+    { name: "orgId_id_unique", key: { orgId: 1, id: 1 }, unique: true },
+    { name: "orgId_used_createdAt", key: { orgId: 1, usedBy: 1, createdAt: 1 } },
+  ],
   formSubmissions: [
     { name: "orgId_id_unique", key: { orgId: 1, id: 1 }, unique: true },
     { name: "orgId_createdAt", key: { orgId: 1, createdAt: -1, id: -1 } },

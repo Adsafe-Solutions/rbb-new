@@ -60,7 +60,7 @@ export const errors = {
   conflict: (message: string) => new ApiError("CONFLICT", message),
   unprocessable: (details: ErrorDetail[], message = "Some fields need attention.") => new ApiError("UNPROCESSABLE_CONTENT", message, { details }),
   payloadTooLarge: (limit: number) => new ApiError("PAYLOAD_TOO_LARGE", `The request body is larger than ${limit} bytes.`),
-  unsupportedMediaType: () => new ApiError("UNSUPPORTED_MEDIA_TYPE", "The request body must be application/json."),
+  unsupportedMediaType: (message = "The request body must be application/json.") => new ApiError("UNSUPPORTED_MEDIA_TYPE", message),
   rateLimited: (retryAfterSeconds: number) =>
     new ApiError("RATE_LIMITED", "Too many requests.", { headers: { "Retry-After": String(retryAfterSeconds) } }),
   internal: (cause?: unknown) => new ApiError("INTERNAL_ERROR", "Something went wrong.", { cause }),

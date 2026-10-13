@@ -12,6 +12,7 @@ import { PublishPanel } from "../settings/PublishPanel";
 import styles from "../../content/content.module.css";
 import { nextSeo } from "../../content/seo";
 import { NoIndexField } from "../../content/NoIndexField";
+import { withRoleIds } from "../../careers/roles";
 
 /* /careers — the website's Careers page (/about-us/careers): its header,
    "Why work with us", "Open opportunities" with the open roles in order,
@@ -116,7 +117,10 @@ export default function CareersPage() {
     setErrors(new Map());
     try {
       const parts = view.record ? changed : PARTS.filter((p) => draft[p] !== undefined);
-      const changes = Object.fromEntries(parts.map((p) => [p, draft[p] ?? null]));
+      /* Each role keeps an id (its application form's address, Admin →
+         Forms): a new one gets one from its title when first saved. */
+      const ready: Draft = draft.opportunities ? { ...draft, opportunities: { ...draft.opportunities, roles: withRoleIds(draft.opportunities.roles) } } : draft;
+      const changes = Object.fromEntries(parts.map((p) => [p, ready[p] ?? null]));
       const next = await careersApi.update(view.revision, changes);
       setView(next);
       setDraft(draftOf(next));

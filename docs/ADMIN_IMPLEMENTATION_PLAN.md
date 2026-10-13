@@ -28,7 +28,8 @@ and the problems met while entering content on 2026-10-12/13.
 | 13 | Pages (general page editor) | L | Removed — not required (scope decision, 2026-10-13) |
 | 14 | Audit Log screen | M | Removed — not required (scope decision, 2026-10-13) |
 | 15 | Settings → General: country selection | S | Implemented — not yet tested or committed |
-| 16 | Website forms stored + Admin → Form submissions | M | Implemented — tests run, not yet committed or deployed |
+| 16 | Website forms stored + Admin → Form submissions | M | Done — committed, pushed and live (`e77f3df`, replies `669f561`) |
+| 17 | Form builder: edit every website form; career application forms with CV uploads | L | Implemented — tests run; not yet committed or deployed |
 
 ## 1. Remove stale references from record pickers — done
 
@@ -365,6 +366,65 @@ and readable by **owners only**, kept **until an owner deletes it**, and
   wording about stored submissions (RBB's text).
 - Tests: API `test/submissions.test.ts`; admin
   `scripts/test/submissions.test.mjs`; web `deploy-pages.test.mjs`.
+
+## 17. Form builder and career application forms — implemented
+
+Owner decisions (2026-10-13): a **full form builder** for the website's
+forms; **one application form per open role** on the Careers page, with
+file uploads; files in the **existing media bucket**, submission details in
+the database; **owners only**; a saved form is **live at once** (no review).
+
+- Contract (`packages/content-schema/src/forms/`): `FormDefinition` — id
+  (`contact`, `volunteer`, `partner`, `career-<role id>`), kind, role,
+  name, heading, intro, button, messages, and 2–25 fields (text, email,
+  phone, long text, dropdown, checkbox, file). Every form keeps a required
+  `name` and `email` (replies). Files: career forms only, at most 3, PDF /
+  DOC / DOCX up to 4 MB. `DEFAULT_FORMS` (the built-in forms' words,
+  `@rbb/content-schema/form-defaults`), `newCareerForm`. Snapshot
+  `content.forms`. Career roles gain an optional `id`.
+- API: `modules/form-definitions/` (store `form_definitions`; service and
+  routes `GET/PUT/DELETE /api/v1/forms-admin[/:id]`, permission
+  `forms:write`). Saving calls `PublishService.publishForms`: a new
+  version that is the live snapshot with only `content.forms` replaced,
+  keeping the source hash (forms are left out of the content hash), so
+  nothing else goes live and "unpublished changes" is unaffected; a normal
+  publish carries the forms too. Submissions to a saved form are checked
+  against it (`modules/forms/definition.ts`); a form never saved keeps the
+  built-in schema. Uploads: `POST /api/v1/forms/:formId/files?field=` (the
+  file's bytes, through the API — the one route allowed past the 256 KB
+  body limit), type from the file's first bytes, rate limited, stored by
+  the API (`R2Storage.putObject`) under `private/forms/<org>/<random id>`
+  (`form_uploads`), claimed by one submission; owners open a file through a
+  5-minute signed link (`GET /api/v1/submissions/:id/attachments/:aid`,
+  `R2Storage.presignGet`); the storage key is never returned; deleting a
+  submission deletes its files; unclaimed uploads older than a day are
+  removed by `FormUploadService.cleanup` (not yet scheduled). Career
+  applications are emailed to `EMAIL_TO_CAREERS` when set (stored only
+  otherwise); the email names files, never attaches them.
+- Admin: Engagement → **Forms** (`/forms`, `/forms/:id`): every form, the
+  Careers roles without one ("Create application form"), and the builder
+  (wording; fields with label, type, required, help, placeholder, options;
+  reorder; Save and publish; reset a built-in form / delete a career
+  form). The Careers editor gives each role an id when saved (kept when
+  renamed). Form submissions shows career form names, saved labels, and
+  each attached file with Download.
+- Website: `PUBLISHED_FORMS` (snapshot target `content/forms.js`) and
+  `formConfig(id)` — the saved form, else the built-in one; Contact and
+  the Get Involved pages use it; the Careers page draws each role's saved
+  application form beneath the roles; new field types phone and file
+  (`components/FileField`, uploads as soon as a file is chosen).
+- Bucket safety: the media bucket has a public address, so files under
+  `private/` are reachable only by anyone who has the exact (random) key —
+  which is never shown. For a hard guarantee, block `/private/*` on the
+  bucket's public domain with a Cloudflare rule (one line; not done).
+- Deploy order: deploy the WEBSITE before saving a first form — the live
+  website's contract does not know `content.forms` and would ignore a
+  newer snapshot until it is redeployed.
+- Tests: API `test/form-builder.test.ts` (7); content-schema
+  `forms/formDefinition.test.ts`; admin `scripts/test/form-builder.test.mjs`;
+  web `published-snapshot.test.mjs` (forms mapping). A scratch build from
+  a fixture snapshot draws the saved Contact form and the Careers role's
+  application form with its file field.
 
 ## 14. Audit Log screen — removed, not required
 

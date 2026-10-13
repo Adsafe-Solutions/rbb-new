@@ -46,10 +46,16 @@ import styles from "./submissions.module.css";
 type ListState =
   | { status: "loading" }
   | { status: "failed" }
-  | { status: "ready"; items: SubmissionSummary[]; next: string | null; counts: SubmissionCounts; canReply: boolean; more: "idle" | "loading" | "failed" };
+  | { status: "ready"; items: SubmissionSummary[]; next: string | null; counts: SubmissionCounts; canReply: boolean; formTitles: Record<string, string>; more: "idle" | "loading" | "failed" };
 
 const when = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" });
-const FORM_OPTIONS = [{ value: "", label: "All forms" }, ...Object.entries(FORM_LABELS).map(([value, label]) => ({ value, label }))];
+/* The filter: the three built-in forms, and every other form (career
+   applications) the list knows by name or has submissions for. */
+const formOptions = (titles: Record<string, string>, seen: string[]) => {
+  const extra = [...new Set([...Object.keys(titles), ...seen])].filter((id) => !Object.hasOwn(FORM_LABELS, id)).sort();
+  return [{ value: "", label: "All forms" }, ...Object.entries(FORM_LABELS).map(([value, label]) => ({ value, label })), ...extra.map((id) => ({ value: id, label: titles[id] ?? id }))];
+};
+const size = (n: number) => (n >= 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
 const STATUS_OPTIONS = [
   { value: "", label: "New and read" },
   { value: "new", label: "New only" },
@@ -80,7 +86,7 @@ export default function SubmissionsPage(_: PageProps) {
     setList({ status: "loading" });
     try {
       const page = await submissionsApi.list(current);
-      if (mine === generation.current) setList({ status: "ready", items: page.items, next: page.next, counts: page.counts, canReply: page.canReply, more: "idle" });
+      if (mine === generation.current) setList({ status: "ready", items: page.items, next: page.next, counts: page.counts, canReply: page.canReply, formTitles: page.formTitles, more: "idle" });
     } catch {
       if (mine === generation.current) setList({ status: "failed" });
     }
@@ -147,6 +153,15 @@ export default function SubmissionsPage(_: PageProps) {
     }
   }
 
+  async function download(item: Submission, attachmentId: string) {
+    try {
+      const link = await submissionsApi.attachment(item.id, attachmentId);
+      window.open(link.url, "_blank", "noopener");
+    } catch (caught) {
+      toast({ title: caught instanceof ApiRequestError ? caught.message : "The file could not be opened.", tone: "danger" });
+    }
+  }
+
   async function sendReply(item: Submission) {
     setBusy(true);
     setReplyError(null);
@@ -203,7 +218,7 @@ export default function SubmissionsPage(_: PageProps) {
       )}
       <div className={styles.toolbar} role="search" aria-label="Filter the submissions">
         <Input type="search" aria-label="Search name, email, organisation or message" placeholder="Search name, email, organisation or message" leadingIcon={<Search />} value={search} onChange={(e) => setSearch(e.target.value)} />
-        <Select aria-label="Form" options={FORM_OPTIONS} value={filters.form} onChange={set("form")} />
+        <Select aria-label="Form" options={formOptions(list.status === "ready" ? list.formTitles : {}, counts ? Object.keys(counts.byForm) : [])} value={filters.form} onChange={set("form")} />
         <Select aria-label="Status" options={STATUS_OPTIONS} value={filters.status} onChange={set("status")} />
         <Input type="date" aria-label="From" value={filters.from} max={filters.to || undefined} onChange={set("from")} />
         <Input type="date" aria-label="To" value={filters.to} min={filters.from || undefined} onChange={set("to")} />
@@ -252,7 +267,8 @@ export default function SubmissionsPage(_: PageProps) {
                       <time dateTime={s.createdAt}>{when.format(new Date(s.createdAt))}</time>
                     </TableCell>
                     <TableCell>
-                      {formLabel(s.formId)}
+                      {s.formTitle ?? formLabel(s.formId)}
+                      {s.attachments > 0 && <span className={styles.sub}>{s.attachments === 1 ? "1 file" : `${s.attachments} files`}</span>}
                       {s.topic && <span className={styles.sub}>{topicLabel(s.topic)}</span>}
                     </TableCell>
                     <TableCell>
@@ -297,7 +313,7 @@ export default function SubmissionsPage(_: PageProps) {
         open={Boolean(open) && !confirmDelete}
         onClose={() => setOpen(null)}
         size="lg"
-        title={item ? `${formLabel(item.formId)} — ${item.fields.name ?? item.fields.email ?? ""}` : "Submission"}
+        title={item ? `${item.formTitle ?? formLabel(item.formId)} — ${item.fields.name ?? item.fields.email ?? ""}` : "Submission"}
         description={item ? `Received ${when.format(new Date(item.createdAt))} · reference ${item.reference}` : undefined}
         footer={
           item ? (
@@ -328,13 +344,31 @@ export default function SubmissionsPage(_: PageProps) {
         {open?.failed && <Alert tone="danger">This submission could not be loaded. It may have been deleted.</Alert>}
         {item && (
           <dl className={styles.facts}>
-            {fieldRows(item.fields).map((row) => (
+            {fieldRows(item.fields, item.labels).map((row) => (
               <div key={row.key}>
                 <dt>{row.label}</dt>
                 <dd>{row.value}</dd>
               </div>
             ))}
           </dl>
+        )}
+        {item && (item.attachments?.length ?? 0) > 0 && (
+          <section className={styles.replies} aria-label="Attached files">
+            <h3 className={styles.repliesHeading}>Attached files</h3>
+            <ul className={styles.replyList}>
+              {item.attachments!.map((a) => (
+                <li key={a.id} className={styles.reply}>
+                  <span>
+                    {item.labels?.[a.fieldId] ?? a.fieldId}: {a.name} · {size(a.size)}
+                  </span>{" "}
+                  <Button size="sm" leadingIcon={<ExternalLink />} onClick={() => download(item, a.id)}>
+                    Download
+                  </Button>
+                </li>
+              ))}
+            </ul>
+            <p className={styles.meta}>Each download link works for 5 minutes. Files are private: they have no public address.</p>
+          </section>
         )}
         {item && (item.replies?.length ?? 0) > 0 && (
           <section className={styles.replies} aria-label="Replies sent">

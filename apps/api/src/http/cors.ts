@@ -11,7 +11,8 @@
 
 /* Idempotency-Key: the public site's forms send one per submission
    (M18), so a retried submission is recognisable. */
-export const ALLOWED_REQUEST_HEADERS = "Content-Type, X-Request-Id, Idempotency-Key";
+/* X-File-Name: a career form's attachment upload names its file (2026-10-13). */
+export const ALLOWED_REQUEST_HEADERS = "Content-Type, X-Request-Id, Idempotency-Key, X-File-Name";
 const PREFLIGHT_MAX_AGE_SECONDS = "600";
 
 export const isAllowedOrigin = (origin: string | null, allowed: readonly string[]): origin is string =>

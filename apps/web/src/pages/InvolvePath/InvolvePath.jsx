@@ -7,7 +7,7 @@ import QuestionsPanel from "../../components/QuestionsPanel/QuestionsPanel.jsx";
 import FormSection from "../../components/FormSection/FormSection.jsx";
 import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
 import LinkChips from "../../components/LinkChips/LinkChips.jsx";
-import { FORMS, GET_INVOLVED, GET_INVOLVED_PAGES, alternativeContact, pathByPath } from "../../content/index.js";
+import { GET_INVOLVED, formConfig, GET_INVOLVED_PAGES, alternativeContact, pathByPath } from "../../content/index.js";
 
 /* One page template for the ways to take part — Volunteer, Fellowship,
    Partner With Us, Travel With Us (Document 06) — filled from the path's
@@ -56,7 +56,7 @@ export default function InvolvePath() {
 
       <ContentRows rows={rows} />
 
-      <FormSection id="inquiry" kicker={path.title} config={FORMS[path.id]} alternative={alternativeContact()} />
+      <FormSection id="inquiry" kicker={path.title} config={formConfig(path.id)} alternative={alternativeContact()} />
 
       {faqSection && (
         <Faq tone="ink" heading={faqSection.heading} items={faqSection.faqs} />

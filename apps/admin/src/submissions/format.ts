@@ -18,7 +18,13 @@ const FIELD_ORDER: [string, string][] = [
   ["topic", "Topic"],
   ["message", "Message"],
 ];
-export function fieldRows(fields: Record<string, string>): { key: string; label: string; value: string }[] {
+export function fieldRows(fields: Record<string, string>, labels?: Record<string, string>): { key: string; label: string; value: string }[] {
+  /* A form saved in the admin: its own labels, in its own order. */
+  if (labels) {
+    const ordered = Object.keys(labels).filter((k) => fields[k]).map((k) => ({ key: k, label: labels[k]!, value: fields[k]! }));
+    const rest = Object.keys(fields).filter((k) => !Object.hasOwn(labels, k) && fields[k]).sort().map((k) => ({ key: k, label: k, value: fields[k]! }));
+    return [...ordered, ...rest];
+  }
   const known = FIELD_ORDER.filter(([key]) => fields[key]).map(([key, label]) => ({ key, label, value: key === "topic" ? topicLabel(fields[key]!) : fields[key]! }));
   const other = Object.keys(fields).filter((k) => !FIELD_ORDER.some(([key]) => key === k) && fields[k]).sort().map((k) => ({ key: k, label: k, value: fields[k]! }));
   return [...known, ...other];

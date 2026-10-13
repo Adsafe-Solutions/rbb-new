@@ -120,6 +120,17 @@ Modules that aren't built yet appear in the sidebar marked "Soon". They
 aren't links. Search, help and notifications in the topbar are marked as
 unavailable.
 
+## Forms (owners only)
+
+`/forms` (Engagement → Forms) edits the website's forms: Contact Us,
+Volunteer, Partner With Us, and one application form per open role on the
+Careers page (roles get an id when the Careers page is saved). The builder
+sets the wording and the fields (short or long text, email, phone,
+dropdown, checkbox, and — on career forms — file upload for a CV). Name
+and Email stay on every form. **Saving puts the form on the website at
+once.** A built-in form can be reset to the website's own; a career form
+deleted.
+
 ## Form submissions (owners only)
 
 `/submissions` (Engagement → Form submissions) lists what visitors sent

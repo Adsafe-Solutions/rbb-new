@@ -6,7 +6,7 @@ import LinkSection from "../../components/LinkSection/LinkSection.jsx";
 import TrustPanel from "../../components/TrustPanel/TrustPanel.jsx";
 import Newsletter from "../../components/Newsletter/Newsletter.jsx";
 import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
-import { CONTACT_COPY, FORMS, ORG_CONTACT, SITE, alternativeContact, pathCards, transparencyLinks, verifiedOnly } from "../../content/index.js";
+import { CONTACT_COPY, FORMS, ORG_CONTACT, formConfig, SITE, alternativeContact, pathCards, transparencyLinks, verifiedOnly } from "../../content/index.js";
 
 /* /contact — Document 08:
 
@@ -59,7 +59,7 @@ export default function Contact() {
           url: inquiry.status === "verified" ? inquiry.href : null,
           pending: ORG_CONTACT.inquiryPending,
         }}
-        form={FORMS.contact}
+        form={formConfig("contact")}
         alternative={alternativeContact()}
       />
 

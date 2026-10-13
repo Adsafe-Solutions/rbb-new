@@ -30,11 +30,14 @@ export interface FormsConfig {
   recipients: Partial<Record<FormId, string>>;
   /* Forms that email the submitter an acknowledgement. */
   acknowledge: FormId[];
+  /* The inbox for career applications (EMAIL_TO_CAREERS, 2026-10-13), or
+     null: applications are then stored only. */
+  careersRecipient: string | null;
   testRecipient: string | null;
   rateLimit: { max: number; windowMs: number };
 }
 
-export const FORMS_OFF: FormsConfig = { mode: "off", problems: [], apiKey: null, from: null, recipients: {}, acknowledge: [], testRecipient: null, rateLimit: { max: 5, windowMs: 600_000 } };
+export const FORMS_OFF: FormsConfig = { mode: "off", problems: [], apiKey: null, from: null, recipients: {}, acknowledge: [], careersRecipient: null, testRecipient: null, rateLimit: { max: 5, windowMs: 600_000 } };
 
 /* One address, no display name, none of the characters that could add a
    recipient or a header (the same rule as @rbb/forms' EMAIL_PATTERN). */
@@ -73,6 +76,10 @@ export function loadFormsConfig(env: Record<string, string | undefined>): FormsC
     if (SINGLE_ADDRESS.test(to)) recipients[id] = to;
     else problems.push(`${name} is not a single email address — the ${id} form stays off`);
   }
+  const careersTo = clean(env.EMAIL_TO_CAREERS);
+  let careersRecipient: string | null = null;
+  if (careersTo && SINGLE_ADDRESS.test(careersTo)) careersRecipient = careersTo;
+  else if (careersTo) problems.push("EMAIL_TO_CAREERS is not a single email address — applications are stored only");
   for (const name of ["EMAIL_TO_TRAVEL", "EMAIL_TO_NEWSLETTER", "NEWSLETTER_ENABLED"])
     if (clean(env[name])) problems.push(`${name} is ignored: that form is not enabled in the API`);
 
@@ -99,6 +106,7 @@ export function loadFormsConfig(env: Record<string, string | undefined>): FormsC
     apiKey,
     from,
     recipients: global.length ? {} : recipients,
+    careersRecipient: global.length ? null : careersRecipient,
     acknowledge,
     testRecipient,
     rateLimit,

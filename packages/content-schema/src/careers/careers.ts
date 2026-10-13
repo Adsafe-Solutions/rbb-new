@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { recordFields } from "../common/record.ts";
-import { Paragraphs, text } from "../common/primitives.ts";
+import { Paragraphs, Slug, text } from "../common/primitives.ts";
 import { Link } from "../common/link.ts";
 import { SeoOverrides } from "../seo/seo.ts";
 
@@ -29,7 +29,9 @@ import { SeoOverrides } from "../seo/seo.ts";
 
 const Section = z.strictObject({ heading: text(160), body: Paragraphs.max(6) });
 
-export const CareerRole = z.strictObject({ title: text(160) });
+/* `id` (2026-10-13): the role's address for its application form (Admin →
+   Forms), from its title; optional so earlier records stay valid. */
+export const CareerRole = z.strictObject({ id: Slug.optional(), title: text(160) });
 
 export const CareersSeo = SeoOverrides.omit({ ogImageId: true });
 

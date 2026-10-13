@@ -155,6 +155,7 @@ export const SNAPSHOT_TARGETS = {
   "src/content/policies.js": "POLICIES (by id)",
   "src/content/getInvolved.js": "GET_INVOLVED.paths (by id), GET_INVOLVED_PAGES.hub",
   "src/content/announcements.js": "ANNOUNCEMENTS.bar, ANNOUNCEMENTS.popup",
+  "src/content/forms.js": "PUBLISHED_FORMS",
 };
 
 /* A published media record → the image object the pages draw. Milestone 2:
@@ -566,6 +567,15 @@ export function storiesFrom(snapshot) {
    are the record's, in order ("verified" is the site's word for a role
    that may be shown — and, as before, the page is indexed only with one).
    Without its own SEO description the page falls back to the site's. */
+/* The website forms as saved in the admin (2026-10-13; live when saved)
+   → PUBLISHED_FORMS.items (content/forms.js), as the contract's
+   definitions; formConfig(id) prefers them to the built-in forms. */
+export function formsFrom(snapshot) {
+  const forms = snapshot.content?.forms;
+  if (!forms?.length) return undefined;
+  return forms.map(({ orgId: _o, updatedAt: _u, ...definition }) => definition);
+}
+
 /* The published How We Work page (#7) → HOW_WE_WORK (content/about.js),
    in its own shape: the header and passages on the object, the cards on
    its nested `practices` (so whatever else those objects hold — the
@@ -591,7 +601,7 @@ export function careersFrom(snapshot) {
     seoTitle: c.seo?.title ?? null,
     noIndex: c.seo?.noIndex ?? false,
     sections: [section("why", c.why), { id: "opportunities", heading: c.opportunities.heading, empty: c.opportunities.empty }, section("apply", c.apply)].filter(Boolean),
-    roles: c.opportunities.roles.map((r) => ({ title: r.title, status: "verified" })),
+    roles: c.opportunities.roles.map((r) => drop({ id: r.id, title: r.title, status: "verified" })),
     closing: { heading: c.closing.heading, ctas: drop({ primary: linkOf(c.closing.primary), secondary: linkOf(c.closing.secondary) }) },
   });
 }
@@ -978,6 +988,7 @@ export function overridesFrom(snapshot) {
     ...(policiesFrom(snapshot) && { "src/content/policies.js": { POLICIES: { [BY_ID]: policiesFrom(snapshot) } } }),
     ...(getInvolvedFrom(snapshot) && { "src/content/getInvolved.js": getInvolvedFrom(snapshot) }),
     ...((announcementsFrom(snapshot) || popupFrom(snapshot)) && { "src/content/announcements.js": { ...announcementsFrom(snapshot), ...popupFrom(snapshot) } }),
+    ...(formsFrom(snapshot) && { "src/content/forms.js": { PUBLISHED_FORMS: { items: formsFrom(snapshot) } } }),
   };
 }
 

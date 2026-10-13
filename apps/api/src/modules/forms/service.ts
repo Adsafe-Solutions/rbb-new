@@ -9,7 +9,10 @@ import { FORM_IDS, formEnabled, type FormId, type FormsConfig } from "./config.t
 import type { SubmissionStore } from "../submissions/repository.ts";
 import { STORED_FORM_IDS } from "../submissions/service.ts";
 import { createDeliverer, type EmailTransport, type OutgoingEmail } from "./email.ts";
-import { acknowledgement, notification, type SubmissionData } from "./templates.ts";
+import { acknowledgement, definitionNotification, notification, type SubmissionData } from "./templates.ts";
+import { validateAgainstDefinition } from "./definition.ts";
+import type { FormUpload, FormUploadService } from "./uploads.ts";
+import type { FormDefinition } from "@rbb/content-schema";
 
 /* M18 — a public form submission, end to end (Document 21).
 
@@ -59,6 +62,11 @@ export interface FormServiceOptions {
   /* Where Contact, Volunteer and Partner submissions are kept. Without it
      (or for any other form) the form is email-only, as in M18. */
   submissions?: SubmissionStore;
+  /* Forms saved in the admin (form-definitions): the one a submission is
+     checked against. Without it every form keeps its built-in schema. */
+  definitions?: { live(id: string): Promise<FormDefinition | null> };
+  /* Career-form attachments (uploads.ts). */
+  uploads?: FormUploadService;
 }
 
 const isFormId = (id: string): id is FormId => (FORM_IDS as readonly string[]).includes(id);
@@ -79,10 +87,14 @@ export class FormService {
 
   async submit(formId: string, body: unknown, facts: SubmitFacts): Promise<{ reference: string }> {
     const { config } = this.#options;
-    if (!Object.hasOwn(FORM_SCHEMA, formId)) throw errors.notFound("form");
-    const emailing = formEnabled(config, formId);
-    const storing = Boolean(this.#options.submissions) && STORED.has(formId);
-    if ((!emailing && !storing) || !isFormId(formId)) throw errors.unavailable("This form is not taking submissions at the moment.");
+    /* A form saved in the admin is checked against what was saved; one
+       never saved keeps the built-in schema (2026-10-13). */
+    const definition = (await this.#options.definitions?.live(formId)) ?? null;
+    if (!definition && !Object.hasOwn(FORM_SCHEMA, formId)) throw errors.notFound("form");
+    const career = definition?.kind === "career";
+    const emailing = career ? config.mode !== "off" && Boolean(config.careersRecipient) : formEnabled(config, formId);
+    const storing = Boolean(this.#options.submissions) && (career || STORED.has(formId));
+    if ((!emailing && !storing) || (!career && !isFormId(formId))) throw errors.unavailable("This form is not taking submissions at the moment.");
     if (body && typeof body === "object" && !Array.isArray(body) && (body as { formId?: unknown }).formId !== formId)
       throw errors.badRequest("The request does not match this form.");
 
@@ -97,22 +109,53 @@ export class FormService {
       return { reference };
     }
 
-    const result = validateSubmission(body);
-    if (!result.ok) {
+    let data: Record<string, string>;
+    let files: Record<string, string> = {};
+    const refuse = async (status: number, problems?: Record<string, string>) => {
       await this.#record(formId, "invalid", reference, facts);
-      if (result.status === 422 && result.fields)
-        throw errors.unprocessable(Object.entries(result.fields).map(([name, code]) => ({ path: `fields.${name}`, message: code as string })));
+      if (status === 422 && problems) throw errors.unprocessable(Object.entries(problems).map(([name, code]) => ({ path: `fields.${name}`, message: code })));
       throw errors.badRequest("The request is malformed.");
+    };
+    if (definition) {
+      const result = validateAgainstDefinition(definition, body);
+      if (!result.ok) return refuse(result.status, result.fields);
+      data = result.data;
+      files = result.files;
+    } else {
+      const result = validateSubmission(body);
+      if (!result.ok) return refuse(result.status, result.fields as Record<string, string> | undefined);
+      data = result.data as Record<string, string>;
     }
 
-    const data = result.data as SubmissionData;
+    /* Attachments: uploads made for this form's file fields, unclaimed. */
+    let uploads: FormUpload[] = [];
+    if (Object.keys(files).length) {
+      if (!this.#options.uploads) throw errors.unavailable("This form is not taking submissions at the moment.");
+      const resolved = await this.#options.uploads.resolve(formId, files);
+      if (Object.keys(resolved.problems).length) return refuse(422, resolved.problems);
+      uploads = resolved.uploads;
+    }
+
     const submittedAt = this.#now().toISOString().slice(0, 16).replace("T", " ");
     const meta = { reference, submittedAt };
     const idem = facts.idempotencyKey && IDEMPOTENCY_KEY.test(facts.idempotencyKey) ? facts.idempotencyKey : randomUUID();
     if (storing) {
       const at = this.#now().toISOString();
+      const id = randomUUID();
+      if (uploads.length && !(await this.#options.uploads!.claim(uploads.map((u) => u.id), id))) return refuse(422, Object.fromEntries(uploads.map((u) => [u.fieldId, "invalid"])));
       try {
-        await this.#options.submissions!.insert({ id: randomUUID(), orgId: this.#options.orgId, formId, reference, fields: storedFields(data), status: "new", createdAt: at, updatedAt: at });
+        await this.#options.submissions!.insert({
+          id,
+          orgId: this.#options.orgId,
+          formId,
+          reference,
+          fields: storedFields(data),
+          ...(definition && { formTitle: definition.title, labels: Object.fromEntries(definition.fields.map((f) => [f.id, f.label])) }),
+          ...(uploads.length && { attachments: uploads.map((u) => ({ id: u.id, fieldId: u.fieldId, name: u.name, size: u.size, contentType: u.contentType, key: u.key })) }),
+          status: "new",
+          createdAt: at,
+          updatedAt: at,
+        });
       } catch {
         this.#options.log.error("form submission could not be stored", { form: formId, reference });
         throw errors.unavailable("Your message could not be sent. Please try again in a moment.");
@@ -123,8 +166,10 @@ export class FormService {
       }
     }
 
+    const to = career ? config.careersRecipient! : config.recipients[formId as FormId]!;
+    const rendered = definition ? definitionNotification(definition, data, uploads.map((u) => ({ label: definition.fields.find((f) => f.id === u.fieldId)?.label ?? u.fieldId, name: u.name, size: u.size })), meta) : notification(formId as FormId, data as unknown as SubmissionData, meta);
     const deliver = createDeliverer(config, this.#options.transport, this.#options.capture);
-    const sent = await deliver({ to: config.recipients[formId]!, replyTo: data.email, ...notification(formId, data, meta) }, `${formId}:${idem}:notify`);
+    const sent = await deliver({ to, replyTo: data.email, ...rendered }, `${formId}:${idem}:notify`);
     if (!sent.ok) {
       if (storing) {
         /* Kept already: the visitor's message is received; RBB reads it in the admin. */
@@ -138,7 +183,7 @@ export class FormService {
 
     /* The submitter's copy, only where enabled. Its failure does not undo
        the delivered notification; it is recorded. */
-    if (config.acknowledge.includes(formId)) {
+    if (!career && isFormId(formId) && config.acknowledge.includes(formId)) {
       const ack = await deliver({ to: data.email, ...acknowledgement(formId, meta) }, `${formId}:${idem}:ack`);
       if (!ack.ok) this.#options.log.warn("form acknowledgement failed", { form: formId, reference, category: ack.category });
     }
@@ -148,7 +193,7 @@ export class FormService {
   /* Fixed windows in the shared throttle store (MongoDB: every API
      instance counts into the same document). The key is a keyed hash of
      the organization and client address plus the form: no IP is stored. */
-  async #rateLimit(formId: FormId, facts: SubmitFacts, reference: string) {
+  async #rateLimit(formId: string, facts: SubmitFacts, reference: string) {
     const { max, windowMs } = this.#options.config.rateLimit;
     const now = this.#now().getTime();
     const index = Math.floor(now / windowMs);
@@ -164,7 +209,7 @@ export class FormService {
   /* The log line and the audit entry: form, outcome, reference, request
      id. Deliberately WITHOUT the hashed IP and user agent the audit trail
      records elsewhere — a public visitor is not a member. */
-  async #record(formId: FormId, outcome: Outcome, reference: string, facts: SubmitFacts) {
+  async #record(formId: string, outcome: Outcome, reference: string, facts: SubmitFacts) {
     this.#options.log.info("form submission", { form: formId, outcome, reference, mode: this.#options.config.mode });
     await this.#audit.recordSafely(
       { action: "forms.submission", resourceType: "form", resourceId: formId, metadata: { outcome, reference, mode: this.#options.config.mode } },
@@ -175,7 +220,7 @@ export class FormService {
 
 /* What is kept: the validated text fields, trimmed, empty ones left out —
    never consent flags, the honeypot or timing. */
-function storedFields(data: SubmissionData): Record<string, string> {
+function storedFields(data: Record<string, string>): Record<string, string> {
   return Object.fromEntries(
     Object.entries(data as unknown as Record<string, unknown>)
       .filter(([, v]) => typeof v === "string" && v.trim() !== "")

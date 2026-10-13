@@ -192,6 +192,59 @@ export const FORMS = {
   },
 };
 
+/* ---------------- Forms saved in the admin ----------------
+   2026-10-13: owners edit the website's forms in the admin (Contact Us,
+   Volunteer, Partner With Us, and one application form per open role on
+   the Careers page); a saved form is live at once. The published snapshot
+   carries them as content.forms, which the build and the runtime snapshot
+   set here (scripts/snapshot-adapter.mjs) — `items` are the content
+   contract's FormDefinitions. Empty: every page keeps the forms above.
+
+   Pages ask for a form with formConfig(id) — never FORMS[id] directly —
+   so a saved form replaces the built-in one wherever it is drawn. */
+export const PUBLISHED_FORMS = { items: [] };
+
+/* Where a form posts: its own endpoint, or — for a career form, which has
+   none of its own — the Contact form's, with its id in place of "contact"
+   (the same API route, POST /api/v1/forms/:formId). */
+const endpointFor = (id) => ENV.formEndpoints[id] ?? (ENV.formEndpoints.contact ? ENV.formEndpoints.contact.replace(/\/contact$/, `/${id}`) : null);
+const MAX_LENGTH = { text: 200, email: 254, tel: 30, textarea: 5000 };
+const AUTOCOMPLETE = { name: "name", email: "email", organization: "organization", phone: "tel" };
+export const UPLOAD_ACCEPT = ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+export const UPLOAD_MAX_BYTES = 4 * 1024 * 1024;
+
+const webField = (f, endpoint) => ({
+  name: f.id,
+  type: f.type,
+  label: f.label,
+  required: f.required,
+  ...(f.help && { hint: f.help }),
+  ...(f.placeholder && { placeholder: f.placeholder }),
+  ...((f.maxLength ?? MAX_LENGTH[f.type]) && { maxLength: f.maxLength ?? MAX_LENGTH[f.type] }),
+  ...(f.options && { options: f.options.map((o) => ({ value: o, label: o })) }),
+  ...(AUTOCOMPLETE[f.id] && { autoComplete: AUTOCOMPLETE[f.id] }),
+  ...(f.type === "file" && { accept: UPLOAD_ACCEPT, maxBytes: UPLOAD_MAX_BYTES, uploadEndpoint: endpoint ? `${endpoint}/files` : null }),
+});
+
+/* The form to draw for `id`: as saved in the admin, else the built-in one
+   (or null — a career form that was never saved). */
+export function formConfig(id) {
+  const saved = PUBLISHED_FORMS.items.find((d) => d.id === id);
+  const built = Object.hasOwn(FORMS, id) ? FORMS[id] : null;
+  if (!saved) return built;
+  const endpoint = built?.endpoint ?? endpointFor(id);
+  return {
+    ...(built ?? pending(id)),
+    endpoint,
+    heading: saved.heading,
+    intro: saved.intro,
+    submitLabel: saved.submitLabel,
+    successMessage: saved.successMessage,
+    errorMessage: saved.errorMessage,
+    fields: saved.fields.map((f) => webField(f, endpoint)),
+  };
+}
+
 /* ---------------- Interface copy ----------------
    PROPOSED. Labels and validation messages only — nothing here says what
    happens to a submission; that is RBB's successMessage / errorMessage. */
@@ -219,6 +272,21 @@ export const FORM_COPY = {
     email: () => "Enter an email address in the correct format, with an @ and a domain",
     tooLong: (label, max) => `${label} must be ${max} characters or fewer`,
     invalid: (label) => `Check “${label}” and try again`,
+    phone: (label) => `Enter ${label.toLowerCase()} using digits, spaces and + ( ) - only`,
+    file: (label) => `Choose a file for “${label}”`,
+  },
+  /* A file field (career applications). */
+  upload: {
+    choose: "Choose a file",
+    replace: "Choose a different file",
+    remove: "Remove",
+    uploading: "Uploading…",
+    uploaded: "Attached",
+    types: "PDF or Word document, up to 4 MB.",
+    tooBig: "That file is larger than 4 MB. Choose a smaller one.",
+    wrongType: "Choose a PDF or Word document.",
+    rateLimited: "Too many uploads. Please wait a few minutes and try again.",
+    failed: "The file could not be uploaded. Please try again.",
   },
 };
 

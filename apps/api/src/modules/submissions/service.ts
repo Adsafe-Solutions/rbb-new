@@ -6,6 +6,7 @@ import { reply as replyEmail } from "../forms/templates.ts";
 import type { AuditService, RequestFacts } from "../audit/audit.ts";
 import { requirePermission } from "../auth/permissions.ts";
 import type { AuthContext } from "../auth/types.ts";
+import type { ObjectStorage } from "../media/storage.ts";
 import { SUBMISSION_STATUSES, type SubmissionCounts, type SubmissionStore, type StoredSubmission } from "./repository.ts";
 
 /* Form submissions in the admin — OWNERS only (submissions:read to look,
@@ -22,7 +23,7 @@ const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const ListQuery = z.strictObject({
   limit: z.coerce.number().int().min(1).max(100).optional(),
   before: z.string().max(200).optional(),
-  form: z.enum(STORED_FORM_IDS).optional(),
+  form: z.string().regex(/^(contact|volunteer|partner|career-[a-z0-9]+(?:-[a-z0-9]+)*)$/).optional(),
   status: z.enum(SUBMISSION_STATUSES).optional(),
   from: z.string().regex(DAY).optional(),
   to: z.string().regex(DAY).optional(),
@@ -53,7 +54,16 @@ export interface SubmissionSummary {
   preview: string;
   /* An owner has replied from the admin. */
   replied: boolean;
+  /* A saved form's name when it came in (career forms), or null. */
+  formTitle: string | null;
+  attachments: number;
 }
+
+/* A submission as the admin reads it: the attachments without their
+   storage keys (a key is half of a public address — never handed out). */
+export type SubmissionView = Omit<StoredSubmission, "attachments"> & { attachments?: { id: string; fieldId: string; name: string; size: number; contentType: string }[] };
+const viewOf = ({ attachments, ...rest }: StoredSubmission): SubmissionView => ({ ...rest, ...(attachments && { attachments: attachments.map(({ key: _key, ...a }) => a) }) });
+const LINK_SECONDS = 300;
 
 export const cursorOf = (s: Pick<StoredSubmission, "createdAt" | "id">) => Buffer.from(JSON.stringify([s.createdAt, s.id])).toString("base64url");
 export function parseCursor(value: string): { createdAt: string; id: string } | null {
@@ -80,6 +90,8 @@ export const summaryOf = (s: StoredSubmission): SubmissionSummary => ({
   topic: s.fields.topic || null,
   preview: (s.fields.message ?? "").replace(/\s+/g, " ").trim().slice(0, 160),
   replied: Boolean(s.replies?.length),
+  formTitle: s.formTitle ?? null,
+  attachments: s.attachments?.length ?? 0,
 });
 
 export class SubmissionService {
@@ -87,12 +99,28 @@ export class SubmissionService {
   readonly #audit: AuditService;
   readonly #now: () => Date;
   readonly #mailer: ReplyMailer | null;
+  readonly #storage: ObjectStorage | null;
+  readonly #titles: (() => Promise<Record<string, string>>) | null;
 
-  constructor(store: SubmissionStore, audit: AuditService, options: { now?: () => Date; mailer?: ReplyMailer | null } = {}) {
+  constructor(store: SubmissionStore, audit: AuditService, options: { now?: () => Date; mailer?: ReplyMailer | null; storage?: ObjectStorage | null; titles?: () => Promise<Record<string, string>> } = {}) {
     this.#store = store;
     this.#audit = audit;
     this.#now = options.now ?? (() => new Date());
     this.#mailer = options.mailer ?? null;
+    this.#storage = options.storage ?? null;
+    this.#titles = options.titles ?? null;
+  }
+
+  /* A short-lived signed link to one attached file (owners). */
+  async attachmentLink(auth: AuthContext | null, id: unknown, attachmentId: unknown, facts: RequestFacts): Promise<{ url: string; expiresAt: string; name: string }> {
+    const member = requirePermission(auth, "submissions:read");
+    const found = Id.safeParse(id).success ? await this.#store.get(id as string) : null;
+    const attachment = found?.attachments?.find((a) => a.id === attachmentId);
+    if (!found || !attachment) throw errors.notFound("attachment");
+    if (!this.#storage?.presignGet) throw errors.unavailable("Files cannot be opened at the moment.");
+    const url = this.#storage.presignGet(attachment.key, LINK_SECONDS, attachment.name);
+    await this.#audit.recordSafely({ action: "submissions.attachment_opened", resourceType: "submission", resourceId: found.id, actorUserId: member.user.id, metadata: { form: found.formId } }, facts);
+    return { url, expiresAt: new Date(this.#now().getTime() + LINK_SECONDS * 1000).toISOString(), name: attachment.name };
   }
 
   /* Whether replies can be sent (email configured). */
@@ -102,7 +130,7 @@ export class SubmissionService {
 
   /* Emails the visitor an owner's reply, then records it on the
      submission. Nothing is recorded unless the email was accepted. */
-  async reply(auth: AuthContext | null, id: unknown, body: unknown, facts: RequestFacts): Promise<StoredSubmission> {
+  async reply(auth: AuthContext | null, id: unknown, body: unknown, facts: RequestFacts): Promise<SubmissionView> {
     const member = requirePermission(auth, "submissions:write");
     const parsed = ReplyBody.safeParse(body);
     if (!parsed.success) throw fromZod(parsed.error, "body");
@@ -119,10 +147,10 @@ export class SubmissionService {
     const saved = await this.#store.addReply(current.id, { id: replyId, at, by: { id: member.user.id, name: member.user.name }, message: parsed.data.message });
     if (!saved) throw errors.notFound("submission");
     await this.#audit.recordSafely({ action: "submissions.replied", resourceType: "submission", resourceId: saved.id, actorUserId: member.user.id, metadata: { form: saved.formId, replies: saved.replies?.length ?? 1 } }, facts);
-    return saved;
+    return viewOf(saved);
   }
 
-  async list(auth: AuthContext | null, input: unknown): Promise<{ items: SubmissionSummary[]; next: string | null; counts: SubmissionCounts; canReply: boolean }> {
+  async list(auth: AuthContext | null, input: unknown): Promise<{ items: SubmissionSummary[]; next: string | null; counts: SubmissionCounts; canReply: boolean; formTitles: Record<string, string> }> {
     requirePermission(auth, "submissions:read");
     const parsed = ListQuery.safeParse(input ?? {});
     if (!parsed.success) throw fromZod(parsed.error, "query");
@@ -131,7 +159,7 @@ export class SubmissionService {
     if (before === null) throw errors.validation([{ path: "query.before", message: "is not a page of this list" }]);
     if (q.from && q.to && q.from > q.to) throw errors.validation([{ path: "query.to", message: "must not be before from" }]);
     const limit = q.limit ?? SUBMISSION_PAGE_SIZE;
-    const [rows, counts] = await Promise.all([
+    const [rows, counts, formTitles] = await Promise.all([
       this.#store.list({
         limit: limit + 1,
         ...(before && { before }),
@@ -142,33 +170,40 @@ export class SubmissionService {
         ...(q.q && { search: q.q }),
       }),
       this.#store.counts(),
+      this.#titles?.() ?? Promise.resolve({}),
     ]);
     const page = rows.slice(0, limit);
-    return { items: page.map(summaryOf), next: rows.length > limit ? cursorOf(page[page.length - 1]!) : null, counts, canReply: this.canReply };
+    return { items: page.map(summaryOf), next: rows.length > limit ? cursorOf(page[page.length - 1]!) : null, counts, canReply: this.canReply, formTitles };
   }
 
-  async get(auth: AuthContext | null, id: unknown): Promise<StoredSubmission> {
+  async get(auth: AuthContext | null, id: unknown): Promise<SubmissionView> {
+    return viewOf(await this.#load(auth, id));
+  }
+
+  async #load(auth: AuthContext | null, id: unknown): Promise<StoredSubmission> {
     requirePermission(auth, "submissions:read");
     const found = Id.safeParse(id).success ? await this.#store.get(id as string) : null;
     if (!found) throw errors.notFound("submission");
     return found;
   }
 
-  async setStatus(auth: AuthContext | null, id: unknown, body: unknown, facts: RequestFacts): Promise<StoredSubmission> {
+  async setStatus(auth: AuthContext | null, id: unknown, body: unknown, facts: RequestFacts): Promise<SubmissionView> {
     const member = requirePermission(auth, "submissions:write");
     const parsed = StatusBody.safeParse(body);
     if (!parsed.success) throw fromZod(parsed.error, "body");
     const current = await this.get(auth, id);
     if (current.status === parsed.data.status) return current;
     const saved = await this.#store.setStatus(current.id, parsed.data.status, this.#now().toISOString());
+    if (saved) await this.#audit.recordSafely({ action: "submissions.status_changed", resourceType: "submission", resourceId: saved.id, actorUserId: member.user.id, metadata: { form: saved.formId, from: current.status, to: saved.status } }, facts);
     if (!saved) throw errors.notFound("submission");
-    await this.#audit.recordSafely({ action: "submissions.status_changed", resourceType: "submission", resourceId: saved.id, actorUserId: member.user.id, metadata: { form: saved.formId, from: current.status, to: saved.status } }, facts);
-    return saved;
+    return viewOf(saved);
   }
 
   async remove(auth: AuthContext | null, id: unknown, facts: RequestFacts): Promise<{ deleted: true }> {
     const member = requirePermission(auth, "submissions:write");
-    const current = await this.get(auth, id);
+    const current = await this.#load(auth, id);
+    /* Its files first: a submission is never deleted while its CV remains. */
+    for (const a of current.attachments ?? []) await this.#storage?.delete(a.key);
     if (!(await this.#store.remove(current.id))) throw errors.notFound("submission");
     await this.#audit.recordSafely({ action: "submissions.deleted", resourceType: "submission", resourceId: current.id, actorUserId: member.user.id, metadata: { form: current.formId } }, facts);
     return { deleted: true };

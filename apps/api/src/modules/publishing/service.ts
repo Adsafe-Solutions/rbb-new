@@ -12,6 +12,7 @@ import {
   projectMediaIds,
   type About,
   type Careers,
+  type FormDefinition,
   type HowWeWork,
   type Policy,
   type PolicyId,
@@ -121,8 +122,11 @@ export function contentHash(record: SiteSettings, collections: SnapshotContent =
   /* The internal country selection is never published, so it is never a
      change to publish either. */
   const { id: _i, orgId: _o, schemaVersion: _s, status: _st, createdAt: _c, updatedAt: _u, publishedAt: _p, releaseMarker: _r, ...settings } = publicSettings(record) as SiteSettings;
+  /* Website forms go live when saved (publishForms), never through review:
+     they are not a change for an owner to publish either. */
+  const { forms: _forms, ...reviewed } = collections;
   // Settings alone hash exactly as they did before content existed.
-  const source = Object.keys(collections).length ? { settings, content: collections } : settings;
+  const source = Object.keys(reviewed).length ? { settings, content: reviewed } : settings;
   /* Milestone 2: an image's focal point or caption is part of what goes
      live, so changing one is a change to publish. Only images that have
      one are hashed — every hash made before Milestone 2 stays the same. */
@@ -259,6 +263,7 @@ export class PublishService {
   readonly #projects: ContentStore<Project> | null;
   readonly #careers: BlockPageStore<Careers> | null;
   readonly #howWeWork: BlockPageStore<HowWeWork> | null;
+  readonly #forms: { list(): Promise<FormDefinition[]> } | null;
   readonly #policies: Partial<Record<PolicyId, BlockPageStore<Policy>>>;
   readonly #getInvolved: Partial<Record<GetInvolvedPageId, BlockPageStore<GetInvolvedPage>>>;
   readonly #announcementBar: BlockPageStore<AnnouncementBar> | null;
@@ -292,6 +297,8 @@ export class PublishService {
       projects?: ContentStore<Project>;
       careers?: BlockPageStore<Careers>;
       howWeWork?: BlockPageStore<HowWeWork>;
+      /* The website forms as saved in the admin (live when saved). */
+      forms?: { list(): Promise<FormDefinition[]> };
       policies?: Partial<Record<PolicyId, BlockPageStore<Policy>>>;
       getInvolved?: Partial<Record<GetInvolvedPageId, BlockPageStore<GetInvolvedPage>>>;
       announcementBar?: BlockPageStore<AnnouncementBar>;
@@ -321,6 +328,7 @@ export class PublishService {
     this.#projects = stores.projects ?? null;
     this.#careers = stores.careers ?? null;
     this.#howWeWork = stores.howWeWork ?? null;
+    this.#forms = stores.forms ?? null;
     this.#policies = stores.policies ?? {};
     this.#getInvolved = stores.getInvolved ?? {};
     this.#announcementBar = stores.announcementBar ?? null;
@@ -484,6 +492,9 @@ export class PublishService {
     if (popup) content.popup = forSnapshot(popup);
     const strip = page(this.#storyStrip, stripRow, live?.storyStrip, "Highlights");
     if (strip) content.storyStrip = forSnapshot(strip);
+    /* The forms as saved (no review): a full publish carries them too. */
+    const forms = (await this.#forms?.list()) ?? [];
+    if (forms.length) content.forms = forms;
     return { content: stamp(content, generatedAt), keyed: content, marks, scheduled, scheduleProblems };
   }
 
@@ -680,6 +691,47 @@ export class PublishService {
     } finally {
       await this.#store.releaseLock(lockId);
     }
+  }
+
+  /* Website forms go live WHEN SAVED (owner decision, 2026-10-13): a new
+     version that is the live snapshot with only `content.forms` replaced
+     by the forms as saved now — nothing else approved goes with it, and
+     what an owner still has to publish stays exactly as it was (the same
+     source hash). With no live website yet, forms wait for the first
+     publish. Returns the live version (unchanged when the forms already
+     match). */
+  async publishForms(auth: AuthContext, facts: RequestFacts): Promise<{ version: number } | null> {
+    this.#member(auth);
+    return this.#locked(
+      async (lockId) => {
+        const [active, live] = await Promise.all([this.#store.active(), this.#store.activeSnapshot()]);
+        if (!active || !live) return null;
+        const forms = (await this.#forms?.list()) ?? [];
+        const { forms: _previous, ...rest } = live.snapshot.content;
+        const content: SnapshotContent = forms.length ? { ...rest, forms } : rest;
+        if (canonical(content.forms ?? null) === canonical(live.snapshot.content.forms ?? null)) return { version: live.version };
+        const generatedAt = this.#now().toISOString();
+        const version = await this.#store.nextVersion(lockId);
+        const parsed = PublishedSnapshot.safeParse({ ...live.snapshot, version, generatedAt, content });
+        const secrets = parsed.success ? secretProblems(parsed.data) : [];
+        if (!parsed.success || secrets.length) {
+          const problems = parsed.success ? secrets.map((path) => ({ path, message: "looks like a credential and cannot be published" })) : parsed.error.issues.map((i) => ({ path: ["snapshot", ...i.path].join("."), message: i.message }));
+          await this.#audit.recordSafely({ action: "publish.rejected", resourceType: "snapshot", actorUserId: auth.user.id, metadata: { problems: problems.map((p) => p.path), trigger: "forms" } }, facts);
+          throw errors.validation(problems, "The forms could not be published.");
+        }
+        const publishedBy = { id: auth.user.id, name: auth.user.name };
+        const stored: StoredSnapshot = { snapshot: parsed.data, version, generatedAt, publishedBy, sourceHash: active.sourceHash };
+        await this.#store.insertSnapshot(stored);
+        if (!(await this.#store.activate(lockId, { version, generatedAt, publishedBy, sourceHash: active.sourceHash, deployment: { status: "pending", attempts: 0 } })))
+          throw errors.conflict("The publish took too long and was stopped. Nothing changed; try again.");
+        const deployment = await this.#deployVersion(version, 0);
+        await this.#audit.recordSafely({ action: "publish.completed", resourceType: "snapshot", resourceId: String(version), actorUserId: auth.user.id, metadata: { version, previousVersion: active.version, deployment: deployment.status, trigger: "forms", counts: { forms: forms.length } } }, facts);
+        return { version };
+      },
+      () => {
+        throw errors.conflict(PUBLISH_BUSY);
+      }
+    );
   }
 
   /* `changesKey`, when given, is the status the owner reviewed (M14): a

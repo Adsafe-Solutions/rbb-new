@@ -16,6 +16,17 @@ export interface SubmissionSummary {
   topic: string | null;
   preview: string;
   replied: boolean;
+  /* A form saved in the admin (career applications): its name. */
+  formTitle: string | null;
+  attachments: number;
+}
+
+export interface SubmissionAttachment {
+  id: string;
+  fieldId: string;
+  name: string;
+  size: number;
+  contentType: string;
 }
 
 export interface SubmissionReply {
@@ -34,6 +45,9 @@ export interface Submission {
   createdAt: string;
   updatedAt: string;
   replies?: SubmissionReply[];
+  formTitle?: string;
+  labels?: Record<string, string>;
+  attachments?: SubmissionAttachment[];
 }
 
 export interface SubmissionCounts {
@@ -48,6 +62,8 @@ export interface SubmissionPage {
   counts: SubmissionCounts;
   /* Email is set up: replies can be sent from the admin. */
   canReply: boolean;
+  /* Forms saved in the admin, by id → name (for the filter). */
+  formTitles: Record<string, string>;
 }
 
 const one = (id: string) => `/api/v1/submissions/${encodeURIComponent(id)}`;
@@ -57,5 +73,7 @@ export const submissionsApi = {
   get: (id: string) => api<Submission>(one(id)),
   setStatus: (id: string, status: "new" | "read") => api<Submission>(`${one(id)}/status`, { method: "POST", body: JSON.stringify({ status }) }),
   remove: (id: string) => api<{ deleted: true }>(one(id), { method: "DELETE" }),
+  /* A short-lived signed link to an attached file. */
+  attachment: (id: string, attachmentId: string) => api<{ url: string; expiresAt: string; name: string }>(`${one(id)}/attachments/${encodeURIComponent(attachmentId)}`),
   reply: (id: string, message: string) => api<Submission>(`${one(id)}/replies`, { method: "POST", body: JSON.stringify({ message }) }),
 };

@@ -94,6 +94,13 @@ export class MemoryStorage implements ObjectStorage {
   publicUrl(key: string) {
     return `https://media.test/${key}`;
   }
+  async putObject(key: string, body: Uint8Array, contentType: string) {
+    if (this.failAll) throw new StorageError("storage down");
+    this.objects.set(key, { bytes: body, contentType });
+  }
+  presignGet(key: string, expiresInSeconds: number, downloadName?: string) {
+    return `https://private.storage.test/${key}?expires=${expiresInSeconds}${downloadName ? `&name=${encodeURIComponent(downloadName)}` : ""}`;
+  }
 }
 
 export function member(orgId: string, role: Role = "EDITOR", userId = crypto.randomUUID()): AuthContext {

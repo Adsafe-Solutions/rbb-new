@@ -10,7 +10,7 @@ import { SettingsService } from "../../src/modules/settings/service.ts";
 import { clock, memoryAuditStore, memoryData, silentLog } from "../auth/memory.ts";
 import { MemoryMediaStore } from "../media/memory.ts";
 import { MemoryContentStore } from "../content/memory.ts";
-import type { About, Appeal, Careers, Event, HowWeWork, GeneralDonationPage, Homepage, Impact, Metric, Post, Program, Project, PublicationSchedule, Report, TeamMember, Transparency } from "@rbb/content-schema";
+import type { About, Appeal, Careers, Event, FormDefinition, HowWeWork, GeneralDonationPage, Homepage, Impact, Metric, Post, Program, Project, PublicationSchedule, Report, TeamMember, Transparency } from "@rbb/content-schema";
 import { StoryService } from "../../src/modules/stories/service.ts";
 import { ProjectService } from "../../src/modules/projects/service.ts";
 import { CareersService } from "../../src/modules/careers/service.ts";
@@ -66,6 +66,8 @@ export interface SharedData {
   careers: Map<string, StoredHomepage>;
   /* #7. */
   howWeWork: Map<string, StoredHomepage>;
+  /* Website forms as saved in the admin (2026-10-13). */
+  formDefinitions: FormDefinition[];
   /* One map per policy (M19), each keyed by organization. */
   policies: Record<PolicyId, Map<string, StoredHomepage>>;
   /* One map per Get Involved page (M20), each keyed by organization. */
@@ -75,7 +77,7 @@ export interface SharedData {
   storyStrips: Map<string, StoredHomepage>;
   base: ReturnType<typeof memoryData>;
 }
-export const sharedData = (): SharedData => ({ settings: new Map(), publish: new Map(), snapshots: [], media: [], posts: [], events: [], appeals: [], donationPages: new Map(), homepages: new Map(), abouts: new Map(), team: [], programs: [], metrics: [], reports: [], projects: [], impacts: new Map(), transparencies: new Map(), careers: new Map(), howWeWork: new Map(), policies: { privacy: new Map(), terms: new Map(), donation: new Map() }, getInvolved: { hub: new Map(), volunteer: new Map(), fellowship: new Map(), partner: new Map(), travel: new Map() }, announcementBars: new Map(), popups: new Map(), storyStrips: new Map(), base: memoryData() });
+export const sharedData = (): SharedData => ({ settings: new Map(), publish: new Map(), snapshots: [], media: [], posts: [], events: [], appeals: [], donationPages: new Map(), homepages: new Map(), abouts: new Map(), team: [], programs: [], metrics: [], reports: [], projects: [], impacts: new Map(), transparencies: new Map(), careers: new Map(), howWeWork: new Map(), formDefinitions: [], policies: { privacy: new Map(), terms: new Map(), donation: new Map() }, getInvolved: { hub: new Map(), volunteer: new Map(), fellowship: new Map(), partner: new Map(), travel: new Map() }, announcementBars: new Map(), popups: new Map(), storyStrips: new Map(), base: memoryData() });
 
 /* An in-memory block-page store (homepage, About) over a shared map. */
 const memoryBlockPageStore = <R extends { orgId: string }>(pages: Map<string, { record: R; revision: number; createdAt: string; updatedAt: string; updatedBy: { id: string | null; name: string } }>, orgId: string) => ({
@@ -292,7 +294,7 @@ export function harness(orgId = "org-a", data: SharedData = sharedData(), deploy
     time,
     audit: data.base.audit,
     settings: new SettingsService(settingsStore, media, audit, { orgId, now: time.now }),
-    publishing: new PublishService({ publish: publishStore, settings: settingsStore, media, posts: postStore, events: eventStore, appeals: appealStore, donationPage: donationPageStore, homepage: homepageStore, about: aboutStore as never, team: teamStore, programs: programStore, metrics: metricStore, reports: reportStore, impact: impactStore as never, transparency: transparencyStore as never, stories: storyStore, projects: projectStore, careers: careersStore as never, howWeWork: howWeWorkStore as never, policies: policyStores, getInvolved: getInvolvedStores, announcementBar: announcementBarStore as never, popup: popupStore as never, storyStrip: storyStripStore as never }, audit, deploy, {
+    publishing: new PublishService({ publish: publishStore, settings: settingsStore, media, posts: postStore, events: eventStore, appeals: appealStore, donationPage: donationPageStore, homepage: homepageStore, about: aboutStore as never, team: teamStore, programs: programStore, metrics: metricStore, reports: reportStore, impact: impactStore as never, transparency: transparencyStore as never, stories: storyStore, projects: projectStore, careers: careersStore as never, howWeWork: howWeWorkStore as never, forms: memoryFormDefinitionStore(data.formDefinitions, orgId), policies: policyStores, getInvolved: getInvolvedStores, announcementBar: announcementBarStore as never, popup: popupStore as never, storyStrip: storyStripStore as never }, audit, deploy, {
       orgId,
       log: silentLog,
       now: time.now,
@@ -317,4 +319,24 @@ export function addMedia(data: SharedData, orgId: string, status: MediaRecord["s
   };
   data.media.push(record);
   return record;
+}
+
+/* Website forms as saved in the admin, in memory (organization-scoped). */
+export function memoryFormDefinitionStore(rows: FormDefinition[], orgId: string) {
+  const mine = () => rows.filter((d) => d.orgId === orgId);
+  return {
+    list: async () => mine().sort((a, b) => a.id.localeCompare(b.id)).map((d) => structuredClone(d)),
+    get: async (id: string) => structuredClone(mine().find((d) => d.id === id) ?? null),
+    save: async (d: FormDefinition) => {
+      const i = rows.findIndex((r) => r.orgId === orgId && r.id === d.id);
+      if (i === -1) rows.push(structuredClone(d));
+      else rows[i] = structuredClone(d);
+    },
+    remove: async (id: string) => {
+      const i = rows.findIndex((r) => r.orgId === orgId && r.id === id);
+      if (i === -1) return false;
+      rows.splice(i, 1);
+      return true;
+    },
+  };
 }

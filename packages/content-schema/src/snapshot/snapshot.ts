@@ -16,6 +16,7 @@ import { Report } from "../transparency/report.ts";
 import { Project, projectMediaIds } from "../projects/project.ts";
 import { Careers } from "../careers/careers.ts";
 import { HowWeWork } from "../howWeWork/howWeWork.ts";
+import { FormDefinition } from "../forms/formDefinition.ts";
 import { POLICY_IDS, Policy, policyApprovalProblems } from "../policies/policy.ts";
 import { GET_INVOLVED_PAGE_IDS, GetInvolvedPage, getInvolvedApprovalProblems } from "../getInvolved/getInvolved.ts";
 import { AnnouncementBar, Popup, StoryStrip, announcementBarApprovalProblems, popupCmsProblems, storyStripApprovalProblems } from "../engagement/engagement.ts";
@@ -192,6 +193,8 @@ export const SnapshotContent = z.strictObject({
   projects: z.array(Project).min(1).optional(),
   careers: Careers.optional(),
   howWeWork: HowWeWork.optional(),
+  /* The website forms as saved in the admin (live when saved). */
+  forms: z.array(FormDefinition).max(60).optional(),
   policies: z.array(Policy).min(1).max(POLICY_IDS.length).optional(),
   getInvolved: z.array(GetInvolvedPage).min(1).max(GET_INVOLVED_PAGE_IDS.length).optional(),
   announcementBar: AnnouncementBar.optional(),
@@ -449,6 +452,15 @@ export const PublishedSnapshot = z
       if (careers.status !== "published") issue([...at, "status"], "a snapshot holds published records only");
       if (careers.orgId !== snapshot.organization.id) issue([...at, "orgId"], "must be the snapshot's organization");
       if (careers.releaseMarker !== undefined) issue([...at, "releaseMarker"], "is internal and never published");
+    }
+    const forms = snapshot.content.forms;
+    if (forms) {
+      const ids = new Set<string>();
+      forms.forEach((f, i) => {
+        if (f.orgId !== snapshot.organization.id) issue(["content", "forms", i, "orgId"], "must be the snapshot's organization");
+        if (ids.has(f.id)) issue(["content", "forms", i, "id"], `form "${f.id}" twice`);
+        ids.add(f.id);
+      });
     }
     const howWeWork = snapshot.content.howWeWork;
     if (howWeWork) {

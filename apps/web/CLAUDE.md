@@ -213,6 +213,13 @@ regions on RBB's behalf (D11, D14), and an empty block approves nothing.
 The Listen → Partner → Act → Sustain framework was rejected by RBB (D11):
 never introduce it. Where We Work has no map (D14).
 
+Website forms saved in the admin (2026-10-13, live when saved) arrive as
+`content.forms` and set `PUBLISHED_FORMS` (`forms.js`). Pages ask for a
+form with `formConfig(id)` — never `FORMS[id]` — so a saved form replaces
+the built-in one; the Careers page draws `career-<role id>` forms beneath
+its roles. A file field uploads through the API (`components/FileField`);
+never post a file anywhere else.
+
 Published policies (M19: privacy, terms, donation) are merged BY ID into
 their records in `POLICIES` (`policies.js`), so the policy page, footer,
 forms' privacy link, donation form and SEO follow. The id and route stay

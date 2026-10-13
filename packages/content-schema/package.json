@@ -8,7 +8,8 @@
     "./homepage-registry": "./src/homepage/registry.ts",
     "./about-registry": "./src/about/registry.ts",
     "./impact-registry": "./src/impact/registry.ts",
-    "./countries": "./src/common/countries.ts"
+    "./countries": "./src/common/countries.ts",
+    "./form-defaults": "./src/forms/defaults.ts"
   },
   "engines": {
     "node": ">=22.18"

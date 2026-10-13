@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { encodeKeyPath, presignUrl, signHeaders, type Credentials } from "./sigv4.ts";
 import { StorageError, type ObjectStorage, type StoredObject, type UploadTarget } from "./storage.ts";
 
@@ -97,5 +98,32 @@ export class R2Storage implements ObjectStorage {
 
   publicUrl(key: string): string {
     return `${this.#publicBase}/${encodeKeyPath(key)}`;
+  }
+
+  /* A server-side upload (form attachments): the body is hashed into the
+     signature, so R2 stores exactly these bytes. */
+  async putObject(key: string, body: Uint8Array, contentType: string): Promise<void> {
+    const url = this.#objectUrl(key);
+    const payloadHash = createHash("sha256").update(body).digest("hex");
+    const headers = signHeaders({ method: "PUT", url, headers: { "content-type": contentType }, credentials: this.#credentials, scope: SCOPE, date: this.#now(), payloadHash });
+    let response: Response;
+    try {
+      response = await this.#fetch(url, { method: "PUT", headers, body, signal: AbortSignal.timeout(this.#timeoutMs * 3) });
+    } catch (error) {
+      throw new StorageError(`R2 PUT failed: ${(error as Error).name}`, { cause: error });
+    }
+    await response.body?.cancel().catch(() => {});
+    if (!response.ok) throw new StorageError(`R2 PUT answered ${response.status}`, { status: response.status });
+  }
+
+  /* A short-lived signed link to read one object from the PRIVATE
+     endpoint, saved under `downloadName`. */
+  presignGet(key: string, expiresInSeconds: number, downloadName?: string): string {
+    const url = this.#objectUrl(key);
+    if (downloadName) {
+      const ascii = downloadName.replace(/[^\x20-\x7e]/g, "_").replace(/["\\]/g, "_");
+      url.searchParams.set("response-content-disposition", `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(downloadName)}`);
+    }
+    return presignUrl({ method: "GET", url, credentials: this.#credentials, scope: SCOPE, date: this.#now(), expiresInSeconds });
   }
 }

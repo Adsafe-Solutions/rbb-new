@@ -60,6 +60,12 @@ import { R2Storage } from "./modules/media/r2.ts";
 import { mongoMemberLeases, teamLock } from "./modules/members/lock.ts";
 import { memberRoutes } from "./modules/members/routes.ts";
 import { MongoSubmissionStore } from "./modules/submissions/repository.ts";
+import { MongoFormDefinitionStore } from "./modules/form-definitions/repository.ts";
+import { formDefinitionRoutes } from "./modules/form-definitions/routes.ts";
+import { FormDefinitionService } from "./modules/form-definitions/service.ts";
+import { FormUploadService, MongoFormUploadStore } from "./modules/forms/uploads.ts";
+import { formUploadRoutes } from "./modules/forms/routes.ts";
+import { MAX_FILE_BYTES } from "@rbb/content-schema";
 import { submissionRoutes } from "./modules/submissions/routes.ts";
 import { SubmissionService } from "./modules/submissions/service.ts";
 import { MemberService } from "./modules/members/service.ts";
@@ -269,7 +275,26 @@ export function createApp(options: AppOptions = {}): App {
       ...(options.now && { now: options.now }),
       ...(options.formsCapture && { capture: options.formsCapture }),
       submissions: new MongoSubmissionStore(db, config.orgId),
+      definitions: { live: (id: string) => new MongoFormDefinitionStore(db, config.orgId).get(id) },
+      uploads: formUploads(db, config),
     });
+  };
+
+  /* Career-form attachments: into the media bucket under private/forms/. */
+  const formUploads = (db: Awaited<ReturnType<MongoProvider["db"]>>, cfg: Config) =>
+    new FormUploadService(new MongoFormUploadStore(db, cfg.orgId), storage, mongoAuthStores(db, cfg.orgId).throttle, { orgId: cfg.orgId, env: cfg.env, secret: cfg.auth.secret, log, ...(options.now && { now: options.now }) });
+  const uploadDeps = async () => {
+    if (!config || !mongo) throw errors.unavailable("The database is not configured.");
+    const db = await mongo.db();
+    const store = new MongoFormDefinitionStore(db, config.orgId);
+    return { uploads: formUploads(db, config), definitions: { live: (id: string) => store.get(id) } };
+  };
+
+  /* The website forms in the admin — owners only, live when saved. */
+  const formDefinitions = async () => {
+    if (!config || !mongo) throw errors.unavailable("The database is not configured.");
+    const db = await mongo.db();
+    return new FormDefinitionService(new MongoFormDefinitionStore(db, config.orgId), { careers: new MongoCareersStore(db, config.orgId), publisher: await publishing(), audit: auditFor(db, config), orgId: config.orgId, ...(options.now && { now: options.now }) });
   };
 
   /* Form submissions in the admin — owners only. */
@@ -278,9 +303,12 @@ export function createApp(options: AppOptions = {}): App {
     const db = await mongo.db();
     /* Replies go out the forms' way (same sender and mode), only while
        email is on; the visitor's answer goes to the form's RBB inbox. */
-    const emailOn = config.forms.mode !== "off" && Object.keys(config.forms.recipients).length > 0;
-    const mailer = emailOn ? { deliver: createDeliverer(config.forms, emailTransport, options.formsCapture), replyTo: (formId: string) => config.forms.recipients[formId as keyof typeof config.forms.recipients] } : null;
-    return new SubmissionService(new MongoSubmissionStore(db, config.orgId), auditFor(db, config), { ...(options.now && { now: options.now }), mailer });
+    const emailOn = config.forms.mode !== "off" && (Object.keys(config.forms.recipients).length > 0 || Boolean(config.forms.careersRecipient));
+    const replyTo = (formId: string) => (formId.startsWith("career-") ? (config.forms.careersRecipient ?? undefined) : config.forms.recipients[formId as keyof typeof config.forms.recipients]);
+    const mailer = emailOn ? { deliver: createDeliverer(config.forms, emailTransport, options.formsCapture), replyTo } : null;
+    const definitions = new MongoFormDefinitionStore(db, config.orgId);
+    const titles = async () => Object.fromEntries((await definitions.list()).map((d) => [d.id, d.title]));
+    return new SubmissionService(new MongoSubmissionStore(db, config.orgId), auditFor(db, config), { ...(options.now && { now: options.now }), mailer, storage, titles });
   };
 
   const members = async () => {
@@ -328,6 +356,7 @@ export function createApp(options: AppOptions = {}): App {
         stories: storyStore(db),
         projects: projectStore(db),
         careers: new MongoCareersStore(db, config.orgId),
+        forms: new MongoFormDefinitionStore(db, config.orgId),
         howWeWork: new MongoHowWeWorkStore(db, config.orgId),
         policies: Object.fromEntries(POLICY_IDS.map((id) => [id, new MongoPolicyStore(db, config.orgId, id)])),
         getInvolved: Object.fromEntries(GET_INVOLVED_PAGE_IDS.map((id) => [id, new MongoGetInvolvedStore(db, config.orgId, id)])),
@@ -501,6 +530,8 @@ export function createApp(options: AppOptions = {}): App {
     ...(config ? memberRoutes(members) : []),
     ...(config ? formRoutes(forms, config.cors.web) : []),
     ...(config ? submissionRoutes(submissions) : []),
+    ...(config ? formDefinitionRoutes(formDefinitions) : []),
+    ...(config ? formUploadRoutes(uploadDeps, config.cors.web) : []),
     ...(config ? donationRoutes(donationProvider) : []),
     ...(config ? mediaRoutes(media) : []),
     ...(config ? settingsRoutes(settings) : []),
@@ -528,11 +559,15 @@ export function createApp(options: AppOptions = {}): App {
     ...(config ? blockPageRoutes<StoryStrip>("story-strip", storyStrip) : []),
   ];
   const router = createRouter(routes);
+  const UPLOAD_PATH = /^\/api\/v1\/forms\/[^/]+\/files$/;
   const allowedOrigins = config?.cors.origins ?? [];
 
   async function respond(request: Request, url: URL, requestId: string, requestLog: Logger, clientIp: string | null): Promise<Response> {
+    /* A career form's attachment upload (at most MAX_FILE_BYTES) is the one
+       body allowed past the general limit; its route enforces its own. */
+    const limit = request.method === "POST" && UPLOAD_PATH.test(url.pathname) ? MAX_FILE_BYTES : BODY_LIMIT_BYTES;
     const declared = Number(request.headers.get("content-length"));
-    if (Number.isFinite(declared) && declared > BODY_LIMIT_BYTES) throw errors.payloadTooLarge(BODY_LIMIT_BYTES);
+    if (Number.isFinite(declared) && declared > limit) throw errors.payloadTooLarge(limit);
 
     let match;
     try {

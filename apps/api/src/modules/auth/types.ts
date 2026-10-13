@@ -27,6 +27,8 @@ export const PERMISSIONS = [
      visitors' names, addresses and messages. */
   "submissions:read",
   "submissions:write",
+  /* The website forms (2026-10-13) — owners only: live when saved. */
+  "forms:write",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 

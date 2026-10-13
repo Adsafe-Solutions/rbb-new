@@ -30,6 +30,22 @@ export interface StoredSubmission {
   updatedAt: string;
   /* Replies sent from the admin, oldest first (absent: none). */
   replies?: SubmissionReply[];
+  /* A form saved in the admin: its name and each field's label when the
+     submission came in (the form may change later). */
+  formTitle?: string;
+  labels?: Record<string, string>;
+  /* Files attached to a career application — in the media bucket under
+     private/forms/, read only by a short-lived signed link. */
+  attachments?: SubmissionAttachment[];
+}
+
+export interface SubmissionAttachment {
+  id: string;
+  fieldId: string;
+  name: string;
+  size: number;
+  contentType: string;
+  key: string;
 }
 
 export interface SubmissionQuery {

@@ -33,6 +33,11 @@ export interface ObjectStorage {
   /* Where the public reads the object. Derived from configuration —
      never from the storage provider's private endpoint. */
   publicUrl(key: string): string;
+  /* Website form uploads (CVs, 2026-10-13): the API stores the bytes
+     itself, under a private prefix, and hands owners a short-lived signed
+     link to read one — never the public URL. */
+  putObject?(key: string, body: Uint8Array, contentType: string): Promise<void>;
+  presignGet?(key: string, expiresInSeconds: number, downloadName?: string): string;
 }
 
 /* A storage call failed (network, provider error, credentials). The

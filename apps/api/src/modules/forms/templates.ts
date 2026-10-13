@@ -205,3 +205,43 @@ export function reply({ message, reference, memberName }: { message: string; ref
   const text = `${message}\n\n${signature}\n\nIn reply to your message, reference ${reference}. You can reply to this email.`;
   return { subject: `Re: your message to ${BRAND} · ${reference}`, html, text };
 }
+
+/* The notification for a form SAVED in the admin (any field set, career
+   applications included): every answer under its label, long answers as
+   blocks, and the attached files by name — the files themselves are read
+   in the admin, never sent by email. The subject carries only the form's
+   name (the owner's words, on one line) and the reference. */
+export function definitionNotification(
+  definition: { title: string; fields: { id: string; type: string; label: string }[] },
+  data: Record<string, string>,
+  attachments: { label: string; name: string; size: number }[],
+  { reference, submittedAt }: { reference: string; submittedAt: string }
+): RenderedEmail {
+  const title = definition.title.replace(/[\r\n]+/g, " ").trim();
+  const answered = definition.fields.filter((f) => f.type !== "file" && data[f.id]);
+  const short = answered.filter((f) => f.type !== "textarea");
+  const long = answered.filter((f) => f.type === "textarea");
+  const size = (n: number) => (n >= 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
+  const files = attachments.map((a) => `${a.label}: ${a.name} (${size(a.size)})`);
+  const html = layout({
+    preheader: `${title} from the website — reference ${reference}`,
+    heading: `New submission: ${title}`,
+    body:
+      p(`Submitted through the “${esc(title)}” form on the ${BRAND} website.`) +
+      detailRows(short.map((f) => [f.label, esc(data[f.id])])) +
+      long.map((f) => messageBlock(f.label, data[f.id]!)).join("") +
+      (files.length ? detailRows([["Attached", files.map(esc).join("<br>") + "<br>Open them in the admin: Form submissions."]]) : "") +
+      (data.email ? replyButton(data.email, data.name ?? "") : "") +
+      metaLine(reference, submittedAt),
+  });
+  const text = [
+    `New submission: ${title} — ${BRAND} website`,
+    "",
+    ...short.map((f) => `${f.label}: ${data[f.id]}`),
+    ...long.flatMap((f) => ["", `${f.label}:`, data[f.id]!]),
+    ...(files.length ? ["", "Attached (open them in the admin: Form submissions):", ...files] : []),
+    "",
+    `Reference ${reference} · Received ${submittedAt} (UTC)`,
+  ].join("\n");
+  return { subject: `New submission: ${title} · ${reference}`, html, text };
+}

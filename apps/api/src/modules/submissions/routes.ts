@@ -9,6 +9,9 @@ import type { SubmissionService } from "./service.ts";
      GET    /api/v1/submissions          ?form&status&from&to&q&before&limit
                                          { items, next, counts } newest first
      GET    /api/v1/submissions/:id      the whole submission
+     GET    /api/v1/submissions/:id/attachments/:attachmentId
+                                         { url, expiresAt, name } — a signed
+                                         link (5 minutes) to an attached file
      POST   /api/v1/submissions/:id/status   { status: "new" | "read" }
      POST   /api/v1/submissions/:id/replies  { message } — emails the
                                          visitor an owner's reply (when email
@@ -35,6 +38,13 @@ export const submissionRoutes = (service: () => Promise<SubmissionService>): Rou
     auth: "required",
     permission: "submissions:read",
     handler: async (c) => ok(await (await service()).get(c.auth, c.params.id)),
+  },
+  {
+    method: "GET",
+    path: "/api/v1/submissions/:id/attachments/:attachmentId",
+    auth: "required",
+    permission: "submissions:read",
+    handler: async (c) => ok(await (await service()).attachmentLink(c.auth, c.params.id, c.params.attachmentId, facts(c))),
   },
   {
     method: "POST",

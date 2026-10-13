@@ -28,6 +28,7 @@ const approved = (block) => block?.status === "approved" && Boolean(block.label)
    rest (submitting, success, error) happen inside FormShell. Every
    condition must hold; see the header of content/forms.js. */
 export function formState(config) {
+  if (!config) return "disabled";
   if (!config || config.status !== "approved") return "disabled";
   if (config.recipient) return "disabled";
   if (!validEndpoint(config.endpoint)) return "disabled";
@@ -64,6 +65,8 @@ export function validateField(field, value) {
 
   if (field.type === "checkbox")
     return field.required && !value ? m.checkbox(field.label) : null;
+  /* A file field holds the id of a finished upload (components/FileField). */
+  if (field.type === "file") return field.required && !text ? m.file(field.label) : null;
   if (!text) {
     if (!field.required) return null;
     if (field.missing) return field.missing;
@@ -72,6 +75,7 @@ export function validateField(field, value) {
   /* The server's own pattern (lib/formSchema.js), so a value the browser
      accepts is never one the server rejects. */
   if (field.type === "email" && !EMAIL_PATTERN.test(text)) return m.email(field.label);
+  if (field.type === "tel" && !/^[0-9+()\-.\s]{3,30}$/.test(text)) return m.phone(field.label);
   if (field.maxLength && text.length > field.maxLength)
     return m.tooLong(field.label, field.maxLength);
   if (field.type === "select" && !field.options.some((o) => o.value === text))
@@ -98,6 +102,8 @@ export function serverFieldMessage(field, code) {
   if (code === "required")
     return validateField(field, field.type === "checkbox" ? false : "");
   if (code === "format" && field.type === "email") return m.email(field.label);
+  if (code === "format" && field.type === "tel") return m.phone(field.label);
+  if (code === "required" && field.type === "file") return m.file(field.label);
   if (code === "too-long" && field.maxLength)
     return m.tooLong(field.label, field.maxLength);
   return m.invalid(field.label);

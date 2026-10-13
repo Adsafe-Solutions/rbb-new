@@ -3,6 +3,7 @@ import Textarea from "../Textarea/Textarea.jsx";
 import SelectField from "../SelectField/SelectField.jsx";
 import CheckboxField from "../CheckboxField/CheckboxField.jsx";
 import FieldError from "../FieldError/FieldError.jsx";
+import FileField from "../FileField/FileField.jsx";
 
 /* One field from a form config (content/forms.js): its visible label,
    whether it is required — said in words, not an asterisk — an optional
@@ -70,14 +71,17 @@ export default function FormField({ formId, field, value, error, onChange, onBlu
       )}
       <FieldError id={errorId} prefix={copy.errorPrefix}>{error}</FieldError>
       <div className="mt-2">
-        {field.type === "textarea" ? (
+        {field.type === "file" ? (
+          <FileField id={id} field={field} value={value} onChange={onChange} disabled={disabled} copy={copy} describedBy={describedBy} invalid={Boolean(error)} />
+        ) : field.type === "textarea" ? (
           <Textarea {...control} maxLength={field.maxLength} />
         ) : field.type === "select" ? (
           <SelectField {...control} options={field.options} placeholder={copy.selectNone} />
         ) : (
           <TextInput
             {...control}
-            type={field.type === "email" ? "email" : "text"}
+            type={field.type === "email" ? "email" : field.type === "tel" ? "tel" : "text"}
+            placeholder={field.placeholder}
             autoComplete={field.autoComplete}
             maxLength={field.maxLength}
             spellCheck={field.type === "email" ? false : undefined}

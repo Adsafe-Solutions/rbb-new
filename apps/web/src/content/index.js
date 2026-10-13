@@ -39,7 +39,7 @@ export {
   appealDonation,
   donationPreview,
 } from "./donation.js";
-export { FORMS, FORM_COPY } from "./forms.js";
+export { FORMS, FORM_COPY, PUBLISHED_FORMS, formConfig } from "./forms.js";
 export {
   POLICIES,
   POLICY_COPY,

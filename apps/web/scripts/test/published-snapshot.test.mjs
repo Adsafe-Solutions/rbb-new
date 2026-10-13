@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import { HOMEPAGE_BLOCK_TYPES } from "@rbb/content-schema/homepage-registry";
 import { ABOUT_BLOCK_TYPES } from "@rbb/content-schema/about-registry";
 import { CTA_TARGETS, GET_INVOLVED_PAGE_IDS, GET_INVOLVED_ROUTES, IMPACT_BLOCK_TYPES, IMPACT_CHAPTER_TYPES, POLICY_IDS, POLICY_ROUTES, PROGRAM_ICONS } from "@rbb/content-schema";
-import { ABOUT_VIEW_TYPES, BY_ID, announcementsFrom, popupFrom, storyStripFrom, CTA_ROUTES, GET_INVOLVED_IDS, IMPACT_PAGE_VIEW_TYPES, IMPACT_VIEW_TYPES, getInvolvedFrom, howWeWorkFrom, impactPagesFrom, POLICY_IDS as ADAPTER_POLICY_IDS, aboutFrom, careersFrom, policiesFrom, impactFrom, metricsFrom, programsFrom, projectsFrom, storiesFrom, transparencyFrom, teamFrom, HOMEPAGE_VIEW_TYPES, SOCIAL_LABELS, SNAPSHOT_TARGETS, appealsFrom, homepageFrom, appendOverrides, collectionsFrom, generalDonationFrom, hasCheckouts, imageOrigins, overridesFrom, structuralProblems } from "../snapshot-adapter.mjs";
+import { ABOUT_VIEW_TYPES, BY_ID, announcementsFrom, popupFrom, storyStripFrom, CTA_ROUTES, GET_INVOLVED_IDS, IMPACT_PAGE_VIEW_TYPES, IMPACT_VIEW_TYPES, getInvolvedFrom, formsFrom, howWeWorkFrom, impactPagesFrom, POLICY_IDS as ADAPTER_POLICY_IDS, aboutFrom, careersFrom, policiesFrom, impactFrom, metricsFrom, programsFrom, projectsFrom, storiesFrom, transparencyFrom, teamFrom, HOMEPAGE_VIEW_TYPES, SOCIAL_LABELS, SNAPSHOT_TARGETS, appealsFrom, homepageFrom, appendOverrides, collectionsFrom, generalDonationFrom, hasCheckouts, imageOrigins, overridesFrom, structuralProblems } from "../snapshot-adapter.mjs";
 
 /* The published-snapshot adapter (scripts/snapshot-adapter.mjs) and the
    build's fetch step (scripts/published-snapshot.mjs). */
@@ -40,7 +40,7 @@ test("mapping: general, SEO, contact and social onto the existing view models", 
     contact: { methods: [{ id: "general", type: "email", label: "Email", value: "hello@example.org" }], office: { address: "1 Test Street", country: "Testland" }, hours: "Mon–Fri" },
     social: [{ platform: "linkedin", url: "https://www.linkedin.com/company/example" }],
   }));
-  const contentTargets = ["media.js", "appeals.js", "donation.js", "homepage.js", "about.js", "team.js", "work.js", "impact.js", "transparency.js", "stories.js", "policies.js", "getInvolved.js", "announcements.js"];
+  const contentTargets = ["media.js", "appeals.js", "donation.js", "homepage.js", "about.js", "team.js", "work.js", "impact.js", "transparency.js", "stories.js", "policies.js", "getInvolved.js", "announcements.js", "forms.js"];
   assert.deepEqual(Object.keys(o).sort(), Object.keys(SNAPSHOT_TARGETS).filter((f) => !contentTargets.some((t) => f.endsWith(t))).sort(), "no content → media.js, appeals.js and donation.js untouched");
   assert.deepEqual(o["src/content/brand.js"].BRAND, { name: "RBB", fullName: "Rising Beyond Borders", summary: "A summary." });
   assert.deepEqual(o["src/content/site.js"].SITE, { description: "A description." });
@@ -719,3 +719,10 @@ test("highlights: an unpublished strip, or one naming an unpublished appeal, fai
 /* How the order is applied — storyAppeals() in content/appeals.js reads
    APPEAL_STORIES.order — is exercised on the real module in
    runtime-snapshot-render.test.mjs. */
+
+test("forms (2026-10-13): saved forms → PUBLISHED_FORMS.items without organization or dates; none → the built-in forms stay", () => {
+  const definition = { id: "contact", orgId: "rbb", kind: "contact", title: "Contact Us", heading: "Write to us", submitLabel: "Send", successMessage: "Thanks.", errorMessage: "Sorry.", fields: [{ id: "name", type: "text", label: "Name", required: true }, { id: "email", type: "email", label: "Email", required: true }], updatedAt: "2026-10-13T10:00:00.000Z" };
+  assert.equal(formsFrom(snapshot()), undefined);
+  assert.deepEqual(formsFrom(withContent({ forms: [definition] })), [{ id: "contact", kind: "contact", title: "Contact Us", heading: "Write to us", submitLabel: "Send", successMessage: "Thanks.", errorMessage: "Sorry.", fields: definition.fields }]);
+  assert.deepEqual(Object.keys(overridesFrom(withContent({ forms: [definition] }))["src/content/forms.js"]), ["PUBLISHED_FORMS"]);
+});

@@ -79,6 +79,9 @@ export function ContactSection({ value, onChange, readOnly, errorFor }: SectionP
                 <Input maxLength={2048} value={method.href ?? ""} onChange={(e) => setMethod(i, { ...method, href: orUndefined(e.target.value) })} />
               </FormField>
             )}
+            <FormField label="Description" helper="Optional. A short note shown with this method on the Contact page, e.g. “For questions about volunteering.” Up to 300 characters." disabled={readOnly} error={errorFor(`methods.${i}.description`)}>
+              <Textarea rows={2} maxLength={300} value={method.description ?? ""} onChange={(e) => setMethod(i, { ...method, description: orUndefined(e.target.value) })} />
+            </FormField>
             {!readOnly && (
               <Button size="sm" variant="ghost" leadingIcon={<Trash2 />} className={styles.remove} onClick={() => onChange({ ...value, methods: value.methods.filter((_, j) => j !== i) })}>
                 Remove {method.label || "method"}

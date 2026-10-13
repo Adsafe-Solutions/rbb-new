@@ -100,7 +100,7 @@ test("after the build: dist/ and build-meta must show a runtime-snapshot build f
   assert.match(artifactProblems(artifact({ missing: ["_headers", "robots.txt"] })).join(), /dist\/_headers is missing/);
 });
 
-test("form endpoints (2026-10-13): Contact, Volunteer and Partner only, each exactly its production endpoint", async () => {
+test("form endpoints (2026-10-13): Contact, Volunteer, Partner and Newsletter only, each exactly its production endpoint", async () => {
   const { FORM_ENDPOINTS: endpoints, preflightProblems: check } = await import("../deploy-pages.mjs");
   const git = { branch: "main", dirty: [], head: "a".repeat(40), upstream: "a".repeat(40) };
   const base = { RBB_SNAPSHOT_URL: "https://api.risingbeyondborders.org/api/v1/public/snapshot", RBB_SNAPSHOT_REQUIRED: "1", RBB_SNAPSHOT_RUNTIME: "on" };
@@ -108,4 +108,6 @@ test("form endpoints (2026-10-13): Contact, Volunteer and Partner only, each exa
   assert.deepEqual(check({ env: base, git }), [], "unset: the forms stay hidden");
   assert.equal(check({ env: { ...base, VITE_FORM_ENDPOINT_CONTACT: "https://evil.example/forms/contact" }, git }).length, 1);
   assert.equal(check({ env: { ...base, VITE_FORM_ENDPOINT_TRAVEL: "https://api.risingbeyondborders.org/api/v1/forms/travel" }, git }).length, 1);
+  assert.equal(endpoints.VITE_FORM_ENDPOINT_NEWSLETTER, "https://api.risingbeyondborders.org/api/v1/forms/newsletter");
+  assert.equal(check({ env: { ...base, VITE_FORM_ENDPOINT_NEWSLETTER: "https://evil.example/forms/newsletter" }, git }).length, 1);
 });

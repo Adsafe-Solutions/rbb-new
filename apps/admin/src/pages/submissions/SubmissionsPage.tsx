@@ -203,7 +203,7 @@ export default function SubmissionsPage(_: PageProps) {
     <PageContainer>
       <PageHeader
         title="Form submissions"
-        description="What visitors send through the website's Contact Us, Volunteer and Partner With Us forms. Newest first; kept until you delete them. Only owners can see this page."
+        description="What visitors send through the website's Contact Us, Volunteer, Partner With Us and career forms, and the footer's Newsletter sign-up. Newest first; kept until you delete them. Only owners can see this page."
       />
       {counts && (
         <div className={styles.counts} aria-label="Totals">

@@ -109,11 +109,11 @@ const success = (page) => page.getByText("Thank you — your message has been se
 try {
   const start = (await outcomes()).length;
 
-  /* ---------- /contact: Contact drawn, Newsletter not (even with an endpoint) ---------- */
+  /* ---------- /contact: Contact drawn; Newsletter in the footer only (no band) ---------- */
   const c = await open("/contact");
   const contact = c.page.locator('form[data-form="contact"]');
   check("contact: the form is drawn", await visibleSoon(contact));
-  check("newsletter: NOT drawn, although its endpoint is set", (await c.page.locator('form[data-form="newsletter"]').count()) === 0);
+  check("newsletter: drawn once, in the footer (the page's band stays off)", (await c.page.locator('form[data-form="newsletter"]').count()) === 1 && (await c.page.locator('footer form[data-form="newsletter"]').count()) === 1);
   check("1440px: no horizontal scroll (contact)", await noHorizontalScroll(c.page));
   await axe(c.page, 'form[data-form="contact"]', "contact form");
 

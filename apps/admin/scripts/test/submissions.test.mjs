@@ -15,6 +15,8 @@ test("forms, topics and fields read as the website words them", () => {
   assert.deepEqual(["contact", "volunteer", "partner", "other"].map(formLabel), ["Contact Us", "Volunteer", "Partner With Us", "other"]);
   assert.equal(topicLabel("general"), "A general question");
   assert.deepEqual(fieldRows({ message: "Hello", email: "a@b.example", name: "A", topic: "donate", organization: "" }).map((r) => [r.label, r.value]), [["Name", "A"], ["Email", "a@b.example"], ["Topic", "Donate"], ["Message", "Hello"]]);
+  assert.deepEqual(fieldRows({ marketing: "Yes", consent: "Yes", email: "r@b.example" }).map((r) => [r.label, r.value]), [["Email", "r@b.example"], ["Marketing emails", "Yes"], ["Newsletter consent", "Yes"]]);
+  assert.equal(formLabel("newsletter"), "Newsletter");
 });
 
 test("a reply opens the member's own mail program, addressed, with the reference", () => {

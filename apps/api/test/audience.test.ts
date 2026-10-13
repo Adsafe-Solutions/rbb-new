@@ -61,6 +61,20 @@ test("one row per person by email (case ignored): forms used, count, first and l
   assert.equal((await failure(w.audience.list(owner, { marketing: "maybe" }))).code, "VALIDATION_ERROR");
 });
 
+test("newsletter subscribers are in the audience as opted in, without a name; filterable by the Newsletter form", async () => {
+  const w = world();
+  await w.send("newsletter", { email: "reader@test.example", consent: true });
+  await w.send("contact", { name: "Asha", email: "asha@test.example", message: MSG, marketing: false });
+  await w.send("newsletter", { email: "Asha@Test.example", consent: true });
+  const page = await w.audience.list(owner, {});
+  assert.deepEqual(page.items.map((p) => [p.email, p.name, p.forms, p.marketing]), [
+    ["Asha@Test.example", "Asha", ["contact", "newsletter"], "Yes"],
+    ["reader@test.example", "", ["newsletter"], "Yes"],
+  ]);
+  assert.equal(page.optedIn, 2);
+  assert.deepEqual((await w.audience.list(owner, { form: "newsletter" })).items.map((p) => p.email), ["Asha@Test.example", "reader@test.example"]);
+});
+
 test("CSV export: quoted, formula-safe, audited by row count only", async () => {
   const w = world();
   await w.send("contact", { name: "=HYPERLINK(\"x\")", email: "a@test.example", message: MSG, marketing: true });

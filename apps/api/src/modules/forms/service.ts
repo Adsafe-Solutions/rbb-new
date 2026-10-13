@@ -7,7 +7,7 @@ import type { ThrottleStore } from "../auth/repository.ts";
 import { pseudonym } from "../auth/tokens.ts";
 import { FORM_IDS, formEnabled, type FormId, type FormsConfig } from "./config.ts";
 import type { SubmissionStore } from "../submissions/repository.ts";
-import { STORED_FORM_IDS } from "../submissions/service.ts";
+import { STORE_ONLY_FORM_IDS, STORED_FORM_IDS } from "../submissions/service.ts";
 import { createDeliverer, type EmailTransport, type OutgoingEmail } from "./email.ts";
 import { acknowledgement, definitionNotification, notification, type SubmissionData } from "./templates.ts";
 import { validateAgainstDefinition } from "./definition.ts";
@@ -71,6 +71,7 @@ export interface FormServiceOptions {
 
 const isFormId = (id: string): id is FormId => (FORM_IDS as readonly string[]).includes(id);
 const STORED = new Set<string>(STORED_FORM_IDS);
+const STORE_ONLY = new Set<string>(STORE_ONLY_FORM_IDS);
 
 export class FormService {
   readonly #throttle: ThrottleStore;
@@ -94,7 +95,7 @@ export class FormService {
     const career = definition?.kind === "career";
     const emailing = career ? config.mode !== "off" && Boolean(config.careersRecipient) : formEnabled(config, formId);
     const storing = Boolean(this.#options.submissions) && (career || STORED.has(formId));
-    if ((!emailing && !storing) || (!career && !isFormId(formId))) throw errors.unavailable("This form is not taking submissions at the moment.");
+    if ((!emailing && !storing) || (!career && !isFormId(formId) && !STORE_ONLY.has(formId))) throw errors.unavailable("This form is not taking submissions at the moment.");
     if (body && typeof body === "object" && !Array.isArray(body) && (body as { formId?: unknown }).formId !== formId)
       throw errors.badRequest("The request does not match this form.");
 
@@ -126,6 +127,8 @@ export class FormService {
       if (!result.ok) return refuse(result.status, result.fields as Record<string, string> | undefined);
       /* Checkboxes (the marketing emails choice) are kept as Yes / No. */
       data = Object.fromEntries(Object.entries(result.data as Record<string, unknown>).map(([k, v]) => [k, typeof v === "boolean" ? (v ? "Yes" : "No") : (v as string)]));
+      /* The newsletter's required consent IS the marketing opt-in. */
+      if (formId === "newsletter") data.marketing = "Yes";
     }
 
     /* Attachments: uploads made for this form's file fields, unclaimed. */
@@ -219,8 +222,8 @@ export class FormService {
   }
 }
 
-/* What is kept: the validated text fields, trimmed, empty ones left out —
-   never consent flags, the honeypot or timing. */
+/* What is kept: the validated fields (checkboxes as Yes / No), trimmed,
+   empty ones left out — never the honeypot or timing. */
 function storedFields(data: Record<string, string>): Record<string, string> {
   return Object.fromEntries(
     Object.entries(data as unknown as Record<string, unknown>)

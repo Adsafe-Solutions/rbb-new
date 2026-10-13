@@ -1,7 +1,9 @@
 /* Form submissions in the admin: the request, the forms' names and the
    field labels. Plain functions, unit-tested (scripts/test). */
 
-export const FORM_LABELS: Record<string, string> = { contact: "Contact Us", volunteer: "Volunteer", partner: "Partner With Us" };
+/* Newsletter: the footer's subscribe form (2026-10-13). It is fixed in the
+   website, so it never appears in Admin → Forms. */
+export const FORM_LABELS: Record<string, string> = { contact: "Contact Us", volunteer: "Volunteer", partner: "Partner With Us", newsletter: "Newsletter" };
 export const formLabel = (formId: string): string => (Object.hasOwn(FORM_LABELS, formId) ? FORM_LABELS[formId]! : formId);
 
 /* The Contact form's topics (packages/forms TOPICS), worded as the
@@ -17,6 +19,8 @@ const FIELD_ORDER: [string, string][] = [
   ["phone", "Phone"],
   ["topic", "Topic"],
   ["message", "Message"],
+  ["marketing", "Marketing emails"],
+  ["consent", "Newsletter consent"],
 ];
 export function fieldRows(fields: Record<string, string>, labels?: Record<string, string>): { key: string; label: string; value: string }[] {
   /* A form saved in the admin: its own labels, in its own order. */

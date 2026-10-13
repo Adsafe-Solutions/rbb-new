@@ -5,6 +5,7 @@ import FormShell from "../FormShell/FormShell.jsx";
 import Section from "../Section/Section.jsx";
 import SectionHeading from "../SectionHeading/SectionHeading.jsx";
 import { FORMS } from "../../content/index.js";
+import SECTIONS from "../../config/sections.js";
 
 /* The newsletter: the ask on a Sky Blue band, a photograph pinned up
    beside it.
@@ -18,6 +19,9 @@ import { FORMS } from "../../content/index.js";
    is ready. Nothing is ever stored in the browser. */
 export default function Newsletter({ kicker, heading, body, pending, src, alt, focal, form = FORMS.newsletter, tone = "accent" }) {
   const headingId = useId();
+  /* The footer carries the sign-up; these bands only when switched on
+     (config/sections.js newsletterBands). */
+  if (!SECTIONS.newsletterBands) return null;
   /* No sign-up to offer and nothing to say instead: no section at all. */
   if (formState(form) !== "ready" && !pending) return null;
 

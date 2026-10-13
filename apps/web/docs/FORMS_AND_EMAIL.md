@@ -15,9 +15,14 @@ in production yet** — see *Activation* below.
   - **Stored and emailed (2026-10-13):** Contact Us, Volunteer and
     Partner With Us submissions are kept for owners in Admin → Form
     submissions, and emailed once email is configured.
-- **Newsletter stays off.** It has `status: "draft"` in `content/forms.js`,
-  and the API refuses it whatever the environment says, until its consent
-  wording, recipient and subscriber processing are approved.
+- **Newsletter: the footer's subscribe form (2026-10-13).** Email and the
+  required consent box. The API keeps each subscriber for owners (Admin →
+  Form submissions → Newsletter; Audience, opted in) and emails nobody,
+  whatever `EMAIL_TO_NEWSLETTER` says. Not editable in Admin → Forms. The
+  newsletter bands on /contact and /stories stay off
+  (`config/sections.js` `newsletterBands`). No confirmation email or
+  unsubscribe handling yet: RBB's mail tool, fed from Audience's CSV
+  export, must handle unsubscribes.
 - **Travel stays off.** The API doesn't take it in M18. Its form stays
   undrawn without an endpoint.
 - **Fundraise has no page.** The API takes it, but no page draws its form:
@@ -77,9 +82,10 @@ browser (static site)
   still carry only the form, outcome and reference.
   The Privacy Policy must say so before RBB relies on it.
 - **Live on the website** when the production deploy sets
-  `VITE_FORM_ENDPOINT_CONTACT`, `_VOLUNTEER` and `_PARTNER` to the API's
-  endpoints (`deploy.env.example`; `scripts/deploy-pages.mjs` accepts only
-  those exact values and refuses Travel, Fundraise and Newsletter).
+  `VITE_FORM_ENDPOINT_CONTACT`, `_VOLUNTEER`, `_PARTNER` and
+  `_NEWSLETTER` to the API's endpoints (`deploy.env.example`;
+  `scripts/deploy-pages.mjs` accepts only those exact values and refuses
+  Travel and Fundraise).
 
 ## Files
 

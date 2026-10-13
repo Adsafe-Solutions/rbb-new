@@ -37,6 +37,12 @@ export const SECTIONS = {
      four appeals marked `story` in content/appeals.js. ON/OFF there
      (APPEAL_STORIES.enabled); VITE_STORY_STRIP = "true" | "false" overrides. */
   storyStrip: (ENV.storyStrip ?? APPEAL_STORIES.enabled) && storyAppeals().length > 0,
+
+  /* The newsletter bands on /contact and /stories (components/Newsletter).
+     OFF: since 2026-10-13 the subscribe form lives in the footer only, at
+     the owner's request — turning this on adds the same form to those
+     two pages. */
+  newsletterBands: false,
 };
 
 export default SECTIONS;

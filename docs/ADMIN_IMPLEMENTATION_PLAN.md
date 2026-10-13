@@ -30,8 +30,10 @@ and the problems met while entering content on 2026-10-12/13.
 | 15 | Settings → General: country selection | S | Implemented — not yet tested or committed |
 | 16 | Website forms stored + Admin → Form submissions | M | Done — committed, pushed and live (`e77f3df`, replies `669f561`) |
 | 17 | Form builder: edit every website form; career application forms with CV uploads | L | Done — committed, pushed and live (`97d5def`) |
-| 18 | Audience, and a marketing emails checkbox on every form (ticked by default) | M | Implemented — tests run; not yet committed or deployed |
-| 19 | Footer link to the Careers page | S | Implemented — not yet committed or deployed |
+| 18 | Audience, and a marketing emails checkbox on every form (ticked by default) | M | Done — committed, pushed and live (`6467a9f`, `42c17d9`) |
+| 19 | Footer link to the Careers page | S | Done — committed, pushed and live (`6467a9f`) |
+| 20 | Admin look: ink primary (in place of `#10437C`), light/dark switch, compact tables | S | Implemented — tests and builds run; not yet committed or deployed |
+| 21 | Footer subscribe (Newsletter) form, stored for owners; not editable in Admin | S | Implemented — tests and builds run; not yet committed or deployed |
 
 ## 1. Remove stale references from record pickers — done
 
@@ -467,10 +469,55 @@ the built-in forms in `apps/web/src/content/forms.js` MARKETING).
   `formDefinition.test.ts`; admin `form-builder.test.mjs`. A scratch build
   pre-renders the box ticked on Contact, Volunteer and Partner.
 
-## 19. Footer link to the Careers page — implemented
+## 19. Footer link to the Careers page — done
 
 `apps/web/src/content/footer.js`: "Careers" (`/about-us/careers`) in the
 footer's Information column, on every page.
+
+## 20. Admin look: ink primary, light/dark switch, compact tables — implemented
+
+Owner request (2026-10-13), narrowed the same day: keep the admin's
+previous backgrounds and colours, and change only the primary colour.
+
+- Primary: `apps/admin/src/theme/rbb.ts` `primary` is ink `#28282B` — the
+  colour the website's default theme uses in place of Deep Trust Blue
+  `#10437C` — on buttons, selected items and badges. Everything else
+  (white surfaces, `#F5F7FA` canvas, Sky Blue accent, text) is unchanged.
+  Links use a darkened Sky Blue (9:1 on white), since an ink link would
+  look like body text.
+- Light/dark switch: a sun/moon button in the topbar
+  (`shell/Topbar.tsx`), remembered per browser (`src/theme/mode.ts`,
+  localStorage, guarded); applied before the first render (`main.tsx`).
+  Light is the default. Dark mode's action colour is white with dark
+  text, so buttons read on the dark ground.
+- Compact tables: `Table`'s default density is now `compact` (every list
+  in the admin); `density="default"` keeps the roomier spacing.
+
+## 21. Footer subscribe (Newsletter) form — implemented
+
+Owner request (2026-10-13): a subscribe form in the footer, not editable in
+Admin → Forms.
+
+- Website: `FORMS.newsletter` is approved (email + the required consent
+  box, its approved wording; proposed success/error copy). The footer
+  draws it on every page once `VITE_FORM_ENDPOINT_NEWSLETTER` is set (the
+  deploy accepts exactly `https://api.risingbeyondborders.org/api/v1/forms/newsletter`).
+  The newsletter bands on /contact and /stories stay off
+  (`config/sections.js` `newsletterBands: false`).
+- API: Newsletter is STORED ONLY (`STORE_ONLY_FORM_IDS`): never emailed to
+  RBB, whatever `EMAIL_TO_NEWSLETTER` says; 503 without the database.
+  Each subscriber is kept with `consent: Yes` and `marketing: Yes`, so
+  they count as opted in under Audience (explicit consent, unlike the
+  pre-ticked box in #18).
+- Admin: "Newsletter" in Form submissions (filter and totals) and in
+  Audience's form filter. It is not in Admin → Forms (not a built-in
+  form definition), so it cannot be edited there.
+- Not built: double opt-in confirmation, unsubscribe handling, or sending
+  newsletters — RBB exports the list (Audience → Export CSV) to its mail
+  tool, which must handle unsubscribes. The Privacy Policy should mention
+  newsletter sign-ups (RBB's wording).
+- Tests: API `submissions.test.ts`, `audience.test.ts`; web
+  `deploy-pages.test.mjs`; admin `submissions.test.mjs`.
 
 ## 14. Audit Log screen — removed, not required
 

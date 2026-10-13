@@ -16,7 +16,7 @@ const PAGE = 50;
 const Query = z.strictObject({
   q: z.string().trim().min(1).max(100).optional(),
   marketing: z.enum(["yes", "no", "unknown"]).optional(),
-  form: z.string().regex(/^(contact|volunteer|partner|career-[a-z0-9]+(?:-[a-z0-9]+)*)$/).optional(),
+  form: z.string().regex(/^(contact|volunteer|partner|newsletter|career-[a-z0-9]+(?:-[a-z0-9]+)*)$/).optional(),
   page: z.coerce.number().int().min(1).max(10_000).optional(),
 });
 

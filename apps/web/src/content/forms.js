@@ -181,15 +181,16 @@ export const FORMS = {
     fields: [NAME, EMAIL, message("What are you planning?", "Tell us what you are planning")],
   },
 
-  /* Newsletter sign-up, wherever a newsletter card appears. Cannot go
-     live without approved consent wording and a real privacy policy,
-     whatever else is supplied (Document 12 §10).
-     M18: OFF — status "draft" — until RBB approves its consent wording,
-     recipient and subscriber processing; the API does not take it either.
-     An endpoint in the environment does not change that. */
+  /* Newsletter sign-up: the footer's subscribe form (2026-10-13, owner's
+     request). Cannot go live without approved consent wording and a
+     published privacy policy, whatever else is supplied (Document 12 §10).
+     The API keeps each subscriber (Admin → Form submissions, Newsletter;
+     and Audience, opted in) and emails nobody. It is fixed here — never
+     edited in Admin → Forms. */
   newsletter: {
     ...pending("newsletter"),
-    status: "draft",
+    successMessage: "Thank you — you are subscribed to news from Rising Beyond Borders.",
+    errorMessage: "Sorry, we could not sign you up. Please try again in a moment.",
     heading: "Sign up",
     submitLabel: "Sign up",
     /* The card's inline field (components/Newsletter) shows a placeholder;

@@ -70,7 +70,7 @@ Base path: **`/api/v1`**.
 | GET | `/api/v1/internal/scheduler/run` | `Authorization: Bearer <CRON_SECRET>` (no session) | M15: the scheduler — publishes what is approved and due, finishes a stopped publish, retries a failed deployment trigger. 503 without CRON_SECRET, 401 without the secret. Also `pnpm api:scheduler:run` |
 | GET | `/api/v1/public/snapshot` | — public | The active published snapshot (`no-cache` + ETag; 404 before the first publish) |
 | GET | `/api/v1/public/snapshot/:version` | — public | One published version (immutable cache) |
-| POST | `/api/v1/forms/:formId` | — public; Origin must be exactly `WEB_ORIGIN` | M18: a website form → `{ data: { reference } }`. Contact, Volunteer, Partner, Fundraise when configured; Newsletter and Travel 503. JSON ≤ 16 KiB (415/413/400), 422 with `fields.<name>` codes, 429 + Retry-After, 503 when off, unconfigured or the email could not be sent. Contact, Volunteer and Partner are stored (2026-10-13) and taken even with email off; see "Public forms" |
+| POST | `/api/v1/forms/:formId` | — public; Origin must be exactly `WEB_ORIGIN` | M18: a website form → `{ data: { reference } }`. Contact, Volunteer, Partner, Fundraise when configured; Newsletter stored only (never emailed); Travel 503. JSON ≤ 16 KiB (415/413/400), 422 with `fields.<name>` codes, 429 + Retry-After, 503 when off, unconfigured or the email could not be sent. Contact, Volunteer and Partner are stored (2026-10-13) and taken even with email off; see "Public forms" |
 | GET | `/api/v1/submissions` | `submissions:read` (OWNER) | Stored form submissions, newest first: `?form&status&from&to&q&before&limit` → `{ items, next, counts }` |
 | GET | `/api/v1/submissions/:id` | `submissions:read` (OWNER) | One submission, every field |
 | POST | `/api/v1/submissions/:id/status` | `submissions:write` (OWNER) | `{ status: "new" \| "read" }` |
@@ -433,7 +433,7 @@ still carry only the form, outcome and reference. Routes: `modules/submissions/`
      a missing or unknown Origin; the admin's origin is refused here too.
   2. JSON, at most 16 KiB (415, 413, 400).
   3. Unknown form → 404.
-  4. Not enabled (mode `off`, no recipient, Newsletter, Travel) → 503.
+  4. Not enabled (mode `off`, no recipient, Travel; Newsletter without the database) → 503.
   5. Rate limit → 429 with Retry-After.
   6. Bots (honeypot filled, or under 1.5 s) get a normal 200 and nothing
      is sent.
@@ -690,7 +690,7 @@ These are unverified until the first deploy:
 - Email invitations, email password reset and email verification
 - Media folders/tags, image resizing, documents (PDF), EXIF/GPS stripping
 - Givebutter changes
-- Newsletter and Travel forms (M18 keeps both off; Newsletter waits for
-  approved consent wording, recipient and subscriber processing)
+- The Travel form (off). Newsletter (2026-10-13) is stored only: no
+  confirmation email, unsubscribe handling or sending
 - Retiring `apps/web/server` (the old form endpoint) — a separate, reviewed
   change once nothing depends on it

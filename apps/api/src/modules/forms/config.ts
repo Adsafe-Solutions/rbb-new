@@ -4,9 +4,10 @@
 
    Which forms the API can take at all is fixed here (FORM_IDS); which are
    ENABLED is configuration: a supported form with an approved recipient,
-   while the email mode is not "off". Newsletter and Travel are not
-   supported in M18 — Newsletter waits for approved consent, recipient and
-   subscriber processing; Travel was not approved for this milestone.
+   while the email mode is not "off". Travel is not supported (not
+   approved). Newsletter is never EMAILED: since 2026-10-13 it is the
+   footer's subscribe form, stored only (submissions/service.ts
+   STORE_ONLY_FORM_IDS) — so EMAIL_TO_NEWSLETTER is still ignored.
 
    Fail closed:
      - a global problem (unknown mode; staging/live without a key or a

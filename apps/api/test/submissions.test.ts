@@ -75,13 +75,29 @@ test("stored: with email off, Contact, Volunteer and Partner are taken and kept 
   for (const secret of [VISITOR.name, VISITOR.email, "reading club"]) assert.ok(!auditText.includes(secret), "the audit trail carries no visitor data");
 });
 
-test("not stored: bots, invalid input, and forms that are not Contact, Volunteer or Partner", async () => {
+test("not stored: bots, invalid input, and forms that are not stored (Fundraise, Travel)", async () => {
   const w = world();
   await w.forms.submit("contact", body("contact", VISITOR, { website: "https://spam.example" }), facts());
   await w.forms.submit("contact", body("contact", VISITOR, { elapsedMs: 10 }), facts("198.51.100.20"));
   assert.equal((await failure(w.forms.submit("contact", body("contact", { name: "", email: "x", message: "" }), facts("198.51.100.21")))).status, 422);
-  for (const id of ["fundraise", "travel", "newsletter"]) assert.equal((await failure(w.forms.submit(id, body(id), facts("198.51.100.22")))).status, 503, id);
+  for (const id of ["fundraise", "travel"]) assert.equal((await failure(w.forms.submit(id, body(id), facts("198.51.100.22")))).status, 503, id);
   assert.equal(w.rows.length, 0);
+});
+
+test("newsletter (the footer's subscribe form): consent required; stored only, never emailed to RBB; kept as opted in", async () => {
+  const config = loadFormsConfig({ EMAIL_MODE: "test", EMAIL_TO_CONTACT: "contact-inbox@rbb.example", EMAIL_TO_NEWSLETTER: "news@rbb.example" });
+  const w = world(config);
+  const refused = await failure(w.forms.submit("newsletter", body("newsletter", { email: "reader@example.org", consent: false }), facts()));
+  assert.equal(refused.status, 422, "no consent, no subscription");
+  assert.equal((await failure(w.forms.submit("newsletter", body("newsletter", { email: "reader@example.org", consent: true, name: "Extra" }), facts("198.51.100.30")))).status, 400, "only the email and consent");
+  await w.forms.submit("newsletter", body("newsletter", { email: "reader@example.org", consent: true }), facts("198.51.100.31"));
+  assert.equal(w.rows.length, 1);
+  assert.deepEqual(w.rows[0]!.fields, { email: "reader@example.org", consent: "Yes", marketing: "Yes" });
+  assert.equal(w.sent.length, 0, "a subscription sends no email, whatever the configuration");
+  assert.deepEqual(w.outcomes().at(-1), "stored");
+  // Without the store (no database) it is not taking subscriptions.
+  const bare = new FormService(memoryAuthStores(memoryData(), "org-a").throttle, new AuditService(memoryAuditStore(memoryData(), "org-a"), { orgId: "org-a", secret: "test-only-auth-secret-0123456789abcdef", log: silentLog }), { orgId: "org-a", config, secret: "test-only-auth-secret-0123456789abcdef", transport: async () => assert.fail("must not send"), log: silentLog });
+  assert.equal((await failure(bare.submit("newsletter", body("newsletter", { email: "reader@example.org", consent: true }), facts("198.51.100.32")))).status, 503);
 });
 
 test("stored and emailed: with email configured both happen; if the email fails the submission is still received", async () => {

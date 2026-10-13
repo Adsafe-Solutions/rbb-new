@@ -1,86 +1,52 @@
-/* Our Impact — Document 05. The single source for impact content: the
-   headline figures (also shown on the homepage), impact per program,
-   geography, approach, measurement, and references to stories and reports.
+/* Our Impact — Document 05: the headline figures, and the two sub-pages'
+   content, Our Approach (/impact/our-approach) and Where We Work
+   (/impact/where-we-work).
+
+   2026-10-13: the Impact page and its figures are the CMS's only
+   (PUBLISHED_IMPACT below, and the published figures set IMPACT.metrics).
+   The built-in Impact page this file used to hold — program impact,
+   measurement, stories, reports and the sample figures — was removed once
+   the live snapshot was shown to replace every part of it. What remains
+   is not published from the CMS yet: Our Approach's intro and principles
+   (D11) and Where We Work's geography (D14) — a published Impact page's
+   `approach` / `geography` blocks set them.
 
    Every block carries an editorial `status` — for the people maintaining
-   this file, never shown on the site:
-     "verified"/"approved"  confirmed by RBB, or cleared to publish as
-                            working content (Document 27) — see each
-                            block's own note
-     "pending-review"      supplied in RBB's materials, awaiting RBB's
-                            final check — shown with a verification note,
-                            never silently
-     "placeholder"          nothing supplied yet; the page shows a placeholder
-
-   It REFERENCES other content rather than copying it: programs by their
-   Our Work slug (content/work.js), stories by their slug
-   (content/stories.js), and transparency documents through the
-   shared list in content/site.js.
+   this file, never shown on the site.
 
    ⚠ Nothing here may name a country, region, beneficiary group, partner,
    donor, outcome, percentage, methodology, date or campaign AS IF RBB HAD
-   SUPPLIED IT unless RBB has. "25 countries reached" is a figure, not a
-   list — do not turn it into guessed country names. The geography and
-   program-impact text below are WORKING placeholders (Document 27),
-   clearly self-labelled ("demo"), kept so the page has something to
-   review; they are not RBB's verified coverage. */
+   SUPPLIED IT unless RBB has. */
 
 import { BRAND } from "./brand.js";
 import { SITE } from "./site.js";
 
 export const IMPACT = {
-  /* Headline figures. Supplied in the annual report; Document 05 requires
-     RBB to verify each before final publication — hence pending-review,
-     unaffected by the working-content merge below: a bald figure has no
-     room for a "(demo)" qualifier, so it stays pending until RBB confirms
-     it, exactly as before.
-
-     ⚠ The same report carries a "120+" figure under an inconsistent
-     "Lives Impacted" label. Its meaning is not established, so it is NOT
-     here and must not be added until RBB clarifies what it counts. */
-  metrics: [
-    { id: "lives", value: "50K+", label: "Lives Impacted Across Communities", status: "pending-review" },
-    { id: "countries", value: "25", label: "Countries Reached", status: "pending-review" },
-    { id: "partners", value: "200+", label: "Partners & Donors Worldwide", status: "pending-review" },
-  ],
-  metricsSource: "Figures from the Rising Beyond Borders annual report.",
-
-  /* Impact per program, by Our Work slug. PROPOSED qualitative summaries:
-     the change each area works towards, in words — no activity, place or
-     figure (decision D12). `metrics` stays empty until RBB verifies one. */
-  programImpact: [
-    { programId: "education", summary: "Working towards wider access to learning, and the skills and confidence to keep learning.", metrics: [], status: "approved" },
-    { programId: "health-wellbeing", summary: "Working towards better access to essential support, and to physical, mental and emotional wellbeing.", metrics: [], status: "approved" },
-    { programId: "livelihoods", summary: "Working towards practical skills, fairer economic opportunity and livelihoods that last.", metrics: [], status: "approved" },
-    { programId: "community-support", summary: "Working towards resilient, connected communities that can meet their own priorities.", metrics: [], status: "approved" },
-  ],
+  /* The headline figures, as the CMS published them (Admin → Impact
+     figures). Empty without a snapshot. */
+  metrics: [],
 
   /* Where RBB works. `countries` are verified country names; `regions` are
-     { name, countries: [] } groupings. WORKING placeholder regions below
-     — every name says "(demo)" — kept so the page/map layout can be
-     reviewed; replace with RBB's verified coverage before launch. */
+     { name, countries: [] } groupings. No geography is shown until RBB
+     supplies verified countries and regions (decision D14).
+     release/approvals.mjs `geography` stays pending, which keeps the
+     release blocked. */
   geography: {
     summary: null,
     regions: [],
     countries: [],
-    /* No geography is shown until RBB supplies verified countries and
-       regions (decision D14) — no placeholder regions either (content
-       brief, 2026-10-04). release/approvals.mjs `geography` stays
-       pending, which keeps the release blocked. */
     status: "placeholder",
   },
 
   /* How RBB works — /impact/our-approach. The foundation is SOURCE: the
-     mission's own words (content/about.js, or the published About page).
+     mission, quoted from the published About page (content/about.js).
      D11 (2026-10-13): Our Approach REUSES this existing, approved content
      — the intro and principles below, as they stand — and nothing new is
-     written for it. They describe how the work is meant to be done, not a
-     named method and not a claim about any project.
+     written for it.
 
-     The Listen → Partner → Act → Sustain framework Document 02 once
-     suggested was REJECTED by RBB (D11, 2026-10-13). It is not RBB's
-     method and must not be introduced on any page; its pending copy that
-     used to sit here (`proposedFramework`) was removed. */
+     The Listen → Partner → Act → Sustain framework was REJECTED by RBB
+     (D11, 2026-10-13). It is not RBB's method and must not be introduced
+     on any page. */
   approach: {
     intro:
       "The people closest to a challenge usually understand it best. Our work is shaped with the communities it is meant to serve, and designed to keep going after any single project ends.",
@@ -94,33 +60,6 @@ export const IMPACT = {
     ],
     status: "approved",
   },
-
-  /* How impact is measured. PROPOSED: RBB's INTENDED approach, in words.
-     No measurement system, survey, review cycle or report is described as
-     existing until RBB supplies one (decision D12). */
-  measurement: {
-    intro:
-      "Impact begins with listening, continues through collaboration, and grows when people have the opportunity to shape their own futures. Counting activities is not the same as knowing what changed, so we aim to look at four things:",
-    /* What RBB INTENDS to look at — aims, not a system in use. */
-    methods: [
-      "Clear aims, agreed with the people involved before work begins",
-      "What changed for people, in their own words as well as in numbers",
-      "What did not work, reported as plainly as what did",
-      "What we learned, and how it shapes the next piece of work",
-    ],
-    evidence: [],
-    status: "approved",
-  },
-
-  /* Impact stories, by slug (content/stories.js). Only approved stories
-     are shown; a slug that is not an approved story is skipped. */
-  stories: ["a-classroom-with-enough-books", "from-one-sewing-machine"],
-
-  /* Reports, as { title, type, url, year, status }. No document is listed
-     here without a real, RBB-approved file (Document 09) — none exists
-     yet, so this stays empty and the page falls back to the shared
-     transparency links. */
-  reports: [],
 };
 
 /* ---------------- Page copy ----------------
@@ -166,70 +105,24 @@ export const metricStats = (ids, where) => {
 };
 
 /* The Impact page as the CMS published it (pages/Impact/CmsImpact draws
-   it). Set from the published snapshot only while the CMS's Impact page
-   is PUBLISHED; undefined, /impact is the page below. */
+   it), set from the published snapshot. The build refuses a snapshot
+   without one (scripts/published-snapshot.mjs). */
 export const PUBLISHED_IMPACT = { page: undefined };
 
 export const IMPACT_PAGES = {
+  /* The interface wording CmsImpact draws around the published blocks,
+     and the one line the Get Involved page quotes (`body`). */
   overview: {
-    kicker: "Our impact",
-    heading: "Our Impact",
     /* PROPOSED wording, built from SOURCE: the annual report's positioning
        and the mission's "sustainable growth and lasting change". */
     body: `${BRAND.fullName} works with communities towards sustainable growth and lasting change — measured honestly, and reported only once it is verified.`,
-    glance: { id: "at-a-glance", kicker: "Impact at a glance", heading: "Together, we create impact." },
-    programs: {
-      kicker: "Impact across our work",
-      heading: "Four program areas",
-      pending: "Program impact information to be provided by Rising Beyond Borders.",
-    },
-    teasers: {
-      whereWeWork: {
-        kicker: "Where we work",
-        heading: "Where our work reaches",
-        empty: "Where We Work information to be provided and reviewed by Rising Beyond Borders.",
-        cta: { label: "Explore Where We Work", to: "/impact/where-we-work" },
-      },
-      approach: {
-        kicker: "Our approach",
-        heading: "Creating change that lasts.",
-        empty: "Approach information to be provided and reviewed by Rising Beyond Borders.",
-        cta: { label: "Explore Our Approach", to: "/impact/our-approach" },
-      },
-      /* Stands in for Where We Work while there is no verified geography. */
-      work: {
-        kicker: "Our work",
-        heading: "See the work in action.",
-        body: "Four connected program areas: education, health and wellbeing, livelihoods and community support.",
-        cta: { label: "Explore Our Work", to: "/work" },
-      },
-    },
-    measurement: {
-      heading: "Evidence & measurement",
-      empty: "Impact measurement and evidence information to be provided and reviewed by Rising Beyond Borders.",
-    },
+    glance: { id: "at-a-glance" },
+    programs: { pending: "Program impact information to be provided by Rising Beyond Borders." },
+    measurement: { empty: "Impact measurement and evidence information to be provided and reviewed by Rising Beyond Borders." },
     stories: {
       id: "stories",
-      kicker: "Impact stories",
-      heading: "Stories of change",
       fallback: "Impact stories to be provided and reviewed by Rising Beyond Borders.",
-      placeholderLabel: "Story",
       readLabel: "Read Story",
-      cta: { label: "Explore All Stories", to: "/stories" },
-    },
-    reports: {
-      kicker: "Reports & transparency",
-      heading: "Reporting what we learn.",
-      body: "Open reporting is part of how we hold ourselves accountable — to supporters, partners and the communities we work with.",
-      linkMeta: SITE.transparencyLinkMeta,
-      cta: { label: "View Transparency", to: "/about#transparency" },
-    },
-    closing: {
-      heading: "Be part of the impact.",
-      ctas: {
-        primary: { label: "Get Involved", to: "/get-involved" },
-        secondary: { label: "Explore Our Work", to: "/work" },
-      },
     },
   },
 

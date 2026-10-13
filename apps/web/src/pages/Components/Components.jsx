@@ -23,7 +23,7 @@ import EmptyPanel from "../../components/EmptyPanel/EmptyPanel.jsx";
 import DonationForm from "../../components/DonationForm/DonationForm.jsx";
 import {
   DONATION,
-  HOMEPAGE,
+  BRAND,
   PROGRAMS,
   PROJECTS,
   SITE,
@@ -117,7 +117,7 @@ export default function Components() {
       <Block index={4} name="Posters, tickets, actions" note="PosterCard, TicketCard, ActionCard.">
         <div className="grid gap-10 lg:grid-cols-3">
           <PosterCard kicker="Mission" tone="ink">
-            <p className="type-card">{HOMEPAGE.whoWeAre.body[0]}</p>
+            <p className="type-card">{BRAND.summary}</p>
           </PosterCard>
           <TicketCard
             kicker="Transparency"

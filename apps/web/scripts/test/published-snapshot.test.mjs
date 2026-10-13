@@ -97,17 +97,27 @@ const fetchStep = (env) =>
   });
 const status = () => JSON.parse(readFileSync(STATUS_FILE, "utf8"));
 
-test("fetch step: not configured → source content, and a stale snapshot file is removed", async () => {
+/* The pages a snapshot must carry (2026-10-13: no built-in copies). */
+const PAGES = ["homepage", "about", "impact", "generalDonation"];
+const withPages = (s) => ({ ...s, content: { ...s.content, ...Object.fromEntries(PAGES.map((k) => [k, { id: k, status: "published" }])) } });
+
+test("fetch step: not configured → the saved copy of the live snapshot; RBB_SNAPSHOT=off → none; a stale file never survives", async () => {
   mkdirSync(dirname(SNAPSHOT_FILE), { recursive: true });
   writeFileSync(SNAPSHOT_FILE, "{}");
-  const r = await fetchStep({});
+  let r = await fetchStep({});
+  assert.equal(r.status, 0, r.stderr);
+  const saved = JSON.parse(readFileSync(join(root, "fixtures/published-snapshot.json"), "utf8"));
+  assert.equal(JSON.parse(readFileSync(SNAPSHOT_FILE, "utf8")).version, saved.version);
+  assert.deepEqual([status().mode, status().version], ["fixture", saved.version]);
+  r = await fetchStep({ RBB_SNAPSHOT: "off" });
   assert.equal(r.status, 0);
   assert.equal(existsSync(SNAPSHOT_FILE), false);
-  assert.equal(status().mode, "source-content");
+  assert.equal(status().mode, "none");
+  assert.equal((await fetchStep({ RBB_SNAPSHOT_REQUIRED: "1" })).status, 1, "required → the API, never the saved copy");
 });
 
-test("fetch step: a valid snapshot is written; 404 falls back unless required; bad data always fails", async () => {
-  let reply = { status: 200, body: { data: snapshot() } };
+test("fetch step: a valid snapshot is written; nothing published, an unreachable API or bad data always fail — there is no built-in content to fall back to", async () => {
+  let reply = { status: 200, body: { data: withPages(snapshot()) } };
   const api = await serve((req, res) => {
     res.writeHead(reply.status, { "Content-Type": "application/json" });
     res.end(JSON.stringify(reply.body));
@@ -121,15 +131,18 @@ test("fetch step: a valid snapshot is written; 404 falls back unless required; b
     r = await fetchStep({ RBB_SNAPSHOT_URL: api.url, RBB_SNAPSHOT_VERSION: "5" });
     assert.equal(r.status, 1, "older than the version a deploy hook announced");
 
+    reply = { status: 200, body: { data: snapshot() } };
+    r = await fetchStep({ RBB_SNAPSHOT_URL: api.url });
+    assert.equal(r.status, 1, "a snapshot without the homepage, About, Impact and donation pages");
+    assert.match(r.stderr, /the homepage is not published in it/);
+
     reply = { status: 404, body: { error: { code: "NOT_FOUND" } } };
     r = await fetchStep({ RBB_SNAPSHOT_URL: api.url });
-    assert.equal(r.status, 0);
+    assert.equal(r.status, 1);
+    assert.match(r.stderr, /nothing has been published yet/);
     assert.equal(existsSync(SNAPSHOT_FILE), false);
-    assert.match(status().reason, /nothing has been published/);
-    assert.match(r.stderr + r.stdout, /building from the SOURCE CONTENT/);
-    assert.equal((await fetchStep({ RBB_SNAPSHOT_URL: api.url, RBB_SNAPSHOT_REQUIRED: "1" })).status, 1, "required → no silent fallback");
 
-    reply = { status: 200, body: { data: { ...snapshot(), organization: { id: "another-org" } } } };
+    reply = { status: 200, body: { data: { ...withPages(snapshot()), organization: { id: "another-org" } } } };
     assert.equal((await fetchStep({ RBB_SNAPSHOT_URL: api.url })).status, 1, "another organization's snapshot is never used");
     reply = { status: 200, body: { data: { version: "x" } } };
     assert.equal((await fetchStep({ RBB_SNAPSHOT_URL: api.url })).status, 1);
@@ -138,10 +151,7 @@ test("fetch step: a valid snapshot is written; 404 falls back unless required; b
     await api.close();
   }
   assert.equal((await fetchStep({ RBB_SNAPSHOT_URL: "http://unreachable.example/api" })).status, 1, "plain http to another host is refused");
-  assert.equal((await fetchStep({ RBB_SNAPSHOT_URL: "http://127.0.0.1:9/api/v1/public/snapshot", RBB_SNAPSHOT_REQUIRED: "1" })).status, 1, "unreachable + required");
-  const unreachable = await fetchStep({ RBB_SNAPSHOT_URL: "http://127.0.0.1:9/api/v1/public/snapshot" });
-  assert.equal(unreachable.status, 0, "unreachable, not required → source content");
-  assert.equal(status().mode, "source-content");
+  assert.equal((await fetchStep({ RBB_SNAPSHOT_URL: "http://127.0.0.1:9/api/v1/public/snapshot" })).status, 1, "unreachable");
   await fetchStep({}); // leave build-meta as a plain build would
   rmSync(STATUS_FILE, { force: true });
 });
@@ -493,17 +503,13 @@ test("stories and projects: published records → stories.js and work.js shapes;
   assert.deepEqual(imageOrigins(withContent({ stories: [{ ...record, id: "s1", type: "story", slug: "a", title: "A", category: "field", body, galleryIds: ["img"] }] })), ["https://media.example.org"]);
 });
 
-test("M15: the story source is declared where the snapshot sets it, and the website's own Impact page never resolves its stories against the CMS's", () => {
+test("M15: the story and project sources are declared where the snapshot sets them; the CMS's Impact page names no story the site does not show", () => {
   const stories = readFileSync(join(root, "src/content/stories.js"), "utf8");
   assert.match(stories, /export const STORY_SOURCE = \{ cms: false \};/);
   assert.deepEqual(SNAPSHOT_TARGETS["src/content/stories.js"], "STORIES, STORY_SOURCE");
   const work = readFileSync(join(root, "src/content/work.js"), "utf8");
   assert.match(work, /export const PROJECT_SOURCE = \{ cms: false \};/, "M31.1: the project source, declared where the snapshot sets it");
   assert.deepEqual(SNAPSHOT_TARGETS["src/content/work.js"], "PROGRAMS, PROJECT_RECORDS, PROJECTS, PROJECT_SOURCE");
-  const impact = readFileSync(join(root, "src/pages/Impact/Impact.jsx"), "utf8");
-  assert.match(impact, /STORY_SOURCE\.cms \? \[\] : IMPACT\.stories\.map\(storyBySlug\)/, "the source page's stories only while the stories are the website's own");
-  const importer = readFileSync(join(root, "src/contract/importers.js"), "utf8");
-  assert.match(importer, /storyIds: STORY_SOURCE\.cms \? \[\] : IMPACT\.stories\.map/);
   const cms = readFileSync(join(root, "src/pages/Impact/CmsImpact.jsx"), "utf8");
   assert.match(cms, /is not published`\)/, "the CMS page names no story the site does not show — never silently dropped");
 });

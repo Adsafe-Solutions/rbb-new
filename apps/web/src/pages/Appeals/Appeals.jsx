@@ -28,10 +28,10 @@ import {
          white   FAQ
          accent  Donate → back to the form */
 export default function Appeals() {
-  /* The CMS's published page names its own eyebrow; the source page is
-     headed "Appeals". */
-  const general = generalDonation();
-  const experience = general.source === "cms" ? general : { ...general, eyebrow: APPEALS_PAGES.hub.heading };
+  /* The general donation page as the CMS published it (2026-10-13: there
+     is no built-in one). */
+  const experience = generalDonation();
+  if (!experience) return null;
   const methods = approvedGivingMethods();
 
   return (

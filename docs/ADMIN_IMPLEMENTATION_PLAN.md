@@ -35,7 +35,8 @@ and the problems met while entering content on 2026-10-12/13.
 | 20 | Admin look: ink primary (in place of `#10437C`), light/dark switch, compact tables | S | Done — committed, pushed and live (`11075f3`) |
 | 21 | Footer subscribe (Newsletter) form, stored for owners; not editable in Admin | S | Done — committed, pushed and live (`f0b967a`) |
 | 22 | Media: delete when not in use; every upload converted to WebP | M | Done — committed, pushed and live (`906224e`) |
-| 23 | Notifications in the topbar (new submissions, review and publishing queue) | S | Implemented — tests run; not yet committed or deployed |
+| 23 | Notifications in the topbar (new submissions, review and publishing queue) | S | Done — committed, pushed and live (`b5a310e`) |
+| 24 | Website: no built-in fallback content for anything the CMS publishes | L | Implemented — verified page for page; tests run; not yet committed or deployed |
 
 ## 1. Remove stale references from record pickers — done
 
@@ -231,7 +232,7 @@ Donate/Givebutter untouched, framework gone) and the updated
 Docs: `docs/PUBLISHING.md`, `apps/web/CLAUDE.md` (snapshot mappings),
 `apps/web/docs/FINAL_CONTENT_REPLACEMENT_CHECKLIST.md` (Admin locations).
 
-Migration for 6 and 7 (`apps/web/scripts/migration/source.mjs`): not done,
+Migration for 6 and 7 (`apps/web/scripts/migration/source.mjs`, retired with the built-in content on 2026-10-13): not done,
 and recorded as `excluded-by-policy` rather than a schema gap. Where We
 Work has no verified source list (D14; the importer adds a `geography`
 block automatically once a verified one exists in the source). How We
@@ -539,7 +540,7 @@ Owner request (2026-10-13).
 - Tests: API `media-usage.test.ts`; admin `media-optimise.test.mjs`; the
   conversion checked in Chromium on the site's own photos.
 
-## 23. Notifications in the topbar — implemented
+## 23. Notifications in the topbar — done
 
 Owner request (2026-10-13): show new submissions and pending publishing in
 the bell's dropdown.
@@ -557,6 +558,46 @@ the bell's dropdown.
   read/unread — an entry clears when the work itself is done.
 - Tests: API `notifications.test.ts`; admin `notifications.test.mjs`; the
   menu checked in a browser against mocked answers (light and dark).
+
+## 24. No built-in fallback content on the website — implemented
+
+Owner decision (2026-10-13, "Group 1 only"): remove the website's built-in
+copy of everything the CMS publishes, after verifying it really comes from
+the API.
+
+- **Verified, not assumed:** a static build from the live snapshot (v53)
+  was the baseline; after each removal the same build was compared page
+  for page (66 HTML files, asset names normalised). Every removal ended
+  identical; the one difference found — the Get Involved page quoting the
+  Impact intro line — was kept as site copy.
+- **Removed:** brand, site description, contact details and social
+  accounts, careers, news, blogs, events, appeals (and
+  `src/contract/appeals.js`), the general donation page and its sample
+  FAQ, the built-in homepage, About and Impact pages (their components
+  now draw only the CMS page), Impact figures, team, programs, projects,
+  stories, transparency overview/governance/accountability, the working
+  policy text, Get Involved texts, the announcement bar's messages and the
+  popup's content. The mission/vision other pages quote now comes from the
+  published About page.
+- **Kept (not published from the CMS):** navigation, footer, page frames
+  and interface wording, photographs, SEO structure, built-in forms, How
+  We Work, Our Approach, Where We Work, transparency document lists.
+- **Builds:** production needs the API's snapshot (no fallback; a snapshot
+  without the homepage, About, Impact or donation page fails the build).
+  Local builds, tests and `pnpm web:dev` use the saved copy
+  `apps/web/fixtures/published-snapshot.json` (the dev server now applies
+  a snapshot too). The deploy refuses a build made from the saved copy.
+- **Retired tooling:** the migration rehearsal (`scripts/migration*`), the
+  Get Involved converter, `export:settings`, and the contract importers
+  for the removed content; the contract check now covers the applied
+  snapshot and the website's own remaining records.
+- **Checked:** web tests (36 + 155), content validation, release status,
+  API (419), schema (99), admin (122), typecheck; static and runtime
+  builds; the runtime build in Chromium (baked and live snapshot paths)
+  and the dev server — every page with its content, no errors.
+- **Found on the way:** the site's placeholder detector flags live CMS
+  project text (e.g. "community-reading-clubs") as working copy — content
+  imported from the old samples; RBB may want to rewrite it.
 
 ## 14. Audit Log screen — removed, not required
 

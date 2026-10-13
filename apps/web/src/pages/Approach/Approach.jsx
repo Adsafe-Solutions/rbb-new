@@ -1,7 +1,8 @@
 import PageHeader from "../../components/PageHeader/PageHeader.jsx";
 import ContentRows from "../../components/ContentRows/ContentRows.jsx";
 import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
-import { ABOUT, IMPACT, IMPACT_PAGES, PUBLISHED_ABOUT } from "../../content/index.js";
+import { IMPACT, IMPACT_PAGES } from "../../content/index.js";
+import { missionStatement } from "../../content/about.js";
 
 /* /impact/our-approach — how RBB works towards sustainable growth and
    lasting change.
@@ -18,9 +19,6 @@ import { ABOUT, IMPACT, IMPACT_PAGES, PUBLISHED_ABOUT } from "../../content/inde
    the mission, and IMPACT.approach's intro and principles. The
    Listen → Partner → Act → Sustain framework was REJECTED by RBB: it is
    not RBB's method and must never appear here. */
-const missionStatement = () =>
-  PUBLISHED_ABOUT.page?.sections.find((s) => s.type === "missionVision")?.data.mission?.statement ?? ABOUT.missionVision.mission.statement;
-
 export default function Approach() {
   const t = IMPACT_PAGES.approach;
   const { approach } = IMPACT;

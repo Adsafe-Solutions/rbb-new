@@ -25,6 +25,9 @@ const snapshot = {
   },
   media: { m1: IMG },
   content: {
+    /* The program the records name (2026-10-13: the website has no
+       built-in programs). */
+    programs: [{ ...base, id: "p-education", slug: "education", title: "Education", icon: "education", description: "A test program.", order: 0 }],
     news: [
       { ...base, id: "n1", type: "news", slug: "news-with-program", title: "A news item with a program", date: "2026-10-01", body, programId: "education" },
       { ...base, id: "n2", type: "news", slug: "news-without-program", title: "A news item without one", date: "2026-10-02", body },
@@ -40,12 +43,13 @@ const snapshot = {
   },
 };
 
-let vite, render, media;
+let vite, render, media, work;
 before(async () => {
   const noSnapshot = { name: "test-no-snapshot", resolveId: (id) => (id === "virtual:rbb-published-snapshot" ? "\0test-no-snapshot" : null), load: (id) => (id === "\0test-no-snapshot" ? "export default null;" : null) };
   /* The source site, always (see cms-links.test.mjs: RBB_SNAPSHOT=off and ws: false keep parallel loaders apart). */
   process.env.RBB_SNAPSHOT = "off";
   vite = await createServer({ root, logLevel: "error", appType: "custom", server: { middlewareMode: true, hmr: false, ws: false }, plugins: [noSnapshot] });
+  work = await vite.ssrLoadModule("/src/content/work.js");
   media = await vite.ssrLoadModule("/src/content/media.js");
   ({ render } = await vite.ssrLoadModule("/src/entry-server.jsx"));
 });
@@ -55,17 +59,6 @@ after(async () => {
 
 const main = (html) => html.slice(html.indexOf("<main"), html.indexOf("</main>"));
 const text = (html) => html.replace(/<!-- -->/g, "").replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ");
-
-/* The source site first, before the snapshot is applied to the shared modules. */
-test("the source site: sample news, blogs and events keep their release markers and render as before — times with no zone", () => {
-  for (const list of [media.NEWS, media.BLOGS, media.EVENTS]) assert.ok(list.length > 0 && list.every((item) => item.releaseMarker), "every sample keeps its marker");
-  const dinner = media.EVENTS.find((e) => e.id === "community-dinner-november");
-  const page = text(main(render(`/media/events/${dinner.id}`).html));
-  assert.match(page, /6:30 PM–9:00 PM(?! \()/, "a source event states no zone, so none is shown");
-  assert.match(page, /Welcome and introductions/, "its schedule");
-  assert.match(render(`/media/events/${dinner.id}`).html, /data-release-marker=/, "the release marker is still on the page");
-  assert.ok(media.BLOGS.every((b) => media.BLOG_CATEGORIES.some((c) => c.id === b.category)) && media.NEWS.every((n) => n.program));
-});
 
 test("the adapter hands the pages each field as the source shape has it — and leaves out what a record leaves out", () => {
   const o = overridesFrom(snapshot)["src/content/media.js"];
@@ -85,7 +78,8 @@ test("the adapter hands the pages each field as the source shape has it — and 
 });
 
 test("rendered: news shows its program, a blog post its category, an event its program, schedule and zone — and nothing for an absent one", () => {
-  /* Apply the snapshot as the build appends it to media.js. */
+  /* Apply the snapshot as the build appends it to work.js and media.js. */
+  for (const [name, value] of Object.entries(overridesFrom(snapshot)["src/content/work.js"])) if (Array.isArray(work[name])) work[name].splice(0, work[name].length, ...value);
   for (const [name, value] of Object.entries(overridesFrom(snapshot)["src/content/media.js"])) media[name].splice(0, media[name].length, ...value);
   const article = (path) => text(main(render(path).html));
   /* The header's label, before the body (the "More" cards below name the other record's). */

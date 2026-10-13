@@ -8,11 +8,11 @@ import { MongoSettingsStore } from "../modules/settings/repository.ts";
 import { SettingsService } from "../modules/settings/service.ts";
 import { guardTarget } from "./target-guard.ts";
 
-/* Creates the organization's FIRST settings record from a file — the
-   website's current settings, exported by the web app:
+/* Creates the organization's FIRST settings record from a file (done for
+   RBB; the website's `export:settings`, which wrote that file from its
+   built-in settings, was retired with them on 2026-10-13):
 
-     pnpm --filter @rbb/web run export:settings
-     pnpm api:settings:import -- --file apps/web/build-meta/site-settings.json [--production=<database>]
+     pnpm api:settings:import -- --file <settings.json> [--production=<database>]
 
    · validated against the content contract; the organization, id, status
      and timestamps are this deployment's, whatever the file says

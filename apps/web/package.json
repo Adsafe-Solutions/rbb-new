@@ -22,7 +22,6 @@
     "smoke:forms": "npx -y -p playwright -p axe-core node scripts/smoke-forms.mjs",
     "release:package": "node scripts/package-release.mjs",
     "serve:local": "node --env-file-if-exists=server/local.env --env-file-if-exists=server/.env.local server/dev-server.mjs",
-    "export:settings": "RBB_SNAPSHOT=off vite build --ssr src/entry-server.jsx --outDir build-meta/.export --logLevel error && node scripts/export-site-settings.mjs",
     "deploy:pages": "node --env-file-if-exists=.env.deploy.local scripts/deploy-pages.mjs",
     "deploy:pages:check": "node --env-file-if-exists=.env.deploy.local scripts/deploy-pages.mjs --check"
   },

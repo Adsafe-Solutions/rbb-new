@@ -25,7 +25,7 @@ import { observabilityReport } from "./config/observability.js";
 import { EVENTS } from "./lib/analytics.js";
 import { validateContent } from "./content/validate.js";
 import { DONATION, donationPreview, donationState } from "./content/donation.js";
-import { HOMEPAGE } from "./content/homepage.js";
+import { PUBLISHED_HOMEPAGE } from "./content/homepage.js";
 import { ENV } from "./config/env.js";
 import { IMPACT } from "./content/impact.js";
 import { TRANSPARENCY, publishedDocuments } from "./content/transparency.js";
@@ -128,9 +128,11 @@ export const publicImages = () =>
    pre-renderer's third-party origin check. */
 export const siteOrigin = () => ENV.siteOrigin;
 
-/* Whether the homepage has a video — its page policy then allows the
-   player's frame (scripts/security-policy.mjs VIDEO). */
-export const featuredVideo = () => Boolean(HOMEPAGE.video?.youtubeId);
+/* Whether the published homepage plays YouTube — its film or a timeline
+   Short — so its page policy allows the player's frame
+   (scripts/security-policy.mjs VIDEO). */
+export const featuredVideo = () =>
+  (PUBLISHED_HOMEPAGE.page?.sections ?? []).some((s) => (s.type === "video" && s.data.youtubeId) || (s.type === "timeline" && s.data.events?.some((e) => e.youtubeId)));
 
 /* Release readiness facts (Document 24) — what this build's CONTENT
    says about each approval area, for scripts/release-status.mjs. Counts
@@ -170,11 +172,6 @@ export const observability = () => ({
 });
 
 export { absoluteUrl, notFoundMeta, robotsTxt, seoHeadHtml, sitemapXml };
-
-/* The website's current settings as a content-contract record — what
-   `npm run export:settings` hands to the API's settings import, so the CMS
-   starts from the values the site already shows (nothing typed in). */
-export { siteSettingsRecord } from "./contract/importers.js";
 
 /* The published snapshot this build applied (or null), checked against the
    content contract. The pre-renderer stops the build on any problem — a

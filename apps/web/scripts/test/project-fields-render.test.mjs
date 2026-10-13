@@ -55,17 +55,6 @@ async function withContent({ projects, stories }, fn) {
   }
 }
 
-test("the source site: no sample project sets any of these fields; each keeps its release marker; its page has no such rows", () => {
-  assert.ok(site.PROJECTS.length > 0);
-  for (const p of site.PROJECTS) {
-    for (const k of ["location", "status", "date", "impact", "partners", "story", "storyId"]) assert.ok(!(k in p), `${p.slug}.${k}`);
-    assert.equal(p.releaseMarker, "Sample project");
-    const html = render(site.projectPath(p)).html;
-    assert.match(html, /data-release-marker="Sample project"/);
-    for (const id of ["impact", "partners", "story"]) assert.equal(row(html, id), null, `${p.slug}: no ${id} row`);
-  }
-});
-
 test("the adapter: the source shape — the stage as `status`, figures as { value, label }, the story by id; nothing for a project without them", () => {
   const [full, plain] = projectsFrom(snapshot({ projects: [projectRecord("full", { ...FACTS, storyId: "s1" }), projectRecord("plain", { order: 1 })] }));
   assert.deepEqual(
@@ -103,10 +92,11 @@ test("the homepage's project timeline: newest date first, the date as its pill; 
   });
 });
 
-test("a website story, by its id, while the website's own stories are the site's; a story the site does not show fails loudly — never left out", async () => {
-  const sample = site.published()[0];
+test("a story by its id is shown; a story the site does not show fails loudly — never left out", async () => {
+  const stories = storiesFrom(snapshot({ stories: [storyRecord("s1")] }));
+  const sample = stories[0];
   const projects = projectsFrom(snapshot({ projects: [projectRecord("names-a-website-story", { storyId: sample.id }), projectRecord("names-nothing-shown", { order: 1, storyId: "no-such-story" })] }));
-  await withContent({ projects }, () => {
+  await withContent({ projects, stories }, () => {
     assert.match(row(main(render("/work/projects/names-a-website-story").html), "story"), new RegExp(sample.title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
     assert.throws(() => render("/work/projects/names-nothing-shown"), /no story "no-such-story"/);
     const { errors } = validate({ preview: false });
@@ -115,19 +105,3 @@ test("a website story, by its id, while the website's own stories are the site's
   });
 });
 
-test("the source importer: a story copy that is the story's own becomes its id; any other copy is kept as written, for conformance to refuse", async () => {
-  const sample = site.published()[0];
-  const own = { title: sample.title, excerpt: sample.excerpt, to: `/stories/${sample.slug}` };
-  const other = { title: "Another title", excerpt: "Words of its own.", to: `/stories/${sample.slug}` };
-  const saved = [...work.PROJECT_RECORDS];
-  work.PROJECT_RECORDS.splice(0, work.PROJECT_RECORDS.length, { ...saved[0], story: own }, { ...saved[1], story: other });
-  try {
-    const [a, b] = importers.projectRecords();
-    assert.equal(a.storyId, sample.id);
-    assert.ok(!("story" in a));
-    assert.deepEqual(b.story, other, "its words are never lost");
-    assert.ok(!("storyId" in b));
-  } finally {
-    work.PROJECT_RECORDS.splice(0, work.PROJECT_RECORDS.length, ...saved);
-  }
-});

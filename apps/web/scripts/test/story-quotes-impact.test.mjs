@@ -44,19 +44,6 @@ async function withStories(stories, fn) {
   }
 }
 
-test("the source site: no sample story has quotes or impact, every one keeps its release marker, and its page shows neither", () => {
-  const stories = site.published();
-  assert.ok(stories.length > 0);
-  for (const story of stories) {
-    assert.ok(!("quotes" in story) && !("impact" in story), `${story.slug}: the source sets neither`);
-    assert.ok(story.releaseMarker, `${story.slug}: a sample keeps its marker`);
-    const html = render(site.storyPath(story)).html;
-    assert.match(html, /data-release-marker=/);
-    assert.doesNotMatch(html, /<blockquote/, `${story.slug}: no quotes`);
-    assert.doesNotMatch(html, /id="impact"/, `${story.slug}: no impact row`);
-  }
-});
-
 test("the adapter: quotes and impact exactly as published, in the source shape; a story without them has neither key", () => {
   const [withFields, without] = storiesFrom(snapshot([storyRecord("with-fields", { quotes: QUOTES, impact: IMPACT }), storyRecord("without-fields")]));
   assert.deepEqual([withFields.quotes, withFields.impact], [QUOTES, IMPACT]);

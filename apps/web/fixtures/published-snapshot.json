@@ -1,0 +1,2490 @@
+{
+  "version": 53,
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-13T12:13:14.279Z",
+  "organization": {
+    "id": "rbb"
+  },
+  "settings": {
+    "id": "site-settings",
+    "orgId": "rbb",
+    "schemaVersion": 1,
+    "status": "published",
+    "createdAt": "2026-10-10T08:03:49.587Z",
+    "updatedAt": "2026-10-13T09:01:16.143Z",
+    "publishedAt": "2026-10-13T12:12:53.775Z",
+    "general": {
+      "shortName": "RBB",
+      "name": "Rising Beyond Borders",
+      "summary": "A non-profit focused on empowering communities and creating sustainable solutions."
+    },
+    "contact": {
+      "methods": [],
+      "office": {
+        "address": "pune India",
+        "city": "pune",
+        "region": "india",
+        "country": "india"
+      },
+      "hours": "We are open 24/7",
+      "responseTime": "We reply within two working days."
+    },
+    "social": [
+      {
+        "platform": "instagram",
+        "url": "https://www.instagram.com/"
+      },
+      {
+        "platform": "facebook",
+        "url": "https://www.facebook.com/"
+      },
+      {
+        "platform": "tiktok",
+        "url": "https://www.tiktok.com/"
+      },
+      {
+        "platform": "linkedin",
+        "url": "https://linkedin.com/in/"
+      },
+      {
+        "platform": "youtube",
+        "url": "https://www.youtube.com/"
+      }
+    ],
+    "seo": {
+      "description": "Rising Beyond Borders is a non-profit focused on empowering communities and creating sustainable solutions."
+    },
+    "branding": {},
+    "analytics": {},
+    "donations": {
+      "form": {
+        "frequencyOptions": {
+          "oneTime": true,
+          "monthly": true
+        },
+        "currency": null,
+        "presetAmounts": [
+          500,
+          1000,
+          2500,
+          5000,
+          10000,
+          25000
+        ],
+        "allowCustomAmount": true,
+        "minimumAmount": 100,
+        "maximumAmount": 1000000
+      },
+      "closing": {
+        "heading": "Every contribution helps build a world where everyone can thrive.",
+        "buttonLabel": "Donate"
+      }
+    },
+    "engagement": {
+      "announcementBar": {
+        "enabled": true,
+        "intervalMs": 5000
+      },
+      "popup": {
+        "enabled": true
+      },
+      "storyStrip": {
+        "enabled": true
+      }
+    },
+    "features": {
+      "themeSwitcher": true
+    }
+  },
+  "media": {
+    "38db8dd1-5f34-4bc4-93f6-e04dccddc5a3": {
+      "id": "38db8dd1-5f34-4bc4-93f6-e04dccddc5a3",
+      "url": "https://media.risingbeyondborders.org/rbb/media/d6dc8431-8558-48ef-b1e3-a6f4bc1e319b/demo-edu-rural-classroom-1200-btxndkjl.webp",
+      "mimeType": "image/webp",
+      "width": 1200,
+      "height": 800,
+      "alt": ""
+    },
+    "dcd49ee2-c349-42d8-b662-b83c7cac14b2": {
+      "id": "dcd49ee2-c349-42d8-b662-b83c7cac14b2",
+      "url": "https://media.risingbeyondborders.org/rbb/media/23e81951-b26f-4bdc-ae80-95eb15e0a15d/demo-comm-aid-boxes-1200-cdcq9aja.webp",
+      "mimeType": "image/webp",
+      "width": 1200,
+      "height": 800,
+      "alt": ""
+    },
+    "b91e8cb7-5379-40a6-a28c-da4307c1e33d": {
+      "id": "b91e8cb7-5379-40a6-a28c-da4307c1e33d",
+      "url": "https://media.risingbeyondborders.org/rbb/media/be63bc2a-6f9b-4ba4-844a-b0800b496cb4/demo-comm-gathering-1200-ivw9wob0.webp",
+      "mimeType": "image/webp",
+      "width": 1200,
+      "height": 800,
+      "alt": "demo"
+    },
+    "16b8a8d1-c5e5-4cba-83ee-126f8fa63aef": {
+      "id": "16b8a8d1-c5e5-4cba-83ee-126f8fa63aef",
+      "url": "https://media.risingbeyondborders.org/rbb/media/d8aeada8-df92-4e50-8a5d-9f8f10763965/demo-edu-teacher-classroom-1200-bmyyxyvh.webp",
+      "mimeType": "image/webp",
+      "width": 1200,
+      "height": 734,
+      "alt": "demo"
+    },
+    "b99769de-c99a-4024-9319-370557742166": {
+      "id": "b99769de-c99a-4024-9319-370557742166",
+      "url": "https://media.risingbeyondborders.org/rbb/media/7f4cee1b-9306-474c-a37f-3ea70f720252/demo-edu-reading-circle-1200-crzlr7bq.webp",
+      "mimeType": "image/webp",
+      "width": 1200,
+      "height": 800,
+      "alt": "demo"
+    },
+    "d342b279-cc4c-4802-a9f9-03c963d12883": {
+      "id": "d342b279-cc4c-4802-a9f9-03c963d12883",
+      "url": "https://media.risingbeyondborders.org/rbb/media/e5a59c1c-b3e9-4c67-a85c-cb4143be1dfc/demo-comm-food-prep-480-dpdwj56j.webp",
+      "mimeType": "image/webp",
+      "width": 480,
+      "height": 320,
+      "alt": "food prep"
+    },
+    "4cbe42d8-ca0d-42e3-95a8-585c3c5e2e01": {
+      "id": "4cbe42d8-ca0d-42e3-95a8-585c3c5e2e01",
+      "url": "https://media.risingbeyondborders.org/rbb/media/3a2e6690-a697-40bb-918b-52f253bb1001/demo-health-checkup-1200-dni9qufm.webp",
+      "mimeType": "image/webp",
+      "width": 1200,
+      "height": 800,
+      "alt": "demo"
+    },
+    "9ec9f035-8487-42b4-aefd-cb856745314c": {
+      "id": "9ec9f035-8487-42b4-aefd-cb856745314c",
+      "url": "https://media.risingbeyondborders.org/rbb/media/30c22a38-97b4-4980-b4e0-30ec851c9ab6/demo-health-water-pump-1200-b7fyut-7.webp",
+      "mimeType": "image/webp",
+      "width": 1200,
+      "height": 800,
+      "alt": "wefe"
+    },
+    "a17124e1-69a5-4435-a339-1811a290ecbf": {
+      "id": "a17124e1-69a5-4435-a339-1811a290ecbf",
+      "url": "https://media.risingbeyondborders.org/rbb/media/2db651ea-eb8d-47e1-a51f-ba3ad6430c88/rbb-field-distribution-480-czupxoh0.webp",
+      "mimeType": "image/webp",
+      "width": 480,
+      "height": 320,
+      "alt": "rbb-field-distribution"
+    },
+    "35323519-b7af-488b-9daf-c66af5982e2f": {
+      "id": "35323519-b7af-488b-9daf-c66af5982e2f",
+      "url": "https://media.risingbeyondborders.org/rbb/media/2b33fd83-6a96-4ae8-ae66-2b1857e5380d/rbb-field-kids-800-dvnf3mc.webp",
+      "mimeType": "image/webp",
+      "width": 800,
+      "height": 533,
+      "alt": "s"
+    },
+    "2e8ec154-1094-4938-adbc-567c99502944": {
+      "id": "2e8ec154-1094-4938-adbc-567c99502944",
+      "url": "https://media.risingbeyondborders.org/rbb/media/00b5c5d8-d396-4e96-ae13-5c3a038162d5/demo-edu-girl-reading-480-aclz2-lm.webp",
+      "mimeType": "image/webp",
+      "width": 480,
+      "height": 320,
+      "alt": "demo-edu-girl-reading-4"
+    },
+    "02914885-cfe1-4836-8c64-cbadaa0d23ee": {
+      "id": "02914885-cfe1-4836-8c64-cbadaa0d23ee",
+      "url": "https://media.risingbeyondborders.org/_development/rbb/media/e8c3c2cb-87b3-47fc-8e5a-5617ca327864/aquib-yazdani-4x5-enhanced.jpg",
+      "mimeType": "image/jpeg",
+      "width": 1600,
+      "height": 2000,
+      "alt": "aquib yazdani"
+    },
+    "4732e533-9b4a-4b5e-9ca5-59693fcb0bbf": {
+      "id": "4732e533-9b4a-4b5e-9ca5-59693fcb0bbf",
+      "url": "https://media.risingbeyondborders.org/rbb/media/73ca9426-99dd-4cff-bbe3-37e706b60107/8387e73f-95de-4ae7-96a9-403ef0528ef7.jpg",
+      "mimeType": "image/jpeg",
+      "width": 640,
+      "height": 640,
+      "alt": "Mohammed Maaz",
+      "caption": "Mohammed Maaz"
+    }
+  },
+  "content": {
+    "news": [
+      {
+        "id": "9b1e0ac6-15e6-4fcd-a569-cd09b0ab08a9",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T18:06:35.977Z",
+        "type": "news",
+        "slug": "reading-clubs-start-a-new-term",
+        "title": "Reading clubs start a new term",
+        "excerpt": "After-school reading sessions return, with new books for every reading level.",
+        "date": "2026-10-12",
+        "author": "Aquib Yazdani",
+        "imageId": "38db8dd1-5f34-4bc4-93f6-e04dccddc5a3",
+        "body": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "Our after-school reading clubs are back for a new term. Children meet twice a week to read together, borrow books to take home and build the confidence that comes with reading for pleasure."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "This term the clubs have new books for every level, from first picture books to short novels, and volunteers on hand to listen to every reader."
+              }
+            ]
+          }
+        ],
+        "programId": "education"
+      }
+    ],
+    "blogs": [
+      {
+        "id": "f218123b-05a5-42e9-be76-4e5739f62cdf",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T18:06:35.977Z",
+        "type": "blog",
+        "slug": "why-we-start-by-listening",
+        "title": "Why we start by listening",
+        "excerpt": "On letting communities set the priorities — and why it makes the work last.",
+        "date": "2026-10-01",
+        "category": "reflections",
+        "author": "Aquib Yazdani",
+        "imageId": "dcd49ee2-c349-42d8-b662-b83c7cac14b2",
+        "body": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "Every piece of work we do begins with a conversation. Before any plan or budget, we ask the people closest to a challenge what they need, what is already working and what a good result would look like to them."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "It is slower at the start. But work shaped by the people it serves is work they own — and work people own is work that lasts after any single project ends."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "Listening does not stop once a project begins. We keep asking, keep adjusting, and report back on what we heard."
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "events": [
+      {
+        "id": "a4dbaf8d-33a9-4f23-8fcb-2a7e780b69ae",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T18:06:35.977Z",
+        "slug": "community-dinner",
+        "title": "Community dinner",
+        "subtitle": "Food, conversation and a short update on the work.",
+        "summary": "An evening for supporters, volunteers and neighbours. Everyone welcome.",
+        "about": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "Join us for an evening of good food and good company. Supporters, volunteers and neighbours are all welcome."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "During the evening we will share a short update on the work across our four program areas, with time for questions."
+              }
+            ]
+          }
+        ],
+        "date": "2026-12-12",
+        "startTime": "11:23 AM",
+        "endTime": "11:23 PM",
+        "timezone": "Asia/Aden",
+        "programId": "education",
+        "venue": "Canada ",
+        "address": "canada new tower",
+        "mapUrl": "https://maps.google.com/?q=Community+Centre+Pune",
+        "schedule": [
+          {
+            "time": "11:23 AM",
+            "item": "Welcome and introductions"
+          },
+          {
+            "time": "12:25 PM",
+            "item": "Lunch is served"
+          },
+          {
+            "time": "2:30 PM",
+            "item": "Close"
+          }
+        ],
+        "imageId": "b91e8cb7-5379-40a6-a28c-da4307c1e33d"
+      },
+      {
+        "id": "c07e5e57-c14a-48eb-a9fd-a9a66364edab",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T18:06:35.977Z",
+        "slug": "volunteer-induction-morning",
+        "title": "Volunteer induction morning",
+        "subtitle": "Meet the team and find a role that suits you.",
+        "summary": "An introduction for new volunteers: how the work runs and where help is needed.",
+        "about": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "New to volunteering with us? This morning is for you. Meet the team, hear how the work runs, and find out where help is most needed."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "There is no commitment — come along, ask questions and see what suits you."
+              }
+            ]
+          }
+        ],
+        "date": "2026-10-09",
+        "startTime": "10:00 AM",
+        "endTime": "4:35 PM",
+        "timezone": "Asia/Kabul",
+        "programId": "community-support",
+        "venue": "Community Centre",
+        "address": "Community Centre, Pune, Maharashtra, India",
+        "mapUrl": "https://maps.google.com/?q=Community+Centre+Pune",
+        "registrationUrl": "https://prod.risingbeyondborders.org/get-involved/volunteer",
+        "schedule": [
+          {
+            "time": "10:00 AM",
+            "item": "Welcome and introductions"
+          },
+          {
+            "time": "10:20 AM",
+            "item": "How the work runs: the four program areas"
+          },
+          {
+            "time": "4:35 PM",
+            "item": "End"
+          }
+        ],
+        "imageId": "16b8a8d1-c5e5-4cba-83ee-126f8fa63aef"
+      }
+    ],
+    "appeals": [
+      {
+        "id": "6eb59cb5-9a1a-413b-a879-c1be6e6bd606",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T17:41:10.386Z",
+        "kind": "emergency",
+        "slug": "emergency-relief",
+        "title": "Emergency Relief",
+        "summary": "When a crisis strikes, families need essentials quickly. This appeal funds an immediate response — and support as they recover.",
+        "imageId": "b99769de-c99a-4024-9319-370557742166",
+        "highlight": {
+          "label": "Emergency Relie",
+          "imageId": "38db8dd1-5f34-4bc4-93f6-e04dccddc5a3"
+        },
+        "sections": [
+          {
+            "id": "why",
+            "type": "richText",
+            "enabled": true,
+            "version": 1,
+            "data": {
+              "heading": "Why it matters",
+              "content": [
+                {
+                  "type": "heading",
+                  "level": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "text": "The situation"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "children": [
+                    {
+                      "type": "text",
+                      "text": "When a crisis strikes, the first days matter most. Families can lose access to food, clean water and shelter almost overnight."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "children": [
+                    {
+                      "type": "text",
+                      "text": "This appeal supports an immediate response alongside local partners, and stays with families through the weeks of recovery that follow."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "helps",
+            "type": "numberedCards",
+            "enabled": true,
+            "version": 1,
+            "data": {
+              "heading": "How your support helps",
+              "items": [
+                {
+                  "title": "Immediate essentials for families"
+                },
+                {
+                  "title": "Safe water and hygiene supplies"
+                },
+                {
+                  "title": "Support as families recover and rebuild"
+                }
+              ]
+            }
+          },
+          {
+            "id": "faq",
+            "type": "faq",
+            "enabled": true,
+            "version": 1,
+            "data": {
+              "kicker": "Transparency",
+              "heading": "Transparency matters.",
+              "items": [
+                {
+                  "question": "Can I choose what my donation supports?",
+                  "answer": "Yes. You can give to a specific emergency appeal or campaign from this page, or give where support is needed most — which lets us direct your gift to wherever it can do the most good across our four program areas."
+                },
+                {
+                  "question": "How are donations used?",
+                  "answer": "Donations support our work across education, health and wellbeing, livelihoods and community support. Our transparency and financial information shows how our work is run and how resources are used."
+                },
+                {
+                  "question": "What if I need to change or ask about a donation?",
+                  "answer": "Please contact us through our Contact page with the details of your gift, and we will help."
+                }
+              ]
+            }
+          }
+        ],
+        "startsOn": "2026-10-01",
+        "endsOn": "2028-04-07"
+      },
+      {
+        "id": "abc10ce3-1603-488b-9c8e-333536a2a7f0",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T17:41:10.386Z",
+        "kind": "campaign",
+        "slug": "campaign",
+        "title": "Campaign",
+        "summary": "A campaign to widen access to learning, so more children can read, learn and keep learning.",
+        "imageId": "dcd49ee2-c349-42d8-b662-b83c7cac14b2",
+        "highlight": {
+          "label": "Education for All",
+          "imageId": "38db8dd1-5f34-4bc4-93f6-e04dccddc5a3"
+        },
+        "sections": [
+          {
+            "id": "why",
+            "type": "richText",
+            "enabled": true,
+            "version": 1,
+            "data": {
+              "heading": "A statement",
+              "content": [
+                {
+                  "type": "heading",
+                  "level": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "text": "Why this campaign"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "children": [
+                    {
+                      "type": "text",
+                      "text": "Too many children still miss out on learning because of cost, distance or a lack of books and teachers.\", \"This campaign supports reading clubs, learning materials and teachers — practical steps that open the door to learning."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "helps",
+            "type": "numberedCards",
+            "enabled": true,
+            "version": 1,
+            "data": {
+              "heading": "How your support helps",
+              "items": [
+                {
+                  "title": "Books and learning materials"
+                },
+                {
+                  "title": "Reading clubs and after-school sessions",
+                  "description": "Reading clubs and after-school sessions"
+                },
+                {
+                  "title": "Support for teachers",
+                  "description": "Support for teachers"
+                }
+              ]
+            }
+          },
+          {
+            "id": "faq",
+            "type": "faq",
+            "enabled": true,
+            "version": 1,
+            "data": {
+              "kicker": "Transparency",
+              "heading": "Transparency matters.",
+              "items": [
+                {
+                  "question": "Can I choose what my donation supports?",
+                  "answer": "Yes. You can give to a specific emergency appeal or campaign from this page, or give where support is needed most — which lets us direct your gift to wherever it can do the most good across our four program areas."
+                },
+                {
+                  "question": "How are donations used?",
+                  "answer": "Donations support our work across education, health and wellbeing, livelihoods and community support. Our transparency and financial information shows how our work is run and how resources are used."
+                },
+                {
+                  "question": "What if I need to change or ask about a donation?",
+                  "answer": "Please contact us through our Contact page with the details of your gift, and we will help."
+                },
+                {
+                  "question": "Can I give on behalf of a business or organisation?",
+                  "answer": "Yes. Organisations can give, and many choose to partner with us in other ways too. Get in touch through our Partner With Us page to talk about what would suit you."
+                }
+              ]
+            }
+          }
+        ],
+        "startsOn": "2026-10-05",
+        "endsOn": "2028-10-27"
+      }
+    ],
+    "generalDonation": {
+      "id": "general-donation",
+      "orgId": "rbb",
+      "schemaVersion": 1,
+      "status": "published",
+      "publishedAt": "2026-10-12T17:27:24.981Z",
+      "hero": {
+        "eyebrow": "Donate",
+        "title": "Support Rising Beyond Borders",
+        "description": "Your gift supports work that creates opportunity, strengthens communities and builds more sustainable futures — across education, health and wellbeing, livelihoods and community support.",
+        "imageId": "9ec9f035-8487-42b4-aefd-cb856745314c",
+        "context": {
+          "label": "Where your gift goes",
+          "body": [
+            "A general gift goes where support is needed most across our four program areas. If you would rather support something specific, you can choose an emergency appeal or a campaign below."
+          ]
+        }
+      },
+      "sections": [
+        {
+          "id": "why",
+          "type": "richText",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "heading": "A statement",
+            "content": [
+              {
+                "type": "heading",
+                "level": 2,
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "Why your support matters"
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "Our mission is to empower vulnerable communities with resources, support and opportunities for sustainable growth and lasting change.\", \"Our vision is a world beyond borders where compassion unites people and every individual can thrive in a safe, inclusive and equitable society."
+                  }
+                ]
+              },
+              {
+                "type": "heading",
+                "level": 2,
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "Why it matters"
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "Our mission is to empower vulnerable communities with resources, support and opportunities for sustainable growth and lasting change.\", \"Our vision is a world beyond borders where compassion unites people and every individual can thrive in a safe, inclusive and equitable society."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "helps",
+          "type": "numberedCards",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "How support helps",
+            "heading": "How your support helps",
+            "intro": "Your support can help:",
+            "items": [
+              {
+                "title": "Expand access to opportunity",
+                "description": "Learning, skills and services that open up new options for people and families."
+              },
+              {
+                "title": "Strengthen community support",
+                "description": "Practical help for households facing a difficult time, delivered with care."
+              },
+              {
+                "title": "Support practical, sustainable solutions",
+                "description": "Work shaped with communities and designed to keep going after any single project ends."
+              },
+              {
+                "title": "Help communities build resilience",
+                "description": "Connections, knowledge and resources that help communities meet their own priorities."
+              }
+            ]
+          }
+        },
+        {
+          "id": "faq",
+          "type": "faq",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "How support helps",
+            "heading": "How your support helps",
+            "items": [
+              {
+                "question": "Can I choose what my donation supports?",
+                "answer": "Yes. You can give to a specific emergency appeal or campaign from this page, or give where support is needed most — which lets us direct your gift to wherever it can do the most good across our four program areas."
+              },
+              {
+                "question": "How are donations used?",
+                "answer": "Donations support our work across education, health and wellbeing, livelihoods and community support. Our transparency and financial information shows how our work is run and how resources are used."
+              },
+              {
+                "question": "What if I need to change or ask about a donation?",
+                "answer": "Please contact us through our Contact page with the details of your gift, and we will help."
+              },
+              {
+                "question": "Can I give on behalf of a business or organisation?",
+                "answer": "es. Organisations can give, and many choose to partner with us in other ways too. Get in touch through our Partner With Us page to talk about what would suit you."
+              }
+            ]
+          }
+        }
+      ],
+      "donation": {
+        "designation": "where-needed-most"
+      },
+      "seo": {
+        "ogImageId": "9ec9f035-8487-42b4-aefd-cb856745314c"
+      }
+    },
+    "homepage": {
+      "id": "homepage",
+      "orgId": "rbb",
+      "schemaVersion": 1,
+      "status": "published",
+      "publishedAt": "2026-10-13T05:50:52.780Z",
+      "sections": [
+        {
+          "id": "hero-a8c0eb79",
+          "type": "hero",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "slides": [
+              {
+                "id": "slide-1",
+                "headline": [
+                  "Opportunity for all.",
+                  "Stronger communities.",
+                  "Changing lives."
+                ],
+                "cta": {
+                  "label": "Explore Our Work",
+                  "href": "/work"
+                },
+                "imageId": "a17124e1-69a5-4435-a339-1811a290ecbf",
+                "insetId": "35323519-b7af-488b-9daf-c66af5982e2f"
+              },
+              {
+                "id": "slide-e64388",
+                "headline": [
+                  "Books.",
+                  "Classrooms. ",
+                  "Open doors. "
+                ],
+                "cta": {
+                  "label": "Explore Education ",
+                  "href": "/work/education"
+                },
+                "imageId": "b99769de-c99a-4024-9319-370557742166",
+                "insetId": "2e8ec154-1094-4938-adbc-567c99502944"
+              }
+            ],
+            "secondaryCta": {
+              "label": "Get Involved",
+              "href": "/get-involved"
+            },
+            "intervalMs": 5000
+          }
+        },
+        {
+          "id": "image-text-ff5286ff",
+          "type": "imageText",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "who we are",
+            "heading": "Change begins with people.",
+            "highlight": "people.",
+            "body": [
+              "Rising Beyond Borders is a non-profit dedicated to empowering communities and creating sustainable solutions to pressing challenges.",
+              "We serve people and communities regardless of religion, nationality, ethnicity, gender, background or belief — because where someone starts in life should never decide how far they can go."
+            ],
+            "imageId": "35323519-b7af-488b-9daf-c66af5982e2f",
+            "imagePosition": "left",
+            "cta": {
+              "label": "About Us",
+              "href": "/about"
+            },
+            "secondaryCta": {
+              "label": "Explore Our Work",
+              "href": "/work"
+            }
+          }
+        },
+        {
+          "id": "programs-05c9fe80",
+          "type": "programs",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "Our areas of work",
+            "heading": "Where we focus our work",
+            "highlight": "our work"
+          }
+        },
+        {
+          "id": "approach-4e6cf179",
+          "type": "approach",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "Our approach",
+            "heading": "Creating change that lasts.",
+            "highlight": "change",
+            "body": "Lasting change is built with communities, not for them. We start by listening, respond to the priorities people set for themselves, and favour solutions that keep working long after a project ends.",
+            "cta": {
+              "label": "Learn How We Work",
+              "href": "/work"
+            }
+          }
+        },
+        {
+          "id": "stats-81490297",
+          "type": "stats",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "Our Impact",
+            "heading": "Together, we create impact.",
+            "highlight": "impact.",
+            "body": "Impact begins with listening, continues through collaboration, and grows when people have the opportunity to shape their own futures.\n\nFigures from the Rising Beyond Borders annual report",
+            "metricIds": [
+              "lives",
+              "countries",
+              "partners"
+            ],
+            "cta": {
+              "label": "Explore Our Impact",
+              "href": "/impacy"
+            }
+          }
+        },
+        {
+          "id": "timeline-930e6879",
+          "type": "timeline",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "Our progress",
+            "heading": "Work that reaches communities.",
+            "highlight": "communities.",
+            "cta": {
+              "label": "Explore our projects",
+              "href": "/work/projects"
+            },
+            "items": [
+              {
+                "id": "milestone-33e443",
+                "date": "2026-06-13",
+                "programId": "education",
+                "title": "Reading clubs open their doors",
+                "summary": "Weekly after-school sessions begin, with books for every reading level.",
+                "youtubeId": "QP5Fs3AYuWE",
+                "videoTitle": "Reading clubs open their doors",
+                "posterId": "2e8ec154-1094-4938-adbc-567c99502944"
+              },
+              {
+                "id": "milestone-6a0465",
+                "date": "2026-09-13",
+                "programId": "health-wellbeing",
+                "title": "A first community health day",
+                "summary": "Basic checks, practical advice and referrals, brought closer to home.",
+                "youtubeId": "myZ9kn9MIWQ",
+                "videoTitle": "A first community health day",
+                "posterId": "9ec9f035-8487-42b4-aefd-cb856745314c"
+              },
+              {
+                "id": "milestone-acb752",
+                "date": "2026-09-15",
+                "programId": "livelihoods",
+                "title": "The tailoring course welcomes its first group",
+                "summary": "Hands-on skills that can be practised close to home.",
+                "youtubeId": "myZ9kn9MIWQ",
+                "videoTitle": "The tailoring course welcomes its first group",
+                "posterId": "d342b279-cc4c-4802-a9f9-03c963d12883"
+              },
+              {
+                "id": "milestone-f62181",
+                "date": "2026-10-02",
+                "programId": "community-support",
+                "title": "Essential support packs reach households",
+                "summary": "Volunteers plan and deliver support for families facing a hard month.",
+                "youtubeId": "MT8tg5b3b8E",
+                "videoTitle": "Essential support packs reach households",
+                "posterId": "16b8a8d1-c5e5-4cba-83ee-126f8fa63aef"
+              }
+            ]
+          }
+        },
+        {
+          "id": "stories-ed1c0142",
+          "type": "stories",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "Stories",
+            "heading": "Stories of change",
+            "highlight": "change",
+            "cta": {
+              "label": "Explore All Stories",
+              "href": "/stories"
+            },
+            "count": 3
+          }
+        },
+        {
+          "id": "video-ed07a7c5",
+          "type": "video",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "Watch",
+            "heading": "See the work up close.",
+            "highlight": "work",
+            "body": "Short films about the people and communities at the heart of our work.",
+            "youtubeId": "QP5Fs3AYuWE",
+            "title": "See the work up close.",
+            "posterId": "16b8a8d1-c5e5-4cba-83ee-126f8fa63aef"
+          }
+        },
+        {
+          "id": "trust-c1e4c2c7",
+          "type": "trust",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "Transparency",
+            "heading": "Trust matters.",
+            "highlight": "Trust",
+            "body": "Supporters should always be able to see how our work is run and how resources are used.",
+            "cta": {
+              "label": "View Transparency",
+              "href": "/about#transparency"
+            }
+          }
+        },
+        {
+          "id": "get-involved-92c08003",
+          "type": "getInvolved",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "Get involved",
+            "heading": "There are many ways to make a difference.",
+            "highlight": "difference.",
+            "body": "There are many ways to make a difference.\n",
+            "imageIds": {}
+          }
+        },
+        {
+          "id": "cta-ff333403",
+          "type": "cta",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "heading": "Together, we can rise beyond borders.",
+            "highlight": "beyond borders.",
+            "body": "Give, volunteer, partner or travel with us — there is a place for everyone in work that opens up opportunity and strengthens communities.",
+            "primary": {
+              "label": "Get Involved",
+              "href": "/get-involved"
+            },
+            "secondary": {
+              "label": "Explore Our Work →",
+              "href": "/work"
+            }
+          }
+        },
+        {
+          "id": "post-list-ed7475b9",
+          "type": "postList",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "Posts",
+            "heading": "Featured Posts",
+            "postIds": [
+              "f218123b-05a5-42e9-be76-4e5739f62cdf",
+              "9b1e0ac6-15e6-4fcd-a569-cd09b0ab08a9"
+            ]
+          }
+        }
+      ]
+    },
+    "about": {
+      "id": "about",
+      "orgId": "rbb",
+      "schemaVersion": 1,
+      "status": "published",
+      "publishedAt": "2026-10-11T04:12:07.028Z",
+      "sections": [
+        {
+          "id": "page-hero-intro",
+          "type": "pageHero",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "title": "About RBB",
+            "crumb": "About Us",
+            "body": "Empowering vulnerable communities with resources, support and opportunities for sustainable growth and lasting change.",
+            "cta": {
+              "label": "Explore Our Work",
+              "href": "/work"
+            }
+          }
+        },
+        {
+          "id": "statement-who-we-are",
+          "type": "statement",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "Who we are",
+            "heading": "Resources, support and opportunity for lasting change",
+            "body": [
+              "Rising Beyond Borders (RBB) is a non-profit organization focused on empowering vulnerable communities with the resources, support and opportunities needed to pursue sustainable growth and lasting change.",
+              "Our work focuses on four program areas: Education, Health & Wellbeing, Livelihoods, and Community Support. Through these areas, RBB aims to help communities access support and opportunities that contribute to a more equitable future."
+            ]
+          }
+        },
+        {
+          "id": "mission-vision-main",
+          "type": "missionVision",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "What we stand for",
+            "heading": "Our mission and vision",
+            "mission": {
+              "label": "Our Mission",
+              "statement": "Empower vulnerable communities with resources, support and opportunities for sustainable growth and lasting change."
+            },
+            "vision": {
+              "label": "Our Vision",
+              "statement": "A world beyond borders where compassion unites people and every individual can thrive in a safe, inclusive and equitable society."
+            }
+          }
+        },
+        {
+          "id": "values",
+          "type": "numberedCards",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "Our values",
+            "heading": "What guides our work",
+            "items": [
+              {
+                "title": "Dignity",
+                "description": "Everyone we work with is treated with respect, and has a say in the decisions that affect their life."
+              },
+              {
+                "title": "Inclusion",
+                "description": "Our work is open to all, regardless of religion, nationality, ethnicity, gender, background or belief."
+              },
+              {
+                "title": "Compassion",
+                "description": "We lead with empathy, and we listen before we act."
+              },
+              {
+                "title": "Collaboration",
+                "description": "Change goes further when communities, supporters and organisations work towards it together."
+              },
+              {
+                "title": "Accountability",
+                "description": "We act with integrity, are honest about what we do, and are open about how resources are used."
+              },
+              {
+                "title": "Sustainability",
+                "description": "We favour solutions that people and communities can carry forward long after a project ends."
+              }
+            ]
+          }
+        },
+        {
+          "id": "approach-how-we-work",
+          "type": "approach",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "Our approach",
+            "heading": "Creating opportunities for lasting change",
+            "highlight": "change",
+            "body": "We focus on empowering vulnerable communities through resources, support and opportunities for sustainable growth. Our work is organized around education, health and wellbeing, livelihoods, and community support.",
+            "cta": {
+              "label": "Explore Our Approach",
+              "href": "/impact/our-approach"
+            }
+          }
+        },
+        {
+          "id": "transparency",
+          "type": "transparency",
+          "enabled": true,
+          "version": 1,
+          "data": {}
+        },
+        {
+          "id": "cta-closing",
+          "type": "cta",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "heading": "Be part of lasting change",
+            "body": "Help support a future where communities have access to the resources, support and opportunities they need to thrive.",
+            "primary": {
+              "label": "Get Involved",
+              "href": "/get-involved"
+            },
+            "secondary": {
+              "label": "Explore Our Work",
+              "href": "/work"
+            }
+          }
+        }
+      ],
+      "seo": {
+        "description": "Learn about Rising Beyond Borders, our mission and vision, and our focus on education, health and wellbeing, livelihoods, and community support."
+      }
+    },
+    "team": [
+      {
+        "id": "c3206c29-9d73-4057-96ca-56041ab46590",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-11T06:32:27.813Z",
+        "slug": "aquib-yazdani",
+        "name": "Aquib Yazdani",
+        "role": "Software Engg.",
+        "group": "team",
+        "order": 0,
+        "featured": true,
+        "shortBio": "Aquib is the software engineer who has worked on this website.",
+        "imageId": "02914885-cfe1-4836-8c64-cbadaa0d23ee",
+        "socialLinks": [
+          {
+            "label": "LinkedIn",
+            "url": "https://www.linkedin.com/in/aquibyazdani/"
+          }
+        ]
+      },
+      {
+        "id": "c6f1a8be-3179-498a-807e-f0ee390d5dbb",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-11T19:49:37.103Z",
+        "slug": "mohammed-maaz",
+        "name": "Mohammed Maaz",
+        "role": "Owner",
+        "group": "team",
+        "order": 1,
+        "imageId": "4732e533-9b4a-4b5e-9ca5-59693fcb0bbf"
+      },
+      {
+        "id": "68bea0d2-b91c-42c9-9040-18dca6da263a",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T13:44:51.719Z",
+        "slug": "mohammed-maaz-new",
+        "name": "Mohammed Maaz",
+        "role": "Leadership",
+        "group": "leadership",
+        "order": 2,
+        "shortBio": "Leads the organisation's direction, partnerships and team.",
+        "imageId": "4732e533-9b4a-4b5e-9ca5-59693fcb0bbf",
+        "departmentOrArea": "Leadership",
+        "location": "Canada",
+        "socialLinks": [
+          {
+            "label": "LinkedIn",
+            "url": "https://www.linkedin.com/in/mohammed-maaz/"
+          }
+        ]
+      },
+      {
+        "id": "17f21e48-8f2e-4a9d-a577-6591e9fac93b",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T13:44:51.719Z",
+        "slug": "aquib-yazdani-new",
+        "name": "Aquib Yazdani",
+        "role": "Head of Programs",
+        "group": "leadership",
+        "order": 3,
+        "shortBio": "Oversees the four program areas and how they work together.",
+        "imageId": "02914885-cfe1-4836-8c64-cbadaa0d23ee",
+        "departmentOrArea": "Development",
+        "socialLinks": [
+          {
+            "label": "LinkedIn",
+            "url": "https://www.linkedin.com/in/aquibyazdani/"
+          }
+        ]
+      }
+    ],
+    "programs": [
+      {
+        "id": "0ea8071a-2bdc-4ada-97b4-5358f4bc1311",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-11T04:12:07.028Z",
+        "slug": "education",
+        "title": "Education",
+        "icon": "education",
+        "order": 0,
+        "description": "Widening access to learning and skill-building, so that people of every age can grow, build confidence and shape their own future.",
+        "why": [
+          "Education builds knowledge, skills and confidence that last a lifetime. It is one of the strongest foundations for sustainable growth and lasting change.",
+          "Yet access to learning is still uneven. Through this program area, Rising Beyond Borders aims to help vulnerable communities reach the learning opportunities and resources they need to thrive."
+        ],
+        "activities": [
+          "Access to learning for children, young people and adults",
+          "Skill-building that opens pathways to further learning and work",
+          "Learning environments where every learner is welcome",
+          "Connecting learners with resources and opportunities"
+        ],
+        "impact": [
+          "More people able to take part in learning, whatever their circumstances",
+          "Learners with the skills and confidence to take their next step"
+        ],
+        "stories": [
+          "“Learning to read, together” — why confidence comes before fluency",
+          "“When every learner has a book” — what changes when materials stop being the bottleneck"
+        ]
+      },
+      {
+        "id": "e730fb65-e41e-4652-83b6-0d97dbd3472f",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-11T04:12:07.028Z",
+        "slug": "health-wellbeing",
+        "title": "Health & Wellbeing",
+        "icon": "health",
+        "order": 1,
+        "description": "Working towards healthier communities, where people can reach the support and information they need for their physical, mental and emotional wellbeing.",
+        "why": [
+          "Good health is the ground everything else stands on. When people are well, children can keep learning, adults can keep working and families can plan for the future.",
+          "Through this program area, Rising Beyond Borders aims to help vulnerable communities access the support, resources and information that contribute to their wellbeing, with dignity."
+        ],
+        "activities": [
+          "Access to essential health and wellbeing support",
+          "Awareness that helps people make informed choices about their health",
+          "Mental and emotional wellbeing as part of good health",
+          "Prevention, so that problems can be met before they grow"
+        ],
+        "impact": [
+          "People able to reach the support they need, with dignity",
+          "Communities better informed about health and wellbeing"
+        ],
+        "stories": [
+          "“Water close to home” — what keeps a water point working",
+          "“A health day, start to finish” — bringing care closer without replacing local services"
+        ]
+      },
+      {
+        "id": "aa4e5d1c-9fcb-4e3d-94c7-3bee81611cbf",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-11T04:12:07.028Z",
+        "slug": "livelihoods",
+        "title": "Livelihoods",
+        "icon": "livelihoods",
+        "order": 2,
+        "description": "Helping people build the skills and opportunities for sustainable livelihoods, so that households can earn a living with dignity and independence.",
+        "why": [
+          "A steady livelihood gives people room to plan, to recover from setbacks and to invest in their families' futures. It is also a source of dignity and independence.",
+          "Through this program area, Rising Beyond Borders aims to help vulnerable communities access the skills, resources and opportunities that lead to sustainable incomes and lasting economic growth."
+        ],
+        "activities": [
+          "Practical skills that lead towards work and earning",
+          "Pathways into employment and self-employment",
+          "Resilience, so that households can withstand setbacks",
+          "Livelihoods that are sustainable over the long term"
+        ],
+        "impact": [
+          "People with the skills and confidence to earn a living",
+          "Fairer access to economic opportunity"
+        ],
+        "stories": [
+          "“A skill you can practise at home” — earning around caring responsibilities",
+          "“Keeping count on market day” — what record-keeping shows a small trader"
+        ]
+      },
+      {
+        "id": "1ccb5e0b-2491-4d2d-8dd0-d23812049544",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-11T04:12:07.028Z",
+        "slug": "community-support",
+        "title": "Community Support",
+        "icon": "community",
+        "order": 3,
+        "description": "Strengthening communities by connecting people with resources and support, especially in times of need, so that no one is left behind.",
+        "why": [
+          "Strong communities look after one another. When people are connected and able to act together, support reaches those who need it most.",
+          "Through this program area, Rising Beyond Borders aims to help vulnerable communities access essential resources and support, and to build the connections that help them stay resilient over time."
+        ],
+        "activities": [
+          "Essential support for people in times of need",
+          "Responding to the priorities communities identify for themselves",
+          "Inclusion, so that no one is left on the margins",
+          "Connection between people, groups and the support around them"
+        ],
+        "impact": [
+          "Communities more resilient in the face of challenges",
+          "People connected to the support and resources around them"
+        ],
+        "stories": [
+          "“What goes into a packing day” — the planning behind essential support"
+        ]
+      }
+    ],
+    "metrics": [
+      {
+        "id": "687b4194-93ec-4b37-a17e-3acf26636ad1",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T10:44:07.040Z",
+        "slug": "lives",
+        "value": "50K+",
+        "label": "Lives Impacted Across Communities",
+        "verification": "verified",
+        "order": 0
+      },
+      {
+        "id": "de942313-4991-486f-8625-ba7144f83500",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T10:44:07.040Z",
+        "slug": "countries",
+        "value": "20",
+        "label": "Countries Reached",
+        "verification": "verified",
+        "order": 1
+      },
+      {
+        "id": "076e0970-0d1d-478d-80ef-3e0a14ec0897",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T10:44:07.040Z",
+        "slug": "partners",
+        "value": "200+",
+        "label": "Partners & Donors Worldwide",
+        "verification": "verified",
+        "order": 2
+      }
+    ],
+    "impact": {
+      "id": "impact",
+      "orgId": "rbb",
+      "schemaVersion": 1,
+      "status": "published",
+      "publishedAt": "2026-10-11T04:12:07.028Z",
+      "sections": [
+        {
+          "id": "intro-our-impact",
+          "type": "intro",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "Our impact",
+            "title": "Our Impact",
+            "highlight": "Impact",
+            "body": "Rising Beyond Borders works to empower vulnerable communities with resources, support and opportunities for sustainable growth and lasting change — measured honestly, and reported only once it is verified."
+          }
+        },
+        {
+          "id": "at-a-glance",
+          "type": "stats",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "Impact at a glance",
+            "heading": "Together, we create impact.",
+            "metricIds": [
+              "lives",
+              "countries",
+              "partners"
+            ],
+            "source": "Figures from the Rising Beyond Borders annual report."
+          }
+        },
+        {
+          "id": "program-impact-focus",
+          "type": "programImpact",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "Impact across our work",
+            "heading": "Where we focus",
+            "items": [
+              {
+                "programId": "education",
+                "summary": "Working towards greater access to learning and opportunities for people and communities to grow."
+              },
+              {
+                "programId": "health-wellbeing",
+                "summary": "Working towards healthier communities with greater access to support for physical, mental and emotional wellbeing."
+              },
+              {
+                "programId": "livelihoods",
+                "summary": "Working towards sustainable livelihood opportunities that support dignity and independence."
+              },
+              {
+                "programId": "community-support",
+                "summary": "Working towards stronger communities with access to resources and support when needed."
+              }
+            ]
+          }
+        },
+        {
+          "id": "teasers-approach-work",
+          "type": "teasers",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "items": [
+              {
+                "heading": "Our approach",
+                "body": "We focus on education, health and wellbeing, livelihoods, and community support as part of our commitment to sustainable growth and lasting change.",
+                "cta": {
+                  "label": "Explore Our Approach",
+                  "href": "/impact/our-approach"
+                }
+              },
+              {
+                "heading": "Our work",
+                "body": "Discover the program areas through which Rising Beyond Borders works towards a more inclusive and equitable future.",
+                "cta": {
+                  "label": "Explore Our Work",
+                  "href": "/work"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "measurement",
+          "type": "measurement",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "heading": "Evidence & measurement",
+            "body": "Impact begins with listening, continues through collaboration, and grows when people have the opportunity to shape their own futures. Counting activities is not the same as knowing what changed, so we aim to look at four things:",
+            "items": [
+              "Clear aims, agreed with the people involved before work begins",
+              "What changed for people, in their own words as well as in numbers",
+              "What did not work, reported as plainly as what did",
+              "What we learned, and how it shapes the next piece of work"
+            ]
+          }
+        },
+        {
+          "id": "reports",
+          "type": "trust",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "Reports & transparency",
+            "heading": "Reporting what we learn.",
+            "body": "Open reporting is part of how we hold ourselves accountable — to supporters, partners and the communities we work with.",
+            "cta": {
+              "label": "View Transparency",
+              "href": "/about#transparency"
+            }
+          }
+        },
+        {
+          "id": "cta-closing",
+          "type": "cta",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "heading": "Be part of lasting change",
+            "primary": {
+              "label": "Get Involved",
+              "href": "/get-involved"
+            },
+            "secondary": {
+              "label": "Explore Our Work",
+              "href": "/work"
+            }
+          }
+        },
+        {
+          "id": "stories-378e7ed7",
+          "type": "stories",
+          "enabled": true,
+          "version": 1,
+          "data": {
+            "kicker": "Impact stories",
+            "heading": "Stories of change",
+            "storyIds": [
+              "ec73d57f-0746-4509-9fca-503d5ef54eac",
+              "b6802a02-f87d-40a8-925a-3b3dea307fdd"
+            ],
+            "cta": {
+              "label": "Explore All Stories",
+              "href": "/stories"
+            }
+          }
+        }
+      ]
+    },
+    "transparency": {
+      "id": "transparency",
+      "orgId": "rbb",
+      "schemaVersion": 1,
+      "status": "published",
+      "publishedAt": "2026-10-12T10:19:04.019Z",
+      "kicker": "Transparency",
+      "heading": "Transparency & Financials",
+      "intro": "Financial information, reports and governance for Rising Beyond Borders.",
+      "financialOverview": {
+        "year": 2026,
+        "verification": "pending-review",
+        "items": [
+          {
+            "id": "programs",
+            "label": "Programs & Services",
+            "percentage": 78
+          },
+          {
+            "id": "fundraising",
+            "label": "Fundraising",
+            "percentage": 12
+          },
+          {
+            "id": "administration",
+            "label": "Administration",
+            "percentage": 10
+          }
+        ]
+      },
+      "accountability": [
+        "Transparency is how trust is earned. Supporters, partners and the communities we work with should be able to see how the work is run and how resources are used.",
+        "Our aim is to report openly on our finances and our work — including what did not go as planned, as well as what did."
+      ]
+    },
+    "stories": [
+      {
+        "id": "ec73d57f-0746-4509-9fca-503d5ef54eac",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-13T05:24:44.322Z",
+        "type": "story",
+        "slug": "when-every-learner-has-a-book",
+        "title": "When every learner has a book",
+        "excerpt": "Shared textbooks slow a whole class down. What changes when materials stop being the bottleneck?",
+        "date": "2026-10-31",
+        "category": "community",
+        "author": "Rising Beyond Borders",
+        "imageId": "16b8a8d1-c5e5-4cba-83ee-126f8fa63aef",
+        "body": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "Picture a lesson where one book is shared between several learners. The teacher reads the exercise aloud, copies it onto the board, and waits while it is copied again into notebooks. Half the lesson is gone before the learning starts."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "Materials seem like the least interesting part of education, until they are missing. Then they decide how fast a class can move, which children keep up and how much of a teacher's skill ever reaches the room."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "Asked what they need, teachers rarely ask for much: enough readers to go round, notebooks, a few things to make an idea visible. The difference is less about the objects than about the time and attention they free up."
+              }
+            ]
+          }
+        ],
+        "programId": "education",
+        "projectId": "teacher-mentoring-network",
+        "location": "Pune",
+        "relatedPostIds": [
+          "b6802a02-f87d-40a8-925a-3b3dea307fdd",
+          "d6db1def-468f-4b4a-b523-273225d7ae89"
+        ],
+        "quotes": [
+          {
+            "text": "proposed",
+            "attribution": "I used to spend the first ten minutes writing the exercise on the board. Now we start."
+          }
+        ],
+        "impact": [
+          "One textbook per learner in the classrooms supplied",
+          "Lesson time spent teaching rather than copying"
+        ]
+      },
+      {
+        "id": "d6db1def-468f-4b4a-b523-273225d7ae89",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-13T05:24:44.322Z",
+        "type": "story",
+        "slug": "sewing",
+        "title": "sewing",
+        "excerpt": "A working water point changes the shape of a day — most of all for the people who used to fetch water from far away.",
+        "date": "2026-10-08",
+        "category": "impact",
+        "author": "Aquib Y.",
+        "imageId": "b91e8cb7-5379-40a6-a28c-da4307c1e33d",
+        "body": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "When a water point stops working, the change is not only in what people drink. The walk to the next source eats into the morning; children arrive late to school; water that is not safe starts to look good enough."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "Repairing a pump is the easy part. Keeping it working is harder, and it depends less on engineering than on organisation: who notices the first sign of trouble, who holds the money for spare parts, who knows how to fix it."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "Where a community takes on that care for itself, a water point stops being a gift that can break and becomes something people own. That is the difference between a repair and a lasting change."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "It is a pattern that runs through community health work: the most valuable support is often the kind that makes outside help less necessary next time."
+              }
+            ]
+          }
+        ],
+        "programId": "livelihoods",
+        "projectId": "teacher-mentoring-network",
+        "location": "Canada",
+        "quotes": [
+          {
+            "text": "proposed",
+            "attribution": "We keep a small fund for parts now. The last repair took an afternoon, not a month.` | `A member of the water point committee"
+          }
+        ],
+        "impact": [
+          "Water points repaired and maintained by their communities",
+          "Shorter walks for water for the families who fetch it"
+        ]
+      },
+      {
+        "id": "b6802a02-f87d-40a8-925a-3b3dea307fdd",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-13T05:24:44.322Z",
+        "type": "story",
+        "slug": "learning-to-read-together",
+        "title": "Learning to read, together",
+        "excerpt": "Why a quiet hour with books, a little patience and no marks can matter as much as any lesson.",
+        "date": "2026-09-11",
+        "category": "news",
+        "author": "Rising Beyond Borders",
+        "imageId": "b99769de-c99a-4024-9319-370557742166",
+        "body": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "Most afternoons the room is noisier than a library should be. Children arrive straight from school, drop their bags and go looking for the book they were halfway through the day before."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "Reading clubs start from a simple observation: the children who struggle to read in class are often the ones who never get to read for pleasure. Here there are no marks, and no one is in a hurry."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "A volunteer reads aloud first, then steps back. Older children begin to help younger ones. A parent waiting at the door sometimes stays to listen, and leaves with a book to share at home."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "The lesson for anyone planning this kind of work is that confidence comes before fluency. A child who believes reading is for them will practise; a child who does not will find reasons not to."
+              }
+            ]
+          }
+        ],
+        "programId": "education",
+        "location": "Pune, India",
+        "quotes": [
+          {
+            "text": "Nobody tells me to read faster here. I just read.` | `A reading club member, aged 9",
+            "attribution": "I came to wait for my daughter and ended up staying for the story."
+          }
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "id": "0b7ff234-2d8a-4159-bbf9-ff66054957c2",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-13T05:31:03.992Z",
+        "slug": "community-reading-clubs",
+        "title": "Community Reading Clubs",
+        "programId": "education",
+        "description": "After-school reading clubs that give children regular, relaxed time with books and an encouraging adult.",
+        "imageId": "b91e8cb7-5379-40a6-a28c-da4307c1e33d",
+        "context": [
+          "Many children finish their first years of school still unsure of their reading. Classrooms are busy, books at home can be scarce, and a child who falls behind early often stays behind.",
+          "Reading clubs offer something simple: time, books and encouragement, away from the pressure of marks."
+        ],
+        "activities": [
+          "Regular reading time in a calm, welcoming space",
+          "Books chosen for different ages and reading levels",
+          "Reading aloud, storytelling and games that build confidence"
+        ],
+        "approach": [
+          "Clubs are shaped with families and schools, so they fit around the school day and the languages children speak at home.",
+          "Volunteers are prepared to support reading without turning it into another lesson, and children help each other as they grow in confidence."
+        ],
+        "outcomes": [
+          "Children who enjoy reading and choose to read",
+          "More confidence in class",
+          "Families more involved in their children's learning"
+        ],
+        "location": "Canada",
+        "stage": "Ongoing",
+        "date": "2026-09-11",
+        "featured": true,
+        "order": 0,
+        "seo": {
+          "ogImageId": "d342b279-cc4c-4802-a9f9-03c963d12883"
+        }
+      },
+      {
+        "id": "4876d848-1602-4745-8e9c-534bf29d9595",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-13T05:31:03.992Z",
+        "slug": "learning-materials-for-classrooms",
+        "title": "Learning Materials for Classrooms",
+        "programId": "education",
+        "description": "Books, notebooks and teaching materials for classrooms that have too few — chosen with the teachers who use them.",
+        "imageId": "b91e8cb7-5379-40a6-a28c-da4307c1e33d",
+        "context": [
+          "When learners share one book between several, lessons slow to the pace of the page-turn. Teachers spend their time copying onto the board instead of teaching, and the children who most need help get the least of it."
+        ],
+        "activities": [
+          "Materials matched to what is being taught",
+          "Guidance for teachers on using them well",
+          "Teachers better equipped to support every child"
+        ],
+        "approach": [
+          " Teachers decide what is needed — not a standard list chosen from far away.",
+          "Materials are sourced as close to the school as possible, and checked on later to make sure they are in use rather than in a cupboard."
+        ],
+        "outcomes": [
+          "Every learner with the materials to take part",
+          " More of the lesson spent teaching",
+          "Teachers better equipped to support every child"
+        ],
+        "order": 1
+      },
+      {
+        "id": "36ddff51-4f74-4d80-bf63-b65c6945ba6b",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-13T05:31:03.992Z",
+        "slug": "teacher-mentoring-network",
+        "title": "Teacher Mentoring Network",
+        "programId": "education",
+        "description": "Pairing newer teachers with experienced colleagues, for support through their first years in the classroom.",
+        "imageId": "16b8a8d1-c5e5-4cba-83ee-126f8fa63aef",
+        "context": [
+          "New teachers often start alone: a full classroom, little preparation time and no one to ask. Many leave the profession early — and their pupils lose a teacher just as they were getting to know them."
+        ],
+        "activities": [
+          "Regular conversations between mentor and teacher",
+          "Small peer groups to share what works",
+          "Practical help with planning and inclusive teaching"
+        ],
+        "approach": [
+          "Mentoring is built on trust, not inspection: teachers set their own goals and decide what they want help with.",
+          "What works in one classroom is shared with others, so good practice spreads between schools."
+        ],
+        "outcomes": [
+          "Teachers who feel confident and supported",
+          "Classrooms that include every learner",
+          "Experienced teachers whose knowledge is passed on"
+        ],
+        "order": 2
+      },
+      {
+        "id": "34771f4e-a14b-448a-a925-a868a30e0144",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-13T05:31:24.185Z",
+        "slug": "community-health-days",
+        "title": "Community Health Days",
+        "programId": "health-wellbeing",
+        "description": "Open days that bring basic health checks, information and advice closer to families who live far from a clinic.",
+        "imageId": "4cbe42d8-ca0d-42e3-95a8-585c3c5e2e01",
+        "context": [
+          "Distance, cost and a day's lost earnings can all delay a visit to a clinic. Small health problems go unchecked until they become serious ones."
+        ],
+        "activities": [
+          "Basic health checks in a familiar community setting",
+          "Clear, practical health information",
+          "Referrals to the services people can use afterwards"
+        ],
+        "approach": [
+          "Health days are planned alongside the health services people already use, so they strengthen those services rather than replace them.",
+          "Checks are private and respectful, and anyone who needs more care leaves knowing where to go next."
+        ],
+        "outcomes": [
+          "Health concerns noticed earlier",
+          "Families better informed about their health",
+          "Stronger links between communities and local services"
+        ],
+        "date": "2026-10-03",
+        "featured": true,
+        "order": 3
+      }
+    ],
+    "careers": {
+      "id": "careers",
+      "orgId": "rbb",
+      "schemaVersion": 1,
+      "status": "published",
+      "publishedAt": "2026-10-12T10:42:52.085Z",
+      "kicker": "Careers",
+      "title": "Careers",
+      "intro": "Opportunities to work with Rising Beyond Borders.",
+      "why": {
+        "heading": "Why work with us",
+        "body": [
+          "Working with Rising Beyond Borders means contributing to work in education, health and wellbeing, livelihoods and community support — work that is inclusive by design and shaped by the communities it serves."
+        ]
+      },
+      "opportunities": {
+        "heading": "Open opportunities",
+        "empty": "There are no open opportunities at the moment.",
+        "roles": [
+          {
+            "id": "sr-software-engineer",
+            "title": "Sr. Software Engineer"
+          }
+        ]
+      },
+      "apply": {
+        "heading": "How to apply",
+        "body": [
+          "Each opportunity sets out what the role involves and how to apply."
+        ]
+      },
+      "closing": {
+        "heading": "Explore Rising Beyond Borders.",
+        "primary": {
+          "label": "About Us",
+          "href": "/about"
+        },
+        "secondary": {
+          "label": "Contact",
+          "href": "/contact"
+        }
+      },
+      "seo": {
+        "description": "Careers and opportunities with Rising Beyond Borders."
+      }
+    },
+    "forms": [
+      {
+        "id": "career-sr-software-engineer",
+        "orgId": "rbb",
+        "kind": "career",
+        "roleId": "sr-software-engineer",
+        "title": "Application — Sr. Software Engineer",
+        "heading": "Apply for Sr. Software Engineer",
+        "submitLabel": "Send application",
+        "successMessage": "Thank you — your application has been sent to Rising Beyond Borders.",
+        "errorMessage": "Sorry, your application could not be sent. Please try again in a moment.",
+        "fields": [
+          {
+            "id": "name",
+            "type": "text",
+            "label": "Your name",
+            "required": true,
+            "maxLength": 200
+          },
+          {
+            "id": "email",
+            "type": "email",
+            "label": "Email address",
+            "required": true,
+            "maxLength": 254
+          },
+          {
+            "id": "cv",
+            "type": "file",
+            "label": "Your CV",
+            "help": "PDF or Word document, up to 4 MB.",
+            "required": true
+          },
+          {
+            "id": "message",
+            "type": "textarea",
+            "label": "Why are you interested in this role?",
+            "required": false,
+            "maxLength": 5000
+          }
+        ],
+        "updatedAt": "2026-10-13T12:13:14.247Z"
+      },
+      {
+        "id": "contact",
+        "orgId": "rbb",
+        "kind": "contact",
+        "title": "Contact Us",
+        "heading": "Send us a message",
+        "submitLabel": "Send message",
+        "successMessage": "Thank you — your message has been sent to Rising Beyond Borders.",
+        "errorMessage": "Sorry, your message could not be sent. Please try again in a moment.",
+        "fields": [
+          {
+            "id": "name",
+            "type": "text",
+            "label": "Your name",
+            "required": true,
+            "maxLength": 200
+          },
+          {
+            "id": "email",
+            "type": "email",
+            "label": "Email address",
+            "required": true,
+            "maxLength": 254
+          },
+          {
+            "id": "topic",
+            "type": "select",
+            "label": "What is your message about?",
+            "required": false,
+            "options": [
+              "A general question",
+              "Donate",
+              "Volunteer",
+              "Fellowship",
+              "Partner With Us",
+              "Travel With Us"
+            ]
+          },
+          {
+            "id": "message",
+            "type": "textarea",
+            "label": "Your message",
+            "required": true,
+            "maxLength": 5000
+          }
+        ],
+        "updatedAt": "2026-10-13T12:11:52.547Z"
+      }
+    ],
+    "policies": [
+      {
+        "id": "privacy",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T17:05:18.479Z",
+        "title": "Privacy Policy",
+        "effectiveDate": "2026-10-12",
+        "lastUpdated": "2026-10-12",
+        "intro": [
+          "This policy explains what personal information Rising Beyond Borders collects through this website, how it is used and the choices you have. It applies to this website and the forms on it, and should be read together with our Terms of Use."
+        ],
+        "sections": [
+          {
+            "id": "introduction-and-scope",
+            "heading": "Introduction and scope",
+            "body": [
+              "Rising Beyond Borders [RBB to confirm: legal name and registered address] is responsible for the personal information handled through this website.\", \"This policy covers the website and the forms it offers: contacting us, volunteering, partnering, travelling with us, fundraising and the newsletter. Donations are made through our payment provider, whose own privacy terms apply to the payment itself."
+            ]
+          },
+          {
+            "id": "information-we-collect",
+            "heading": "Information we collect",
+            "body": [
+              "We collect only what you give us through the forms on this website, and only what each form asks for."
+            ]
+          },
+          {
+            "id": "how-we-use-information",
+            "heading": "How we use information",
+            "body": [
+              "We use your information to answer your message, to follow up on an offer to volunteer, partner, travel or fundraise with us, to process and acknowledge a donation, and — only if you asked for it — to send you our news."
+            ]
+          }
+        ],
+        "relatedPolicies": [
+          "terms",
+          "donation"
+        ]
+      },
+      {
+        "id": "terms",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T17:05:05.288Z",
+        "title": "Terms of Use",
+        "effectiveDate": "2026-10-12",
+        "lastUpdated": "2026-10-12",
+        "intro": [
+          "These terms govern the use of the Rising Beyond Borders website. By using the website you agree to them. Please also read our Privacy Policy and Donation Policy."
+        ],
+        "sections": [
+          {
+            "id": "acceptable-use",
+            "heading": "Acceptable use",
+            "body": [
+              "You may use this website for lawful purposes only. You must not try to disrupt it, gain unauthorised access to it, copy it automatically, or use it to send unsolicited messages."
+            ]
+          },
+          {
+            "id": "intellectual-property",
+            "heading": "Intellectual property",
+            "body": [
+              "The text, photographs, logo and design of this website belong to Rising Beyond Borders or to the people who licensed them to us. You may read and share links to our pages; please ask before reproducing text or images elsewhere."
+            ]
+          },
+          {
+            "id": "external-links",
+            "heading": "External links",
+            "body": [
+              "This website links to other websites, including our payment provider and social media. We do not control them and are not responsible for their content or their handling of your information."
+            ]
+          },
+          {
+            "id": "website-availability",
+            "heading": "Website availability",
+            "body": [
+              "We aim to keep the website available, but we do not guarantee that it will be uninterrupted or free of errors, and we may change or remove content at any time."
+            ]
+          },
+          {
+            "id": "limitation-of-liability",
+            "heading": "Limitation of liability",
+            "body": [
+              "RBB to confirm with counsel: the limitation of liability that applies."
+            ]
+          },
+          {
+            "id": "changes-to-these-terms",
+            "heading": "Changes to these terms",
+            "body": [
+              "We may update these terms from time to time."
+            ]
+          }
+        ],
+        "relatedPolicies": [
+          "privacy",
+          "donation"
+        ]
+      },
+      {
+        "id": "donation",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T17:05:05.288Z",
+        "title": "Donation Policy",
+        "effectiveDate": "2026-10-12",
+        "lastUpdated": "2026-10-12",
+        "intro": [
+          "This policy explains how donations to Rising Beyond Borders are received, used, acknowledged and refunded.\", \"DRAFT FOR REVIEW — this wording must be reviewed and approved by Rising Beyond Borders' counsel before it is published."
+        ],
+        "sections": [
+          {
+            "id": "about-this-policy",
+            "heading": "About this policy",
+            "body": [
+              "This policy applies to donations made through this website, including gifts to our appeals and campaigns."
+            ]
+          },
+          {
+            "id": "how-donations-are-used",
+            "heading": "How donations are used",
+            "body": [
+              "General donations support our work across our four program areas — Education, Health & Wellbeing, Livelihoods and Community Support — and the costs of running the organisation."
+            ]
+          },
+          {
+            "id": "appeals-and-campaigns",
+            "heading": "Appeals and campaigns",
+            "body": [
+              "A gift to a specific appeal is used for that appeal. If an appeal raises more than it needs, or its need changes, the remaining funds are used for similar work in the same program area."
+            ]
+          },
+          {
+            "id": "payments",
+            "heading": "Payments",
+            "body": [
+              "Online donations are processed by [RBB to confirm: the payment provider]. Your card or bank details are entered with the provider and never pass through this website."
+            ]
+          },
+          {
+            "id": "receipts-and-acknowledgements",
+            "heading": "Receipts and acknowledgements",
+            "body": [
+              "You will receive a confirmation of your gift by email from our payment provider, and an acknowledgement from Rising Beyond Borders."
+            ]
+          },
+          {
+            "id": "refunds",
+            "heading": "Refunds",
+            "body": [
+              "If you made a donation by mistake or in the wrong amount, contact us within [RBB to confirm: period] of the gift and we will refund it where we can."
+            ]
+          },
+          {
+            "id": "your-personal-information",
+            "heading": "Your personal information",
+            "body": [
+              "Donor details are handled as described in our Privacy Policy, and are never sold."
+            ]
+          },
+          {
+            "id": "questions-about-giving",
+            "heading": "Questions about giving",
+            "body": [
+              "If you have a question about a donation, please contact us using the details shown below or on our Contact page."
+            ]
+          }
+        ],
+        "relatedPolicies": [
+          "privacy",
+          "terms"
+        ]
+      }
+    ],
+    "getInvolved": [
+      {
+        "id": "hub",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T10:48:11.937Z",
+        "heading": "Get Involved",
+        "intro": "There are many ways to make a difference. Whether you volunteer, join a fellowship, partner with us or travel with us, you become part of work that opens up opportunity and strengthens communities.",
+        "ways": {
+          "kicker": "Four ways to get involved",
+          "heading": "Choose how you take part."
+        },
+        "choose": {
+          "kicker": "Choose your path",
+          "heading": "What each path involves"
+        },
+        "closing": {
+          "heading": "Ready to take the next step?",
+          "primary": {
+            "label": "See Our Appeals",
+            "target": "appeals"
+          },
+          "secondary": {
+            "label": "Explore Our Work",
+            "target": "work"
+          }
+        }
+      },
+      {
+        "id": "volunteer",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T10:48:11.937Z",
+        "shortDescription": "Share your time, skills and experience to support meaningful community-focused work.",
+        "hubNote": "Give time, a professional skill or practical help — the volunteer page explains what volunteering can involve.",
+        "sections": [
+          {
+            "id": "why",
+            "heading": "Why volunteer",
+            "body": [
+              "Volunteering is one of the most direct ways to support community-focused work. Volunteers bring time, energy and experience — and often find that they learn as much as they give. Whatever your background, your skills can help open up opportunity for others."
+            ]
+          },
+          {
+            "id": "ways",
+            "heading": "Opportunities may include",
+            "body": [
+              "Depending on Rising Beyond Borders' programs and needs, volunteering could take several forms:"
+            ],
+            "items": [
+              "Practical help at community events and activities",
+              "Support for learning and reading activities",
+              "Skills-based help, such as communications, design, finance or planning",
+              "Helping to organise awareness and fundraising events"
+            ]
+          },
+          {
+            "id": "who",
+            "heading": "Who could take part",
+            "body": [
+              "Rising Beyond Borders welcomes interest from people of every background. Anything a particular role needs — skills, time or location — will be set out with that role when it is published."
+            ]
+          },
+          {
+            "id": "expect",
+            "heading": "What happens next",
+            "body": [
+              "Each volunteer opportunity sets out what it involves and how to express interest. If you have a question in the meantime, get in touch through our Contact page."
+            ]
+          }
+        ],
+        "seo": {
+          "description": "How to volunteer your time and skills with Rising Beyond Borders."
+        }
+      },
+      {
+        "id": "fellowship",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T10:48:11.937Z",
+        "shortDescription": "Spend focused time learning alongside community-focused work, and bring your own skills to it.",
+        "hubNote": "Focused time learning alongside the work and contributing your own skills — the fellowship page explains what it could involve.",
+        "sections": [
+          {
+            "id": "why",
+            "heading": "Why a fellowship",
+            "body": [
+              "A fellowship is a chance to go deeper than a single volunteering day: time spent learning from the communities and teams behind the work, and contributing your own skills to it across education, health and wellbeing, livelihoods and community support."
+            ]
+          },
+          {
+            "id": "what",
+            "heading": "What a fellowship could involve",
+            "body": [],
+            "items": [
+              "Working alongside a program team",
+              "A focused piece of work of your own, agreed at the start",
+              "Regular reflection on what you are learning"
+            ]
+          },
+          {
+            "id": "next",
+            "heading": "Interested?",
+            "body": [
+              "Fellowship places are not open yet. If you would like to hear when they are, or to talk about what a fellowship could look like for you, get in touch through our Contact page."
+            ]
+          }
+        ],
+        "seo": {
+          "description": "Fellowships with Rising Beyond Borders."
+        }
+      },
+      {
+        "id": "partner",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T10:48:11.937Z",
+        "shortDescription": "Work with Rising Beyond Borders to explore practical ways of contributing skills, resources and expertise.",
+        "hubNote": "For organisations, institutions and community groups that want to combine skills, resources or expertise around shared aims.",
+        "sections": [
+          {
+            "id": "why",
+            "heading": "Why partner with us",
+            "body": [
+              "Lasting change is rarely achieved alone. Partnership lets organisations, institutions and community groups combine their skills, resources and expertise around shared aims. We welcome conversations about practical ways of working together."
+            ]
+          },
+          {
+            "id": "areas",
+            "heading": "Potential partnership areas",
+            "body": [],
+            "items": [
+              "Sharing professional skills and expertise",
+              "Contributing resources in kind",
+              "Collaborating on community-focused work",
+              "Raising awareness of shared causes"
+            ]
+          },
+          {
+            "id": "who",
+            "heading": "Who could partner with us",
+            "body": [
+              "Partnerships could bring together many kinds of organisation, including:"
+            ],
+            "items": [
+              "Community organisations and local groups",
+              "Nonprofit organisations",
+              "Schools, colleges and other educational institutions",
+              "Health organisations",
+              "Businesses",
+              "Philanthropic supporters",
+              "Technical and professional contributors"
+            ]
+          },
+          {
+            "id": "how",
+            "heading": "How a partnership could start",
+            "body": [
+              "Every partnership begins with a conversation about shared aims, what each side can bring, and how the people the work serves will have a say."
+            ]
+          }
+        ],
+        "seo": {
+          "description": "How organizations and communities can explore partnership with Rising Beyond Borders."
+        }
+      },
+      {
+        "id": "travel",
+        "orgId": "rbb",
+        "schemaVersion": 1,
+        "status": "published",
+        "publishedAt": "2026-10-12T10:48:11.937Z",
+        "shortDescription": "See community-focused work first-hand, on a visit planned with the people it serves.",
+        "hubNote": "See the work first-hand on a visit planned with the communities it serves, and register your interest in a future trip.",
+        "sections": [
+          {
+            "id": "why",
+            "heading": "Why travel with us",
+            "body": [
+              "There is no better way to understand the work than to see it. Travelling with us means meeting the communities and teams behind it — on their terms, with respect for their time and privacy — and coming home able to share what you saw."
+            ]
+          },
+          {
+            "id": "what",
+            "heading": "What a trip could involve",
+            "body": [],
+            "items": [
+              "Time with program teams and the communities they work with",
+              "Learning about the local context the work happens in",
+              "Time together each day to reflect on what you have seen"
+            ]
+          },
+          {
+            "id": "practical",
+            "heading": "Dates and practical details",
+            "body": [
+              "Dates, costs and practical details are shared once a trip is confirmed. Register your interest below and we will let you know when trips are planned."
+            ]
+          }
+        ],
+        "seo": {
+          "description": "Travelling with Rising Beyond Borders."
+        }
+      }
+    ],
+    "announcementBar": {
+      "id": "announcement-bar",
+      "orgId": "rbb",
+      "schemaVersion": 1,
+      "status": "published",
+      "publishedAt": "2026-10-12T17:45:27.502Z",
+      "items": [
+        {
+          "id": "m-ee5bddb4",
+          "text": "Join us for a community dinner on 14 November.",
+          "link": {
+            "label": "Volunteer",
+            "href": "/get-involved/volunteer"
+          }
+        },
+        {
+          "id": "m-0636921b",
+          "text": "Join us for a community dinner on 12 December.",
+          "link": {
+            "label": "See events",
+            "href": "/media/events/community-dinner"
+          }
+        }
+      ]
+    },
+    "popup": {
+      "id": "site-popup",
+      "orgId": "rbb",
+      "schemaVersion": 1,
+      "status": "published",
+      "publishedAt": "2026-10-12T17:49:56.407Z",
+      "key": "popup-2026-10-12-l3zb",
+      "kicker": "What's on",
+      "heading": "New events are open for registration",
+      "highlight": "registration",
+      "body": "Community dinners, family reading afternoons and volunteer mornings — find something near you and save your place.",
+      "imageId": "d342b279-cc4c-4802-a9f9-03c963d12883",
+      "cta": {
+        "label": "Explore events",
+        "href": "/media/events"
+      },
+      "dismissLabel": "Maybe later",
+      "delayMs": 6000,
+      "frequency": "session",
+      "excludePaths": [
+        "/contact",
+        "/privacy",
+        "/terms",
+        "/donation-policy"
+      ]
+    },
+    "storyStrip": {
+      "id": "story-strip",
+      "orgId": "rbb",
+      "schemaVersion": 1,
+      "status": "published",
+      "publishedAt": "2026-10-13T06:21:07.254Z",
+      "appealIds": [
+        "abc10ce3-1603-488b-9c8e-333536a2a7f0",
+        "6eb59cb5-9a1a-413b-a879-c1be6e6bd606"
+      ]
+    }
+  }
+}

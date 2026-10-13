@@ -2,9 +2,13 @@
    scripts/snapshot-adapter.mjs for WHAT it sets, and
    scripts/published-snapshot.mjs for where the snapshot comes from).
 
-   Runs in BUILDS only (client and server alike, so they agree). With no
-   build-meta/published-snapshot.json — or RBB_SNAPSHOT=off — it changes
-   nothing at all: the build is byte-identical to one without the plugin.
+   Runs in builds (client and server alike, so they agree) AND, since
+   2026-10-13, in the dev server: the website keeps no built-in copy of the
+   CMS's content, so without a snapshot its pages would be empty. It reads
+   build-meta/published-snapshot.json (what the build's fetch step wrote),
+   or else the saved copy fixtures/published-snapshot.json. The dev server
+   always applies it statically. RBB_SNAPSHOT=off: no snapshot (tests that
+   apply their own).
 
    Two ways of applying the snapshot, decided by scripts/runtime-snapshot.mjs:
 
@@ -39,6 +43,8 @@ import { runtimeSnapshotConfig, runtimeSnapshotEnv } from "./runtime-snapshot.mj
 export const VIRTUAL_ID = "virtual:rbb-published-snapshot";
 const RESOLVED = "\0rbb-published-snapshot";
 export const PREVIEW_FILE = "build-meta/preview-snapshot.json";
+/* The saved copy of the live snapshot (scripts/published-snapshot.mjs). */
+export const FIXTURE_FILE = "fixtures/published-snapshot.json";
 export const PREVIEW_STATUS_FILE = "build-meta/preview-snapshot-status.json";
 /* The runtime configuration this build was made with, for the prerender
    (scripts/prerender.mjs) — deleted when the build is static. */
@@ -82,21 +88,26 @@ export const previewTags = (status) => [
    build decides from the environment. */
 export default function publishedSnapshot({ root, runtime: givenRuntime, applyInServe = false } = {}) {
   const preview = process.env.RBB_PREVIEW === "1";
-  const file = join(root, preview ? PREVIEW_FILE : "build-meta/published-snapshot.json");
-  if (preview && !existsSync(file)) throw new Error(`RBB_PREVIEW=1 but there is no ${PREVIEW_FILE}: start the preview with \`npm run preview:cms\`.`);
-  const snapshot = process.env.RBB_SNAPSHOT !== "off" && existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : null;
+  const built = join(root, preview ? PREVIEW_FILE : "build-meta/published-snapshot.json");
+  if (preview && !existsSync(built)) throw new Error(`RBB_PREVIEW=1 but there is no ${PREVIEW_FILE}: start the preview with \`npm run preview:cms\`.`);
+  const saved = join(root, FIXTURE_FILE);
+  const file = existsSync(built) ? built : !preview && existsSync(saved) ? saved : null;
+  const snapshot = process.env.RBB_SNAPSHOT !== "off" && file ? JSON.parse(readFileSync(file, "utf8")) : null;
   const status = preview && existsSync(join(root, PREVIEW_STATUS_FILE)) ? JSON.parse(readFileSync(join(root, PREVIEW_STATUS_FILE), "utf8")) : null;
   const overrides = snapshot ? overridesFrom(snapshot) : null;
   const runtime = preview ? null : givenRuntime !== undefined ? givenRuntime : runtimeSnapshotConfig({ env: process.env, snapshot });
   const runtimeFile = join(root, RUNTIME_FILE);
+  /* The dev server applies the snapshot statically (no runtime hook). */
+  let serving = false;
 
   return {
     name: "rbb-published-snapshot",
-    /* A published snapshot: builds only. A preview: the dev server only. */
+    /* A published snapshot: builds and the dev server. A preview: the dev server only. */
     apply(_config, { command }) {
       if (preview && command === "build") throw new Error("RBB_PREVIEW=1 is for the local dev server only (npm run preview:cms) — a preview is never built.");
       if (applyInServe && command === "serve") return true;
-      return command === (preview ? "serve" : "build");
+      if (command === "serve") serving = true;
+      return preview ? command === "serve" : true;
     },
     ...(preview && {
       transformIndexHtml: () => previewTags(status),
@@ -113,7 +124,7 @@ export default function publishedSnapshot({ root, runtime: givenRuntime, applyIn
     /* The runtime build's compile-time constants: where to ask, and the
        baked values the hook applies when the API has nothing newer. */
     config: () =>
-      runtime
+      runtime && !serving
         ? { define: { "import.meta.env.VITE_RBB_RUNTIME_SNAPSHOT": JSON.stringify(runtimeSnapshotEnv(runtime)), __RBB_BAKED_OVERRIDES__: JSON.stringify(JSON.stringify(overrides)) } }
         : {},
     /* A published page with a Givebutter checkout needs the build's
@@ -136,7 +147,7 @@ export default function publishedSnapshot({ root, runtime: givenRuntime, applyIn
       try {
         /* Runtime: every target gets the hook — a newer snapshot may set
            any of them. Static: only what this snapshot sets. */
-        if (runtime) return { code: appendRuntimeHook(code, target), map: null };
+        if (runtime && !serving) return { code: appendRuntimeHook(code, target), map: null };
         if (!overrides?.[target]) return null;
         return { code: appendOverrides(code, target, overrides[target]), map: null };
       } catch (error) {

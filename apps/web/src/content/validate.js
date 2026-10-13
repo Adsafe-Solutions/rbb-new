@@ -136,7 +136,6 @@ export function validateContent({ pages = [], redirects = [], preview = false } 
   const ALL_PROJECTS = PROJECT_RECORDS;
   const ALL_TEAM = TEAM_MEMBERS;
   const ALL_METHODS = DONATION.givingMethods;
-  const ALL_FAQS = DONATION.faqs;
 
   /* ---- Stories (Document 07) ---- */
   identity("stories.js STORIES", ALL_STORIES);
@@ -145,14 +144,6 @@ export function validateContent({ pages = [], redirects = [], preview = false } 
     err(
       "stories.js STORIES",
       `${featured.length} approved stories are marked \`featured\`; only one may be`
-    );
-  /* M15: once the stories come from the CMS, the website's own Impact page
-     — which names the website's own stories — shows none (never a CMS story
-     by a coincidental slug). Said loudly, so it is never a silent gap. */
-  if (CONTENT.STORY_SOURCE.cms && !CONTENT.PUBLISHED_IMPACT.page && CONTENT.IMPACT.stories.length)
-    warn(
-      "impact.js IMPACT.stories",
-      `the stories now come from the CMS, so the website's own Impact page shows none of the ${CONTENT.IMPACT.stories.length} website stories it names — publish the Impact page from the CMS to choose CMS stories for /impact`
     );
   for (const s of ALL_STORIES) {
     const where = `stories.js STORIES[${s?.id}]`;
@@ -295,12 +286,6 @@ export function validateContent({ pages = [], redirects = [], preview = false } 
     if (m.externalUrl != null && !/^https:\/\//.test(m.externalUrl))
       err(where, "`externalUrl` must be https");
   }
-  ALL_FAQS.forEach((f, i) => {
-    const where = `donation.js faqs[${i}]`;
-    if (!STATUSES.includes(f?.status)) err(where, "unknown `status`");
-    if (live(f?.status) && (!text(f.q) || !(text(f.a) || Array.isArray(f.a))))
-      err(where, "an approved FAQ needs `q` and `a`");
-  });
 
   /* ---- Forms (Document 12): no recipient in client content, ever ---- */
   for (const [name, form] of Object.entries(FORMS)) {
@@ -394,7 +379,6 @@ export function validateContent({ pages = [], redirects = [], preview = false } 
       team: TEAM_MEMBERS.filter((m) => m.status === "approved").length,
       policies: POLICIES.filter((p) => p.status === "approved").length,
       givingMethods: DONATION.givingMethods.filter((m) => m.status === "approved").length,
-      donationFaqs: DONATION.faqs.filter((f) => f.status === "approved").length,
     },
   };
 }

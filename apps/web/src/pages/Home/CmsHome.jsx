@@ -113,7 +113,7 @@ const RENDERERS = {
     <EditorialSplit index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} body={data.body} cta={data.cta} secondary={data.secondary} image={data.image} reverse={data.imagePosition === "left"} />
   ),
   programs: ({ index, tone, data }) => <ProgramAreas index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} intro={data.body} cta={data.cta} items={HOMEPAGE.programs.items} />,
-  approach: ({ index, tone, data }) => <ApproachFlow index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} intro={data.body} steps={HOMEPAGE.approach.steps} cta={data.cta} />,
+  approach: ({ index, tone, data }) => <ApproachFlow index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} intro={data.body} steps={[]} cta={data.cta} />,
   stats: ({ index, tone, data }) => (
     <ImpactStats index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} body={data.body} stats={statsFor(data.metricIds)} note={metricsNote()} source={data.source} cta={data.cta} />
   ),

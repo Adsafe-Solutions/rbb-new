@@ -1,5 +1,11 @@
 # Content migration rehearsal
 
+> **Retired (2026-10-13).** The content is in the CMS and the website no
+> longer keeps its built-in copy, so this rehearsal — `scripts/migration*`,
+> its tests and the contract importers it used — was removed. This page is
+> kept as the record of how the migration was rehearsed. See
+> docs/PUBLISHING.md "No built-in content".
+
 A **dry run** of moving the website's source content (`apps/web/src/content`)
 into the CMS. It plans and never writes: there is no apply, write, upload or
 publish mode, and the command refuses any such flag before it reads anything.

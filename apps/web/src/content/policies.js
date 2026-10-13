@@ -43,50 +43,6 @@ import { isWorkingContent } from "../lib/releaseMarkers.js";
 import { withoutTrailingSlash } from "../lib/paths.js";
 import { ORG_CONTACT, methodHref, verifiedOnly } from "./contact.js";
 
-/* WORKING placeholder policy text (Document 27). Each page is structured
-   like a real policy so it can be reviewed, and every one opens by saying
-   on its face that it is NOT RBB's policy — the final text comes from RBB
-   and its counsel. No date, provider, retention period, right or
-   conformance claim below is RBB's. */
-const POLICY_NOTE =
-  "Demo text — this is NOT Rising Beyond Borders' policy. It shows how the page will look; the final text will be supplied by Rising Beyond Borders and reviewed by counsel.";
-const working = (sections) => ({
-  status: "approved",
-  effectiveDate: "2026-09-24",
-  lastUpdated: "2026-09-24",
-  intro: [POLICY_NOTE],
-  sections,
-});
-
-const WORKING_POLICIES = {
-  privacy: working([
-    { id: "introduction", heading: "Introduction and scope", body: ["Demo — This policy explains how personal information is handled when you use this website."] },
-    { id: "information-collected", heading: "Information we collect", body: ["Demo — Details you give us through our forms and donation form, such as your name and email address."], items: ["Demo — contact form messages", "Demo — newsletter sign-ups", "Demo — donation details (payments are processed by a payment provider)"] },
-    { id: "use", heading: "How we use information", body: ["Demo — To answer your message, process your donation and, if you ask, send you news."] },
-    { id: "sharing", heading: "Sharing and service providers", body: ["Demo — We use service providers to send email (Resend) and process payments."] },
-    { id: "retention", heading: "Data retention", body: ["Demo — Retention periods to be set by Rising Beyond Borders."] },
-    { id: "rights", heading: "Your rights and choices", body: ["Demo — You can ask to see, correct or delete your information."] },
-    { id: "contact", heading: "Privacy questions", body: ["Demo — Contact us at hello@example.org."] },
-  ]),
-  terms: working([
-    { id: "acceptable-use", heading: "Acceptable use", body: ["Demo — Use this website lawfully and do not try to disrupt it."] },
-    { id: "intellectual-property", heading: "Intellectual property", body: ["Demo — Text and images on this site belong to their owners."] },
-    { id: "external-links", heading: "External links", body: ["Demo — We are not responsible for other websites we link to."] },
-    { id: "changes", heading: "Changes to these terms", body: ["Demo — We may update these terms; the date above shows the latest version."] },
-  ]),
-  donation: working([
-    { id: "introduction", heading: "About this policy", body: ["Demo — This policy explains how donations to Rising Beyond Borders are received, used and acknowledged."] },
-    { id: "use-of-donations", heading: "How donations are used", body: ["Demo — How general and appeal donations are applied across the four program areas."] },
-    { id: "appeals", heading: "Appeals and campaigns", body: ["Demo — What happens when an appeal raises more, or less, than it needs."] },
-    { id: "payments", heading: "Payments", body: ["Demo — How payments are processed, and that card and bank details go to the payment provider, not this website."] },
-    { id: "receipts", heading: "Receipts and acknowledgements", body: ["Demo — How and when donors receive confirmation of a gift."] },
-    { id: "refunds", heading: "Refunds", body: ["Demo — How to ask for a refund, and within what period."] },
-    { id: "personal-information", heading: "Your personal information", body: ["Demo — How donor details are handled; see the Privacy Policy."] },
-    { id: "contact", heading: "Questions about giving", body: ["Demo — How to contact Rising Beyond Borders about a donation."] },
-  ]),
-  /* No `cookies` entry on purpose — see the cookies record below. */
-};
-
 const POLICY_RECORDS = [
   {
     id: "privacy",
@@ -201,9 +157,11 @@ const POLICY_RECORDS = [
   },
 ];
 
-/* Each policy that has working text takes it; the rest keep the pending
-   state above. */
-export const POLICIES = POLICY_RECORDS.map((p) => (WORKING_POLICIES[p.id] ? { ...p, ...WORKING_POLICIES[p.id] } : p));
+/* Every policy's text is the CMS's (2026-10-13: Admin → Policies); the
+   published snapshot merges it into these records by id. The id, route
+   and title above stay the site's. Without a snapshot no policy is
+   published, and each page shows its pending line. */
+export const POLICIES = POLICY_RECORDS;
 
 /* What the codebase itself was found to use (Document 13 §6), for RBB and
    counsel — NOT a public statement, and NOT a claim that the site sets no

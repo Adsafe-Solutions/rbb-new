@@ -32,7 +32,6 @@ export {
 export {
   DONATION,
   approvedGivingMethods,
-  approvedDonationFaqs,
   donationState,
   donationActionBlock,
   generalDonation,

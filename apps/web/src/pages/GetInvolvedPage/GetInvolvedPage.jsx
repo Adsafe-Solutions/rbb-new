@@ -79,7 +79,8 @@ export default function GetInvolvedPage() {
 
       <QuestionsPanel index={4} tone="white" {...t.questions} contact={contact} />
 
-      <ClosingCta tone="accent" {...t.closing} />
+      {/* The CMS's closing (2026-10-13: none built in) — drawn once published. */}
+      {t.closing.heading && t.closing.ctas?.primary && <ClosingCta tone="accent" {...t.closing} />}
     </>
   );
 }

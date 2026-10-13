@@ -25,14 +25,11 @@
      "draft" | "pending-review" | "approved" | "archived"
    Only "approved" methods and FAQs render. */
 
-import { ABOUT } from "./about.js";
 import { HOMEPAGE } from "./homepage.js";
 import { SITE } from "./site.js";
 import { transparencyLinks } from "./transparency.js";
-import { PROGRAMS } from "./work.js";
 import { pathCards } from "./getInvolved.js";
 import { policyLink } from "./policies.js";
-import { RBB_PHOTOS } from "./photos.js";
 import { APPEALS_PAGES, appealKind } from "./appeals.js";
 import { PAYMENT_CONNECTED } from "../lib/payment.js";
 
@@ -54,53 +51,13 @@ import { PAYMENT_CONNECTED } from "../lib/payment.js";
    provider's production configuration is verified. */
 const STATUS = "pending";
 
-const MISSION = `Our mission is to ${ABOUT.missionVision.mission.statement.replace(/^E/, "e")}`;
-
 export const DONATION = {
   status: STATUS,
 
   /* The general donation page (/appeals — the Donate page's address
-     forwards there) as DonationExperience reads it: see
-     `generalDonation()` below. PROPOSED copy; no figure, no promise of
-     what a particular amount does. */
-  general: {
-    eyebrow: "Donate",
-    title: "Support Rising Beyond Borders",
-    description:
-      "Your gift supports work that creates opportunity, strengthens communities and builds more sustainable futures — across education, health and wellbeing, livelihoods and community support.",
-    context: {
-      label: "Where your gift goes",
-      body: [
-        "A general gift goes where support is needed most across our four program areas. If you would rather support something specific, you can choose an emergency appeal or a campaign below.",
-      ],
-    },
-    image: RBB_PHOTOS.kids,
-  },
-
-  /* 03 — Why your support matters. SOURCE: the mission and vision, as the
-     annual report states them. No beneficiary figure: none is verified. */
-  whyGive: {
-    id: "why-give",
-    kicker: "Why give",
-    heading: "Why your support matters",
-    body: [MISSION, `Our vision is ${ABOUT.missionVision.vision.statement.replace(/^A/, "a")}`],
-    cta: { label: "About Us", to: "/about#mission-vision" },
-  },
-
-  /* 04 — How your support helps. General AREAS where support can
-     contribute — never "₹X provides Y": no costed claim is approved. */
-  impact: {
-    id: "how-support-helps",
-    kicker: "How support helps",
-    heading: "How your support helps",
-    intro: "Your support can help:",
-    items: [
-      { title: "Expand access to opportunity", description: "Learning, skills and services that open up new options for people and families." },
-      { title: "Strengthen community support", description: "Practical help for households facing a difficult time, delivered with care." },
-      { title: "Support practical, sustainable solutions", description: "Work shaped with communities and designed to keep going after any single project ends." },
-      { title: "Help communities build resilience", description: "Connections, knowledge and resources that help communities meet their own priorities." },
-    ],
-  },
+     forwards there) is the CMS's only (PUBLISHED_GENERAL_DONATION,
+     2026-10-13): its hero, "why", "how support helps", FAQ and lists. What
+     stays here is the donation form's and the page's own wording. */
 
   /* 07 — Closing CTA: back to the form, never a second form. */
   closing: {
@@ -248,31 +205,9 @@ export const DONATION = {
   /* 07 — FAQ. [{ q, a, status }] — questions and answers RBB supplies.
      No refund, receipt, tax, recurring-payment, cancellation or
      processing policy is written here on RBB's behalf. */
-  /* SAMPLE answers (`releaseMarker`, never shown, keeps release:check
-     blocked until RBB approves them). Nothing here
-     promises a receipt, a refund or a tax position — those are the
-     Donation Policy's, once RBB supplies it. No question about a state
-     of the site ("is online giving open?") — public copy never talks
-     about the build. */
-  faqs: [
-    {
-      q: "Can I choose what my donation supports?",
-      a: "Yes. You can give to a specific emergency appeal or campaign from this page, or give where support is needed most — which lets us direct your gift to wherever it can do the most good across our four program areas.",
-    },
-    {
-      q: "How are donations used?",
-      a: "Donations support our work across education, health and wellbeing, livelihoods and community support. Our transparency and financial information shows how our work is run and how resources are used.",
-    },
-    {
-      q: "What if I need to change or ask about a donation?",
-      a: "Please contact us through our Contact page with the details of your gift, and we will help.",
-    },
-    {
-      q: "Can I give on behalf of a business or organisation?",
-      a: "Yes. Organisations can give, and many choose to partner with us in other ways too. Get in touch through our Partner With Us page to talk about what would suit you.",
-    },
-  ].map((faq) => ({ ...faq, status: "approved", releaseMarker: "Sample event — sample FAQ answer" })),
-  faq: {
+  /* The FAQ band's heading (components/DonationExperience); the
+     questions are the published page's own. */
+    faq: {
     id: "faq",
     kicker: "Questions",
     heading: "Frequently asked questions",
@@ -308,7 +243,6 @@ export const DONATION = {
 /* ---------------- Lookups ---------------- */
 const approved = (record) => ["approved", "verified"].includes(record.status);
 export const approvedGivingMethods = () => DONATION.givingMethods.filter(approved);
-export const approvedDonationFaqs = () => DONATION.faqs.filter(approved);
 
 /* The state the page actually shows. A state is honoured only when its
    approved content exists — "approved-live" without a verified URL and
@@ -402,30 +336,15 @@ export const generalDonation = () => {
       why: cms.why ?? null,
       impact: cms.impact ?? null,
       trust: ownTrust(cms.trust, TRUST),
-      ...ownFaq(cms.faq, approvedDonationFaqs()),
+      ...ownFaq(cms.faq, []),
       lists: cms.lists,
       closing: DONATION.closing,
       checkout: cms.checkout ?? null,
     };
-  return sourceGeneralDonation();
+  /* No built-in page (2026-10-13): the build refuses a snapshot without
+     one (scripts/published-snapshot.mjs). */
+  return null;
 };
-
-const sourceGeneralDonation = () => ({
-  type: "general",
-  id: DONATION.donationAction.id,
-  eyebrow: DONATION.general.eyebrow,
-  title: DONATION.general.title,
-  description: DONATION.general.description,
-  image: DONATION.general.image,
-  parent: null,
-  context: DONATION.general.context,
-  donation: { type: "general", designation: "where-needed-most" },
-  why: DONATION.whyGive,
-  impact: DONATION.impact,
-  trust: TRUST,
-  faq: approvedDonationFaqs(),
-  closing: DONATION.closing,
-});
 
 /* An emergency appeal or a campaign (content/appeals.js). Its own story
    is the "why"; its own list of what support funds is the "how". */

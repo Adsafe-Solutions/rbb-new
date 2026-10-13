@@ -31,14 +31,14 @@ test("the API address: https, or http on this machine; never credentials in it",
   assert.ok(!allowedApi("https://user:pass@api.example.org"));
 });
 
-test("the plugin: published snapshots in builds only; a preview in the dev server only, never built", () => {
+test("the plugin: published snapshots in builds and the dev server; a preview in the dev server only, never built", () => {
   const root = mkdtempSync(join(tmpdir(), "rbb-preview-"));
   const before = process.env.RBB_PREVIEW;
   try {
     delete process.env.RBB_PREVIEW;
     const normal = publishedSnapshot({ root });
     assert.equal(normal.apply({}, { command: "build" }), true);
-    assert.equal(normal.apply({}, { command: "serve" }), false, "npm run dev is unchanged");
+    assert.equal(normal.apply({}, { command: "serve" }), true, "npm run dev applies it too (2026-10-13: no built-in content to fall back on)");
     assert.equal(normal.transformIndexHtml, undefined, "no preview marks outside preview mode");
     assert.equal(normal.configureServer, undefined);
 

@@ -7,10 +7,10 @@ export const SITE = {
   /* Every document title ends with this; the homepage is this alone. */
   name: BRAND.fullName,
 
-  /* The meta description for any page that does not set its own. Mirrors
-     the one in index.html, which is what crawlers that do not run
-     JavaScript see. */
-  description: `${BRAND.fullName} is ${BRAND.summary.replace(/^A /, "a ")}`,
+  /* The meta description for any page that does not set its own: the
+     CMS's (Settings → SEO; the published snapshot sets it). index.html
+     carries a copy for crawlers that do not run JavaScript. */
+  description: "",
 
   /* What an unbuilt page says. Neutral on purpose: the content for these
      pages comes from Rising Beyond Borders in later phases, and until it

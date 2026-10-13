@@ -32,20 +32,11 @@ export const publishedDocuments = (docs) =>
   docs.filter((doc) => ["verified", "approved"].includes(doc.status) && doc.fileUrl);
 
 export const TRANSPARENCY = {
-  /* The 2026 Financial Overview, exactly as the supplied annual-report
-     materials give it — three shares and nothing else. PENDING-REVIEW: RBB
-     must verify before final publication, and the page says so. These are
-     NOT presented as audited results, are never converted into amounts,
-     and no conclusion about financial health is drawn from them. */
-  financialOverview: {
-    year: 2026,
-    status: "pending-review",
-    items: [
-      { id: "programs", label: "Programs & Services", percentage: 78, status: "pending-review" },
-      { id: "fundraising", label: "Fundraising", percentage: 12, status: "pending-review" },
-      { id: "administration", label: "Administration", percentage: 10, status: "pending-review" },
-    ],
-  },
+  /* The financial overview, governance and "How we report" are the CMS's
+     only (Admin → Transparency, 2026-10-13); the published snapshot sets
+     them. Empty without one. The document lists below are still the
+     website's own: none is published from the CMS yet. */
+  financialOverview: { year: null, status: "placeholder", items: [] },
 
   /* PLACEHOLDER — no report files supplied. Unlike the page text, a
      document is not something a placeholder can stand in for: a listed
@@ -69,24 +60,16 @@ export const TRANSPARENCY = {
   },
   governanceDocuments: [],
 
-  /* Why transparency matters, and how the page works. PROPOSED wording
-     describing the site's own practice — not a claim about audits,
-     standards or compliance. */
-  accountability: {
-    intro: [
-      "Transparency is how trust is earned. Supporters, partners and the communities we work with should be able to see how the work is run and how resources are used.",
-      "Our aim is to report openly on our finances and our work — including what did not go as planned, as well as what did.",
-    ],
-    status: "pending-review",
-  },
+  accountability: { intro: null, status: "placeholder" },
 };
 
 /* ---------------- Page copy ----------------
    Headings and labels are PROPOSED interface copy. */
 export const TRANSPARENCY_COPY = {
-  kicker: "Transparency",
-  heading: "Transparency & Financials",
-  body: `Financial information, reports and governance for ${BRAND.fullName}.`,
+  /* The chapter's kicker, heading and intro: the CMS's (the snapshot sets them). */
+  kicker: null,
+  heading: "",
+  body: "",
   onThisPage: "On this page",
   overview: {
     id: "financial-overview",

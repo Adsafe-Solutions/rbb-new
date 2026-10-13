@@ -36,6 +36,10 @@ const snapshot = ({ home, about }) => ({
   settings: { id: "site-settings", orgId: "rbb", schemaVersion: 1, status: "published", general: { shortName: "RBB", name: "Rising Beyond Borders", summary: "A summary." }, contact: { methods: [] }, social: [], seo: { description: "A description." }, branding: {}, analytics: {}, engagement: {}, features: {} },
   media: { img: IMG },
   content: {
+    /* One published appeal and one story, so their bands have something
+       to show (2026-10-13: the website has no built-in ones). */
+    appeals: [{ id: "id-a-test-appeal", orgId: "rbb", schemaVersion: 1, status: "published", publishedAt: "2026-10-01T00:00:00.000Z", kind: "emergency", slug: "a-test-appeal", title: "A test appeal", summary: "A test summary.", imageId: "img", sections: [] }],
+    stories: [{ id: "s1", orgId: "rbb", schemaVersion: 1, status: "published", publishedAt: "2026-10-01T00:00:00.000Z", type: "story", slug: "a-test-story", title: "A test story", excerpt: "A test excerpt.", date: "2026-10-01", category: "field", body: [{ type: "paragraph", children: [{ type: "text", text: "A test paragraph." }] }] }],
     ...(home && { homepage: { id: "homepage", orgId: "rbb", schemaVersion: 1, status: "published", sections: home } }),
     ...(about && { about: { id: "about", orgId: "rbb", schemaVersion: 1, status: "published", sections: about } }),
   },
@@ -124,13 +128,3 @@ test("About from the CMS draws the statement's link, the highlights and the valu
   assert.ok(!/Meet the team|A test introduction to the values|class="hl"/.test(p.slice(p.indexOf("Who we are"))), "nothing added without the fields");
 });
 
-test("the source site: / and /about keep every band, the sample timeline, film and FAQ keep their release markers", async (t) => {
-  const site = await siteWith(null);
-  t.after(site.close);
-  const home = site.html("/");
-  for (const id of ["Our progress", "Stories of change", "Frequently asked questions", "Together, we can rise beyond borders."]) assert.ok(text(home).includes(id) || home.includes(id), id);
-  const markers = [...home.matchAll(/data-release-marker="([^"]*)"/g)].map((m) => m[1]);
-  assert.ok(markers.length > 0, "the sample homepage content keeps its markers");
-  const about = text(site.html("/about"));
-  for (const heading of ["Mission", "Vision"]) assert.ok(about.includes(heading), heading);
-});

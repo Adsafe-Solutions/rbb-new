@@ -51,7 +51,7 @@ fails.
 | Variable | Required value | Why |
 | --- | --- | --- |
 | `RBB_SNAPSHOT_URL` | `https://api.risingbeyondborders.org/api/v1/public/snapshot` exactly | The build fetches the published CMS snapshot from the production API, and the browser asks the same endpoint for newer ones |
-| `RBB_SNAPSHOT_REQUIRED` | `1` | The build fails rather than fall back to the source content |
+| `RBB_SNAPSHOT_REQUIRED` | `1` | The build must use the API's snapshot, never the saved copy (`fixtures/published-snapshot.json`) |
 | `RBB_SNAPSHOT_RUNTIME` | `on` | The runtime snapshot (`docs/PUBLISHING.md` "Runtime snapshot"). The build treats unset as on and accepts only `on` or `off`; the deployment demands the explicit `on` |
 | `VITE_SITE_URL` | unset, or `https://prod.risingbeyondborders.org` | Anything else is refused |
 | `VITE_ENVIRONMENT` | unset, or `prod` | |

@@ -64,23 +64,11 @@ export const ORG_CONTACT = {
     status: "placeholder",
   },
 
-  /* Official social accounts. `icon` keys map to the glyphs in
-     components/Footer/SocialIcon.jsx. Each stays empty until RBB supplies
-     its real account URL — never a platform's home page (decision D18). */
-  /* ⚠ TEMPORARY (RBB's call, Oct 2026): the platforms' ROOT addresses,
-     so the footer's icons show while RBB's real account URLs are found.
-     Replace each `url` with the RBB account ("https://www.instagram.com/
-     <handle>"). Until then the release markers flag every one ("platform
-     home page as social link") and release:check stays BLOCKED, so they
-     cannot reach production by accident. X is not used; TikTok takes
-     its place. */
-  social: [
-    { platform: "instagram", icon: "instagram", label: "Instagram", url: "https://www.instagram.com/", status: "verified" },
-    { platform: "facebook", icon: "facebook", label: "Facebook", url: "https://www.facebook.com/", status: "verified" },
-    { platform: "tiktok", icon: "tiktok", label: "TikTok", url: "https://www.tiktok.com/", status: "verified" },
-    { platform: "linkedin", icon: "linkedin", label: "LinkedIn", url: "https://www.linkedin.com/", status: "verified" },
-    { platform: "youtube", icon: "youtube", label: "YouTube", url: "https://www.youtube.com/", status: "verified" },
-  ],
+  /* Official social accounts — the CMS's (Admin → Settings), like the
+     methods, office, hours and response time above: the published
+     snapshot sets them all (2026-10-13). Empty without one. `icon` keys
+     map to the glyphs in components/Footer/SocialIcon.jsx. */
+  social: [],
 
   /* Shown only if RBB supplies them and wants them displayed. */
   hours: { value: null, status: "placeholder" },
@@ -123,24 +111,17 @@ export const officeLines = () => {
    supplies them (decision D19): an invented vacancy or careers inbox is
    something a real applicant would act on. */
 export const CAREERS = {
+  /* The page's address — the site's. Everything else is the CMS's
+     (Admin → Careers page, 2026-10-13): the published snapshot sets it.
+     Empty without one. */
   to: "/about-us/careers",
-  title: "Careers",
-  kicker: "Careers",
-  body: "Opportunities to work with Rising Beyond Borders.",
-  metaDescription: "Careers and opportunities with Rising Beyond Borders.",
-  sections: [
-    { id: "why", heading: "Why work with us", body: ["Working with Rising Beyond Borders means contributing to work in education, health and wellbeing, livelihoods and community support — work that is inclusive by design and shaped by the communities it serves."] },
-    { id: "opportunities", heading: "Open opportunities", empty: "There are no open opportunities at the moment." },
-    { id: "apply", heading: "How to apply", body: ["Each opportunity sets out what the role involves and how to apply."] },
-  ],
+  title: "",
+  kicker: null,
+  body: "",
+  metaDescription: null,
+  sections: [],
   roles: [],
-  closing: {
-    heading: "Explore Rising Beyond Borders.",
-    ctas: {
-      primary: { label: "About Us", to: "/about" },
-      secondary: { label: "Contact", to: "/contact" },
-    },
-  },
+  closing: { heading: "", ctas: {} },
 };
 
 /* ---------------- /contact page copy ----------------

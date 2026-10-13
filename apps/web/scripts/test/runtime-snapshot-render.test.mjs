@@ -91,16 +91,25 @@ test("a page published after the build renders at its address, with the snapshot
 });
 
 test("highlights: storyAppeals() follows APPEAL_STORIES.order when a published strip sets it, and the site's own rule otherwise", () => {
-  const own = site.storyAppeals().map((a) => a.id);
-  assert.ok(own.length > 1, "the source site marks appeals for the strip");
-  const reversed = [...own].reverse();
-  site.APPEAL_STORIES.order = [reversed[0], "not-an-appeal", ...reversed.slice(1)];
+  /* Two appeals marked for the strip, and one not (2026-10-13: the
+     website has no built-in appeals). */
+  const saved = [...site.APPEALS];
+  const appeal = (id, story) => ({ id, kind: "emergency", title: `Appeal ${id}`, summary: "S.", sections: [], ...(story && { story: {} }) });
+  site.APPEALS.splice(0, site.APPEALS.length, appeal("a1", true), appeal("a2", true), appeal("a3", false));
   try {
-    assert.deepEqual(site.storyAppeals().map((a) => a.id), reversed, "the strip's order, its appeals only, never a missing one");
+    const own = site.storyAppeals().map((a) => a.id);
+    assert.deepEqual(own, ["a1", "a2"], "the site's own rule: the marked appeals, in list order");
+    const reversed = [...own].reverse();
+    site.APPEAL_STORIES.order = [reversed[0], "not-an-appeal", "a3", ...reversed.slice(1)];
+    try {
+      assert.deepEqual(site.storyAppeals().map((a) => a.id), reversed, "the strip's order, its appeals only, never a missing one");
+    } finally {
+      site.APPEAL_STORIES.order = null;
+    }
+    assert.deepEqual(site.storyAppeals().map((a) => a.id), own);
   } finally {
-    site.APPEAL_STORIES.order = null;
+    site.APPEALS.splice(0, site.APPEALS.length, ...saved);
   }
-  assert.deepEqual(site.storyAppeals().map((a) => a.id), own);
 });
 
 test("a snapshot a module cannot take is recorded, never thrown — the module still loads, and the boot sees the failure", async () => {
@@ -110,7 +119,7 @@ test("a snapshot a module cannot take is recorded, never thrown — the module s
     snapshotState().overrides = { "src/content/brand.js": { NOT_AN_EXPORT: { a: 1 } }, "src/content/site.js": { SITE: { description: "Still applied" } } };
     const { BRAND } = await another.ssrLoadModule("/src/content/brand.js");
     const { SITE } = await another.ssrLoadModule("/src/content/site.js");
-    assert.equal(BRAND.name, "RBB", "untouched");
+    assert.equal(BRAND.name, "", "untouched: the module's own value (empty — the CMS sets it)");
     assert.equal(SITE.description, "Still applied");
     assert.match(snapshotState().failed.message, /brand\.js no longer declares "export const NOT_AN_EXPORT"/);
     assert.deepEqual(snapshotState().applied, ["src/content/site.js"]);

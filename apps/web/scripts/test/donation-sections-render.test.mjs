@@ -103,11 +103,12 @@ test("/appeals from the CMS: its own why, how, appeal lists, trust panel and que
   assert.ok(!html.includes("sample FAQ answer"), "and its sample answers");
 });
 
-test("/appeals from the CMS without them: the site's own trust panel, questions and appeal bands, as before; switched off: none", async (t) => {
+test("/appeals from the CMS without them: the site's own trust panel and appeal bands, no questions (none built in since 2026-10-13); switched off: none", async (t) => {
   const absent = await siteWith(snapshot({ page: [WHY], appeals: [appeal("first-emergency", "emergency")] }));
   t.after(absent.close);
   const a = main(absent.html("/appeals"));
-  assert.ok(a.includes("Transparency matters.") && a.includes("Frequently asked questions"), "the site's own");
+  assert.ok(a.includes("Transparency matters."), "the site's own trust panel");
+  assert.ok(!a.includes("Frequently asked questions"), "no built-in questions: the FAQ is the published page's own");
   assert.match(a, /<h2[^>]*>Emergency Response<\/h2>[\s\S]*<h2[^>]*>Campaigns<\/h2>/, "the built-in appeal bands");
   const off = await siteWith(snapshot({ page: [WHY, { ...TRUST, enabled: false }, { ...FAQ, enabled: false }, { ...LISTS[0], enabled: false }], appeals: [appeal("first-emergency", "emergency")] }));
   t.after(off.close);
@@ -138,17 +139,6 @@ test("an appeal from the CMS: its own why heading, kicker and link; its own sect
   assert.ok(p.includes("The situation") && p.includes("Transparency matters."), "its own heading; the site's trust panel without its own");
   assert.ok(!p.includes("Frequently asked questions"), "no questions without its own, as before");
   assert.match(text(band(p, "Other appeals") ?? ""), /Appeal another-emergency/, "the page's own band without lists");
-});
-
-test("the source site: appeal pages keep the page's wording and markers; /appeals its own bands, trust panel and sample questions", async (t) => {
-  const site = await siteWith(null);
-  t.after(site.close);
-  const page = main(site.html("/appeals/emergency/emergency-appeal-01"));
-  assert.ok(page.includes("Why this response matters"), "the page's heading for a source appeal, as before");
-  assert.ok(!page.includes(">The situation<"), "the record's heading was never shown");
-  assert.match(page, /data-release-marker=/);
-  const hub = main(site.html("/appeals"));
-  assert.ok(hub.includes("Transparency matters.") && hub.includes("Frequently asked questions") && band(hub, ">Campaigns<"));
 });
 
 test("Milestone 3 still holds: an appeal's SEO description and noIndex; appeal pages are never indexed", async (t) => {

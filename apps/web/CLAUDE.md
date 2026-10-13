@@ -87,17 +87,25 @@ one build. `npm run dev` and `npm run build` show the same complete site.
 There is no staging content mode, no `src/content/demo/`, no
 `VITE_CONTENT_MODE`, no `build:staging`.
 
-Much of that content is SAMPLE content while RBB's own words are written:
-team profiles, stories, projects, the homepage timeline and film, Media
-Center items, appeals, stock photographs. Sections stay populated, but
+**The CMS is the only source of what it publishes (2026-10-13).** The
+content files keep NO built-in copy of the brand, contact details,
+careers, news, blogs, events, appeals, the donation page, homepage,
+About, Impact page and figures, team, programs, projects, stories,
+transparency, policies, Get Involved, the announcement bar, the popup or
+Highlights: those exports are empty (`[]`, `""`, `null`) and the
+published snapshot fills them. Never add built-in content back for any
+of them — it would be dead in production and drift from the CMS. Every
+build applies a snapshot: production the API's; local builds, tests and
+`npm run dev` the saved copy `fixtures/published-snapshot.json`
+(docs/PUBLISHING.md "No built-in content"). What the files still hold
+is what the CMS does not publish: navigation, footer columns, page
+frames and interface wording, photographs, SEO structure, the built-in
+forms, How We Work, Our Approach, Where We Work and the transparency
+document lists.
+
 VISIBLE text never labels itself as demo (client decision, 2026-10-06) —
-no "Demo text —", "(demo)", "Sample profile". Write samples as natural
-NGO copy with no real people, places or figures. Each sample record
-carries an internal `releaseMarker` (rendered only as a hidden
-`data-release-marker`), so the release stays blocked until RBB replaces
-it; see `docs/WORKING_CONTENT.md`. A few things never get a sample:
-impact figures, financial percentages and any DOCUMENT. Those stay empty
-or `pending-review` until RBB supplies them.
+no "Demo text —", "(demo)", "Sample profile". A few things never get a
+sample: impact figures, financial percentages and any DOCUMENT.
 
 What the build enforces splits in two (`scripts/production-gate.mjs`):
 
@@ -124,7 +132,9 @@ the `rbb-published-snapshot` Vite plugin sets the mapped exports in
 `brand.js`, `site.js` and `contact.js`. This happens in the client and
 server builds alike, so the HTML and the hydrated page agree. The mapping
 and its reasons are in `scripts/snapshot-adapter.mjs`. Without the URL,
-nothing changes: the source content is the site, byte for byte.
+the saved copy `fixtures/published-snapshot.json` is applied instead (a
+local or test build, never deployed); the build refuses a snapshot
+without the homepage, About, Impact and donation pages.
 
 **The runtime snapshot** (`docs/PUBLISHING.md` "Runtime snapshot"): a
 build with the URL also asks the API for the latest published snapshot
@@ -159,9 +169,9 @@ DonationForm.
 
 A snapshot's published homepage fills `PUBLISHED_HOMEPAGE`
 (`homepage.js`). `pages/Home` then draws its blocks through
-`pages/Home/CmsHome.jsx`: an explicit type → component table, reusing the
-source homepage's components. A build without one draws the source
-homepage, unchanged. The About page works the same way
+`pages/Home/CmsHome.jsx`: an explicit type → component table. There is
+no built-in homepage (2026-10-13). The About and Impact pages work the
+same way
 (`PUBLISHED_ABOUT`, `pages/About/CmsAbout.jsx`, one shared tone rule in
 `lib/bandTones.js`). The snapshot's team replaces `TEAM_MEMBERS` in its
 source shape, with media-library photographs (`imageId`). Its published
@@ -178,21 +188,10 @@ page. A published Impact page fills `PUBLISHED_IMPACT`
 
 Published projects replace `PROJECT_RECORDS` and `PROJECTS` (`work.js`),
 and published stories replace `STORIES` (`stories.js`), each in its source
-shape. `STORY_SOURCE.cms` says which stories are the site's (M15): once the
-CMS's are, they are the ONLY stories — never resolve a reference made
-against the website's own stories (the source Impact page's
-`IMPACT.stories` slugs) against CMS stories, or the other way round. The
-source Impact page then shows its empty stories state, and the build warns;
-a CMS Impact page names CMS stories by id, and a story it names that the
-site does not show fails the build. `PROJECT_SOURCE.cms` does the same for
-projects (M31.1): `false` by default, set by the build when the snapshot
-carries published projects. While the projects are the CMS's but the
-stories are still the website's own, a source story naming a source
-project is a build WARNING, not an error, and its page shows no project
-link (`lib/storyProjects.js`). A CMS story's missing project still fails
-— the snapshot contract and `validate.js` both check it. The warning
-approves nothing: sample stories keep their `releaseMarker` and still
-block release readiness. A CMS story's `body` is structured rich text: render it through
+shape (`STORY_SOURCE.cms` / `PROJECT_SOURCE.cms` say so, M15/M31.1). A CMS
+Impact page names CMS stories by id, and a story it names that the site
+does not show fails the build; so does a CMS story's missing project —
+the snapshot contract and `validate.js` both check it. A CMS story's `body` is structured rich text: render it through
 `components/RichText`'s `RichBlock`, never as HTML. Media-library images
 carry a `mediaId`; the validator and `publicImages` treat them as served
 by the library, not the build.
@@ -223,9 +222,8 @@ never post a file anywhere else.
 Published policies (M19: privacy, terms, donation) are merged BY ID into
 their records in `POLICIES` (`policies.js`), so the policy page, footer,
 forms' privacy link, donation form and SEO follow. The id and route stay
-the site's. A policy the snapshot does not carry keeps its source record.
-`policies.js` itself is untouched, so a build without a published policy
-is byte-identical. Never write policy text or dates on RBB's behalf, and
+the site's. A policy the snapshot does not carry stays unpublished (its
+pending line). Never write policy text or dates on RBB's behalf, and
 never treat a published policy as satisfying the `policies` release
 approval.
 

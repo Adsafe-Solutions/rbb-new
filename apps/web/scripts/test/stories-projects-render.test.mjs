@@ -2,14 +2,16 @@ import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
+import { applySnapshot } from "./support/saved-snapshot.mjs";
 
 /* M48: the project and story pages, and the /stories hub's empty and
    featured-only states, rendered through Vite's SSR loader as the
-   prerender renders them. The source site — no published snapshot — with
-   its sample records, which must keep their hidden release markers. */
+   prerender renders them — with the saved copy of the live snapshot
+   (fixtures/published-snapshot.json) applied, as a build applies it:
+   since 2026-10-13 the website has no built-in projects or stories. */
 
 const root = fileURLToPath(new URL("../..", import.meta.url));
-let vite, site, render, isWorkingContent;
+let vite, site, render;
 
 before(async () => {
   const noSnapshot = { name: "test-no-snapshot", resolveId: (id) => (id === "virtual:rbb-published-snapshot" ? "\0test-no-snapshot" : null), load: (id) => (id === "\0test-no-snapshot" ? "export default null;" : null) };
@@ -21,9 +23,10 @@ before(async () => {
      race for its port.) */
   process.env.RBB_SNAPSHOT = "off";
   vite = await createServer({ root, logLevel: "error", appType: "custom", server: { middlewareMode: true, hmr: false, ws: false }, plugins: [noSnapshot] });
+  /* The saved live snapshot, applied as the build applies it. */
+  await applySnapshot(vite);
   site = await vite.ssrLoadModule("/src/content/index.js");
   ({ render } = await vite.ssrLoadModule("/src/entry-server.jsx"));
-  ({ isWorkingContent } = await vite.ssrLoadModule("/src/lib/releaseMarkers.js"));
 });
 after(async () => {
   await vite?.close();
@@ -52,7 +55,7 @@ async function withStories(stories, fn) {
   }
 }
 
-test("every project page renders its project: title, program, description, release marker, never indexed while it is a sample", () => {
+test("every project page renders its project: title, program, description", () => {
   assert.ok(site.PROJECTS.length > 0, "there are projects to render");
   for (const project of site.PROJECTS) {
     const route = site.projectPath(project);
@@ -64,10 +67,6 @@ test("every project page renders its project: title, program, description, relea
     assert.ok(program, `${route}: its program exists`);
     assert.ok(html.includes(`href="${program.to}"`), `${route}: links to its program`);
     assert.ok(meta.title.includes(project.title), `${route}: its title`);
-    if (isWorkingContent(project)) {
-      assert.match(html, /data-release-marker=/, `${route}: a sample keeps its hidden release marker`);
-      assert.match(meta.robots, /^noindex/, `${route}: a sample is never indexed`);
-    }
     assert.equal(h1(render(`${route}/`).html), project.title, `${route}/: the same page`);
   }
 });
@@ -88,10 +87,6 @@ test("every story page renders its story: title, type, body, links to its progra
     for (const related of (story.relatedStoryIds ?? []).map(site.storyBySlug).filter(Boolean))
       assert.ok(html.includes(`href="${site.storyPath(related)}"`), `${route}: links to related story ${related.slug}`);
     assert.ok(meta.title.includes(story.title), `${route}: its title`);
-    if (isWorkingContent(story)) {
-      assert.match(html, /data-release-marker=/, `${route}: a sample keeps its hidden release marker`);
-      assert.match(meta.robots, /^noindex/, `${route}: a sample is never indexed`);
-    }
     assert.equal(h1(render(`${route}/`).html), story.title, `${route}/: the same page`);
   }
 });
@@ -107,19 +102,22 @@ test("an unknown or unapproved project or story address is the 404 page, never i
   if (unapproved) assert.equal(h1(render(site.storyPath(unapproved)).html), missing, "an unapproved story has no page");
 });
 
-test("/stories with its stories: the featured story leads and the list holds the others", () => {
-  const featured = site.featuredStory();
-  assert.ok(featured, "the source stories have a featured story");
-  const { html } = render("/stories");
-  assert.doesNotMatch(html, ERROR_BOUNDARY);
-  const list = text(band(html, "all-stories"));
-  assert.ok(!list.includes(featured.title), "the featured story is not listed again");
-  for (const story of site.published().filter((s) => s !== featured)) assert.ok(list.includes(story.title), `lists ${story.slug}`);
-  assert.ok(!list.includes(site.STORIES_PAGES.hub.browse.empty), "no empty panel");
+test("/stories with its stories: the featured story leads and the list holds the others", async () => {
+  const [first, ...rest] = site.published();
+  assert.ok(first && rest.length, "there are stories to list");
+  const featured = { ...first, featured: true };
+  await withStories([featured, ...rest], () => {
+    const { html } = render("/stories");
+    assert.doesNotMatch(html, ERROR_BOUNDARY);
+    const list = text(band(html, "all-stories"));
+    assert.ok(!list.includes(featured.title), "the featured story is not listed again");
+    for (const story of rest) assert.ok(list.includes(story.title), `lists ${story.slug}`);
+    assert.ok(!list.includes(site.STORIES_PAGES.hub.browse.empty), "no empty panel");
+  });
 });
 
 test("/stories with only a featured story: it leads, and the list shows it instead of saying stories are to come", async () => {
-  const only = { ...site.featuredStory(), featured: true };
+  const only = { ...site.published()[0], featured: true };
   await withStories([only], () => {
     const { html } = render("/stories");
     assert.doesNotMatch(html, ERROR_BOUNDARY);

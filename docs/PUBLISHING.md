@@ -21,6 +21,41 @@ without a rebuild — see "Runtime snapshot" below. MongoDB or the API
 being down never takes the site down: the browser keeps the build's own
 snapshot.
 
+## No built-in content (2026-10-13)
+
+The website keeps **no built-in copy** of anything the CMS publishes: the
+brand, site description, contact details, social accounts, careers,
+news, blogs, events, appeals, the donation page, homepage, About, Impact
+page and figures, team, programs, projects, stories, transparency
+(financial overview, governance, "How we report"), policies, Get
+Involved, the announcement bar, the popup and Highlights. Each was
+removed from `apps/web/src/content/` only after a build from the live
+snapshot (v53) with it removed gave the same HTML on all 66 pages.
+
+What the website still holds itself: the navigation, footer columns,
+page frames and interface wording, photographs, SEO structure, the
+built-in forms, How We Work, Our Approach's intro and principles, Where
+We Work's geography and the transparency document lists (none of those
+is published from the CMS yet).
+
+So every build applies a snapshot:
+- **Production** (`RBB_SNAPSHOT_URL` + `RBB_SNAPSHOT_REQUIRED=1`): the
+  API's. Nothing published, an unreachable API or bad data fails the
+  build; so does a snapshot without the homepage, About, Impact or
+  donation page published (`REQUIRED_PAGES`).
+- **Local and test builds, and `pnpm web:dev`** (no URL): the saved copy
+  `apps/web/fixtures/published-snapshot.json` (status `mode: "fixture"`,
+  which the deploy refuses). Refresh it from the public endpoint when the
+  live content changes.
+- `RBB_SNAPSHOT=off`: no snapshot — the CMS's sections are empty (tests
+  that apply their own snapshots).
+
+The tools that converted the built-in content into CMS records — the
+migration rehearsal (`scripts/migration*`), `export:settings`, and the
+contract importers for it — were removed with it. The build checks the
+applied snapshot against the contract (`publishedSnapshotInfo`) and the
+website's own remaining records (`src/contract/conformance.js`).
+
 ## Site settings
 
 - **Contract:** `SiteSettings` in `packages/content-schema`, the M1
@@ -56,13 +91,11 @@ snapshot.
 - **Audit:** `settings.updated` records the changed field *paths* only (for
   example `contact.methods`), never values. `settings.imported` is recorded
   once.
-- **First record:** RBB's real current values, not invented ones:
-  ```sh
-  pnpm --filter @rbb/web run export:settings        # the website's settings → apps/web/build-meta/site-settings.json
-  pnpm api:build && pnpm api:settings:import -- --file apps/web/build-meta/site-settings.json   # production: add --production=risingbeyondborders
-  ```
-  The import creates the record only if none exists. It never overwrites,
-  and nothing is published by it.
+- **First record:** imported once from the website's values (done; the
+  website's `export:settings` was retired with its built-in content on
+  2026-10-13). `pnpm api:settings:import -- --file <settings.json>` still
+  creates a record only if none exists — it never overwrites, and
+  nothing is published by it.
 
 ## Publishing
 
@@ -124,10 +157,10 @@ scheduled for later (M15, below). There is no preview environment.
 
 | Variable (build environment) | Effect |
 |---|---|
-| `RBB_SNAPSHOT_URL` | The public snapshot endpoint (https; http only for localhost). **Unset: the site builds from its source content, byte-identical to before M5** |
-| `RBB_SNAPSHOT_REQUIRED=1` | Fail the build if the snapshot can't be fetched (use once the CMS is the source of truth) |
+| `RBB_SNAPSHOT_URL` | The public snapshot endpoint (https; http only for localhost). **Unset: the saved copy, `fixtures/published-snapshot.json`** (local and test builds; never deployed). Set: the API's, or the build fails |
+| `RBB_SNAPSHOT_REQUIRED=1` | `RBB_SNAPSHOT_URL` must be set — production never uses the saved copy |
 | `RBB_SNAPSHOT_VERSION` | Fail if the snapshot is older than this (from the deploy hook) |
-| `RBB_SNAPSHOT=off` | Ignore the snapshot entirely |
+| `RBB_SNAPSHOT=off` | No snapshot: the CMS's sections are empty (tests) |
 
 ## Runtime snapshot
 
@@ -1541,9 +1574,8 @@ Never content wording or secrets.
 **Public site.** It is unaware of scheduling: no runtime calls and no
 route changes. A scheduled revision is not in any snapshot, so it is not
 built, prerendered or indexed before its publication; after it, it follows
-the published snapshot like anything else. Before the first CMS
-publication, and while a CMS revision is only scheduled, the source content
-stays the source.
+the published snapshot like anything else. While a CMS revision is only
+scheduled, the published version stays live.
 
 **Proof.** Run against a local MongoDB, in real time, with the scheduler
 run through its CLI:

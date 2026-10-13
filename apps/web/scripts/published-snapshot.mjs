@@ -46,7 +46,7 @@ const fail = (message) => {
 
 /* The pages the website has no built-in copy of, and would draw blank
    without (2026-10-13): a snapshot must carry each, published. */
-export const REQUIRED_PAGES = { homepage: "the homepage", about: "the About page", impact: "the Impact page", generalDonation: "the donation page" };
+export const REQUIRED_PAGES = { homepage: "the homepage", about: "the About page", howWeWork: "the How We Work page", impact: "the Impact page", generalDonation: "the donation page" };
 const missingPages = (snapshot) =>
   Object.entries(REQUIRED_PAGES)
     .filter(([key]) => snapshot.content?.[key]?.status !== "published")

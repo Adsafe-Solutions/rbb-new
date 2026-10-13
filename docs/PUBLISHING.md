@@ -25,8 +25,9 @@ snapshot.
 
 The website keeps **no built-in copy** of anything the CMS publishes: the
 brand, site description, contact details, social accounts, careers,
-news, blogs, events, appeals, the donation page, homepage, About, Impact
-page and figures, team, programs, projects, stories, transparency
+news, blogs, events, appeals, the donation page, homepage, About, How We
+Work (kicker, heading, intro, rows, "In practice"), Impact page and
+figures, team, programs, projects, stories, transparency
 (financial overview, governance, "How we report"), policies, Get
 Involved, the announcement bar, the popup and Highlights. Each was
 removed from `apps/web/src/content/` only after a build from the live
@@ -34,15 +35,16 @@ snapshot (v53) with it removed gave the same HTML on all 66 pages.
 
 What the website still holds itself: the navigation, footer columns,
 page frames and interface wording, photographs, SEO structure, the
-built-in forms, How We Work, Our Approach's intro and principles, Where
+built-in forms, How We Work's related cards and closing ask, Our
+Approach's intro and principles, Where
 We Work's geography and the transparency document lists (none of those
 is published from the CMS yet).
 
 So every build applies a snapshot:
 - **Production** (`RBB_SNAPSHOT_URL` + `RBB_SNAPSHOT_REQUIRED=1`): the
   API's. Nothing published, an unreachable API or bad data fails the
-  build; so does a snapshot without the homepage, About, Impact or
-  donation page published (`REQUIRED_PAGES`).
+  build; so does a snapshot without the homepage, About, How We Work,
+  Impact or donation page published (`REQUIRED_PAGES`).
 - **Local and test builds, and `pnpm web:dev`** (no URL): the saved copy
   `apps/web/fixtures/published-snapshot.json` (status `mode: "fixture"`,
   which the deploy refuses). Refresh it from the public endpoint when the

@@ -578,13 +578,16 @@ the API.
   now draw only the CMS page), Impact figures, team, programs, projects,
   stories, transparency overview/governance/accountability, the working
   policy text, Get Involved texts, the announcement bar's messages and the
-  popup's content. The mission/vision other pages quote now comes from the
+  popup's content; and (same day, once live v55 published it) How We
+  Work's kicker, heading, intro, rows and "In practice" block. The mission/vision other pages quote now comes from the
   published About page.
 - **Kept (not published from the CMS):** navigation, footer, page frames
   and interface wording, photographs, SEO structure, built-in forms, How
-  We Work, Our Approach, Where We Work, transparency document lists.
+  We Work's related cards and closing ask, Our Approach, Where We Work,
+  transparency document lists.
 - **Builds:** production needs the API's snapshot (no fallback; a snapshot
-  without the homepage, About, Impact or donation page fails the build).
+  without the homepage, About, How We Work, Impact or donation page fails
+  the build). The saved copy is live v55.
   Local builds, tests and `pnpm web:dev` use the saved copy
   `apps/web/fixtures/published-snapshot.json` (the dev server now applies
   a snapshot too). The deploy refuses a build made from the saved copy.

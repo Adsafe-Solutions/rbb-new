@@ -1,7 +1,7 @@
 {
-  "version": 53,
+  "version": 55,
   "schemaVersion": 1,
-  "generatedAt": "2026-10-13T12:13:14.279Z",
+  "generatedAt": "2026-10-13T13:41:22.412Z",
   "organization": {
     "id": "rbb"
   },
@@ -12,7 +12,7 @@
     "status": "published",
     "createdAt": "2026-10-10T08:03:49.587Z",
     "updatedAt": "2026-10-13T09:01:16.143Z",
-    "publishedAt": "2026-10-13T12:12:53.775Z",
+    "publishedAt": "2026-10-13T13:41:22.412Z",
     "general": {
       "shortName": "RBB",
       "name": "Rising Beyond Borders",
@@ -411,7 +411,6 @@
         "summary": "When a crisis strikes, families need essentials quickly. This appeal funds an immediate response — and support as they recover.",
         "imageId": "b99769de-c99a-4024-9319-370557742166",
         "highlight": {
-          "label": "Emergency Relie",
           "imageId": "38db8dd1-5f34-4bc4-93f6-e04dccddc5a3"
         },
         "sections": [
@@ -514,7 +513,6 @@
         "summary": "A campaign to widen access to learning, so more children can read, learn and keep learning.",
         "imageId": "dcd49ee2-c349-42d8-b662-b83c7cac14b2",
         "highlight": {
-          "label": "Education for All",
           "imageId": "38db8dd1-5f34-4bc4-93f6-e04dccddc5a3"
         },
         "sections": [
@@ -1944,6 +1942,70 @@
       "seo": {
         "description": "Careers and opportunities with Rising Beyond Borders."
       }
+    },
+    "howWeWork": {
+      "id": "how_we_work",
+      "orgId": "rbb",
+      "schemaVersion": 1,
+      "status": "published",
+      "publishedAt": "2026-10-13T13:37:59.090Z",
+      "kicker": "How we work",
+      "heading": "How we work with communities, partners and supporters",
+      "body": "How we work with communities, partners and supporters — from the first conversation to learning from what changed.",
+      "practices": {
+        "kicker": "In practice ",
+        "heading": "What working with us looks like.",
+        "items": [
+          {
+            "title": "Listening first",
+            "description": "Work starts from the priorities communities name for themselves.",
+            "icon": "community"
+          },
+          {
+            "title": "Working together",
+            "description": "We collaborate with communities, supporters and organisations who share our aims.",
+            "icon": "community"
+          },
+          {
+            "title": "Dignity and choice",
+            "description": "Support is offered with respect, and people keep control over decisions that affect them.",
+            "icon": "community"
+          },
+          {
+            "title": "Building for the long term",
+            "description": "We favour solutions that communities can carry forward after any single project ends.",
+            "icon": "community"
+          }
+        ]
+      },
+      "rows": [
+        {
+          "id": "where-the-work-starts",
+          "heading": "Where the work starts",
+          "body": "The people closest to a challenge usually understand it best. Our work is shaped with the communities it is meant to serve, and designed to keep going after any single project ends."
+        },
+        {
+          "id": "connecting-people-with-opportunity",
+          "heading": "Connecting people with opportunity",
+          "body": "Much of what we do is connection: helping people reach the resources, skills and services that open up new options, across education, health and wellbeing, livelihoods and community support.\n\n"
+        },
+        {
+          "id": "learning-from-what-changes",
+          "heading": "Learning from what changes",
+          "body": "Counting activities is not the same as knowing what changed, so we aim to look at four things:",
+          "items": [
+            "What changed for people, in their own words as well as in numbers",
+            "What did not work, reported as plainly as what did",
+            "What we learned, and how it shapes the next piece of work",
+            "Clear aims, agreed with the people involved before work begins"
+          ]
+        },
+        {
+          "id": "being-open-about-it",
+          "heading": "Being open about it",
+          "body": "Supporters should always be able to see how our work is run and how resources are used. Our transparency and financial information is gathered in one place on the About page."
+        }
+      ]
     },
     "forms": [
       {

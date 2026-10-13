@@ -98,7 +98,7 @@ const fetchStep = (env) =>
 const status = () => JSON.parse(readFileSync(STATUS_FILE, "utf8"));
 
 /* The pages a snapshot must carry (2026-10-13: no built-in copies). */
-const PAGES = ["homepage", "about", "impact", "generalDonation"];
+const PAGES = ["homepage", "about", "howWeWork", "impact", "generalDonation"];
 const withPages = (s) => ({ ...s, content: { ...s.content, ...Object.fromEntries(PAGES.map((k) => [k, { id: k, status: "published" }])) } });
 
 test("fetch step: not configured → the saved copy of the live snapshot; RBB_SNAPSHOT=off → none; a stale file never survives", async () => {

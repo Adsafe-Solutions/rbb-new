@@ -90,7 +90,7 @@ There is no staging content mode, no `src/content/demo/`, no
 **The CMS is the only source of what it publishes (2026-10-13).** The
 content files keep NO built-in copy of the brand, contact details,
 careers, news, blogs, events, appeals, the donation page, homepage,
-About, Impact page and figures, team, programs, projects, stories,
+About, How We Work, Impact page and figures, team, programs, projects, stories,
 transparency, policies, Get Involved, the announcement bar, the popup or
 Highlights: those exports are empty (`[]`, `""`, `null`) and the
 published snapshot fills them. Never add built-in content back for any
@@ -100,8 +100,7 @@ build applies a snapshot: production the API's; local builds, tests and
 (docs/PUBLISHING.md "No built-in content"). What the files still hold
 is what the CMS does not publish: navigation, footer columns, page
 frames and interface wording, photographs, SEO structure, the built-in
-forms, How We Work, Our Approach, Where We Work and the transparency
-document lists.
+forms, Our Approach, Where We Work and the transparency document lists.
 
 VISIBLE text never labels itself as demo (client decision, 2026-10-06) —
 no "Demo text —", "(demo)", "Sample profile". A few things never get a
@@ -134,7 +133,7 @@ server builds alike, so the HTML and the hydrated page agree. The mapping
 and its reasons are in `scripts/snapshot-adapter.mjs`. Without the URL,
 the saved copy `fixtures/published-snapshot.json` is applied instead (a
 local or test build, never deployed); the build refuses a snapshot
-without the homepage, About, Impact and donation pages.
+without the homepage, About, How We Work, Impact and donation pages.
 
 **The runtime snapshot** (`docs/PUBLISHING.md` "Runtime snapshot"): a
 build with the URL also asks the API for the latest published snapshot

@@ -48,7 +48,7 @@ when the live content changes.
 
 What stays in `src/content/` is what the CMS does not manage: navigation,
 footer columns, page frames and interface wording, photographs, SEO
-structure, the built-in forms, How We Work, Our Approach and Where We Work.
+structure, the built-in forms, Our Approach and Where We Work.
 
 ## Rules
 

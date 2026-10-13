@@ -8,11 +8,11 @@ import StepCard from "../StepCard/StepCard.jsx";
 /* How the work is done — a band of Sky Blue with the statement set at
    billboard size, the line that expands on it, and the way on.
 
-   `steps` render as numbered StepCards ONLY when they are given, and the
-   content layer gives them only once RBB has approved the framework
-   (content/impact.js `approachSteps`). Until then this is the statement,
-   the line and the link — Listen → Partner → Act → Sustain is never
-   presented as RBB's method because a layout had room for it.
+   `steps` render as numbered StepCards ONLY when they are given. The
+   content layer gives none: the Listen → Partner → Act → Sustain
+   framework was REJECTED by RBB (D11, 2026-10-13), so this is the
+   statement, the line and the link — never a method because a layout had
+   room for it.
 
    Sky Blue, so everything on it is Night (the `accent` tone): Deep Trust
    Blue type on this blue is 3.89:1, and the tone makes that impossible to

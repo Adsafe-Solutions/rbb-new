@@ -86,8 +86,9 @@ approval in `release/approvals.mjs`, then run `npm run release:check`.
 | Who we are, paragraph 1 | `/about#who-we-are`, `/` | `about.js` → `whoWeAre.body[0]` | Annual-report description | Confirm | D8 | coreIdentity | RBB APPROVAL REQUIRED |
 | Who we are, paragraphs 2–3 | `/about#who-we-are` | `about.js` → `whoWeAre.body[1–2]` | Proposed wording, no history, place, figure or person | Confirm or rewrite | D8 | coreIdentity | RBB APPROVAL REQUIRED |
 | Values (title + description each) | `/about#values` | `about.js` → `values.items` | 6 proposed values ("What guides our work") | Confirm or replace with RBB's values | D10 | coreIdentity | RBB APPROVAL REQUIRED |
-| How we work | `/about#how-we-work`, `/about/how-we-work`, `/impact/our-approach` | `about.js` → `approach.intro`, `HOW_WE_WORK`; `impact.js` → `approach.intro`, `approach.principles` | Proposed wording, rewritten 2026-10-06 from wording approved elsewhere | Approve or reword | D11 | programs | RBB APPROVAL REQUIRED |
-| Listen → Partner → Act → Sustain | hidden | `impact.js` → `approach.proposedFramework` (also `about.js` → `approach.steps`) | `pending-review`, not shown | Approve or reject as official framework | D11 | programs | RBB APPROVAL REQUIRED |
+| Our Approach | `/impact/our-approach` | `impact.js` → `approach.intro`, `approach.principles`; the mission. Admin: Impact page → "Our Approach page" block | **Decided (D11, 2026-10-13): reuse this existing approved content** | — | D11 | programs | RESOLVED |
+| How we work | `/about#how-we-work`, `/about/how-we-work` | `about.js` → `approach.intro`, `HOW_WE_WORK`. Admin: How We Work page (`/how-we-work`) | Proposed wording, rewritten 2026-10-06 from wording approved elsewhere; placeholder until RBB's wording | Supply the approved wording | D11 | programs | RBB APPROVAL REQUIRED |
+| Listen → Partner → Act → Sustain | — | removed | **Rejected by RBB (D11, 2026-10-13)**; must not be introduced | — | D11 | programs | RESOLVED |
 | Team members | `/about/team`, `/about/team/<slug>` | `team.js` → `TEAM_MEMBERS[]` (`name`, `role`, `shortBio`, `biography`, `image`, `imageAlt`, `category`, `featured`) | 6 sample profiles (a role as the name, stock portraits), each with a profile page | Real people, with consent for name, photo and bio | D16 | team | RBB INPUT REQUIRED |
 | Team governance line | `/about/team` | `team.js` → `TEAM_GOVERNANCE` | Pending | Statement, or none | D16 | team | RBB INPUT REQUIRED |
 
@@ -104,7 +105,7 @@ approval in `release/approvals.mjs`, then run `npm run release:check`.
 | 25 countries reached | `/`, `/impact` | `impact.js` → `metrics[id=countries]` | as above | Verify, or withdraw | D2 | impact | RBB APPROVAL REQUIRED |
 | 200+ partners & donors | `/`, `/impact` | `impact.js` → `metrics[id=partners]` | as above | Verify, or withdraw | D3 | impact | RBB APPROVAL REQUIRED |
 | "120+" | — | not in the content | Excluded | Keep off the site unless RBB defines it | D4 | impact | NOT APPLICABLE |
-| Countries and regions | `/impact/where-we-work` | `impact.js` → `geography` (`summary`, `regions`, `countries`, `status`) | **Empty**; not shown | Approved list | D14 | geography | RBB INPUT REQUIRED |
+| Countries and regions | `/impact/where-we-work` | Admin: Impact page → "Where We Work page" block — countries chosen from the full ISO 3166-1 list (`impact.js` → `geography` stays empty) | **Empty**; not shown, `noindex`. No map (D14) | Select the verified countries | D14 | geography | RBB INPUT REQUIRED |
 | Stories | `/stories`, `/stories/<slug>`, `/`, `/impact` | `stories.js` → `STORIES[]` (`title`, `category`, `date`, `author`, `location`, `programId`, `projectId`, `excerpt`, `body`, `quotes`, `image`, `media`, `relatedStoryIds`, `featured`, `status`); `impact.js` → `stories` | 8 sample stories | Real stories; consent for people, quotes, photos | D15 | stories | RBB INPUT REQUIRED |
 
 ### Transparency and financials (`/about#transparency`)
@@ -296,8 +297,8 @@ leaves the site, but **only on RBB's instruction**.
 | "120+" (conflicting figure in the annual report) | **Excluded** | Must not be used unless RBB defines what it counts | — | impact | E |
 | Program impact summaries (`/impact`) | 4 proposed "working towards…" lines | Approved summaries, or none | — | programs | C |
 | Evidence & measurement | Proposed aims, not a system in use | RBB's actual approach to measurement, or none | — | programs | C |
-| `/impact/where-we-work` | No geography shown; page is `noindex` | Approved list of countries and regions actually served. **No map until then.** | Optional | geography | D |
-| `/impact/our-approach` | Mission quoted (A); proposed approach intro and principles | Approved approach and principles | — | programs | C |
+| `/impact/where-we-work` | No geography shown; page is `noindex` | Select the countries actually served in the Admin. **No map (D14).** | Optional | geography | D |
+| `/impact/our-approach` | Mission quoted (A); the existing intro and principles | **Decided (D11): reuse the existing approved content** | — | programs | — |
 | Financial overview **78% / 12% / 10%** (2026) | Shown with "Pending verification" on every share | Verify against approved accounts, or withdraw. No amounts are shown | — | financials | C |
 | Annual reports | None listed; "to be provided" | Approved report files (PDF), title, year | — | financials | D |
 | Financial information documents | None listed | Approved files, or none | — | financials | D |
@@ -418,7 +419,7 @@ showing placeholder content. What is **not yet possible**:
 | 4 program page descriptions | Annual-report one-liners | Confirm | A |
 | 8 story, 10 project and 6 team page titles and descriptions | Sample records; `noindex`, neutral preview description | Replaced with the real records | B |
 | Privacy and Terms descriptions | Neutral preview description; pages show the pending line | Final policies | B |
-| Legacy pages `/giving`, `/giving/zakat`, `/gifts`, `/giving/major-giving` | `noindex`; titles inherited ("Zakat & Sadaqah", "Charity Gifts", "Major Gifts") | Decide to keep (with RBB content) or retire with redirects | C |
+| Legacy pages `/giving`, `/giving/zakat`, `/gifts`, `/giving/major-giving` | **Retired (D35, 2026-10-13).** `/giving`, `/gifts`, `/giving/major-giving` forward to Donate (`/appeals`); `/giving/zakat` gets the not-found page | None | — |
 | `/impact/where-we-work` | `noindex` until geography is real | Becomes indexable automatically once it is | D |
 
 ## 13. Images
@@ -435,8 +436,8 @@ sources and licences: `docs/IMAGE_INVENTORY.md` and
 | `rbb-field-elder.jpg` | Ownership pending | `/`, `/appeals` | Who-we-are print, closing card | Supplied by RBB, **unconfirmed** | Yes (D33) |
 | 17 × `demo-edu-*`, `demo-health-*`, `demo-live-*`, `demo-comm-*` | Temporary / working (Pexels) | program, project, story, Media Center, appeal and homepage cards and detail pages | Stand-ins for RBB field photography | Pexels licence; none shows RBB | Replace (D32) |
 | 6 × `demo-team-*` | Temporary / working (Pexels) | `/about/team`, 6 profile pages | Stand-in portraits; alt text says they are stock portraits | Pexels licence | Replace (D16, D32) |
-| `ngo-volunteers.jpg`, `ngo-events.jpg`, `gifts-hero.jpg`, `zakat-hero.jpg` | Legacy / inherited (Pexels) | `/giving`, `/gifts`, `/giving/major-giving`, `/giving/zakat` | Legacy giving pages | Pexels licence | Replace or retire the pages (D32, D35) |
-| `ngo-classroom.jpg` | Legacy / inherited, **unknown source** | `/giving/zakat` | Newsletter band | **Unknown** | Replace, or establish its source (D32) |
+| `ngo-volunteers.jpg`, `ngo-events.jpg`, `gifts-hero.jpg`, `zakat-hero.jpg` | Legacy / inherited (Pexels) | none (the legacy giving pages were retired, D35) | — | Pexels licence | Not shown on any page; licence only matters if reused (D32) |
+| `ngo-classroom.jpg` | Legacy / inherited, **unknown source** | none (`/giving/zakat` retired, D35) | — | **Unknown** | Not shown; establish its source before any reuse (D32) |
 | 46 files in `src/assets/` | Unused | none | — | Mostly inherited | See "Remove, don't replace (E)" above |
 
 The three field images' alt text describes what is in the frame ("a person
@@ -448,8 +449,8 @@ RBB activity until D33 is confirmed.
 | `logos/rbb-lockup.png`, `rbb-lockup-reversed.png` | Header, footer | RBB-supplied logo files | Confirm final logo | C |
 | `rbb-field-kids.jpg`, `rbb-field-distribution.jpg`, `rbb-field-elder.jpg` | Home hero, who-we-are, newsletter | Supplied by RBB | **Confirm ownership, and that they are photographs of RBB's work.** Their lettering looks garbled, and their alt text says the volunteers wear RBB vests | C |
 | 23 × `demo-*.jpg` (17 program/story photos, 6 team portraits) | Projects, stories, programs, team, Media Center, appeals, homepage | Pexels licence; none shows RBB | Replace with RBB photography (with consent), or explicitly license and approve | B |
-| `ngo-volunteers.jpg`, `ngo-events.jpg`, `gifts-hero.jpg`, `zakat-hero.jpg` | Legacy giving pages | Pexels licence, inherited from the old site | Replace, approve, or retire the pages | B |
-| `ngo-classroom.jpg` | `/giving/zakat` | **Unknown source and licence** | Replace, or establish its source | E until resolved |
+| `ngo-volunteers.jpg`, `ngo-events.jpg`, `gifts-hero.jpg`, `zakat-hero.jpg` | none — the legacy giving pages were retired (D35) | Pexels licence, inherited from the old site | Not shown; nothing to do unless reused | — |
+| `ngo-classroom.jpg` | none (`/giving/zakat` retired, D35) | **Unknown source and licence** | Not shown; establish its source before any reuse | — |
 
 **Photographs RBB needs to supply** (minimum for a launch without
 working photographs):

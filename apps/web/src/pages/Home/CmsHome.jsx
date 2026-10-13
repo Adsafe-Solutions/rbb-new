@@ -26,7 +26,6 @@ import {
   NEWS,
   SITE,
   appealsOf,
-  approachSteps,
   blogCard,
   blogPath,
   eventGroup,

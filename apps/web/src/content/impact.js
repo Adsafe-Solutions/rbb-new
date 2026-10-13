@@ -70,17 +70,17 @@ export const IMPACT = {
     status: "placeholder",
   },
 
-  /* How RBB works. The foundation is SOURCE: the mission's own words
-     (content/about.js). The intro and principles below are PROPOSED
-     general prose (decision D11) — how the work is meant to be done, not
-     a named method and not a claim about any project.
+  /* How RBB works — /impact/our-approach. The foundation is SOURCE: the
+     mission's own words (content/about.js, or the published About page).
+     D11 (2026-10-13): Our Approach REUSES this existing, approved content
+     — the intro and principles below, as they stand — and nothing new is
+     written for it. They describe how the work is meant to be done, not a
+     named method and not a claim about any project.
 
-     `proposedFramework` is the Listen → Partner → Act → Sustain structure
-     Document 02 suggested for the homepage. It is kept here, not shown on
-     the Approach page, because Document 05 forbids presenting it as RBB's
-     methodology before RBB approves it — its status stays pending-review,
-     unaffected by the working-content merge (this is a claimed
-     methodology, not a self-labelled placeholder). */
+     The Listen → Partner → Act → Sustain framework Document 02 once
+     suggested was REJECTED by RBB (D11, 2026-10-13). It is not RBB's
+     method and must not be introduced on any page; its pending copy that
+     used to sit here (`proposedFramework`) was removed. */
   approach: {
     intro:
       "The people closest to a challenge usually understand it best. Our work is shaped with the communities it is meant to serve, and designed to keep going after any single project ends.",
@@ -93,10 +93,6 @@ export const IMPACT = {
       "Learning and improving — we reflect on what works, and change course when something does not",
     ],
     status: "approved",
-    proposedFramework: {
-      steps: ["Listen", "Partner", "Act", "Sustain"],
-      status: "pending-review",
-    },
   },
 
   /* How impact is measured. PROPOSED: RBB's INTENDED approach, in words.
@@ -136,16 +132,6 @@ export const IMPACT = {
    19). Verify every figure and it disappears on its own. */
 export const metricsNote = () =>
   IMPACT.metrics.every((m) => ["verified", "approved"].includes(m.status)) ? null : SITE.figuresPending;
-
-/* The approach steps as the homepage may show them: only once RBB has
-   approved the framework (Document 19 §5). Until then the homepage's
-   approach section is its heading, intro and link, as on /about — the
-   proposed Listen → Partner → Act → Sustain is never presented as RBB's
-   methodology. One copy of the steps, here. */
-export const approachSteps = () =>
-  ["verified", "approved"].includes(IMPACT.approach.proposedFramework.status)
-    ? IMPACT.approach.proposedFramework.steps.map((title) => ({ title }))
-    : [];
 
 /* The headline figures as branded cards (components/ImpactStats, Home and
    /impact): each figure's own label and value, and a glyph chosen by its

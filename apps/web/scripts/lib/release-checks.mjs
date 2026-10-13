@@ -54,7 +54,7 @@ const DECISIONS = {
   stories: "D15",
   contact: "D17–D19",
   forms: "D20, D21",
-  donation: "D25–D31, D35",
+  donation: "D25–D31",
   email: "D22, D30",
   policies: "D23, D24, D29",
   images: "D32, D33",

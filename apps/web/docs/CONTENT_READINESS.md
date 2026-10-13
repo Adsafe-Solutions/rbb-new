@@ -72,9 +72,9 @@ replaces them. The classes below are unchanged
 1. **Approach steps.** The homepage showed Listen → Partner → Act → Sustain
    under "Our approach". RBB has not approved it as its methodology
    (Document 19 §5), and the steps were duplicated in `homepage.js` and
-   `impact.js`. They now live once, in `impact.js`
-   (`approach.proposedFramework`), and appear on the homepage only when its
-   status is approved. Until then the section is its heading, intro and
+   `impact.js`. They then lived once, in `impact.js`, hidden until
+   approved. RBB has since REJECTED the framework (D11, 2026-10-13): it was
+   removed from the code, and the section is its heading, intro and
    "Learn How We Work" link.
 2. **Impact figures.** 50K+, 25 and 200+ are `pending-review`, but Home and
    /impact showed them with only their source line, while the 78 / 12 / 10
@@ -139,11 +139,11 @@ is required before launch** — Document 19 §8.
 | `rbb-field-kids.jpg` | Supplied by RBB (compressed from PNG) | RBB's own | Home (hero) | Read as illustrative rather than documentary, and carry RBB-branded signage; **RBB to confirm they may be presented as photographs of its work** |
 | `rbb-field-distribution.jpg` | Supplied by RBB | RBB's own | Home (Who we are) | As above |
 | `rbb-field-elder.jpg` | Supplied by RBB | RBB's own | Home, Donate (closing) | As above |
-| `ngo-volunteers.jpg` | Pexels — RDNE Stock Project (6646918) | Free licence | /giving (legacy, noindex) | **Stock; could be read as RBB field work — decision needed** |
-| `ngo-events.jpg` | Pexels — Quyn Phạm (13418669) | Free licence | /giving, /gifts, /giving/major-giving | Same |
-| `gifts-hero.jpg` | Pexels — Dauphotographer (35106287) | Free licence | /gifts, /giving/major-giving | Same |
-| `zakat-hero.jpg` | Pexels — Shkraba Anthony (7345444) | Free licence | /giving/zakat | Same |
-| `ngo-classroom.jpg` | Stock (credit not recorded) | Unconfirmed | /giving/zakat | **Licence to confirm**; same decision |
+| `ngo-volunteers.jpg` | Pexels — RDNE Stock Project (6646918) | Free licence | none (/giving retired, D35) | **Stock; could be read as RBB field work — decision needed** |
+| `ngo-events.jpg` | Pexels — Quyn Phạm (13418669) | Free licence | none (pages retired, D35) | Same |
+| `gifts-hero.jpg` | Pexels — Dauphotographer (35106287) | Free licence | none (pages retired, D35) | Same |
+| `zakat-hero.jpg` | Pexels — Shkraba Anthony (7345444) | Free licence | none (page retired, D35) | Same |
+| `ngo-classroom.jpg` | Stock (credit not recorded) | Unconfirmed | none (page retired, D35) | **Licence to confirm**; same decision |
 
 All published photos are served through `components/Picture` with
 responsive WebP copies (Document 15). The four legacy pages are noindex and

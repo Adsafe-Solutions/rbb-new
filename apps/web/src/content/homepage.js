@@ -22,7 +22,7 @@ import { BRAND } from "./brand.js";
 import { SITE } from "./site.js";
 import { transparencyLinks } from "./transparency.js";
 import { PROGRAMS, PROJECTS, projectHighlights, projectPath } from "./work.js";
-import { IMPACT, approachSteps, impactStats, metricsNote } from "./impact.js";
+import { IMPACT, impactStats, metricsNote } from "./impact.js";
 import { GET_INVOLVED, pathCards } from "./getInvolved.js";
 import { latestStories, storyCard } from "./stories.js";
 import { RBB_PHOTOS as PHOTOS, WORKING_PHOTOS } from "./photos.js";
@@ -148,17 +148,16 @@ export const HOMEPAGE = {
   },
 
   /* 04 — Our Approach.
-     Intro: PROPOSED general copy. Listen → Partner → Act → Sustain is a structure Document 02
-     suggested, not a framework RBB has published, and Document 19 forbids
-     presenting it as RBB's methodology before approval. The steps live
-     once, in content/impact.js (`proposedFramework`), and appear here only
-     when that is approved. Until then: heading, intro and the link. */
+     Intro: PROPOSED general copy. No steps: the Listen → Partner → Act →
+     Sustain framework Document 02 suggested was REJECTED by RBB (D11,
+     2026-10-13) and must not be introduced. The section is its heading,
+     intro and the link. */
   approach: {
     kicker: "Our approach",
     heading: "Creating change that lasts.",
     intro:
       "Lasting change is built with communities, not for them. We start by listening, respond to the priorities people set for themselves, and favour solutions that keep working long after a project ends.",
-    steps: approachSteps(),
+    steps: [],
     cta: { label: "Learn How We Work", to: "/impact/our-approach" },
   },
 

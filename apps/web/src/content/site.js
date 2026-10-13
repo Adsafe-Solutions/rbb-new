@@ -117,14 +117,9 @@ export const SITE = {
 
 
 
-  /* Pages built before the V1 sitemap. They still have routes and
-     inbound links, so they still need titles — they are just no longer
-     in the navigation. */
+  /* Titles for routes outside the sitemap (the dev catalogues). The
+     legacy giving pages that used to be listed here were retired (D35). */
   titles: {
-    "/giving": "Ways to Give",
-    "/giving/zakat": "Zakat & Sadaqah",
-    "/gifts": "Charity Gifts",
-    "/giving/major-giving": "Major Gifts",
     "/design-system": "Design System",
     "/components": "Components",
   },

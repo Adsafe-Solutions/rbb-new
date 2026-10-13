@@ -1,7 +1,7 @@
 /* Donation & Giving — Document 11. ONE source for how giving works: the
-   header's donation popup (components/DonateDialog), /appeals, every
-   appeal page and the legacy /giving and /gifts pages all read from
-   here, so nothing about giving is stated in two places. The appeals
+   header's donation popup (components/DonateDialog), /appeals and every
+   appeal page read from here, so nothing about giving is stated in two
+   places. (The legacy /giving and /gifts pages were retired — D35.) The appeals
    themselves are content/appeals.js.
 
    ⚠ No payment or financial detail may be written here that RBB has not
@@ -53,11 +53,6 @@ import { PAYMENT_CONNECTED } from "../lib/payment.js";
    stays "pending" until RBB approves the wording and the payment
    provider's production configuration is verified. */
 const STATUS = "pending";
-
-/* The one line that says giving is not open yet — the hero's notice, and
-   the legacy pages' whole message. */
-const PENDING_NOTICE =
-  "Online donations are not open yet. Details will be published here once Rising Beyond Borders confirms them.";
 
 const MISSION = `Our mission is to ${ABOUT.missionVision.mission.statement.replace(/^E/, "e")}`;
 
@@ -299,20 +294,6 @@ export const DONATION = {
     appeals: { label: "See our appeals", to: "/appeals" },
   },
 
-  /* The legacy giving pages (/giving, /gifts, /giving/major-giving). They
-     keep their addresses, but none of them describes a giving program of
-     its own until RBB supplies one — each points to the one donation page
-     instead, with the same state line. */
-  legacy: {
-    kicker: "Donate",
-    heading: "How to give",
-    pendingBody: [PENDING_NOTICE],
-    body: ["How to give to Rising Beyond Borders is set out on our appeals page."],
-    onward: { label: "Go to Appeals", to: "/appeals" },
-  },
-  /* The legacy pages show `legacy.body` in every state — no "not open
-     yet" line (content brief, 2026-10-04). */
-
   /* The site-wide close (content/homepage.js), for pages that are not
      donation pages (AppealList). Its
      supporting line is still pending, so it is left out here rather than
@@ -350,13 +331,7 @@ export const donationState = () => {
    blocks a production release while it is true. */
 export const donationPreview = (state = donationState()) => state === "pending" && !PAYMENT_CONNECTED;
 
-/* The block the legacy giving pages show, in the current state. */
-export const legacyGivingBlock = () => {
-  const { heading, body } = DONATION.legacy;
-  return { heading, body };
-};
-
-/* The statement block for a state (the legacy pages' band). */
+/* The statement block for a state (it was the retired legacy giving pages' band). */
 export const donationActionBlock = (state = donationState()) => {
   const action = DONATION.donationAction;
   if (state === "approved-live") return action.live;

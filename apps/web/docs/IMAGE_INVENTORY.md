@@ -16,11 +16,11 @@ has been replaced.
 | rbb-field-kids.jpg | `/` (hero; who-we-are collage; Donate tab) | Supplied by RBB ("helping kids.png") | RBB's own branded image | RBB (to confirm) | **RBB to confirm** ownership and approve it as a photograph of its work. It reads as illustrative, and the lettering is garbled (Documents 02/03) |
 | rbb-field-distribution.jpg | `/` (collage; Volunteer and Fundraise tabs) | Supplied by RBB ("helping-onfield.png") | RBB's own branded image | RBB (to confirm) | As above |
 | rbb-field-elder.jpg | `/` (collage; Partner tab; closing card), `/appeals` (closing band) | Supplied by RBB ("helping old.png") | RBB's own branded image | RBB (to confirm) | As above |
-| ngo-volunteers.jpg | `/giving` (legacy) | Pexels [6646918](https://www.pexels.com/photo/6646918/) | Pexels licence | RDNE Stock project | Inherited from the old site. Replace, or approve under the Pexels licence |
-| ngo-events.jpg | `/giving`, `/gifts`, `/giving/major-giving` (legacy) | Pexels [13418669](https://www.pexels.com/photo/13418669/) | Pexels licence | Quyn Phạm (checked) | Inherited. Replace or approve |
-| gifts-hero.jpg | `/gifts`, `/giving/major-giving` (legacy) | Pexels [35106287](https://www.pexels.com/photo/35106287/) | Pexels licence | Dauphotographer | Inherited. Replace or approve |
-| zakat-hero.jpg | `/giving/zakat` (legacy) | Pexels [7345444](https://www.pexels.com/photo/7345444/) | Pexels licence | Shkraba Anthony | Inherited. Replace or approve |
-| ngo-classroom.jpg | `/giving/zakat` (legacy) | **Unknown** — arrived with the initial import, no credit recorded | **Unknown** | Unknown | **Replace, or establish its source**, before release |
+| ngo-volunteers.jpg | none — `/giving` retired (D35); only the unused sample modules `content/ngo.js`, `pages.js` import it | Pexels [6646918](https://www.pexels.com/photo/6646918/) | Pexels licence | RDNE Stock project | Inherited from the old site. Replace, or approve under the Pexels licence |
+| ngo-events.jpg | none — those pages retired (D35); only the unused sample modules import it | Pexels [13418669](https://www.pexels.com/photo/13418669/) | Pexels licence | Quyn Phạm (checked) | Inherited. Replace or approve |
+| gifts-hero.jpg | none — `/gifts` retired (D35); only the unused `content/ngo.js` imports it | Pexels [35106287](https://www.pexels.com/photo/35106287/) | Pexels licence | Dauphotographer | Inherited. Replace or approve |
+| zakat-hero.jpg | none — `/giving/zakat` retired (D35); still listed in `scripts/responsive-images.mjs` | Pexels [7345444](https://www.pexels.com/photo/7345444/) | Pexels licence | Shkraba Anthony | Inherited. Replace or approve |
+| ngo-classroom.jpg | none — `/giving/zakat` retired (D35); only the unused `content/pages.js` imports it | **Unknown** — arrived with the initial import, no credit recorded | **Unknown** | Unknown | **Replace, or establish its source**, before release |
 
 Each has WebP copies in `src/assets/responsive/`.
 
@@ -29,8 +29,8 @@ catalogue sections were promoted (collage, tabbed Get Involved, closing
 card), each photograph appears two or three times. They are the only
 approved images. RBB supplying more field photography, ideally one per
 Get Involved path, removes the repetition. The four legacy giving
-pages exist only to point visitors to Donate. RBB could also decide to
-retire those pages, which would remove 5 of these images.
+pages, which only pointed visitors to Donate, were retired (D35,
+2026-10-13); their five inherited images are no longer shown.
 
 The Pexels licence allows free use with no attribution required. Recording
 the creator is good practice, and it is how a photograph can be traced if

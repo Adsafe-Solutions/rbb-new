@@ -8,7 +8,7 @@ import { renderToString } from "react-dom/server";
 import { StaticRouter } from "react-router-dom";
 import { Shell } from "./App.jsx";
 import { SeoCollector } from "./hooks/useSeo.js";
-import { CAREERS_PATH, LEGACY_PATHS, STUB_PATHS, redirectMap } from "./config/routes.js";
+import { CAREERS_PATH, STUB_PATHS, redirectMap } from "./config/routes.js";
 import { PAGES, POLICIES } from "./content/index.js";
 import { published, storyPath } from "./content/stories.js";
 import { mediaDetailPaths } from "./content/media.js";
@@ -64,8 +64,9 @@ export function render(url) {
 
 /* Every route that is a page, to be written as its own HTML file:
    - the sitemap's pages (not its `section` forwards — those redirect)
-   - Careers, the legacy giving pages and the older stub addresses,
-     which stay reachable but carry `noindex` (content/seo.js)
+   - Careers and the older stub addresses, which stay reachable but carry
+     `noindex` (content/seo.js). The legacy giving pages were retired
+     (D35): three forward to Donate (config/routes.js REDIRECTS)
    - each APPROVED story, verified project and approved profile.
    Drafts, pending records and unknown slugs are not in this list: they
    get no file, so the host serves 404.html for them. */
@@ -75,7 +76,6 @@ export function prerenderPaths() {
       "/",
       ...PAGES.filter((p) => !p.section).map((p) => p.to),
       CAREERS_PATH,
-      ...LEGACY_PATHS,
       ...STUB_PATHS,
       ...POLICIES.filter((p) => p.route).map((p) => p.route),
       ...published().map(storyPath),

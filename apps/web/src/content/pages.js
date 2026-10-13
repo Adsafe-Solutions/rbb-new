@@ -1,5 +1,5 @@
 /* Sample content for components the /components catalog still renders
-   (BannerHero, Prose, SignupCard, Steps, Testimonials, Faq, ContactDetails,
+   (Prose, SignupCard, Steps, Testimonials, Faq, ContactDetails,
    LinkCards, Newsletter). No live page reads this file any more: /contact
    is built from content/contact.js and the Get Involved pages from
    content/getInvolved.js.
@@ -127,7 +127,7 @@ export const CONTACT = {
       { title: "Get Involved", body: "Your chance to make a difference", to: "/get-involved", src: fundraise, alt: "Volunteers packing food donations" },
       { title: "About Us", body: "Learn more about our mission, values, and impact", to: "/about", src: about, alt: "A volunteer handing over a food aid box" },
       { title: "Careers", body: `Work with ${BRAND.name}`, to: "/about-us/careers", src: events, alt: "Young volunteers at an outdoor event" },
-      { title: "Giving", body: "Ways to give", to: "/giving", src: foodParcels, alt: "Boxes marked AID in a van" },
+      { title: "Giving", body: "Ways to give", to: "/appeals", src: foodParcels, alt: "Boxes marked AID in a van" },
       { title: "Reports", body: SITE.placeholder, to: "/about/transparency", src: classroom, alt: "Children at their desks in a tented classroom" },
     ],
   },

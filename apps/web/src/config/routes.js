@@ -26,6 +26,15 @@ export const REDIRECTS = {
   /* Reports are what Transparency & Financials will publish — a section
      of /about since the About pages were consolidated. */
   "/reports": "/about#transparency",
+  /* The legacy giving pages, RETIRED (D35, 2026-10-13): unused — nothing
+     on the site linked to them, they were noindex, and each only pointed
+     to Donate. Their old addresses forward there, as /donate does.
+     /giving/zakat is NOT forwarded: sending it to the general Donate page
+     would imply Zakat-specific giving RBB does not offer, so it gets the
+     not-found page, like the Zakat sub-pages retired before it. */
+  "/giving": "/appeals",
+  "/gifts": "/appeals",
+  "/giving/major-giving": "/appeals",
 };
 
 /* Older addresses with no page — RETIRED (Document 19).
@@ -45,15 +54,6 @@ export const REDIRECTS = {
    it becomes a page in content/nav.js; to keep an old address working for
    a page that exists, add it to REDIRECTS above. */
 export const STUB_PATHS = [];
-
-/* Pages built before the sitemap. Outside the navigation, still linked
-   from across the site, kept at their own addresses (Document 11). */
-export const LEGACY_PATHS = [
-  "/giving",
-  "/giving/zakat",
-  "/gifts",
-  "/giving/major-giving",
-];
 
 /* Careers, at the address the site has always used (Document 08). */
 export const CAREERS_PATH = "/about-us/careers";

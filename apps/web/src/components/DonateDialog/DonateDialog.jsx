@@ -8,7 +8,7 @@ import { pauseScroll, resumeScroll } from "../../animations/lenis.js";
 import { DONATION, donationActionBlock, donationState } from "../../content/index.js";
 
 /* The donation popup — what the header's Donate button opens, from every
-   page. The same donation action as the appeal pages (DonationAction),
+   page. The same donation action as the appeal pages,
    in the same state (content/donation.js), drawn as a dialog: the
    statement, then THE donation form (components/DonationForm, shared by
    every donation page) — or, once giving is live through an external

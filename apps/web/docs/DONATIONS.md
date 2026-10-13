@@ -22,7 +22,7 @@ on-page checkout state.
 in two places:
 
 - the header's **Donate** popup (`components/DonateDialog`), on every page;
-- the donation page, **`/appeals`** (via `DonationAction`).
+- the donation page, **`/appeals`** (via `DonationExperience`).
 
 The individual appeal pages (`/appeals/emergency/*`,
 `/appeals/campaigns/*`) have **no** donation form; their "Donate to this

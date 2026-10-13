@@ -38,7 +38,6 @@ export {
   generalDonation,
   appealDonation,
   donationPreview,
-  legacyGivingBlock,
 } from "./donation.js";
 export { FORMS, FORM_COPY } from "./forms.js";
 export {
@@ -52,9 +51,8 @@ export {
   policyContact,
   publishedPolicyLinks,
 } from "./policies.js";
-export { GIVING } from "./giving.js";
 export { HOMEPAGE, PUBLISHED_HOMEPAGE } from "./homepage.js";
-export { IMPACT, IMPACT_PAGES, PUBLISHED_IMPACT, metricsNote, approachSteps, impactStats, metricStats } from "./impact.js";
+export { IMPACT, IMPACT_PAGES, PUBLISHED_IMPACT, metricsNote, impactStats, metricStats } from "./impact.js";
 export { GET_INVOLVED, GET_INVOLVED_PAGES, pathCards, pathByPath } from "./getInvolved.js";
 export {
   STORIES,
@@ -81,8 +79,6 @@ export {
   projectHighlights,
   projectPath,
 } from "./work.js";
-export { ZAKAT } from "./zakat.js";
-export { GIFTS } from "./gifts.js";
 export { ABOUT, HOW_WE_WORK, PUBLISHED_ABOUT } from "./about.js";
 export {
   NEWS,

@@ -14,9 +14,6 @@ import Footer from "./components/Footer/Footer.jsx";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary.jsx";
 import MarkSprite from "./components/Mark/MarkSprite.jsx";
 import Home from "./pages/Home/Home.jsx";
-import Giving from "./pages/Giving/Giving.jsx";
-import Zakat from "./pages/Zakat/Zakat.jsx";
-import Gifts from "./pages/Gifts/Gifts.jsx";
 import Contact from "./pages/Contact/Contact.jsx";
 import About from "./pages/About/About.jsx";
 import Placeholder from "./pages/Placeholder/Placeholder.jsx";
@@ -67,7 +64,7 @@ import {
 import { SECTIONS } from "./config/sections.js";
 import ThemeSwitcher from "./components/ThemeSwitcher/ThemeSwitcher.jsx";
 import { DEV_TOOLS_IN_BUILD } from "./config/env.js";
-import { LEGACY_PATHS, REDIRECTS, STUB_PATHS } from "./config/routes.js";
+import { REDIRECTS, STUB_PATHS } from "./config/routes.js";
 
 /* The pages of the V1 sitemap (content/nav.js) that already have a built
    page behind them. Every other sitemap path renders Placeholder until
@@ -127,15 +124,6 @@ const Components = DEV_TOOLS_IN_BUILD
 const IntegrationGivebutter = DEV_TOOLS_IN_BUILD
   ? lazy(() => import("./pages/IntegrationGivebutter/IntegrationGivebutter.jsx"))
   : null;
-
-/* The pages built before the sitemap, by address (config/routes.js
-   lists the addresses). */
-const LEGACY_PAGES = {
-  "/giving": Giving,
-  "/giving/zakat": Zakat,
-  "/gifts": Gifts,
-  "/giving/major-giving": Gifts,
-};
 
 /* REDIRECTS and STUB_PATHS live in config/routes.js, where the build's
    pre-renderer and host redirect manifest read them too (Document 15). */
@@ -324,26 +312,6 @@ export function Shell() {
               <Route key={from} path={from} element={<Navigate to={to} replace />} />
             ))}
             <Route path="/blogs/:slug" element={<PostRedirect />} />
-
-            {/* Pages built before the sitemap. Outside the navigation now,
-              but still linked from across the site, so they stay — at
-              their own addresses, not redirected, until RBB decides what
-              each is for (Document 11). /giving, /gifts and
-              /giving/major-giving point to the one donation page; Zakat
-              keeps its placeholder. */}
-            {LEGACY_PATHS.map((path) => [path, LEGACY_PAGES[path]]).map(
-              ([path, Page]) => (
-                <Route
-                  key={path}
-                  path={path}
-                  element={
-                    <Titled path={path}>
-                      <Page />
-                    </Titled>
-                  }
-                />
-              )
-            )}
 
             {DesignSystem && SECTIONS.designSystemRoute && (
               <Route

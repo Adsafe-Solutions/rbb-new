@@ -216,7 +216,8 @@ const RULES = {
   /* Pages whose substance is still pending. */
   "/impact/where-we-work": {
     description: `Where the work of ${BRAND.fullName} reaches.`,
-    index: () => verified(IMPACT.geography) && IMPACT.geography.countries.length > 0,
+    /* #6: indexed once a published list exists — regions or countries. */
+    index: () => verified(IMPACT.geography) && (IMPACT.geography.regions.length > 0 || IMPACT.geography.countries.length > 0),
   },
   "/impact/our-approach": { index: () => verified(IMPACT.approach) },
 
@@ -230,14 +231,6 @@ const RULES = {
     ])
   ),
 
-  /* Legacy giving addresses (Document 11): kept so old links land, but
-     they point to /appeals and must not compete with it. */
-  ...Object.fromEntries(
-    ["/giving", "/giving/zakat", "/gifts", "/giving/major-giving"].map((to) => [
-      to,
-      { title: SITE.titles[to], description: `${SITE.titles[to]} — ${BRAND.fullName}.`, index: () => false },
-    ])
-  ),
 };
 
 /* The sitemap's own entries, by route — title, parent, description. */

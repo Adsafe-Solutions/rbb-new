@@ -1,0 +1,243 @@
+[
+  {
+    "id": "privacy",
+    "title": "Privacy Policy",
+    "effectiveDate": "[RBB to confirm: YYYY-MM-DD]",
+    "lastUpdated": "[RBB to confirm: YYYY-MM-DD]",
+    "intro": [
+      "This policy explains what personal information Rising Beyond Borders collects through this website, how it is used and the choices you have. It applies to this website and the forms on it, and should be read together with our Terms of Use.",
+      "DRAFT FOR REVIEW — this wording is a starting point prepared for Rising Beyond Borders and must be reviewed and approved by its counsel before it is published. Replace every [RBB to confirm: …] placeholder."
+    ],
+    "sections": [
+      {
+        "id": "introduction",
+        "heading": "Introduction and scope",
+        "body": [
+          "Rising Beyond Borders [RBB to confirm: legal name and registered address] is responsible for the personal information handled through this website.",
+          "This policy covers the website and the forms it offers: contacting us, volunteering, partnering, travelling with us, fundraising and the newsletter. Donations are made through our payment provider, whose own privacy terms apply to the payment itself."
+        ]
+      },
+      {
+        "id": "information-collected",
+        "heading": "Information we collect",
+        "body": [
+          "We collect only what you give us through the forms on this website, and only what each form asks for."
+        ],
+        "items": [
+          "Contact form: your name, email address and message.",
+          "Volunteer, partner, travel and fundraising forms: your name, email address and the details the form asks for about your interest.",
+          "Newsletter sign-up: your email address and your consent to receive our news.",
+          "Donations: your name, email address and the gift you choose. Card and bank details are entered with our payment provider and never pass through this website."
+        ]
+      },
+      {
+        "id": "use",
+        "heading": "How we use information",
+        "body": [
+          "We use your information to answer your message, to follow up on an offer to volunteer, partner, travel or fundraise with us, to process and acknowledge a donation, and — only if you asked for it — to send you our news."
+        ]
+      },
+      {
+        "id": "sharing",
+        "heading": "Sharing and service providers",
+        "body": [
+          "We do not sell personal information. We share it only with the service providers who help us run this website and respond to you, and only for that purpose: [RBB to confirm: the email delivery provider], [RBB to confirm: the payment provider] and [RBB to confirm: the website hosting provider]."
+        ]
+      },
+      {
+        "id": "forms",
+        "heading": "Forms and communications",
+        "body": [
+          "When you submit a form, it is sent to Rising Beyond Borders by email so that we can reply. The newsletter is sent only to people who signed up for it; every message includes a way to unsubscribe, and you can also ask us to remove you at any time."
+        ]
+      },
+      {
+        "id": "cookies",
+        "heading": "Cookies and similar technologies",
+        "body": [
+          "This website's own code does not set cookies, store data in your browser or run analytics or tracking. The brand typeface is loaded from Google Fonts on every page, which means Google receives your IP address and browser details when a page loads.",
+          "[RBB to confirm: whether the hosting provider sets any cookies, from the technology audit of the live site.]"
+        ]
+      },
+      {
+        "id": "retention",
+        "heading": "Data retention",
+        "body": [
+          "We keep form messages for [RBB to confirm: period] after we have answered them, newsletter details until you unsubscribe, and donation records for [RBB to confirm: period required for accounting]."
+        ]
+      },
+      {
+        "id": "security",
+        "heading": "Security",
+        "body": [
+          "We take reasonable steps to protect the information we hold, and we limit access to the people who need it to respond to you. No method of transmission over the internet is completely secure, so we cannot guarantee absolute security."
+        ]
+      },
+      {
+        "id": "rights",
+        "heading": "Your rights and choices",
+        "body": [
+          "You can ask us what information we hold about you, ask us to correct or delete it, and withdraw consent to the newsletter at any time. To do so, use the contact details on this page. [RBB to confirm: any rights that apply under the law of RBB's jurisdiction.]"
+        ]
+      },
+      {
+        "id": "contact",
+        "heading": "Privacy questions",
+        "body": [
+          "If you have a question about this policy or about how your information is handled, please contact us using the details shown below or on our Contact page."
+        ]
+      },
+      {
+        "id": "updates",
+        "heading": "Updates to this policy",
+        "body": [
+          "We may update this policy from time to time. The \"Last updated\" date at the top of the page shows when it last changed."
+        ]
+      }
+    ],
+    "contactReference": null,
+    "relatedPolicies": ["terms", "donation"],
+    "seo": {
+      "description": "The Rising Beyond Borders privacy policy: what information this website collects, how it is used and your choices."
+    }
+  },
+  {
+    "id": "terms",
+    "title": "Terms of Use",
+    "effectiveDate": "[RBB to confirm: YYYY-MM-DD]",
+    "lastUpdated": "[RBB to confirm: YYYY-MM-DD]",
+    "intro": [
+      "These terms govern the use of the Rising Beyond Borders website. By using the website you agree to them. Please also read our Privacy Policy and Donation Policy.",
+      "DRAFT FOR REVIEW — this wording must be reviewed and approved by Rising Beyond Borders' counsel before it is published. Replace every [RBB to confirm: …] placeholder."
+    ],
+    "sections": [
+      {
+        "id": "acceptable-use",
+        "heading": "Acceptable use",
+        "body": [
+          "You may use this website for lawful purposes only. You must not try to disrupt it, gain unauthorised access to it, copy it automatically, or use it to send unsolicited messages."
+        ]
+      },
+      {
+        "id": "intellectual-property",
+        "heading": "Intellectual property",
+        "body": [
+          "The text, photographs, logo and design of this website belong to Rising Beyond Borders or to the people who licensed them to us. You may read and share links to our pages; please ask before reproducing text or images elsewhere."
+        ]
+      },
+      {
+        "id": "external-links",
+        "heading": "External links",
+        "body": [
+          "This website links to other websites, including our payment provider and social media. We do not control them and are not responsible for their content or their handling of your information."
+        ]
+      },
+      {
+        "id": "availability",
+        "heading": "Website availability",
+        "body": [
+          "We aim to keep the website available, but we do not guarantee that it will be uninterrupted or free of errors, and we may change or remove content at any time."
+        ]
+      },
+      {
+        "id": "disclaimers",
+        "heading": "Disclaimers",
+        "body": [
+          "The information on this website is provided for general information about our work. It is not professional advice, and we do our best to keep it accurate and up to date."
+        ]
+      },
+      {
+        "id": "liability",
+        "heading": "Limitation of liability",
+        "body": [
+          "[RBB to confirm with counsel: the limitation of liability that applies.]"
+        ]
+      },
+      {
+        "id": "changes",
+        "heading": "Changes to these terms",
+        "body": [
+          "We may update these terms from time to time. The \"Last updated\" date at the top of the page shows when they last changed."
+        ]
+      }
+    ],
+    "contactReference": null,
+    "relatedPolicies": ["privacy", "donation"],
+    "seo": {
+      "description": "The terms of use for the Rising Beyond Borders website."
+    }
+  },
+  {
+    "id": "donation",
+    "title": "Donation Policy",
+    "effectiveDate": "[RBB to confirm: YYYY-MM-DD]",
+    "lastUpdated": "[RBB to confirm: YYYY-MM-DD]",
+    "intro": [
+      "This policy explains how donations to Rising Beyond Borders are received, used, acknowledged and refunded.",
+      "DRAFT FOR REVIEW — this wording must be reviewed and approved by Rising Beyond Borders' counsel before it is published. Replace every [RBB to confirm: …] placeholder."
+    ],
+    "sections": [
+      {
+        "id": "introduction",
+        "heading": "About this policy",
+        "body": [
+          "This policy applies to donations made through this website, including gifts to our appeals and campaigns."
+        ]
+      },
+      {
+        "id": "use-of-donations",
+        "heading": "How donations are used",
+        "body": [
+          "General donations support our work across our four program areas — Education, Health & Wellbeing, Livelihoods and Community Support — and the costs of running the organisation. [RBB to confirm: how general donations are allocated.]"
+        ]
+      },
+      {
+        "id": "appeals",
+        "heading": "Appeals and campaigns",
+        "body": [
+          "A gift to a specific appeal is used for that appeal. If an appeal raises more than it needs, or its need changes, the remaining funds are used for similar work in the same program area. [RBB to confirm.]"
+        ]
+      },
+      {
+        "id": "payments",
+        "heading": "Payments",
+        "body": [
+          "Online donations are processed by [RBB to confirm: the payment provider]. Your card or bank details are entered with the provider and never pass through this website."
+        ]
+      },
+      {
+        "id": "receipts",
+        "heading": "Receipts and acknowledgements",
+        "body": [
+          "You will receive a confirmation of your gift by email from our payment provider, and an acknowledgement from Rising Beyond Borders. [RBB to confirm: any tax-receipt wording, only with tax or legal confirmation.]"
+        ]
+      },
+      {
+        "id": "refunds",
+        "heading": "Refunds",
+        "body": [
+          "If you made a donation by mistake or in the wrong amount, contact us within [RBB to confirm: period] of the gift and we will refund it where we can. [RBB to confirm: the full refund terms.]"
+        ]
+      },
+      {
+        "id": "personal-information",
+        "heading": "Your personal information",
+        "body": [
+          "Donor details are handled as described in our Privacy Policy, and are never sold."
+        ]
+      },
+      {
+        "id": "contact",
+        "heading": "Questions about giving",
+        "body": [
+          "If you have a question about a donation, please contact us using the details shown below or on our Contact page."
+        ]
+      }
+    ],
+    "contactReference": null,
+    "relatedPolicies": ["privacy", "terms"],
+    "seo": {
+      "description": "How donations to Rising Beyond Borders are received, used, acknowledged and refunded."
+    }
+  }
+]

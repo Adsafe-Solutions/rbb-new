@@ -47,6 +47,10 @@ export const WORKING_MARKERS = [
   ["sample profile", /\bSample profile\b/],
   ["sample video", /\bSample video\b/],
   ["sample event", /\bSample event\b/],
+  /* A bracketed placeholder left in drafted text for the organization to
+     fill in ("[RBB to confirm: the payment provider]", "[TBC]") — the
+     drafted policies use it for every fact only RBB can state. */
+  ["confirmation placeholder", /\[(RBB to confirm|to be confirmed|TBC|TODO)\b[^\]]*\]/i],
 ];
 
 /* Placeholder contact values that must be replaced before release. */

@@ -32,6 +32,7 @@ export const WORKING_TEXT_RULES: readonly (readonly [string, RegExp])[] = [
   ["sample profile", /\bSample profile\b/],
   ["sample video", /\bSample video\b/],
   ["sample event", /\bSample event\b/],
+  ["confirmation placeholder", /\[(RBB to confirm|to be confirmed|TBC|TODO)\b[^\]]*\]/i],
   ["example.* address or URL", /\b[\w.+-]*@?example\.(org|com|net)\b/i],
   ["fictional 555 phone number", /\+?1?[\s.-]?\(?555\)?[\s.-]?01\d\d\b/],
   ["platform home page as social link", /https?:\/\/(www\.)?(instagram|facebook|linkedin|youtube|x|twitter|tiktok)\.com\/?(?=["'\s<)]|$)/],

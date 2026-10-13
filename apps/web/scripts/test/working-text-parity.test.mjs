@@ -15,6 +15,6 @@ test("the content contract's working-text rules are exactly this site's", () => 
 });
 
 test("both find the same things", () => {
-  for (const text of ["Demo — x", "Sample story", "write to hello@example.org", "name@example.com", "img/demo-field.jpg", "A real paragraph.", "Call +1 555 0123"])
+  for (const text of ["Demo — x", "Sample story", "write to hello@example.org", "name@example.com", "img/demo-field.jpg", "A real paragraph.", "Call +1 555 0123", "Processed by [RBB to confirm: the payment provider].", "[TBC]", "A [bracketed] aside."])
     assert.deepEqual(workingTextFindings(text), workingContentFindings(text), text);
 });

@@ -172,6 +172,27 @@
   border-radius: var(--radius-md);
   list-style: none;
 }
+.unlisted {
+  display: grid;
+  gap: var(--space-2);
+}
+.unlistedItems {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.unlistedItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+}
 .pickLabel {
   display: inline-flex;
   flex-wrap: wrap;

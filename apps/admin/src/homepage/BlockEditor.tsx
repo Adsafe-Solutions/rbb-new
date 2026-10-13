@@ -4,6 +4,7 @@ import { appealsApi, eventsApi, postsApi } from "../content/client";
 import type { BlockData, BlockType, HomepageSection } from "./client";
 import { Body, Cta, HeadingFields, ImageField, ItemList, LinkField, ParagraphsField, RecordPicker, TextField, clean, sub, type PickableRecord } from "../blocks/fields";
 import { MetricsField } from "../impact/MetricsField";
+import { ProgramSelect } from "../content/pickers";
 import styles from "../blocks/blocks.module.css";
 
 /* One block's editor: typed fields for exactly its contract data. The
@@ -120,7 +121,7 @@ const EDITORS: { [T in BlockType]: (p: EditorProps<T>) => ReactNode } = {
               <FormField label="Date" required error={err(`items.${i}.date`)} disabled={disabled}>
                 <Input type="date" value={item.date} onChange={(e) => setItem({ ...item, date: e.target.value })} />
               </FormField>
-              <TextField label="Program" required helper="The program's address, e.g. education." max={120} value={item.programId} onChange={(programId) => setItem({ ...item, programId: programId ?? "" })} error={err(`items.${i}.programId`)} disabled={disabled} />
+              <ProgramSelect label="Program" required value={item.programId || undefined} onChange={(programId) => setItem({ ...item, programId: programId ?? "" })} error={err(`items.${i}.programId`)} disabled={disabled} />
             </div>
             <TextField label="Title" required max={120} value={item.title} onChange={(title) => setItem({ ...item, title: title ?? "" })} error={err(`items.${i}.title`)} disabled={disabled} />
             <TextField label="One line" required multiline max={300} value={item.summary} onChange={(summary) => setItem({ ...item, summary: summary ?? "" })} error={err(`items.${i}.summary`)} disabled={disabled} />

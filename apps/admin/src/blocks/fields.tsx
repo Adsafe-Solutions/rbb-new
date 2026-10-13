@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { ArrowDown, ArrowUp, Badge, Button, Checkbox, FormField, IconButton, Input, Plus, Spinner, Textarea, Trash2 } from "../design-system";
 import { isReady, readinessWord } from "../content/workflow";
 import { MediaPicker } from "../media/MediaPicker";
+import { unlistedChoices, withoutChoice } from "./pickerChoices";
 import styles from "./blocks.module.css";
 
 /* The typed fields every block editor is built from. Each one edits one
@@ -127,7 +128,10 @@ export function RecordPicker({ label, load, value, onChange, max, disabled, erro
     };
   }, [load]);
   const byId = new Map((records ?? []).map((r) => [r.id, r]));
-  const chosen = value.map((id) => byId.get(id) ?? { id, title: "Not found", status: "missing" });
+  /* Chosen, but not in the list: no box to untick, so each is listed
+     below with its own Remove button (blocks/pickerChoices.ts). */
+  const unlisted = unlistedChoices(value, records);
+  const chosen = value.filter((id) => byId.has(id)).map((id) => byId.get(id)!);
   return (
     <fieldset className={styles.group}>
       <legend className={styles.legend}>{label}</legend>
@@ -169,14 +173,27 @@ export function RecordPicker({ label, load, value, onChange, max, disabled, erro
           })}
         </ul>
       )}
-      {value
-        .filter((id) => !byId.has(id) && itemError?.(id))
-        .map((id) => (
-          <p key={id} className={styles.error} role="alert">
-            “{id}” (not in the list): {itemError!(id)}
+      {unlisted.length > 0 && (
+        <div className={styles.unlisted} data-testid="picker-unlisted">
+          <p className={styles.error} role="alert">
+            Chosen but not in the list — {unlisted.length === 1 ? "a record" : "records"} this organization does not have (or no longer has). Remove {unlisted.length === 1 ? "it" : "them"}, then choose from the list above.
           </p>
-        ))}
-      {chosen.some((r) => !isReady(r.status, r.live)) && value.length > 0 && <p className={styles.help}>Chosen but not approved yet: {chosen.filter((r) => !isReady(r.status, r.live)).map((r) => r.title).join(", ")}.</p>}
+          <ul className={styles.unlistedItems} aria-label={`${label} not in the list`}>
+            {unlisted.map((id) => (
+              <li key={id} className={styles.unlistedItem}>
+                <span>
+                  <code>{id}</code>
+                  {itemError?.(id) && <span className={`${styles.error} ${styles.itemError}`}> {itemError(id)}</span>}
+                </span>
+                <Button size="sm" leadingIcon={<Trash2 />} disabled={disabled} onClick={() => onChange(withoutChoice(value, id))}>
+                  Remove
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {chosen.some((r) => !isReady(r.status, r.live)) && <p className={styles.help}>Chosen but not approved yet: {chosen.filter((r) => !isReady(r.status, r.live)).map((r) => r.title).join(", ")}.</p>}
     </fieldset>
   );
 }

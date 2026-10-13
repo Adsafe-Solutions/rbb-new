@@ -15,6 +15,14 @@ export interface SubmissionSummary {
   organization: string | null;
   topic: string | null;
   preview: string;
+  replied: boolean;
+}
+
+export interface SubmissionReply {
+  id: string;
+  at: string;
+  by: { id: string; name: string };
+  message: string;
 }
 
 export interface Submission {
@@ -25,6 +33,7 @@ export interface Submission {
   status: "new" | "read";
   createdAt: string;
   updatedAt: string;
+  replies?: SubmissionReply[];
 }
 
 export interface SubmissionCounts {
@@ -37,6 +46,8 @@ export interface SubmissionPage {
   items: SubmissionSummary[];
   next: string | null;
   counts: SubmissionCounts;
+  /* Email is set up: replies can be sent from the admin. */
+  canReply: boolean;
 }
 
 const one = (id: string) => `/api/v1/submissions/${encodeURIComponent(id)}`;
@@ -46,4 +57,5 @@ export const submissionsApi = {
   get: (id: string) => api<Submission>(one(id)),
   setStatus: (id: string, status: "new" | "read") => api<Submission>(`${one(id)}/status`, { method: "POST", body: JSON.stringify({ status }) }),
   remove: (id: string) => api<{ deleted: true }>(one(id), { method: "DELETE" }),
+  reply: (id: string, message: string) => api<Submission>(`${one(id)}/replies`, { method: "POST", body: JSON.stringify({ message }) }),
 };

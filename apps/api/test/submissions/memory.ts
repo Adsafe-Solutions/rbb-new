@@ -1,4 +1,4 @@
-import { countsOf, matchesSubmission, submissionOrder, type StoredSubmission, type SubmissionStatus, type SubmissionStore } from "../../src/modules/submissions/repository.ts";
+import { countsOf, matchesSubmission, submissionOrder, type StoredSubmission, type SubmissionReply, type SubmissionStatus, type SubmissionStore } from "../../src/modules/submissions/repository.ts";
 
 /* The submission store in memory, organization-scoped like MongoDB's. */
 export function memorySubmissionStore(rows: StoredSubmission[], orgId: string, options: { failInsert?: boolean } = {}): SubmissionStore {
@@ -14,6 +14,12 @@ export function memorySubmissionStore(rows: StoredSubmission[], orgId: string, o
       const row = mine().find((r) => r.id === id);
       if (!row) return null;
       Object.assign(row, { status, updatedAt: at });
+      return structuredClone(row);
+    },
+    addReply: async (id: string, reply: SubmissionReply) => {
+      const row = mine().find((r) => r.id === id);
+      if (!row) return null;
+      Object.assign(row, { replies: [...(row.replies ?? []), structuredClone(reply)], status: "read", updatedAt: reply.at });
       return structuredClone(row);
     },
     remove: async (id) => {

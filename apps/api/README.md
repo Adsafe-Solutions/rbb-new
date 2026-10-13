@@ -74,6 +74,7 @@ Base path: **`/api/v1`**.
 | GET | `/api/v1/submissions` | `submissions:read` (OWNER) | Stored form submissions, newest first: `?form&status&from&to&q&before&limit` → `{ items, next, counts }` |
 | GET | `/api/v1/submissions/:id` | `submissions:read` (OWNER) | One submission, every field |
 | POST | `/api/v1/submissions/:id/status` | `submissions:write` (OWNER) | `{ status: "new" \| "read" }` |
+| POST | `/api/v1/submissions/:id/replies` | `submissions:write` (OWNER) | `{ message }` — emails the visitor an owner's reply (forms' sender and mode; Reply-To the form's `EMAIL_TO_<FORM>` inbox; never quotes their message) and records it; 503 while email is off |
 | DELETE | `/api/v1/submissions/:id` | `submissions:write` (OWNER) | Deletes it for good |
 
 The donation provider is Givebutter, behind `modules/donations/provider.ts`.

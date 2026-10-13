@@ -64,7 +64,7 @@ import { submissionRoutes } from "./modules/submissions/routes.ts";
 import { SubmissionService } from "./modules/submissions/service.ts";
 import { MemberService } from "./modules/members/service.ts";
 import { MongoMediaStore } from "./modules/media/repository.ts";
-import { refusingTransport, resendTransport, type EmailTransport, type OutgoingEmail } from "./modules/forms/email.ts";
+import { createDeliverer, refusingTransport, resendTransport, type EmailTransport, type OutgoingEmail } from "./modules/forms/email.ts";
 import { formRoutes } from "./modules/forms/routes.ts";
 import { FormService } from "./modules/forms/service.ts";
 import { mediaRoutes } from "./modules/media/routes.ts";
@@ -276,7 +276,11 @@ export function createApp(options: AppOptions = {}): App {
   const submissions = async () => {
     if (!config || !mongo) throw errors.unavailable("The database is not configured.");
     const db = await mongo.db();
-    return new SubmissionService(new MongoSubmissionStore(db, config.orgId), auditFor(db, config), { ...(options.now && { now: options.now }) });
+    /* Replies go out the forms' way (same sender and mode), only while
+       email is on; the visitor's answer goes to the form's RBB inbox. */
+    const emailOn = config.forms.mode !== "off" && Object.keys(config.forms.recipients).length > 0;
+    const mailer = emailOn ? { deliver: createDeliverer(config.forms, emailTransport, options.formsCapture), replyTo: (formId: string) => config.forms.recipients[formId as keyof typeof config.forms.recipients] } : null;
+    return new SubmissionService(new MongoSubmissionStore(db, config.orgId), auditFor(db, config), { ...(options.now && { now: options.now }), mailer });
   };
 
   const members = async () => {

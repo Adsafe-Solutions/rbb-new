@@ -7,7 +7,8 @@ import { FORMS_OFF, loadFormsConfig, type FormsConfig } from "../src/modules/for
 import type { EmailTransport, OutgoingEmail } from "../src/modules/forms/email.ts";
 import { FormService } from "../src/modules/forms/service.ts";
 import type { StoredSubmission } from "../src/modules/submissions/repository.ts";
-import { SubmissionService, cursorOf } from "../src/modules/submissions/service.ts";
+import { SubmissionService, cursorOf, type ReplyMailer } from "../src/modules/submissions/service.ts";
+import { createDeliverer } from "../src/modules/forms/email.ts";
 import type { AuthContext } from "../src/modules/auth/types.ts";
 import { clock, memoryAuditStore, memoryAuthStores, memoryData, silentLog } from "./auth/memory.ts";
 import { memorySubmissionStore } from "./submissions/memory.ts";
@@ -163,4 +164,38 @@ test("another organization's submissions are never seen", async () => {
   const ownerB = member("OWNER", "org-b");
   assert.equal((await other.list(ownerB, {})).items.length, 0);
   assert.equal((await failure(other.get(ownerB, w.rows[0]!.id))).code, "NOT_FOUND");
+});
+
+test("reply from the admin: emailed to the visitor (Reply-To the form's RBB inbox), recorded, never quoting their message; refused without email", async () => {
+  const config = loadFormsConfig({ EMAIL_MODE: "test", EMAIL_TO_CONTACT: "contact-inbox@rbb.example" });
+  const w = world(config);
+  await w.forms.submit("contact", body("contact"), facts());
+  const id = w.rows[0]!.id;
+  const captured: OutgoingEmail[] = [];
+  const mailer: ReplyMailer = { deliver: createDeliverer(config, async () => ({ ok: true, id: "x" }), (e) => captured.push(e)), replyTo: (form) => config.recipients[form as "contact"] };
+  const service = new SubmissionService(memorySubmissionStore(w.rows, "org-a"), new AuditService(memoryAuditStore(w.data, "org-a"), { orgId: "org-a", secret: "test-only-auth-secret-0123456789abcdef", log: silentLog }), { now: w.time.now, mailer });
+  assert.equal(service.canReply, true);
+  assert.equal((await failure(service.reply(editor, id, { message: "Hello" }, ADMIN_FACTS))).code, "FORBIDDEN");
+  assert.equal((await failure(service.reply(owner, id, { message: "   " }, ADMIN_FACTS))).code, "VALIDATION_ERROR");
+  const saved = await service.reply(owner, id, { message: "Thank you for writing.\nWe would love your help." }, ADMIN_FACTS);
+  assert.equal(saved.replies!.length, 1);
+  assert.equal(saved.replies![0]!.by.name, "OWNER");
+  assert.equal(saved.status, "read");
+  const email = captured.at(-1)!;
+  assert.equal(email.to, VISITOR.email);
+  assert.equal(email.replyTo, "contact-inbox@rbb.example");
+  assert.match(email.subject, /^Re: your message to Rising Beyond Borders · RBB-/);
+  assert.ok(email.text.includes("We would love your help.") && email.text.includes("OWNER"));
+  assert.ok(!email.text.includes("reading club") && !email.html.includes("reading club"), "the visitor's own message is not quoted");
+  assert.equal((await service.list(owner, {})).items[0]!.replied, true);
+  const audit = w.data.audit.filter((e) => e.action === "submissions.replied");
+  assert.equal(audit.length, 1);
+  assert.ok(!JSON.stringify(audit).includes("love your help") && !JSON.stringify(audit).includes(VISITOR.email));
+
+  const off = new SubmissionService(memorySubmissionStore(w.rows, "org-a"), new AuditService(memoryAuditStore(w.data, "org-a"), { orgId: "org-a", secret: "test-only-auth-secret-0123456789abcdef", log: silentLog }));
+  assert.equal(off.canReply, false);
+  assert.equal((await failure(off.reply(owner, id, { message: "Hello" }, ADMIN_FACTS))).status, 503);
+  const failing = new SubmissionService(memorySubmissionStore(w.rows, "org-a"), new AuditService(memoryAuditStore(w.data, "org-a"), { orgId: "org-a", secret: "test-only-auth-secret-0123456789abcdef", log: silentLog }), { mailer: { deliver: async () => ({ ok: false, category: "unavailable" }), replyTo: () => undefined } });
+  assert.equal((await failure(failing.reply(owner, id, { message: "Hello" }, ADMIN_FACTS))).status, 503);
+  assert.equal(w.rows[0]!.replies!.length, 1, "a failed send records nothing");
 });

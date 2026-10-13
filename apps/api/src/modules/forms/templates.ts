@@ -187,3 +187,21 @@ export function acknowledgement(formId: FormId, { reference, submittedAt }: { re
   const text = `${a.heading}\n\nWe have received ${a.received} through the ${BRAND} website.\nIf you need to refer to it, please quote reference ${reference}.\nIf you did not send this, you can ignore this email.\n\nReference ${reference} · Received ${submittedAt} (UTC)\n${BRAND}`;
   return { subject: `${a.heading} · ${reference}`, html, text };
 }
+
+/* An owner's reply from the admin (Form submissions), to the address the
+   visitor gave. The owner wrote every word of it; it does NOT quote what
+   the visitor sent (the acknowledgement rule above: no visitor text is
+   echoed to a typed address). The subject carries only the reference. */
+export function reply({ message, reference, memberName }: { message: string; reference: string; memberName: string }): RenderedEmail {
+  const signature = `${memberName}\n${BRAND}`;
+  const html = layout({
+    preheader: message.replace(/\s+/g, " ").slice(0, 120),
+    heading: `A reply from ${BRAND}`,
+    body:
+      `<div style="margin:0 0 18px;font-family:${FONT};font-size:16px;line-height:1.6;color:${C.ink};word-break:break-word;">${escMultiline(message)}</div>` +
+      p(escMultiline(signature)) +
+      `<p style="margin:0;font-family:${FONT};font-size:13px;color:${C.muted};">In reply to your message, reference ${esc(reference)}. You can reply to this email.</p>`,
+  });
+  const text = `${message}\n\n${signature}\n\nIn reply to your message, reference ${reference}. You can reply to this email.`;
+  return { subject: `Re: your message to ${BRAND} · ${reference}`, html, text };
+}

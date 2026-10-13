@@ -10,11 +10,15 @@ import type { SubmissionService } from "./service.ts";
                                          { items, next, counts } newest first
      GET    /api/v1/submissions/:id      the whole submission
      POST   /api/v1/submissions/:id/status   { status: "new" | "read" }
+     POST   /api/v1/submissions/:id/replies  { message } — emails the
+                                         visitor an owner's reply (when email
+                                         is set up) and records it
      DELETE /api/v1/submissions/:id      deletes it for good
 
    The public site adds them (modules/forms); nothing here creates one. */
 
 const BODY_LIMIT = 1024;
+const REPLY_LIMIT = 24 * 1024;
 const facts = ({ requestId, clientIp, request }: Context): RequestFacts => ({ requestId, clientIp, userAgent: request.headers.get("user-agent") });
 
 export const submissionRoutes = (service: () => Promise<SubmissionService>): Route[] => [
@@ -38,6 +42,13 @@ export const submissionRoutes = (service: () => Promise<SubmissionService>): Rou
     auth: "required",
     permission: "submissions:write",
     handler: async (c) => ok(await (await service()).setStatus(c.auth, c.params.id, await readJson(c.request, BODY_LIMIT), facts(c))),
+  },
+  {
+    method: "POST",
+    path: "/api/v1/submissions/:id/replies",
+    auth: "required",
+    permission: "submissions:write",
+    handler: async (c) => ok(await (await service()).reply(c.auth, c.params.id, await readJson(c.request, REPLY_LIMIT), facts(c))),
   },
   {
     method: "DELETE",

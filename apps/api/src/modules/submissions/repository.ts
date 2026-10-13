@@ -10,6 +10,14 @@ import { COLLECTIONS } from "../../db/collections.ts";
 export const SUBMISSION_STATUSES = ["new", "read"] as const;
 export type SubmissionStatus = (typeof SUBMISSION_STATUSES)[number];
 
+/* A reply an owner sent from the admin. */
+export interface SubmissionReply {
+  id: string;
+  at: string;
+  by: { id: string; name: string };
+  message: string;
+}
+
 export interface StoredSubmission {
   id: string;
   orgId: string;
@@ -20,6 +28,8 @@ export interface StoredSubmission {
   status: SubmissionStatus;
   createdAt: string;
   updatedAt: string;
+  /* Replies sent from the admin, oldest first (absent: none). */
+  replies?: SubmissionReply[];
 }
 
 export interface SubmissionQuery {
@@ -48,6 +58,8 @@ export interface SubmissionStore {
   setStatus(id: string, status: SubmissionStatus, at: string): Promise<StoredSubmission | null>;
   remove(id: string): Promise<boolean>;
   counts(): Promise<SubmissionCounts>;
+  /* Records a sent reply; the submission becomes read. */
+  addReply(id: string, reply: SubmissionReply): Promise<StoredSubmission | null>;
 }
 
 const SEARCHED = ["name", "email", "organization", "message"] as const;
@@ -123,6 +135,11 @@ export class MongoSubmissionStore implements SubmissionStore {
 
   async setStatus(id: string, status: SubmissionStatus, at: string) {
     const doc = await this.#collection.findOneAndUpdate({ orgId: this.#orgId, id }, { $set: { status, updatedAt: new Date(at) } }, { returnDocument: "after" });
+    return doc ? fromDocument(doc) : null;
+  }
+
+  async addReply(id: string, reply: SubmissionReply) {
+    const doc = await this.#collection.findOneAndUpdate({ orgId: this.#orgId, id }, { $push: { replies: reply }, $set: { status: "read", updatedAt: new Date(reply.at) } } as never, { returnDocument: "after" });
     return doc ? fromDocument(doc) : null;
   }
 

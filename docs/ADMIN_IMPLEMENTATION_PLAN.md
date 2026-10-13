@@ -349,8 +349,13 @@ and readable by **owners only**, kept **until an owner deletes it**, and
   bots and invalid input are never stored. Audit: by id and form only.
 - Admin: Engagement → **Form submissions** (`/submissions`, owners only):
   totals per form, filters, table, a dialog with every field that marks
-  it read, Mark as new, Reply by email (the member's own mail program),
-  Delete (confirmed).
+  it read, Mark as new, Delete (confirmed), and **Reply from the admin**
+  (`POST /api/v1/submissions/:id/replies`): sent through the forms' email
+  (same sender and mode), signed with the owner's name, Reply-To the
+  form's RBB inbox, never quoting the visitor's message, recorded on the
+  submission ("Replies sent", a Replied badge) and audited by id and form
+  only; unavailable (503, and a note in the dialog) while email is off.
+  "Open in mail app" stays as a fallback.
 - Website: shown when the production deploy sets
   `VITE_FORM_ENDPOINT_CONTACT/_VOLUNTEER/_PARTNER` (exact production
   endpoints, enforced by `scripts/deploy-pages.mjs`).

@@ -126,7 +126,11 @@ unavailable.
 through the website's Contact Us, Volunteer and Partner With Us forms,
 newest first, with totals per form and filters (form, new/read, dates,
 text). Opening one shows every field and marks it read; it can be marked
-new again, answered in the member's own mail program, or deleted for good.
+new again, answered, or deleted for good. **Replies are written and sent
+from the admin** while email is set up: emailed to the visitor from RBB's
+sender, signed with the member's name, Reply-To the form's RBB inbox,
+without quoting the visitor's message, and listed under "Replies sent".
+"Open in mail app" is always there too.
 The route and the API need `submissions:read` / `submissions:write`.
 
 ## Users & Roles, your account, setup links (M17.3)

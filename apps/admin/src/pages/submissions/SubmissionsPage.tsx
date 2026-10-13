@@ -17,6 +17,8 @@ import {
   Spinner,
   Table,
   TableBody,
+  Textarea,
+  FormField,
   TableCell,
   TableEmpty,
   TableHead,
@@ -35,13 +37,16 @@ import styles from "./submissions.module.css";
    Volunteer and Partner With Us forms (2026-10-13). Owners only: the
    route needs submissions:read and the API checks every request. Newest
    first, filtered by form, new/read, dates and text; opening one shows
-   every field, marks it read, and offers a reply in the member's own mail
-   program. Kept until an owner deletes it. */
+   every field and marks it read. A reply can be written and sent from
+   here — emailed to the visitor from RBB's address, Reply-To the form's
+   RBB inbox, and kept with the submission — while email is set up; the
+   member's own mail program is always offered too. Kept until an owner
+   deletes it. */
 
 type ListState =
   | { status: "loading" }
   | { status: "failed" }
-  | { status: "ready"; items: SubmissionSummary[]; next: string | null; counts: SubmissionCounts; more: "idle" | "loading" | "failed" };
+  | { status: "ready"; items: SubmissionSummary[]; next: string | null; counts: SubmissionCounts; canReply: boolean; more: "idle" | "loading" | "failed" };
 
 const when = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" });
 const FORM_OPTIONS = [{ value: "", label: "All forms" }, ...Object.entries(FORM_LABELS).map(([value, label]) => ({ value, label }))];
@@ -60,6 +65,8 @@ export default function SubmissionsPage(_: PageProps) {
   const [open, setOpen] = useState<{ id: string; item: Submission | null; failed?: boolean } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [replyError, setReplyError] = useState<string | null>(null);
 
   /* The text search waits for a pause in typing. */
   useEffect(() => {
@@ -73,7 +80,7 @@ export default function SubmissionsPage(_: PageProps) {
     setList({ status: "loading" });
     try {
       const page = await submissionsApi.list(current);
-      if (mine === generation.current) setList({ status: "ready", items: page.items, next: page.next, counts: page.counts, more: "idle" });
+      if (mine === generation.current) setList({ status: "ready", items: page.items, next: page.next, counts: page.counts, canReply: page.canReply, more: "idle" });
     } catch {
       if (mine === generation.current) setList({ status: "failed" });
     }
@@ -105,13 +112,15 @@ export default function SubmissionsPage(_: PageProps) {
       const form = s.counts.byForm[item.formId];
       return {
         ...s,
-        items: s.items.map((i) => (i.id === item.id ? { ...i, status: item.status } : i)),
+        items: s.items.map((i) => (i.id === item.id ? { ...i, status: item.status, replied: Boolean(item.replies?.length) } : i)),
         counts: { ...s.counts, new: s.counts.new + delta, byForm: form ? { ...s.counts.byForm, [item.formId]: { ...form, new: form.new + delta } } : s.counts.byForm },
       };
     });
 
   async function show(id: string) {
     setOpen({ id, item: null });
+    setDraft("");
+    setReplyError(null);
     try {
       let item = await submissionsApi.get(id);
       if (item.status === "new" && canWrite) {
@@ -138,6 +147,22 @@ export default function SubmissionsPage(_: PageProps) {
     }
   }
 
+  async function sendReply(item: Submission) {
+    setBusy(true);
+    setReplyError(null);
+    try {
+      const saved = await submissionsApi.reply(item.id, draft);
+      patch(saved);
+      setOpen({ id: item.id, item: saved });
+      setDraft("");
+      toast({ title: "Reply sent", description: `Emailed to ${item.fields.email}.`, tone: "success" });
+    } catch (caught) {
+      setReplyError(caught instanceof ApiRequestError ? (caught.details[0]?.message ? `Message ${caught.details[0].message}.` : caught.message) : "The reply could not be sent. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function remove(item: Submission) {
     setBusy(true);
     try {
@@ -157,6 +182,7 @@ export default function SubmissionsPage(_: PageProps) {
   const filtered = Boolean(filters.form || filters.status || filters.from || filters.to || filters.q);
   const counts = list.status === "ready" ? list.counts : null;
   const item = open?.item ?? null;
+  const canReply = list.status === "ready" && list.canReply;
 
   return (
     <PageContainer>
@@ -241,6 +267,11 @@ export default function SubmissionsPage(_: PageProps) {
                     </TableCell>
                     <TableCell>
                       <Badge tone={s.status === "new" ? "info" : "neutral"}>{s.status === "new" ? "New" : "Read"}</Badge>
+                      {s.replied && (
+                        <span className={styles.sub}>
+                          <Badge tone="success">Replied</Badge>
+                        </span>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))
@@ -274,7 +305,7 @@ export default function SubmissionsPage(_: PageProps) {
               <Button onClick={() => setOpen(null)}>Close</Button>
               {item.fields.email && (
                 <Button leadingIcon={<ExternalLink />} onClick={() => (window.location.href = replyHref(item.fields.email!, item.formId, item.reference))}>
-                  Reply by email
+                  Open in mail app
                 </Button>
               )}
               {canWrite && (
@@ -304,6 +335,39 @@ export default function SubmissionsPage(_: PageProps) {
               </div>
             ))}
           </dl>
+        )}
+        {item && (item.replies?.length ?? 0) > 0 && (
+          <section className={styles.replies} aria-label="Replies sent">
+            <h3 className={styles.repliesHeading}>Replies sent</h3>
+            <ol className={styles.replyList}>
+              {item.replies!.map((r) => (
+                <li key={r.id} className={styles.reply}>
+                  <p className={styles.meta}>
+                    {r.by.name} · {when.format(new Date(r.at))}
+                  </p>
+                  <p className={styles.replyText}>{r.message}</p>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+        {item && canWrite && item.fields.email && (
+          <section className={styles.replies} aria-label="Reply">
+            {canReply ? (
+              <>
+                <FormField label={`Reply to ${item.fields.name || item.fields.email}`} helper={`Sent from Rising Beyond Borders to ${item.fields.email}, signed with your name. Their answer comes back to RBB's inbox for this form. Their message is not quoted.`} error={replyError ?? undefined}>
+                  <Textarea rows={6} maxLength={5000} value={draft} onChange={(e) => setDraft(e.target.value)} />
+                </FormField>
+                <div>
+                  <Button variant="primary" loading={busy} disabled={!draft.trim()} onClick={() => sendReply(item)}>
+                    Send reply
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <Alert tone="info">Email is not set up for the website forms, so replies cannot be sent from here yet. Use “Open in mail app”.</Alert>
+            )}
+          </section>
         )}
       </Dialog>
       <Dialog

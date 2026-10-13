@@ -898,23 +898,35 @@ export class PublishService {
      refuses a missing image. Media ids are UUIDs, so a record that holds
      the id anywhere uses it. */
   async mediaUsage(mediaId: string): Promise<string[]> {
-    const uses: string[] = [];
-    const holds = (value: unknown) => JSON.stringify(value).includes(`"${mediaId}"`);
+    return (await this.mediaUsageMany([mediaId]))[mediaId] ?? [];
+  }
+
+  /* The same answer for many images at once (the media library's page of
+     tiles, 2026-10-13): everything is read ONCE, then each id is looked
+     for in it. */
+  async mediaUsageMany(mediaIds: readonly string[]): Promise<Record<string, string[]>> {
+    const result: Record<string, string[]> = Object.fromEntries(mediaIds.map((id) => [id, [] as string[]]));
+    if (!mediaIds.length) return result;
     const [live, settings] = await Promise.all([this.#store.activeSnapshot(), this.#settings.get()]);
-    if (live?.snapshot.media[mediaId]) uses.push(`The live website (published version ${live.version})`);
-    if (settings && holds(settings.record)) uses.push("Site settings");
+    const places: { where: string; text: string }[] = [];
+    if (settings) places.push({ where: "Site settings", text: JSON.stringify(settings.record) });
     for (const [section, store] of this.#sections()) {
       if (!store) continue;
       for (const row of await store.listForPublish()) {
         if (row.record.status !== "approved" && row.record.status !== "published") continue;
-        if (holds(row.record)) uses.push(`${section}: ${titleOf(row.record as unknown as Record<string, unknown>, section)} (${row.schedule ? "scheduled" : row.record.status})`);
+        places.push({ where: `${section}: ${titleOf(row.record as unknown as Record<string, unknown>, section)} (${row.schedule ? "scheduled" : row.record.status})`, text: JSON.stringify(row.record) });
       }
     }
     for (const [section, store] of this.#pages()) {
       const stored = store ? await store.get() : null;
-      if (stored && (stored.record.status === "approved" || stored.record.status === "published") && holds(stored.record)) uses.push(`${section} (${stored.schedule ? "scheduled" : stored.record.status})`);
+      if (stored && (stored.record.status === "approved" || stored.record.status === "published")) places.push({ where: `${section} (${stored.schedule ? "scheduled" : stored.record.status})`, text: JSON.stringify(stored.record) });
     }
-    return uses;
+    for (const id of mediaIds) {
+      const uses = result[id]!;
+      if (live?.snapshot.media[id]) uses.push(`The live website (published version ${live.version})`);
+      for (const place of places) if (place.text.includes(`"${id}"`)) uses.push(place.where);
+    }
+    return result;
   }
 
   /* The public read — no session. The organization is this deployment's. */

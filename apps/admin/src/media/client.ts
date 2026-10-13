@@ -34,6 +34,9 @@ export interface MediaItem {
   completedAt: string | null;
   failureReason: string | null;
   version: number;
+  /* Ready images: where the website or approved content still uses it
+     (2026-10-13). Empty — "Not in use" — means it can be deleted. */
+  usedBy?: string[];
 }
 
 export interface MediaPolicy {
@@ -55,6 +58,7 @@ export interface MediaListParams {
   type?: "image";
   status?: MediaStatus;
   sort?: "newest" | "oldest";
+  usage?: "used" | "unused";
   page?: number;
   pageSize?: number;
 }

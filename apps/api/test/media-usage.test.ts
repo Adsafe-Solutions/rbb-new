@@ -42,6 +42,7 @@ async function site(orgId = "org-a", data = sharedData()) {
     log: silentLog,
     now: h.time.now,
     usage: (id) => h.publishing.mediaUsage(id),
+    usageMany: (ids) => h.publishing.mediaUsageMany(ids),
     lock: publishLock(h.publishStore, h.time.now),
   });
   await h.settings.importInitial(settingsRecord(orgId), { id: null, name: "Settings import" });
@@ -104,6 +105,29 @@ test("delete becomes possible once nothing public or approved needs the image â€
   assert.ok(!JSON.stringify(await h.publishing.publicSnapshot()).includes(pic.id));
   assert.deepEqual(await h.publishing.mediaUsage(pic.id), []);
   assert.deepEqual(await media.delete(owner, pic.id, FACTS), { deleted: true, storage: "removed" });
+});
+
+test("the library says where each ready image is used, and filters to used or unused ones (2026-10-13)", async () => {
+  const { h, media, image } = await site();
+  const live = image();
+  const unused = image();
+  const draftOnly = image();
+  await createApproved(h.stories, owner, story({ title: "Live story", imageId: live.id }), FACTS);
+  await h.publishing.publish(owner, FACTS);
+  await h.stories.create(editor, story({ title: "Draft story", imageId: draftOnly.id }), FACTS);
+  const { items } = await media.list(owner, {});
+  const byId = Object.fromEntries(items.map((m) => [m.id, m.usedBy]));
+  assert.ok(byId[live.id]!.some((w) => /^The live website/.test(w)) && byId[live.id]!.includes("Stories: Live story (published)"));
+  assert.deepEqual(byId[unused.id], []);
+  assert.deepEqual(byId[draftOnly.id], [], "a draft does not hold an image (M16)");
+  assert.deepEqual((await media.get(owner, live.id)).usedBy, byId[live.id]);
+  assert.deepEqual((await media.list(owner, { usage: "used" })).items.map((m) => m.id), [live.id]);
+  const free = await media.list(owner, { usage: "unused", pageSize: 1 });
+  assert.equal(free.pagination.total, 2);
+  assert.equal(free.items.length, 1);
+  assert.deepEqual((await media.list(owner, { usage: "unused", status: "failed" })).items, []);
+  // What the library calls unused, delete accepts.
+  for (const m of [unused, draftOnly]) assert.deepEqual(await media.delete(owner, m.id, FACTS), { deleted: true, storage: "removed" });
 });
 
 test("delete waits for a publication: it is refused while the publish lock is held", async () => {

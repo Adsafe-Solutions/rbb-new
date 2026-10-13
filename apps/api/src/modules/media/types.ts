@@ -93,6 +93,11 @@ export interface MediaView {
   completedAt: string | null;
   failureReason: string | null;
   version: number;
+  /* Where a READY image is still needed (2026-10-13): the same places that
+     refuse its deletion — the live website, approved, scheduled or
+     published content, the saved settings. Empty: it can be deleted.
+     Absent on pending and failed files, which nothing can use. */
+  usedBy?: string[];
 }
 
 export function toMediaView(record: MediaRecord): MediaView {

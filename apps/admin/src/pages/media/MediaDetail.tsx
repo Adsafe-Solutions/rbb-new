@@ -68,6 +68,8 @@ export function MediaDetail({ media, onClose, onChanged, onDeleted }: MediaDetai
   const dirty = Object.keys(changes).length > 0 || Boolean(focalProblem);
   const marker = "value" in focal && focal.value ? focalDraft(focal.value) : null;
   const ready = media.status === "ready";
+  /* Where it is used (ready images): the reason Delete is not offered. */
+  const inUse = ready && (media.usedBy?.length ?? 0) > 0;
 
   async function save() {
     if (focalProblem) return;
@@ -204,6 +206,22 @@ export function MediaDetail({ media, onClose, onChanged, onDeleted }: MediaDetai
               </dd>
             </div>
           )}
+          {ready && media.usedBy && (
+            <div>
+              <dt>Used by</dt>
+              <dd>
+                {media.usedBy.length ? (
+                  <ul className={styles.usedBy} aria-label="Where this file is used">
+                    {media.usedBy.map((where) => (
+                      <li key={where}>{where}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  "Not in use — it can be deleted."
+                )}
+              </dd>
+            </div>
+          )}
           {media.status === "failed" && media.failureReason && (
             <div>
               <dt>Reason</dt>
@@ -271,7 +289,14 @@ export function MediaDetail({ media, onClose, onChanged, onDeleted }: MediaDetai
 
       {canEdit && (
         <footer className={styles.footer}>
-          <Button variant="ghost" leadingIcon={<Trash2 />} className={styles.delete} onClick={() => setConfirmDelete(true)}>
+          <Button
+            variant="ghost"
+            leadingIcon={<Trash2 />}
+            className={styles.delete}
+            onClick={() => setConfirmDelete(true)}
+            disabled={inUse}
+            title={inUse ? "In use — remove it from the places listed under “Used by” first" : undefined}
+          >
             Delete
           </Button>
           {ready && (

@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   ChevronLeft,
+  Dialog,
   ChevronRight,
   Drawer,
   EmptyState,
@@ -16,7 +17,9 @@ import {
   Search,
   Select,
   Skeleton,
+  useToast,
 } from "../../design-system";
+import { ApiRequestError } from "../../api";
 import { mediaApi, type MediaItem, type MediaListParams, type MediaPolicy, type Pagination } from "../../media/client";
 import { useUploads } from "../../media/uploads";
 import { MediaDetail } from "./MediaDetail";
@@ -35,11 +38,13 @@ const FILTERS = [
   { value: "ready", label: "Ready" },
   { value: "pending", label: "Pending" },
   { value: "failed", label: "Failed" },
+  { value: "used", label: "In use" },
+  { value: "unused", label: "Not in use" },
 ] as const;
 type Filter = (typeof FILTERS)[number]["value"];
 
-const paramsFor = (filter: Filter): Pick<MediaListParams, "type" | "status"> =>
-  filter === "images" ? { type: "image" } : filter === "ready" || filter === "pending" || filter === "failed" ? { status: filter } : {};
+const paramsFor = (filter: Filter): Pick<MediaListParams, "type" | "status" | "usage"> =>
+  filter === "images" ? { type: "image" } : filter === "ready" || filter === "pending" || filter === "failed" ? { status: filter } : filter === "used" || filter === "unused" ? { usage: filter } : {};
 
 function useDebounced<T>(value: T, ms: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -63,6 +68,29 @@ export default function MediaLibraryPage() {
   const [policy, setPolicy] = useState<MediaPolicy | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [selected, setSelected] = useState<MediaItem | null>(null);
+  /* Delete straight from a tile — offered only for files nothing uses. */
+  const [toDelete, setToDelete] = useState<MediaItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const { toast } = useToast();
+
+  async function deleteFromTile() {
+    if (!toDelete) return;
+    setDeleting(true);
+    try {
+      await mediaApi.remove(toDelete.id);
+      toast({ title: "Media deleted", description: toDelete.originalFilename });
+      if (selected?.id === toDelete.id) setSelected(null);
+      reload();
+    } catch (caught) {
+      // Something started using it meanwhile: the API says so, and where.
+      const usedBy = caught instanceof ApiRequestError && caught.status === 409 ? caught.details.filter((d) => d.path === "usedBy").map((d) => d.message) : [];
+      toast({ tone: "danger", title: "Not deleted", description: usedBy.length ? `Still used by: ${usedBy.join("; ")}` : "The file could not be deleted. Please try again." });
+      reload();
+    } finally {
+      setDeleting(false);
+      setToDelete(null);
+    }
+  }
   const query = useDebounced(search.trim(), 250);
 
   const reload = useCallback(() => setReloads((n) => n + 1), []);
@@ -163,7 +191,7 @@ export default function MediaLibraryPage() {
           </p>
           <ul className={styles.grid} aria-label="Media files">
             {list.items.map((media) => (
-              <MediaTile key={media.id} media={media} upload={uploadsByMedia.get(media.id)} onOpen={setSelected} />
+              <MediaTile key={media.id} media={media} upload={uploadsByMedia.get(media.id)} onOpen={setSelected} onDelete={canUpload ? setToDelete : undefined} />
             ))}
           </ul>
           {list.pagination.totalPages > 1 && (
@@ -189,6 +217,22 @@ export default function MediaLibraryPage() {
         onRetry={uploads.retry}
         onDismiss={uploads.dismiss}
         onClearFinished={uploads.clearFinished}
+      />
+
+      <Dialog
+        open={toDelete !== null}
+        onClose={() => setToDelete(null)}
+        size="sm"
+        title="Delete this file?"
+        description={toDelete ? `“${toDelete.originalFilename}” is not used anywhere. It will be removed from the media library and from storage. This cannot be undone.` : ""}
+        footer={
+          <>
+            <Button onClick={() => setToDelete(null)}>Cancel</Button>
+            <Button variant="destructive" loading={deleting} onClick={deleteFromTile}>
+              Delete file
+            </Button>
+          </>
+        }
       />
 
       <Drawer open={selected !== null} onClose={() => setSelected(null)} label={selected ? `Details: ${selected.originalFilename}` : "Media details"} side="right" size="lg">

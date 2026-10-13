@@ -254,6 +254,7 @@ export function createApp(options: AppOptions = {}): App {
       ...(options.now && { now: options.now }),
       // M16: a media item the website or approved content still needs is not deleted.
       usage: async (mediaId) => (await publishing()).mediaUsage(mediaId),
+      usageMany: async (mediaIds) => (await publishing()).mediaUsageMany(mediaIds),
       lock: lockFor(db),
     });
   };

@@ -60,10 +60,16 @@ republishes what it changes.
   short-lived presigned URL, and `src/media/client.ts` PUTs the file to it
   with an XMLHttpRequest, so progress can be shown. File bytes never go to
   the API, and the admin holds no storage credential.
-- **The upload queue** (`src/media/uploads.ts`) checks files against the
-  API's policy first, for instant feedback. It then runs request → PUT →
-  complete, at most three at a time, with cancel and retry. Retry always asks
-  for a new upload URL.
+- **The upload queue** (`src/media/uploads.ts`) first optimises each image
+  (`src/media/convert.ts`: WebP, longest side at most 3200px; see
+  `docs/MEDIA_LIBRARY.md` "Optimising"), then checks it against the API's
+  policy for instant feedback. It then runs request → PUT → complete, at
+  most three at a time, with cancel and retry. Retry always asks for a new
+  upload URL.
+- **Deleting:** tiles say **In use** or **Not in use** (and the filter
+  has both). A file nothing uses has a Delete button on its tile; the
+  detail panel lists where an image is used and disables Delete until
+  nothing does. The API refuses (409) a file still in use.
 - **Showing and hiding controls** goes through `useCan()` (`src/auth.tsx`).
   That's a courtesy only: the API enforces the permissions.
 - **Locally,** the bucket's CORS must allow `http://localhost:5174`. Without

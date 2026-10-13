@@ -10,13 +10,14 @@ import { MediaService } from "./service.ts";
    handler runs); handlers only translate HTTP to the service.
 
      GET    /api/v1/media/policy                 limits for client-side checks   media:read
-     GET    /api/v1/media                        list (search, type, status, sort, page)
-     GET    /api/v1/media/:id                    one record
+     GET    /api/v1/media                        list (search, type, status, usage, sort, page);
+                                                 each ready image says where it is used (usedBy)
+     GET    /api/v1/media/:id                    one record, with usedBy
      POST   /api/v1/media/upload-intents         pending record + presigned PUT  media:write
      POST   /api/v1/media/:id/complete           verify the object → ready       media:write
      POST   /api/v1/media/:id/abort              upload failed/cancelled → failed media:write
      PATCH  /api/v1/media/:id                    alt, caption, credit, license, consent
-     DELETE /api/v1/media/:id                    soft delete, then storage cleanup
+     DELETE /api/v1/media/:id                    soft delete, then storage cleanup (409 while in use)
 
    Bodies are small JSON: file bytes go to storage, never here. */
 

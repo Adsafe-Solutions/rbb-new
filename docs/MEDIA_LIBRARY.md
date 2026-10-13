@@ -96,7 +96,7 @@ The format is `[_<env>/]<orgId>/media/<random uuid>/<safe-name>.<ext>`:
 
 | Rule | Value | Why |
 |---|---|---|
-| Types | JPEG, PNG, WebP, AVIF | Website images. The type is checked against the file's own bytes at completion, not just the claimed MIME type or the extension |
+| Types | JPEG, PNG, WebP, AVIF (the admin sends WebP whenever converting helps) | Website images. The type is checked against the file's own bytes at completion, not just the claimed MIME type or the extension |
 | SVG | **Refused** | An SVG can carry script, and served from the media domain it would run when opened directly. Safe handling (sanitising, or a sandbox CSP or download disposition on the bucket's domain) isn't designed yet. Use PNG/WebP for logos |
 | Documents (PDF) | Not yet | Nothing on the site needs an uploaded document today. The content contract already knows `application/pdf`; adding it is one entry in `policy.ts` |
 | Max size | 10 MiB | The largest image the site uses is 2.1 MB; 10 MiB covers an unoptimised phone photo. Enforced before a URL is issued, *signed into* the URL (Content-Length), and re-checked at completion |
@@ -142,6 +142,13 @@ lives in `PublishService.mediaUsage()`; the tests are in
 
 Pending and failed records hold nothing public and can always be deleted.
 
+**In the library (2026-10-13).** Every ready image says where it is used
+(`usedBy` on `GET /api/v1/media` and `/:id`, from
+`PublishService.mediaUsageMany()`, which reads everything once per page).
+Tiles show **In use** or **Not in use**; the filter has both. A file nothing
+uses gets a Delete button on its tile; the detail panel lists "Used by" and
+disables Delete while the list is not empty. The API still decides.
+
 ## Cleanup
 
 Run `pnpm api:build && pnpm api:media:cleanup`.
@@ -154,15 +161,38 @@ Run `pnpm api:build && pnpm api:media:cleanup`.
   "Production safety").
 - It runs on demand only; there is no scheduler yet.
 
+## Optimising: WebP before upload (2026-10-13)
+
+The admin converts every image to WebP **in the browser, before it uploads**
+(`apps/admin/src/media/convert.ts`); the bytes still go straight to R2 and
+the API checks what arrives as before.
+
+- Quality 0.85 for photographs, 0.9 for PNG (graphics, transparency).
+- Longest side at most **3200px** (the widest image the site draws is about
+  1440px wide, so this stays sharp on 2× screens). Camera orientation is
+  applied.
+- The WebP is used when it is smaller, or when the image was scaled down.
+  An original that is already WebP is re-encoded only for a 10%+ saving.
+  Otherwise, or where the browser cannot encode WebP, the original uploads
+  unchanged.
+- Any format the browser can open is accepted that way (GIF, BMP…); SVG is
+  still refused. Inputs over 60 MB are not tried (and then exceed the 10 MiB
+  limit).
+- Measured in Chromium: a 2.1 MB PNG became a 202 KB WebP (−90%); a
+  6000×4000 photo became 3200×2133. Average pixel difference about 1–3 of
+  255 — not visible.
+- Images uploaded before this are unchanged.
+
 ## Image metadata (EXIF, GPS)
 
-**Uploads are stored exactly as sent. Metadata is not stripped.** The API
-reads only the file's header, to check its type and dimensions. It never
-rewrites the image. A phone photo can carry EXIF data, including the GPS
-location where it was taken, the time, and the camera. That data is served
-publicly with the image.
+**A converted image carries no metadata**: the WebP is drawn from the
+pixels, so EXIF (GPS location, time, camera) is not copied. **A file that
+uploads as it is** (see above) is stored exactly as sent, metadata included:
+the API reads only the file's header, to check its type and dimensions, and
+never rewrites the image. A phone photo can carry EXIF data, including the
+GPS location where it was taken, and that data is served publicly with it.
 
-Until server-side stripping exists:
+For files that upload unchanged:
 
 - **Turn off location before uploading** photos of people, homes or
   programme sites. Use the phone's camera settings, or export the photo
@@ -171,8 +201,8 @@ Until server-side stripping exists:
   exporting for the web. Uploaded media isn't processed by the website build;
   it is served exactly as stored.
 
-Stripping needs image re-encoding. That is image processing, which is out of
-scope until a later milestone.
+Server-side stripping (for every file, whatever the browser) would need image
+processing in the API; it is not built.
 
 ## Alt text: where it is required
 

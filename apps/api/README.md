@@ -48,8 +48,8 @@ Base path: **`/api/v1`**.
 | GET | `/api/v1/integrations/donations/campaigns` | `appeals:read` | The donation provider's campaigns, provider-neutral (read-only) |
 | GET | `/api/v1/integrations/donations/campaigns/:campaignId` | `appeals:read` | One campaign by the provider's id |
 | GET | `/api/v1/media/policy` | `media:read` | Upload limits (types, max size), for client-side checks |
-| GET | `/api/v1/media` | `media:read` | `?search=&type=image&status=ready\|pending\|failed&sort=newest\|oldest&page=&pageSize=` → `{ data, pagination }`. Never lists deleted media |
-| GET | `/api/v1/media/:id` | `media:read` | One media record (404 if deleted) |
+| GET | `/api/v1/media` | `media:read` | `?search=&type=image&status=ready\|pending\|failed&usage=used\|unused&sort=newest\|oldest&page=&pageSize=` → `{ data, pagination }`. Never lists deleted media. Each ready image carries `usedBy` (where it is still used; empty = deletable) |
+| GET | `/api/v1/media/:id` | `media:read` | One media record, with `usedBy` (404 if deleted) |
 | POST | `/api/v1/media/upload-intents` | `media:write` | `{ filename, mimeType, size, width?, height? }` → pending record + a 5-minute presigned PUT URL for one new object |
 | POST | `/api/v1/media/:id/complete` | `media:write` | Verifies the object in storage (size, real type from its bytes, dimensions) → `ready`. Idempotent |
 | POST | `/api/v1/media/:id/abort` | `media:write` | The browser's upload failed or was cancelled → `failed` |
@@ -688,7 +688,9 @@ These are unverified until the first deploy:
 
 - Owner-driven password reset for a member who already has a password
 - Email invitations, email password reset and email verification
-- Media folders/tags, image resizing, documents (PDF), EXIF/GPS stripping
+- Media folders/tags, documents (PDF), server-side image processing (the
+  admin converts to WebP and scales in the browser, which drops EXIF/GPS from
+  converted files — `docs/MEDIA_LIBRARY.md`)
 - Givebutter changes
 - The Travel form (off). Newsletter (2026-10-13) is stored only: no
   confirmation email, unsubscribe handling or sending

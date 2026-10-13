@@ -62,6 +62,8 @@ export const ListInput = z.strictObject({
   type: z.enum(["image"]).optional(),
   status: z.enum(["pending", "ready", "failed"]).optional(),
   sort: z.enum(["newest", "oldest"]).default("newest"),
+  /* 2026-10-13: ready images that are (or are not) still in use. */
+  usage: z.enum(["used", "unused"]).optional(),
   page: z.coerce.number().int().min(1).max(10_000).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(24),
 });
@@ -90,6 +92,9 @@ export interface MediaServiceOptions {
   now?: () => Date;
   /* M16: where a media item is still needed (PublishService.mediaUsage). */
   usage?: (mediaId: string) => Promise<string[]>;
+  /* The same for many at once (PublishService.mediaUsageMany), for the
+     library's "In use" / "Not in use" labels. Defaults to `usage` per id. */
+  usageMany?: (mediaIds: string[]) => Promise<Record<string, string[]>>;
   /* M16: the publish lock (publishing/lock.ts). */
   lock?: PublishLock;
 }
@@ -104,10 +109,12 @@ export class MediaService {
   readonly #log: Logger;
   readonly #now: () => Date;
   readonly #usage: (mediaId: string) => Promise<string[]>;
+  readonly #usageMany: (mediaIds: string[]) => Promise<Record<string, string[]>>;
   readonly #lock: PublishLock;
 
   constructor(store: MediaStore, storage: ObjectStorage | null, audit: AuditService, throttle: ThrottleStore, options: MediaServiceOptions) {
     this.#usage = options.usage ?? (async () => []);
+    this.#usageMany = options.usageMany ?? (async (ids) => Object.fromEntries(await Promise.all(ids.map(async (id) => [id, await this.#usage(id)] as const))));
     this.#lock = options.lock ?? unlocked;
     this.#store = store;
     this.#storage = storage;
@@ -151,17 +158,35 @@ export class MediaService {
     this.#member(auth);
     const parsed = ListInput.safeParse(input);
     if (!parsed.success) throw errors.validation(issues(parsed.error, "query"));
-    const { search, type, status, sort, page, pageSize } = parsed.data;
-    const result: MediaPage = await this.#store.list({ ...(search && { search }), ...(type && { kind: type }), ...(status && { status }), sort, page, pageSize });
+    const { search, type, status, sort, usage, page, pageSize } = parsed.data;
+    const query = { ...(search && { search }), ...(type && { kind: type }), ...(status && { status }), sort };
+    if (usage) {
+      /* Usage is not a database field: read every matching ready image (a
+         library is hundreds, not millions), look each up, then page. */
+      if (status && status !== "ready") return { items: [], pagination: { page, pageSize, total: 0, totalPages: 1 } };
+      const all = (await this.#store.list({ ...query, status: "ready", page: 1, pageSize: 10_000 })).items;
+      const uses = await this.#usageMany(all.map((r) => r.id));
+      const matching = all.filter((r) => (uses[r.id]?.length ?? 0) > 0 === (usage === "used"));
+      const items = matching.slice((page - 1) * pageSize, page * pageSize).map((r) => ({ ...toMediaView(r), usedBy: uses[r.id] ?? [] }));
+      return { items, pagination: { page, pageSize, total: matching.length, totalPages: Math.max(1, Math.ceil(matching.length / pageSize)) } };
+    }
+    const result: MediaPage = await this.#store.list({ ...query, page, pageSize });
     return {
-      items: result.items.map(toMediaView),
+      items: await this.#withUsage(result.items),
       pagination: { page, pageSize, total: result.total, totalPages: Math.max(1, Math.ceil(result.total / pageSize)) },
     };
   }
 
   async get(auth: AuthContext, id: string): Promise<MediaView> {
     this.#member(auth);
-    return toMediaView(await this.#find(id));
+    return (await this.#withUsage([await this.#find(id)]))[0]!;
+  }
+
+  /* Views, each ready one with where it is still used. */
+  async #withUsage(records: MediaRecord[]): Promise<MediaView[]> {
+    const ready = records.filter((r) => r.status === "ready").map((r) => r.id);
+    const uses = ready.length ? await this.#usageMany(ready) : {};
+    return records.map((r) => (r.status === "ready" ? { ...toMediaView(r), usedBy: uses[r.id] ?? [] } : toMediaView(r)));
   }
 
   async createUploadIntent(auth: AuthContext, input: unknown, facts: RequestFacts): Promise<UploadIntent> {
@@ -344,7 +369,7 @@ export class MediaService {
     const changed = Object.fromEntries(Object.entries(fields).filter(([key, value]) => value !== undefined && (record[key as keyof MediaRecord] ?? null) !== value));
     if (!Object.keys(changed).length) {
       if (version !== record.version) throw errors.conflict("This file was changed since it was opened. Reload it and try again.");
-      return toMediaView(record);
+      return (await this.#withUsage([record]))[0]!;
     }
     const now = this.#now().toISOString();
     const updated = await this.#store.update(record.id, { fromStatuses: ["ready"], expectedVersion: version }, { ...changed, updatedAt: now, updatedBy: auth.user.id });
@@ -353,7 +378,7 @@ export class MediaService {
       { action: "media.metadata_updated", resourceType: "media", resourceId: record.id, actorUserId: auth.user.id, metadata: { fields: Object.keys(changed) } },
       facts
     );
-    return toMediaView(updated);
+    return (await this.#withUsage([updated]))[0]!;
   }
 
   async delete(auth: AuthContext, id: string, facts: RequestFacts): Promise<{ deleted: true; storage: "removed" | "pending" }> {

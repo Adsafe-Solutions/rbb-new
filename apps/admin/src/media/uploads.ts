@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { mediaApi, putToStorage, uploadErrorMessage, type MediaItem, type MediaPolicy } from "./client";
+import { optimiseImage } from "./convert";
 
 /* The upload queue: each file goes
-     check (here, for instant feedback) → intent (API) → PUT (storage)
+     optimise (convert.ts: WebP, scaled to the website's largest size)
+     → check (here, for instant feedback) → intent (API) → PUT (storage)
      → complete (API verifies) → done
    A failure after the intent tells the API (abort), so no record is ever
    left looking ready. Retry starts over with a NEW intent — an object key
    is never reused. The checks here mirror the API's policy for speed only;
    the API decides. */
 
-export type UploadPhase = "queued" | "preparing" | "uploading" | "completing" | "done" | "failed" | "cancelled";
+export type UploadPhase = "queued" | "optimising" | "preparing" | "uploading" | "completing" | "done" | "failed" | "cancelled";
 
 export interface UploadItem {
   key: string;
@@ -21,6 +23,8 @@ export interface UploadItem {
   retryable: boolean;
   mediaId: string | null;
   media: MediaItem | null;
+  /* What optimising did: the size before and after, and whether it became WebP. */
+  optimised: { from: number; to: number; converted: boolean } | null;
 }
 
 const MAX_PARALLEL = 3;
@@ -51,7 +55,7 @@ export function useUploads(policy: MediaPolicy | null, onUploaded: (media: Media
   const patch = useCallback((key: string, changes: Partial<UploadItem>) => setItems((list) => list.map((item) => (item.key === key ? { ...item, ...changes } : item))), []);
 
   const run = useCallback(
-    async (item: UploadItem, mimeType: string) => {
+    async (item: UploadItem, policy: MediaPolicy) => {
       const controller = new AbortController();
       controllers.current.set(item.key, controller);
       running.current.add(item.key);
@@ -65,13 +69,23 @@ export function useUploads(policy: MediaPolicy | null, onUploaded: (media: Media
         if (controller.signal.aborted) throw new DOMException("Upload cancelled", "AbortError");
       };
       try {
-        patch(item.key, { phase: "preparing", progress: 0, error: null, mediaId: null, media: null });
-        const intent = await mediaApi.createIntent({ filename: item.file.name, mimeType, size: item.file.size });
+        patch(item.key, { phase: "optimising", progress: 0, error: null, mediaId: null, media: null, optimised: null });
+        const optimised = await optimiseImage(item.file);
+        stopIfCancelled();
+        const file = optimised.file;
+        patch(item.key, { optimised: { from: optimised.originalSize, to: file.size, converted: optimised.converted } });
+        const checked = checkFile(file, policy);
+        if ("error" in checked) {
+          patch(item.key, { phase: "failed", error: checked.error, retryable: false });
+          return;
+        }
+        patch(item.key, { phase: "preparing" });
+        const intent = await mediaApi.createIntent({ filename: file.name, mimeType: checked.mimeType, size: file.size });
         mediaId = intent.mediaId;
         stopIfCancelled();
         patch(item.key, { phase: "uploading", mediaId });
         stage = "upload";
-        await putToStorage(intent, item.file, (progress) => patch(item.key, { progress }), controller.signal);
+        await putToStorage(intent, file, (progress) => patch(item.key, { progress }), controller.signal);
         stopIfCancelled();
         // The signed URL has done its job; it is not kept anywhere.
         stage = "complete";
@@ -101,14 +115,13 @@ export function useUploads(policy: MediaPolicy | null, onUploaded: (media: Media
     const slots = MAX_PARALLEL - running.current.size;
     if (slots <= 0) return;
     for (const item of items.filter((i) => i.phase === "queued").slice(0, slots)) {
-      const checked = checkFile(item.file, policy);
-      if ("error" in checked) patch(item.key, { phase: "failed", error: checked.error, retryable: false });
-      else void run(item, checked.mimeType);
+      running.current.add(item.key); // counted at once, so the next pass does not start it twice
+      void run(item, policy);
     }
   }, [items, policy, patch, run]);
 
   const add = useCallback((files: File[]) => {
-    setItems((list) => [...list, ...files.map((file) => ({ key: crypto.randomUUID(), file, phase: "queued" as const, progress: 0, error: null, retryable: true, mediaId: null, media: null }))]);
+    setItems((list) => [...list, ...files.map((file) => ({ key: crypto.randomUUID(), file, phase: "queued" as const, progress: 0, error: null, retryable: true, mediaId: null, media: null, optimised: null }))]);
   }, []);
 
   const cancel = useCallback((key: string) => controllers.current.get(key)?.abort(), []);
@@ -119,6 +132,6 @@ export function useUploads(policy: MediaPolicy | null, onUploaded: (media: Media
   // Leaving the page cancels uploads still in flight.
   useEffect(() => () => controllers.current.forEach((c) => c.abort()), []);
 
-  const active = items.some((i) => ["queued", "preparing", "uploading", "completing"].includes(i.phase));
+  const active = items.some((i) => ["queued", "optimising", "preparing", "uploading", "completing"].includes(i.phase));
   return { items, add, cancel, retry, dismiss, clearFinished, active };
 }

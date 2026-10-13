@@ -1,6 +1,7 @@
 import { useRef, useState, type DragEvent } from "react";
 import { Button, CircleCheck, CircleX, Dialog, IconButton, Spinner, X, cx } from "../../design-system";
 import type { MediaPolicy } from "../../media/client";
+import { MAX_EDGE } from "../../media/convert";
 import { formatBytes, type UploadItem } from "../../media/uploads";
 import styles from "./MediaLibraryPage.module.css";
 
@@ -22,7 +23,8 @@ interface UploadDialogProps {
 export function UploadDialog({ open, onClose, policy, uploads, onAdd, onCancel, onRetry, onDismiss, onClearFinished }: UploadDialogProps) {
   const input = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
-  const accept = policy ? [...policy.mimeTypes, ...policy.extensions.map((e) => `.${e}`)].join(",") : "image/*";
+  /* Any image: each is converted to WebP before it uploads (media/convert.ts). */
+  const accept = "image/*";
 
   const onDrop = (event: DragEvent) => {
     event.preventDefault();
@@ -37,7 +39,11 @@ export function UploadDialog({ open, onClose, policy, uploads, onAdd, onCancel, 
       onClose={onClose}
       size="md"
       title="Upload media"
-      description={policy ? `JPEG, PNG, WebP or AVIF, up to ${formatBytes(policy.maxBytes)} each.` : "Loading upload limits…"}
+      description={
+        policy
+          ? `Any image — JPEG, PNG, WebP, AVIF, GIF… Each is converted to WebP and scaled to at most ${MAX_EDGE} px on its longest side before it uploads, so it is smaller with no visible loss of quality.`
+          : "Loading upload limits…"
+      }
       footer={
         <>
           {finished && (
@@ -89,10 +95,11 @@ export function UploadDialog({ open, onClose, policy, uploads, onAdd, onCancel, 
                 <span className={styles.queueName}>{u.file.name}</span>
                 <span className={styles.queueStatus} role={u.phase === "failed" ? "alert" : undefined}>
                   {u.phase === "queued" && "Waiting…"}
+                  {u.phase === "optimising" && "Optimising…"}
                   {u.phase === "preparing" && "Preparing…"}
-                  {u.phase === "uploading" && `Uploading · ${Math.round(u.progress * 100)}% of ${formatBytes(u.file.size)}`}
+                  {u.phase === "uploading" && `Uploading · ${Math.round(u.progress * 100)}% of ${formatBytes(u.optimised?.to ?? u.file.size)}`}
                   {u.phase === "completing" && "Checking the file…"}
-                  {u.phase === "done" && "Uploaded"}
+                  {u.phase === "done" && (u.optimised?.converted ? `Uploaded as WebP · ${formatBytes(u.optimised.from)} → ${formatBytes(u.optimised.to)}` : "Uploaded")}
                   {u.phase === "cancelled" && "Cancelled"}
                   {u.phase === "failed" && u.error}
                 </span>
@@ -103,7 +110,7 @@ export function UploadDialog({ open, onClose, policy, uploads, onAdd, onCancel, 
                 )}
               </span>
               <span className={styles.queueActions}>
-                {["preparing", "uploading"].includes(u.phase) && (
+                {["optimising", "preparing", "uploading"].includes(u.phase) && (
                   <Button size="sm" variant="ghost" onClick={() => onCancel(u.key)}>
                     Cancel
                   </Button>

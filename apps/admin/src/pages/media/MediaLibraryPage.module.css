@@ -44,6 +44,16 @@
   }
 }
 
+/* The tile and, for a file nothing uses, its own Delete button on top. */
+.tileItem {
+  position: relative;
+}
+.tileDelete {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  box-shadow: var(--shadow-dropdown);
+}
 .tile {
   display: flex;
   flex-direction: column;

@@ -187,3 +187,16 @@ test("the definition check: normalising, one line except long text, formats, ign
   assert.equal(sniffDocument(PNG), null);
   assert.equal(safeFileName(null, "application/msword"), "document.doc");
 });
+
+test("a new save needs the marketing checkbox; a form saved before it existed still publishes", async () => {
+  const w = await world();
+  const c = DEFAULT_FORMS.contact;
+  const without = c.fields.filter((f) => f.id !== "marketing");
+  assert.equal((await failure(w.builder.save(owner, "contact", edit({ ...c, fields: without }), FACTS))).code, "VALIDATION_ERROR");
+  // An older saved form (no marketing field) in the store: a forms-only publish and a full publish both still work.
+  w.data.formDefinitions.push({ ...c, orgId: "org-a", fields: without, updatedAt: "2026-10-13T10:00:00.000Z" } as FormDefinition);
+  const v = (await w.h.settings.get(owner))!;
+  await w.h.settings.update(owner, { revision: v.revision, changes: { general: { ...v.settings.general, summary: "Changed." } } }, FACTS);
+  await w.h.publishing.publish(owner, FACTS);
+  assert.ok(PublishedSnapshot.safeParse((await w.h.publishing.publicSnapshot())!).success);
+});

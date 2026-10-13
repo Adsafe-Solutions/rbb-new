@@ -32,11 +32,15 @@ test("a definition keeps name and email, matches its kind, uses files only on ca
     ["four files", { ...newCareerForm("r", "R"), orgId: org, fields: [...newCareerForm("r", "R").fields, ...[1, 2, 3].map((i) => ({ id: `f${i}`, type: "file", label: "F", required: false }))] }],
     ["career id without its role", { ...newCareerForm("r", "R"), orgId: org, id: "career-other" }],
     ["a recipient (never public)", { ...c, recipient: "x@example.org" }],
-    ["no marketing checkbox", { ...c, fields: c.fields.filter((f) => f.id !== "marketing") }],
     ["marketing required", { ...c, fields: c.fields.map((f) => (f.id === "marketing" ? { ...f, required: true } : f)) }],
     ["ticked by default on a non-checkbox", { ...c, fields: c.fields.map((f) => (f.id === "message" ? { ...f, defaultChecked: true } : f)) }],
   ] as const)
     assert.ok(issues(value).length > 0, name);
+});
+
+test("a form saved before the marketing checkbox existed stays valid (its presence is required of new saves only)", () => {
+  const c = { ...DEFAULT_FORMS.contact, orgId: org };
+  assert.deepEqual(issues({ ...c, fields: c.fields.filter((f) => f.id !== "marketing") }), []);
 });
 
 test("snapshot: content.forms of this organization, each form once", () => {

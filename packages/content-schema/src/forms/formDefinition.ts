@@ -68,8 +68,12 @@ export const FormDefinition = z
       const f = byId.get(id);
       if (!f || f.type !== type || !f.required) ctx.addIssue({ code: "custom", path: ["fields"], message: `every form keeps a required "${id}" field (${type})` });
     }
+    /* The marketing checkbox, when present, is an optional checkbox. Its
+       PRESENCE is required of every NEW save (form-definitions service and
+       the admin builder), not here: forms saved before it existed stay
+       valid in stored records and published snapshots. */
     const marketing = byId.get(MARKETING_FIELD_ID);
-    if (!marketing || marketing.type !== "checkbox" || marketing.required) ctx.addIssue({ code: "custom", path: ["fields"], message: `every form keeps the optional "${MARKETING_FIELD_ID}" checkbox (news and updates by email)` });
+    if (marketing && (marketing.type !== "checkbox" || marketing.required)) ctx.addIssue({ code: "custom", path: ["fields"], message: `the "${MARKETING_FIELD_ID}" field is the optional news-and-updates checkbox` });
     if (d.fields.filter((f) => f.type === "file").length > MAX_FILE_FIELDS) ctx.addIssue({ code: "custom", path: ["fields"], message: `at most ${MAX_FILE_FIELDS} file uploads` });
   });
 export type FormDefinition = z.infer<typeof FormDefinition>;

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BUILT_IN_FORM_IDS, DEFAULT_FORMS, FormDefinition, newCareerForm, type Careers, type FormDefinitionData } from "@rbb/content-schema";
+import { BUILT_IN_FORM_IDS, DEFAULT_FORMS, FormDefinition, MARKETING_FIELD_ID, newCareerForm, type Careers, type FormDefinitionData } from "@rbb/content-schema";
 import { errors, fromZod } from "../../errors.ts";
 import type { AuditService, RequestFacts } from "../audit/audit.ts";
 import { requirePermission } from "../auth/permissions.ts";
@@ -107,6 +107,9 @@ export class FormDefinitionService {
     }
     const parsed = FormDefinition.safeParse({ ...input.data, id, orgId: this.#orgId, kind, ...(roleId && { roleId }), updatedAt: this.#now().toISOString() });
     if (!parsed.success) throw fromZod(parsed.error, "body");
+    /* Every form saved from now on carries the marketing emails checkbox
+       (2026-10-13); forms saved before it stay valid until next saved. */
+    if (!parsed.data.fields.some((f) => f.id === MARKETING_FIELD_ID)) throw errors.validation([{ path: "body.fields", message: `every form keeps the optional "${MARKETING_FIELD_ID}" checkbox (news and updates by email)` }]);
     const before = await this.#store.get(id);
     await this.#store.save(parsed.data);
     await this.#audit.recordSafely({ action: before ? "forms.updated" : "forms.created", resourceType: "form", resourceId: id, actorUserId: member.user.id, metadata: { fields: parsed.data.fields.length } }, facts);

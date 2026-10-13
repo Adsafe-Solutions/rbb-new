@@ -77,6 +77,7 @@ Base path: **`/api/v1`**.
 | POST | `/api/v1/submissions/:id/replies` | `submissions:write` (OWNER) | `{ message }` — emails the visitor an owner's reply (forms' sender and mode; Reply-To the form's `EMAIL_TO_<FORM>` inbox; never quotes their message) and records it; 503 while email is off |
 | DELETE | `/api/v1/submissions/:id` | `submissions:write` (OWNER) | Deletes it for good (and its files) |
 | GET | `/api/v1/submissions/:id/attachments/:attachmentId` | `submissions:read` (OWNER) | `{ url, expiresAt, name }` — a 5-minute signed link to an attached file |
+| GET | `/api/v1/notifications` | signed in | The topbar's notifications, live (nothing stored): `{ submissions: { new, byForm } \| null (needs submissions:read), publishing: { submitted, approved, failedSchedules } \| null (needs settings:read), canApprove, canPublish, checkedAt }`. Reads `PublishService.review()` — the publish status's review lists without building the candidate |
 | GET | `/api/v1/audience` | `submissions:read` (OWNER) | Every person across the forms, by email: `?q&marketing=yes\|no\|unknown&form&page` → `{ items, total, matching, optedIn, page, pages }` |
 | GET | `/api/v1/audience/export` | `submissions:read` (OWNER) | The same, as CSV (audited by row count) |
 | GET/PUT/DELETE | `/api/v1/forms-admin[/:id]` | `forms:write` (OWNER) | The website forms: list (with Careers roles), one form, save (LIVE AT ONCE: a forms-only publish), delete a career form / reset a built-in one |

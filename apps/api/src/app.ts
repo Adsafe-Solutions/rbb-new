@@ -70,6 +70,8 @@ import { submissionRoutes } from "./modules/submissions/routes.ts";
 import { SubmissionService } from "./modules/submissions/service.ts";
 import { AudienceService } from "./modules/audience/service.ts";
 import { audienceRoutes } from "./modules/audience/routes.ts";
+import { notificationRoutes } from "./modules/notifications/routes.ts";
+import { NotificationService } from "./modules/notifications/service.ts";
 import { MemberService } from "./modules/members/service.ts";
 import { MongoMediaStore } from "./modules/media/repository.ts";
 import { createDeliverer, refusingTransport, resendTransport, type EmailTransport, type OutgoingEmail } from "./modules/forms/email.ts";
@@ -533,6 +535,14 @@ export function createApp(options: AppOptions = {}): App {
     );
   };
 
+  /* The topbar's notifications: live counts, nothing stored. */
+  const notifications = async () => {
+    if (!config || !mongo) throw errors.unavailable("The database is not configured.");
+    const db = await mongo.db();
+    const store = new MongoSubmissionStore(db, config.orgId);
+    return new NotificationService({ counts: () => store.counts(), review: async (auth) => (await publishing()).review(auth), ...(options.now && { now: options.now }) });
+  };
+
   const routes: Route[] = [
     ...healthRoutes({ configured: config !== null, mongo, target: config?.target.kind ?? null }),
     ...appealRoutes(appealStore),
@@ -542,6 +552,7 @@ export function createApp(options: AppOptions = {}): App {
     ...(config ? submissionRoutes(submissions) : []),
     ...(config ? formDefinitionRoutes(formDefinitions) : []),
     ...(config ? audienceRoutes(audience) : []),
+    ...(config ? notificationRoutes(notifications) : []),
     ...(config ? formUploadRoutes(uploadDeps, config.cors.web) : []),
     ...(config ? donationRoutes(donationProvider) : []),
     ...(config ? mediaRoutes(media) : []),

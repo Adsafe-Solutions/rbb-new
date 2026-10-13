@@ -57,6 +57,28 @@
 }
 /* Placeholders keep their normal look (they are not "broken"), with a
    not-allowed cursor; the tooltip explains. */
+/* The notifications bell and its count. */
+.bell {
+  position: relative;
+  display: inline-flex;
+}
+.bellCount {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--color-danger-solid);
+  /* White in both themes: 5.3:1 on the red. */
+  color: var(--primitive-neutral-0);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+  pointer-events: none;
+}
 .placeholder[aria-disabled="true"] {
   background: transparent;
   color: var(--color-text-subtle);

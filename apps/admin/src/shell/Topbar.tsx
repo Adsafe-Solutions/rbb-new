@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { chooseMode, preferredMode } from "../theme/mode";
+import { PUBLISH_HREF, badgeCount, formBreakdown, itemLabel, plural, sectionHref, type ReviewItem } from "../notifications/model";
+import { useNotifications } from "../notifications/useNotifications";
 import type { AuthView } from "../api";
 import { useAuth } from "../auth";
 import {
@@ -10,6 +12,7 @@ import {
   ChevronDown,
   CircleHelp,
   IconButton,
+  Inbox,
   LogOut,
   Menu,
   MenuItem,
@@ -18,6 +21,7 @@ import {
   Moon,
   PanelLeft,
   Search,
+  Send,
   Sun,
   Tooltip,
   UserRound,
@@ -38,10 +42,10 @@ export interface TopbarProps {
 
 export const roleLabel = (role: string) => role.charAt(0) + role.slice(1).toLowerCase();
 
-/* Search, help and notifications are PLACEHOLDERS for later milestones:
-   visible so the layout is final, `aria-disabled` so they are focusable
-   and their tooltips say plainly that they are not available yet. None of
-   them pretends to work. */
+/* Search and help are PLACEHOLDERS for later milestones: visible so the
+   layout is final, `aria-disabled` so they are focusable and their
+   tooltips say plainly that they are not available yet. Neither pretends
+   to work. Notifications are real (2026-10-13). */
 export function Topbar({ view, breadcrumb, onToggleNavigation, navigationLabel, navigationExpanded, navigationControls }: TopbarProps) {
   return (
     <header className={styles.topbar}>
@@ -60,13 +64,98 @@ export function Topbar({ view, breadcrumb, onToggleNavigation, navigationLabel, 
         <Tooltip content="Help is not available yet" side="bottom">
           <IconButton label="Help" icon={<CircleHelp />} aria-disabled="true" className={styles.placeholder} />
         </Tooltip>
-        <Tooltip content="Notifications are not available yet" side="bottom">
-          <IconButton label="Notifications" icon={<Bell />} aria-disabled="true" className={styles.placeholder} />
-        </Tooltip>
+        <NotificationsMenu />
         <ThemeSwitch />
         <UserMenu view={view} />
       </div>
     </header>
+  );
+}
+
+/* What is waiting: new form submissions, content waiting for review,
+   approved changes not yet published, failed scheduled publications —
+   each person only what they may see (the API decides). */
+function NotificationsMenu() {
+  const { data, refresh } = useNotifications();
+  const count = badgeCount(data);
+  const p = data?.publishing ?? null;
+  const items = (list: ReviewItem[], total: number) => (
+    <>
+      {list.map((item, i) => (
+        <MenuItem key={`${item.section}:${item.title}:${i}`} onSelect={() => navigate(sectionHref(item.section))}>
+          {itemLabel(item)}
+        </MenuItem>
+      ))}
+      {total > list.length && <MenuItem onSelect={() => navigate(PUBLISH_HREF)}>{`and ${total - list.length} more…`}</MenuItem>}
+    </>
+  );
+  const empty = data !== null && !data.submissions?.new && !p?.submitted.total && !p?.approved.total && !p?.failedSchedules.length;
+  return (
+    <Menu
+      align="end"
+      minWidth={300}
+      label="Notifications"
+      trigger={(props) => (
+        <span className={styles.bell}>
+          <IconButton
+            {...props}
+            onClick={() => {
+              void refresh();
+              props.onClick();
+            }}
+            label={count ? `Notifications: ${count} waiting` : "Notifications"}
+            icon={<Bell />}
+            data-testid="notifications"
+          />
+          {count > 0 && (
+            <span className={styles.bellCount} aria-hidden="true">
+              {count > 99 ? "99+" : count}
+            </span>
+          )}
+        </span>
+      )}
+    >
+      <MenuLabel>Notifications</MenuLabel>
+      {data === null && <MenuItem disabled>Checking…</MenuItem>}
+      {empty && <MenuItem disabled>You're all caught up.</MenuItem>}
+      {data?.submissions && data.submissions.new > 0 && (
+        <>
+          <MenuSeparator />
+          <MenuLabel>{`New form submissions (${data.submissions.new})`}</MenuLabel>
+          {formBreakdown(data.submissions.byForm).map(([form, n]) => (
+            <MenuItem key={form} icon={<Inbox />} onSelect={() => navigate("/submissions")}>
+              {`${form}: ${plural(n, "new submission")}`}
+            </MenuItem>
+          ))}
+        </>
+      )}
+      {p && p.failedSchedules.length > 0 && (
+        <>
+          <MenuSeparator />
+          <MenuLabel>{p.failedSchedules.length === 1 ? "A scheduled publication failed" : `${p.failedSchedules.length} scheduled publications failed`}</MenuLabel>
+          {items(p.failedSchedules, p.failedSchedules.length)}
+        </>
+      )}
+      {p && p.submitted.total > 0 && (
+        <>
+          <MenuSeparator />
+          <MenuLabel>{`Waiting for ${data?.canApprove ? "your " : ""}review (${p.submitted.total})`}</MenuLabel>
+          {items(p.submitted.items, p.submitted.total)}
+        </>
+      )}
+      {p && p.approved.total > 0 && (
+        <>
+          <MenuSeparator />
+          <MenuLabel>{`Approved, not yet published (${p.approved.total})`}</MenuLabel>
+          {items(p.approved.items, p.approved.total)}
+          {data?.canPublish && (
+            <MenuItem icon={<Send />} onSelect={() => navigate(PUBLISH_HREF)}>
+              Review and publish the website
+            </MenuItem>
+          )}
+        </>
+      )}
+    </Menu>
   );
 }
 

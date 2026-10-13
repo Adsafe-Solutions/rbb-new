@@ -130,8 +130,17 @@ flag the code is not in the bundle.
   `<dialog>`).
 
 Modules that aren't built yet appear in the sidebar marked "Soon". They
-aren't links. Search, help and notifications in the topbar are marked as
-unavailable.
+aren't links. Search and help in the topbar are marked as unavailable.
+
+**Notifications** (the topbar bell, 2026-10-13): new form submissions per
+form (owners), content waiting for review, approved changes not yet
+published and failed scheduled publications, each linking to where it is
+dealt with. The number on the bell counts only what this person can act
+on (editors see the publishing queue without a number). Read live from
+`GET /api/v1/notifications` every minute, on window focus and when the
+menu opens; nothing is stored, so an entry goes away when the work is done
+(a submission marked read, content approved, the website published).
+`src/notifications/`.
 
 ## Forms (owners only)
 

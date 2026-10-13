@@ -59,6 +59,7 @@ export {
   HandHelping,
   Scale,
   Search,
+  Send,
   Settings,
   ShieldCheck,
   Sparkles,

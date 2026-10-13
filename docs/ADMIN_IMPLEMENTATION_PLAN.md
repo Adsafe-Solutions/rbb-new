@@ -34,7 +34,8 @@ and the problems met while entering content on 2026-10-12/13.
 | 19 | Footer link to the Careers page | S | Done — committed, pushed and live (`6467a9f`) |
 | 20 | Admin look: ink primary (in place of `#10437C`), light/dark switch, compact tables | S | Done — committed, pushed and live (`11075f3`) |
 | 21 | Footer subscribe (Newsletter) form, stored for owners; not editable in Admin | S | Done — committed, pushed and live (`f0b967a`) |
-| 22 | Media: delete when not in use; every upload converted to WebP | M | Implemented — tests run; not yet committed or deployed |
+| 22 | Media: delete when not in use; every upload converted to WebP | M | Done — committed, pushed and live (`906224e`) |
+| 23 | Notifications in the topbar (new submissions, review and publishing queue) | S | Implemented — tests run; not yet committed or deployed |
 
 ## 1. Remove stale references from record pickers — done
 
@@ -520,7 +521,7 @@ Admin → Forms.
 - Tests: API `submissions.test.ts`, `audience.test.ts`; web
   `deploy-pages.test.mjs`; admin `submissions.test.mjs`.
 
-## 22. Media: delete when not in use; WebP on upload — implemented
+## 22. Media: delete when not in use; WebP on upload — done
 
 Owner request (2026-10-13).
 
@@ -537,6 +538,25 @@ Owner request (2026-10-13).
   images are unchanged. `docs/MEDIA_LIBRARY.md` "Optimising".
 - Tests: API `media-usage.test.ts`; admin `media-optimise.test.mjs`; the
   conversion checked in Chromium on the site's own photos.
+
+## 23. Notifications in the topbar — implemented
+
+Owner request (2026-10-13): show new submissions and pending publishing in
+the bell's dropdown.
+
+- API: `GET /api/v1/notifications` (`modules/notifications/`), live counts,
+  nothing stored: new submissions per form (submissions:read), content
+  submitted for review, approved changes not yet published and failed
+  scheduled publications (settings:read; `PublishService.review()`), and
+  whether this person can approve / publish.
+- Admin: the bell opens a menu grouped by kind; each entry links to its
+  form inbox, section or the publish panel (`/settings`). The badge counts
+  what this person can act on. Refreshed every minute while the tab is
+  visible, on focus and when opened.
+- Not built: browser push or email notifications, and per-person
+  read/unread — an entry clears when the work itself is done.
+- Tests: API `notifications.test.ts`; admin `notifications.test.mjs`; the
+  menu checked in a browser against mocked answers (light and dark).
 
 ## 14. Audit Log screen — removed, not required
 

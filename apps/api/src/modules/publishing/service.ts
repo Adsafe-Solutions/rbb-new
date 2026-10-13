@@ -663,6 +663,13 @@ export class PublishService {
     };
   }
 
+  /* What waits for review or publication — status()'s `review` alone,
+     without building the candidate (the topbar's notifications, polled). */
+  async review(auth: AuthContext): Promise<PublishStatus["review"]> {
+    this.#member(auth);
+    return this.#review(this.#now());
+  }
+
   /* M36: the candidate status() checks and publish() would store — approved
      and published records over the working settings — shown to an OWNER
      only, and only read: no version is taken, nothing is marked published,

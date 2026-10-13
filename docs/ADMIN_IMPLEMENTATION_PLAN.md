@@ -6,8 +6,10 @@ done. Each item is implemented, tested with the unit suites
 `pnpm typecheck`), reviewed, then committed. Nothing here touches
 production data; deployment is a separate, explicit step.
 
-Sources: `docs/CMS_COVERAGE_AUDIT.md`, `docs/CONTENT_MIGRATION_PLAN.md`,
-and the problems met while entering content on 2026-10-12/13.
+Sources: the CMS coverage audit of 2026-10-11 and
+`docs/CONTENT_MIGRATION_PLAN.md` (both since folded into this plan; the
+audit was removed on 2026-10-13), and the problems met while entering
+content on 2026-10-12/13.
 
 ## Status
 
@@ -229,8 +231,7 @@ elsewhere, the form uses the selector and starts empty); web
 `scripts/test/legacy-giving-retired.test.mjs` (redirects, removed files,
 Donate/Givebutter untouched, framework gone) and the updated
 `published-snapshot.test.mjs`.
-Docs: `docs/PUBLISHING.md`, `apps/web/CLAUDE.md` (snapshot mappings),
-`apps/web/docs/FINAL_CONTENT_REPLACEMENT_CHECKLIST.md` (Admin locations).
+Docs: `docs/PUBLISHING.md`, `apps/web/CLAUDE.md` (snapshot mappings).
 
 Migration for 6 and 7 (`apps/web/scripts/migration/source.mjs`, retired with the built-in content on 2026-10-13): not done,
 and recorded as `excluded-by-policy` rather than a schema gap. Where We

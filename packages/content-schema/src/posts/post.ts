@@ -33,7 +33,7 @@ export const STORY_CATEGORY_IDS = ["news", "field", "impact", "community"] as co
 
      quotes  pull-quotes after the body: the words, as said, and who said
              them — both required, as the website's own content rules
-             require (apps/web content/validate.js, docs/CONTENT_GUIDE.md
+             require (apps/web content/validate.js
              `quotes [{ text, attribution }]`). Public: a quote and its
              attribution are shown on the page. A real person's words need RBB's approval and
              their permission (content/stories.js) — the editorial approval

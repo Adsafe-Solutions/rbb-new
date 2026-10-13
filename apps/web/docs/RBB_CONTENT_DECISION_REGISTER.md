@@ -8,7 +8,9 @@ RBB needs to supply. It also gives the file to change and the approval
 area in `release/approvals.mjs` where the decision is recorded (who, date,
 reference). **Every decision below is OPEN.**
 
-The page-by-page view is `docs/FINAL_CONTENT_REPLACEMENT_CHECKLIST.md`.
+Content itself is entered and approved in the Admin (CMS); since
+2026-10-13 the website keeps no built-in copy of it (docs/PUBLISHING.md
+"No built-in content").
 
 | # | Decision | On the site now | What RBB must decide or supply | File | Approval area | Status |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -65,7 +67,7 @@ stories, the homepage timeline and film, Media Center items and appeals
 stay as sample content written as natural copy; each carries an
 internal, never-displayed `releaseMarker` that the readiness scan and
 `release:check` detect. None of the decisions changes: each is still
-OPEN (`docs/WORKING_CONTENT.md`).
+OPEN.
 
 ## Rules that hold whatever is decided
 

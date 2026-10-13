@@ -9,7 +9,8 @@ and `npm run build` show the same complete website, and it is verified —
 build, hydration, CSP, accessibility, responsive, forms in test mode,
 donation states.
 
-Much of that content is SAMPLE content (`docs/WORKING_CONTENT.md`),
+Since 2026-10-13 that content is the CMS's (docs/PUBLISHING.md "No
+built-in content"); much of it began as SAMPLE content,
 because no RBB-approved replacement content, credentials or provider
 configuration has been supplied. Since 2026-10-06 (the client's
 decision) samples carry no visible demo label; each carries an internal,

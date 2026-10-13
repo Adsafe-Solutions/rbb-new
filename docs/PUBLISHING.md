@@ -1679,7 +1679,7 @@ refuses them, and the snapshot refuses them on a news or blog post).
 - **Quotes** (`quotes`): up to 6, each `{ text, attribution }` — the words
   as said (up to 600 characters) and who said them (up to 160). Both are
   required, as the website's own content rules require
-  (`content/validate.js`, `docs/CONTENT_GUIDE.md`). Shown after the story
+  (`content/validate.js`). Shown after the story
   as pull-quotes, in order. Public as written. A real person's words need
   RBB's approval and their permission: the editorial approval is that gate;
   the CMS records no consent for a quote.

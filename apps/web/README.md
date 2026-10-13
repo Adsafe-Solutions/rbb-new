@@ -1,79 +1,65 @@
-# RBB
+# RBB website (`@rbb/web`)
 
-React + Vite front end, built on a token-driven design system.
+The public Rising Beyond Borders website: React 18 + Vite + Tailwind v4,
+pre-rendered to static HTML, deployed to Cloudflare Pages. Its content is
+published from the Admin (CMS) through the API's snapshot.
 
 ## Run it
 
+From the repository root (pnpm workspace — never `npm install` here):
+
 ```sh
-npm install
-npm run dev        # http://localhost:5173
-npm run build      # production bundle into dist/
-npm run preview    # serve the built bundle
+pnpm install
+pnpm web:dev        # http://localhost:5173 — the saved copy of the live content
+pnpm web:build      # dist/ — with RBB_SNAPSHOT_URL unset, from the saved copy
+pnpm web:test       # unit and render tests
+pnpm web:validate   # content checks
 ```
 
-Visit **`/design-system`** in dev for the living token reference — every
-swatch on that page is rendered from a real utility, so it cannot drift from
-the code.
+`/design-system` and `/components` render the design system live in dev.
 
 ## Where things are
 
 ```
-design/
-  DESIGN.md        the written style reference
-  tokens.json      the DTCG token export theme.css is generated from
-  reference/       the screenshots the layout was built against
 src/
-  styles/
-    theme.css      ← THE design system. Tailwind reads this.
-    variables.css  the same tokens as plain custom properties
-    index.css      base layer: document styles, Lenis, reveal states
-  animations/      the motion system: Lenis, GSAP, the attribute scanner
-  content/         every string on the site
-  components/      one folder per component
-  pages/           one folder per route
-  config/          env reading and feature switches
+  styles/        theme.css (THE design system), variables.css, index.css
+  animations/    the motion system: Lenis, GSAP, the attribute scanner
+  content/       page wording, navigation, footer, forms — and the empty
+                 exports the CMS snapshot fills
+  components/    one folder per component
+  pages/         one folder per route
+  config/        env reading and feature switches
+  contract/      build-time checks against the content contract
+scripts/         the build: snapshot fetch and adapter, prerender, deploy
+fixtures/        published-snapshot.json — the saved copy of the live CMS data
+docs/            deployment, security, forms, donations, release readiness
 ```
 
-## The rules that matter
+## Content
 
-**No hex codes in `src/` outside `styles/`.** Every colour is named in
-`theme.css`, and Tailwind emits a utility for each one — `--color-pollen`
-becomes `bg-pollen`, `text-pollen`, `border-pollen`. A component that wants a
-colour reaches for the utility, never the literal.
+Everything the CMS publishes — homepage, About, Impact, team, programs,
+projects, stories, news, events, appeals, policies, Get Involved,
+contact and brand — comes from the API's published snapshot. The website
+keeps no built-in copy of it (see `docs/PUBLISHING.md` at the repository
+root, "No built-in content"). Production builds fetch the live snapshot;
+local builds, tests and the dev server use `fixtures/published-snapshot.json`.
+Refresh that file from `https://api.risingbeyondborders.org/api/v1/public/snapshot`
+when the live content changes.
 
-**Tailwind v4, so there is no `tailwind.config.js`.** The theme lives in CSS.
-Adding a token to the `@theme` block in `theme.css` is all it takes for the
-utility to exist.
+What stays in `src/content/` is what the CMS does not manage: navigation,
+footer columns, page frames and interface wording, photographs, SEO
+structure, the built-in forms, How We Work, Our Approach and Where We Work.
 
-**Write class names out in full.** Tailwind finds classes by scanning source
-files for literal strings; it does not evaluate JavaScript. `` `bg-${token}` ``
-generates nothing and renders transparent. Keep a lookup map of complete class
-strings instead — `components/Button` and `pages/DesignSystem` both do.
+## Rules
 
-**Pair the type utilities.** Each size ships with its own leading and tracking:
-`text-body leading-body tracking-body`. The positive tracking at every size is
-what gives the face its open cadence — never zero it out.
-
-**One filled button, and it is ink.** Yellow is the brand's warmth, not its
-clickability. A honey button carries no affordance and competes with the real
-call to action. See the Do's and Don'ts in `design/DESIGN.md`.
-
-## Content and assets
-
-All copy is in `src/content/`. The brand name comes from `content/brand.js` —
-including the oversized hero mark, which renders whatever string it is given.
-
-Photography is not wired up yet. Content entries name a `photo` label and
-`components/Photo` draws a tonal placeholder at the correct aspect ratio, so
-every section holds its true shape. To drop in real art, import the file and
-swap `photo: "portrait-seafront"` for `src: portraitSeafront`. Nothing else
-changes.
-
-The QR code in `components/GetApp` is a placeholder pattern at the right
-density. **It does not scan** — replace it before this goes anywhere public.
+The working rules for this app — design system, motion, snapshot
+mappings and their gotchas — are in `CLAUDE.md`. In short: no hex codes
+outside `src/styles/`; write Tailwind class names out in full (no
+interpolation); keep content exports as `export const NAME = …` objects or
+arrays, because the build assigns the snapshot into them.
 
 ## Environment
 
-Copy `.env.example` to `.env.local`. Only `VITE_*` keys reach the browser;
-nothing in the file is secret today. Feature switches default from
-`src/config/sections.js`, so an environment only names what it wants different.
+Copy `.env.example` to `.env.local`. Only `VITE_*` keys reach the browser.
+Feature switches default from `src/config/sections.js`. Deploying:
+`docs/DEPLOY_CLOUDFLARE_PAGES.md`.

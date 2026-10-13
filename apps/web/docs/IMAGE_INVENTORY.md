@@ -40,14 +40,49 @@ acceptable.
 
 ## Working placeholder photographs — 23 temporary Pexels images
 
-Listed in full, with creator and link, in `docs/WORKING_CONTENT.md`. They
-live in `src/assets/` beside every other image and are published by every
-build — that is what lets the whole site be reviewed. They illustrate the
-sample team, projects, stories, Media Center items and appeals. **None of
+Listed in full, with creator and link, below. They live in `src/assets/`
+beside every other image (`WORKING_PHOTOS` / `TEAM_PORTRAITS` in
+`content/photos.js`). The "Used for" column is what each illustrated when
+the website held its own sample content; since 2026-10-13 that content is
+the CMS's, and a page frame may still use one. **None of
 them is RBB's**, and every one must be replaced or explicitly licensed and
 approved before release; the readiness scan flags each one ("working
 placeholder photograph") and `npm run release:status` counts what is left.
-All 23 are used, none is left over.
+All 23 are still in the site's image set (`content/photos.js`).
+
+All are free under the [Pexels licence](https://www.pexels.com/license/).
+None shows RBB's work, people or places, so the alt text describes only
+what is in the frame.
+
+| File (`src/assets/`) | Pexels photo | Photographer | Used for |
+| --- | --- | --- | --- |
+| demo-edu-rural-classroom.jpg | [15119089](https://www.pexels.com/photo/15119089/) | Pallav Suthar | Classroom Supplies project; story |
+| demo-edu-teacher-classroom.jpg | [18395403](https://www.pexels.com/photo/18395403/) | C.T. PHAT | Teacher Mentoring project; gallery |
+| demo-edu-girl-reading.jpg | [12926472](https://www.pexels.com/photo/12926472/) | Photomandi PK | Story gallery |
+| demo-edu-reading-circle.jpg | [8613089](https://www.pexels.com/photo/8613089/) | Yan Krukau | Reading Clubs project; featured story |
+| demo-health-checkup.jpg | [5327584](https://www.pexels.com/photo/5327584/) | Thirdman | Health Days project; story |
+| demo-health-team.jpg | [6129657](https://www.pexels.com/photo/6129657/) | RDNE Stock project | Story gallery |
+| demo-health-water-pump.jpg | [28101466](https://www.pexels.com/photo/28101466/) | illustrate Digital Ug | Water Points project; story |
+| demo-health-drinking-water.jpg | [28101461](https://www.pexels.com/photo/28101461/) | illustrate Digital Ug (confirmed 2026-09-24) | Story gallery |
+| demo-live-vegetable-seller.jpg | [10146963](https://www.pexels.com/photo/10146963/) | Rohan Dewangan | Story gallery |
+| demo-live-market.jpg | [20432829](https://www.pexels.com/photo/20432829/) | Fireworks Uche | Market Traders project; story |
+| demo-live-sewing.jpg | [3738100](https://www.pexels.com/photo/3738100/) | cottonbro studio | Tailoring project; story |
+| demo-live-harvest.jpg | [10745258](https://www.pexels.com/photo/10745258/) | Leonardo Vazquez | Smallholder project; gallery |
+| demo-comm-gathering.jpg | [31874011](https://www.pexels.com/photo/31874011/) | Helena Jankovičová Kováčová | Information Days project; story |
+| demo-comm-aid-boxes.jpg | [6647178](https://www.pexels.com/photo/6647178/) | RDNE Stock project | Story gallery |
+| demo-comm-packing.jpg | [7156178](https://www.pexels.com/photo/7156178/) | Gustavo Fring | Essentials project; story |
+| demo-comm-food-prep.jpg | [6995212](https://www.pexels.com/photo/6995212/) | Julia M Cameron | Story gallery |
+| demo-comm-relief-packing.jpg | [6646871](https://www.pexels.com/photo/6646871/) | RDNE Stock project | Story gallery |
+| demo-team-1.jpg | [29852895](https://www.pexels.com/photo/29852895/) | Ifeyinka Adeyemo | Sample team portrait |
+| demo-team-2.jpg | [18809829](https://www.pexels.com/photo/18809829/) | Audy of Course | Sample team portrait |
+| demo-team-3.jpg | [30767572](https://www.pexels.com/photo/30767572/) | Uiliam Nörnberg | Sample team portrait |
+| demo-team-4.jpg | [34381970](https://www.pexels.com/photo/34381970/) | Zoe Galarza | Sample team portrait |
+| demo-team-5.jpg | [12437056](https://www.pexels.com/photo/12437056/) | Lubomir Satko | Sample team portrait |
+| demo-team-6.jpg | [30004322](https://www.pexels.com/photo/30004322/) | Daniel & Hannah Snipes | Sample team portrait |
+
+The team portraits (`TEAM_PORTRAITS`) are stock photographs of real
+models standing in for sample roles. Their alt text says they are stock
+
 
 **Resolved flag:** `demo-health-drinking-water.jpg` (Pexels
 [28101461](https://www.pexels.com/photo/28101461/), "Girl Drinking Water

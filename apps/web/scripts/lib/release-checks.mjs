@@ -143,7 +143,7 @@ export function evaluateRelease(ctx) {
       "CONTENT",
       `${contentReadiness.placeholders} working placeholder occurrence(s) in ${contentReadiness.files.length} file(s)`,
       `the build still shows working content: ${contentReadiness.rules.join(", ")}`,
-      "Replace every placeholder with RBB's approved content (docs/FINAL_CONTENT_REPLACEMENT_CHECKLIST.md)",
+      "Replace every placeholder with RBB's approved content — in the Admin (CMS) for published content, in src/ for photographs and page wording",
       { files: contentReadiness.files.slice(0, 25) }
     );
   else pass("CONTENT", "No working placeholder content in the build");

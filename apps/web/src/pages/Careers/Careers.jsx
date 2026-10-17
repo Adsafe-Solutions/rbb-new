@@ -5,7 +5,7 @@ import FormSection from "../../components/FormSection/FormSection.jsx";
 import { formState } from "../../lib/forms.js";
 import useSeo from "../../hooks/useSeo.js";
 import { routeMeta } from "../../content/seo.js";
-import { CAREERS, alternativeContact, formConfig } from "../../content/index.js";
+import { CAREERS, alternativeContact, careerFormConfig } from "../../content/index.js";
 
 /* /about-us/careers — the Careers page, at the address the site already
    used (Document 08 keeps it rather than opening a second careers page).
@@ -20,13 +20,16 @@ import { CAREERS, alternativeContact, formConfig } from "../../content/index.js"
 
    2026-10-13: a role with an application form saved in the admin
    (career-<role id>) gets that form, in its own section beneath the list,
-   with a link to it from the role's line. A role without one shows its
-   title only. */
+   with a link to it from the role's line. 2026-10-17 (review): a role
+   without one gets the standard application form, so every open role can
+   be applied for — before, only the role whose form had been saved showed
+   an Apply section. A role with no id (never saved in the admin) shows
+   its title only. */
 export default function Careers() {
   useSeo(routeMeta(CAREERS.to));
 
   const applications = CAREERS.roles
-    .map((role) => ({ role, config: role.id ? formConfig(`career-${role.id}`) : null }))
+    .map((role) => ({ role, config: careerFormConfig(role) }))
     .filter((a) => formState(a.config) === "ready");
   const open = new Set(applications.map((a) => a.role.id));
 

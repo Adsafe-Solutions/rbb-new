@@ -54,6 +54,7 @@ export const ENV_VARIABLES = {
   EMAIL_ACK_FORMS: { secret: false, requiredIn: "never", purpose: "comma list of forms that email the submitter an acknowledgement (default none)" },
   EMAIL_TEST_RECIPIENT: { secret: false, requiredIn: "never", purpose: "staging only: the one inbox every form email goes to" },
   FORMS_RATE_LIMIT_MAX: { secret: false, requiredIn: "never", purpose: "submissions per client and form per window (default 5)" },
+  FORMS_CAREERS_RATE_LIMIT_MAX: { secret: false, requiredIn: "never", purpose: "career applications per client and role per window (default 3)" },
   FORMS_RATE_LIMIT_WINDOW_S: { secret: false, requiredIn: "never", purpose: "the rate-limit window in seconds (default 600)" },
 } as const;
 
@@ -191,6 +192,7 @@ const EnvSchema = z
     EMAIL_ACK_FORMS: z.string().optional(),
     EMAIL_TEST_RECIPIENT: z.string().optional(),
     FORMS_RATE_LIMIT_MAX: z.string().optional(),
+    FORMS_CAREERS_RATE_LIMIT_MAX: z.string().optional(),
     FORMS_RATE_LIMIT_WINDOW_S: z.string().optional(),
   })
   .superRefine((env, ctx) => {

@@ -136,3 +136,19 @@ export class FormDefinitionService {
 }
 
 const strip = ({ orgId: _o, updatedAt: _u, ...rest }: FormDefinition): FormDefinitionData => rest as FormDefinitionData;
+
+/* The form a PUBLIC submission (or a career CV upload) is checked against:
+   as saved in the admin; else — for a career form (2026-10-17, review) —
+   the standard application form of a role the PUBLISHED Careers page
+   lists, so every open role can be applied for, not only those whose form
+   an owner saved. The website draws the same standard form (apps/web
+   content/forms.js defaultCareerForm). Anything else: null (built-in
+   forms keep their schema; an unknown or unpublished role is not a form). */
+export const liveForms = (store: Pick<FormDefinitionStore, "get">, orgId: string, publishedRoles: () => Promise<{ id?: string | undefined; title: string }[]>) => ({
+  async live(id: string): Promise<FormDefinition | null> {
+    const saved = await store.get(id);
+    if (saved || !id.startsWith("career-")) return saved;
+    const role = (await publishedRoles()).find((r) => r.id && `career-${r.id}` === id);
+    return role?.id ? FormDefinition.parse({ ...newCareerForm(role.id, role.title), orgId }) : null;
+  },
+});

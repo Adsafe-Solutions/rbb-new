@@ -40,9 +40,12 @@ export interface FormsConfig {
   eventsRecipient: string | null;
   testRecipient: string | null;
   rateLimit: { max: number; windowMs: number };
+  /* Career applications: a tighter limit (3 per window by default —
+     2026-10-17, review), in the same window. */
+  careersRateLimit: { max: number; windowMs: number };
 }
 
-export const FORMS_OFF: FormsConfig = { mode: "off", problems: [], apiKey: null, from: null, recipients: {}, acknowledge: [], careersRecipient: null, eventsRecipient: null, testRecipient: null, rateLimit: { max: 5, windowMs: 600_000 } };
+export const FORMS_OFF: FormsConfig = { mode: "off", problems: [], apiKey: null, from: null, recipients: {}, acknowledge: [], careersRecipient: null, eventsRecipient: null, testRecipient: null, rateLimit: { max: 5, windowMs: 600_000 }, careersRateLimit: { max: 3, windowMs: 600_000 } };
 
 /* One address, no display name, none of the characters that could add a
    recipient or a header (the same rule as @rbb/forms' EMAIL_PATTERN). */
@@ -107,6 +110,7 @@ export function loadFormsConfig(env: Record<string, string | undefined>): FormsC
     return fallback;
   };
   const rateLimit = { max: positive("FORMS_RATE_LIMIT_MAX", 5), windowMs: positive("FORMS_RATE_LIMIT_WINDOW_S", 600) * 1000 };
+  const careersRateLimit = { max: positive("FORMS_CAREERS_RATE_LIMIT_MAX", 3), windowMs: rateLimit.windowMs };
 
   return {
     /* A misconfigured deployment takes no submission rather than half-working. */
@@ -120,6 +124,7 @@ export function loadFormsConfig(env: Record<string, string | undefined>): FormsC
     acknowledge,
     testRecipient,
     rateLimit,
+    careersRateLimit,
   };
 }
 

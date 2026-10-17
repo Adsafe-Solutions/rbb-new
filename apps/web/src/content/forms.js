@@ -244,11 +244,50 @@ const webField = (f, endpoint) => ({
 });
 
 /* The form to draw for `id`: as saved in the admin, else the built-in one
-   (or null — a career form that was never saved). */
+   (or null — a career form that was never saved; careerFormConfig gives
+   those the standard application form). */
 export function formConfig(id) {
   const saved = PUBLISHED_FORMS.items.find((d) => d.id === id);
   const built = Object.hasOwn(FORMS, id) ? FORMS[id] : null;
   if (!saved) return built;
+  return fromDefinition(id, saved, built);
+}
+
+/* Every open role on the Careers page takes applications (2026-10-17,
+   review): a role whose form was never saved in the admin gets the
+   standard one — the admin's own starting point for a new role
+   (packages/content-schema newCareerForm), mirrored here because the
+   browser bundle never imports the schema package; a test keeps the two
+   equal. The API accepts it for any role the published Careers page
+   lists. Saving a form for the role in the admin replaces it. */
+export const defaultCareerForm = (role) => ({
+  id: `career-${role.id}`,
+  kind: "career",
+  roleId: role.id,
+  title: `Application — ${role.title}`.slice(0, 120),
+  heading: `Apply for ${role.title}`.slice(0, 160),
+  submitLabel: "Send application",
+  successMessage: "Thank you — your application has been sent to Rising Beyond Borders.",
+  errorMessage: "Sorry, your application could not be sent. Please try again in a moment.",
+  fields: [
+    { id: "name", type: "text", label: "Your name", required: true, maxLength: 200 },
+    { id: "email", type: "email", label: "Email address", required: true, maxLength: 254 },
+    { id: "cv", type: "file", label: "Your CV", help: "PDF or Word document, up to 4 MB.", required: true },
+    { id: "message", type: "textarea", label: "Why are you interested in this role?", required: false, maxLength: 5000 },
+    { id: "marketing", type: "checkbox", label: MARKETING.label, required: false, defaultChecked: true },
+  ],
+});
+
+/* A Careers role's application form: as saved in the admin, else the standard one. */
+export function careerFormConfig(role) {
+  if (!role?.id) return null;
+  const id = `career-${role.id}`;
+  return formConfig(id) ?? fromDefinition(id, defaultCareerForm(role), null);
+}
+
+/* A form definition (saved in the admin, or a role's standard form) as the
+   config the page draws. */
+function fromDefinition(id, saved, built) {
   const endpoint = built?.endpoint ?? endpointFor(id);
   return {
     ...(built ?? pending(id)),

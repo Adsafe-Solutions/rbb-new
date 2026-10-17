@@ -62,7 +62,7 @@ import { memberRoutes } from "./modules/members/routes.ts";
 import { MongoSubmissionStore } from "./modules/submissions/repository.ts";
 import { MongoFormDefinitionStore } from "./modules/form-definitions/repository.ts";
 import { formDefinitionRoutes } from "./modules/form-definitions/routes.ts";
-import { FormDefinitionService } from "./modules/form-definitions/service.ts";
+import { FormDefinitionService, liveForms } from "./modules/form-definitions/service.ts";
 import { FormUploadService, MongoFormUploadStore } from "./modules/forms/uploads.ts";
 import { formUploadRoutes } from "./modules/forms/routes.ts";
 import { MAX_FILE_BYTES } from "@rbb/content-schema";
@@ -281,7 +281,7 @@ export function createApp(options: AppOptions = {}): App {
       ...(options.now && { now: options.now }),
       ...(options.formsCapture && { capture: options.formsCapture }),
       submissions: new MongoSubmissionStore(db, config.orgId),
-      definitions: { live: (id: string) => new MongoFormDefinitionStore(db, config.orgId).get(id) },
+      definitions: liveForms(new MongoFormDefinitionStore(db, config.orgId), config.orgId, publishedRoles(db, config.orgId)),
       uploads: formUploads(db, config),
       /* Event registrations: the event as the LIVE snapshot has it — the
          page the visitor registered from — never an unpublished edit. */
@@ -291,6 +291,11 @@ export function createApp(options: AppOptions = {}): App {
     });
   };
 
+  /* The open roles on the PUBLISHED Careers page (the live snapshot): each
+     takes applications, through its saved form or the standard one. */
+  const publishedRoles = (db: Awaited<ReturnType<MongoProvider["db"]>>, orgId: string) => async () =>
+    (await new MongoPublishStore(db, orgId).activeSnapshot())?.snapshot.content.careers?.opportunities.roles ?? [];
+
   /* Career-form attachments: into the media bucket under private/forms/. */
   const formUploads = (db: Awaited<ReturnType<MongoProvider["db"]>>, cfg: Config) =>
     new FormUploadService(new MongoFormUploadStore(db, cfg.orgId), storage, mongoAuthStores(db, cfg.orgId).throttle, { orgId: cfg.orgId, env: cfg.env, secret: cfg.auth.secret, log, ...(options.now && { now: options.now }) });
@@ -298,7 +303,7 @@ export function createApp(options: AppOptions = {}): App {
     if (!config || !mongo) throw errors.unavailable("The database is not configured.");
     const db = await mongo.db();
     const store = new MongoFormDefinitionStore(db, config.orgId);
-    return { uploads: formUploads(db, config), definitions: { live: (id: string) => store.get(id) } };
+    return { uploads: formUploads(db, config), definitions: liveForms(store, config.orgId, publishedRoles(db, config.orgId)) };
   };
 
   /* Admin → Audience: every person across the forms — owners only. */

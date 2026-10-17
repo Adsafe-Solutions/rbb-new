@@ -476,6 +476,11 @@ still carry only the form, outcome and reference. Routes: `modules/submissions/`
     `EMAIL_TO_EVENTS` is told when set; the registrant gets a confirmation
     with the event's published details whenever email is on — it quotes
     nothing they typed. `test/event-registration.test.ts`.
+  - **Career applications** (2026-10-17, review): every open role on the
+    PUBLISHED Careers page takes applications — its form as saved in the
+    admin, else the standard application form (`newCareerForm`; the
+    website draws the same one). Limited to `FORMS_CAREERS_RATE_LIMIT_MAX`
+    (default 3) per client and role per window. `test/career-applications.test.ts`.
   - Templates escape everything a visitor typed. They are byte-identical to
     the website server's while both exist (`test/forms.test.ts`).
 - **No real email in tests.** Under `NODE_ENV=test` the default transport
@@ -532,6 +537,7 @@ Variables.
 | `EMAIL_ACK_FORMS` | no | no | Comma list of forms that email the submitter an acknowledgement |
 | `EMAIL_TEST_RECIPIENT` | staging | no | The one inbox all staging email goes to |
 | `FORMS_RATE_LIMIT_MAX`, `FORMS_RATE_LIMIT_WINDOW_S` | no (5, 600) | no | Submissions per client and form per window (shared MongoDB counter) |
+| `FORMS_CAREERS_RATE_LIMIT_MAX` | no (3) | no | Career applications per client and role per window (same window) |
 | `LOG_LEVEL` | no (`info`) | no | |
 | `PORT` | no (4000) | no | Local server only |
 | `BOOTSTRAP_OWNER_EMAIL`, `BOOTSTRAP_OWNER_NAME`, `BOOTSTRAP_OWNER_PASSWORD` | bootstrap command only | password: **yes** | Never read by the API itself |

@@ -128,7 +128,7 @@ export class FormService {
       throw errors.badRequest("The request does not match this form.");
 
     const reference = newReference();
-    await this.#rateLimit(formId, facts, reference);
+    await this.#rateLimit(formId, facts, reference, career ? config.careersRateLimit : config.rateLimit);
 
     const fields = body as Record<string, unknown>;
     const honeypot = fields?.[HONEYPOT_FIELD];
@@ -316,8 +316,7 @@ export class FormService {
   /* Fixed windows in the shared throttle store (MongoDB: every API
      instance counts into the same document). The key is a keyed hash of
      the organization and client address plus the form: no IP is stored. */
-  async #rateLimit(formId: string, facts: SubmitFacts, reference: string) {
-    const { max, windowMs } = this.#options.config.rateLimit;
+  async #rateLimit(formId: string, facts: SubmitFacts, reference: string, { max, windowMs } = this.#options.config.rateLimit) {
     const now = this.#now().getTime();
     const index = Math.floor(now / windowMs);
     const endsAt = (index + 1) * windowMs;

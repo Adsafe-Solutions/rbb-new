@@ -29,6 +29,7 @@ export interface SubmissionData {
   organization?: string;
   phone?: string;
   topic?: string;
+  country?: string;
 }
 
 const BRAND = "Rising Beyond Borders";
@@ -133,6 +134,7 @@ export function notification(formId: FormId, data: SubmissionData, { reference, 
     ...(data.organization ? ([["Organization", esc(data.organization)]] as [string, string][]) : []),
     ["Email", esc(data.email)],
     ...(data.phone ? ([["Phone", esc(data.phone)]] as [string, string][]) : []),
+    ...(data.country ? ([["Country", esc(data.country)]] as [string, string][]) : []),
     ...(formId === "contact" && data.topic ? ([["Topic", esc(TOPIC_LABELS[data.topic] ?? data.topic)]] as [string, string][]) : []),
   ];
   const html = layout({
@@ -152,6 +154,7 @@ export function notification(formId: FormId, data: SubmissionData, { reference, 
     ...(data.organization ? [`Organization: ${data.organization}`] : []),
     `Email: ${data.email}`,
     ...(data.phone ? [`Phone: ${data.phone}`] : []),
+    ...(data.country ? [`Country: ${data.country}`] : []),
     ...(formId === "contact" && data.topic ? [`Topic: ${TOPIC_LABELS[data.topic] ?? data.topic}`] : []),
     "",
     `${MESSAGE_TITLES[formId]}:`,

@@ -4,8 +4,8 @@
    apps/web/server), so the two can never disagree about a field, a length
    or an allowed value.
 
-   Plain data, no imports, no browser or Vite APIs: it must load in the
-   serverless runtime as-is.
+   Plain data — its only import is this package's own country list — and
+   no browser or Vite APIs: it must load in the serverless runtime as-is.
 
    ⚠ A field is here only because it has an approved purpose (Document 21
    §4). Adding one means RBB approves it, the privacy policy covers it,
@@ -15,6 +15,9 @@
    four ways to take part (content/getInvolved.js ids — content/validate.js
    checks they still match). */
 export const TOPICS = ["general", "donate", "volunteer", "fellowship", "partner", "travel"];
+
+import { COUNTRY_NAMES } from "./countries.js";
+export { COUNTRY_NAMES };
 
 /* Every field any form may carry. `singleLine` fields are rejected if they
    contain a line break — they reach email headers (Reply-To) or subjects,
@@ -27,6 +30,9 @@ export const FIELD_RULES = {
      by country, and no form here needs to call it. */
   phone: { type: "text", required: false, maxLength: 30, singleLine: true },
   topic: { type: "select", required: false, options: TOPICS, singleLine: true },
+  /* Where the person is (Volunteer, 2026-10-17 — RBB's request): one of
+     the ISO country names, chosen from a list so it is never misspelt. */
+  country: { type: "select", required: true, options: COUNTRY_NAMES, singleLine: true },
   message: { type: "textarea", required: true, maxLength: 5000 },
   consent: { type: "checkbox", required: true },
   /* Advertising / news emails (2026-10-13): optional; the website shows it
@@ -38,7 +44,7 @@ export const FIELD_RULES = {
 /* Which fields each form sends, in order. Anything else is rejected. */
 export const FORM_SCHEMA = {
   contact: ["name", "email", "topic", "message", "marketing"],
-  volunteer: ["name", "email", "message", "marketing"],
+  volunteer: ["name", "email", "country", "message", "marketing"],
   partner: ["name", "organization", "email", "message", "marketing"],
   travel: ["name", "email", "phone", "message"],
   fundraise: ["name", "email", "message"],

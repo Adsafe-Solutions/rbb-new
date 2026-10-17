@@ -21,6 +21,7 @@ const FIELD_ORDER: [string, string][] = [
   ["email", "Email"],
   ["organization", "Organisation"],
   ["phone", "Phone"],
+  ["country", "Country"],
   ["topic", "Topic"],
   ["message", "Message"],
   ["marketing", "Marketing emails"],

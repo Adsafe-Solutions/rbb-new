@@ -22,7 +22,8 @@ import { createLogger } from "../src/logging/logger.ts";
 const VISITOR = { name: "Asha Visitor", email: "asha.visitor@example.org", message: "I would like to <b>help</b> & learn more.\nThanks" };
 const SECRETS = [VISITOR.name, VISITOR.email, "help", "learn more"];
 const facts = (clientIp = "198.51.100.7") => ({ requestId: "req-form-0001", clientIp, idempotencyKey: "abcdef12-3456" });
-const body = (formId: string, fields: Record<string, unknown> = VISITOR, extra: Record<string, unknown> = {}) => ({ formId, fields, website: "", elapsedMs: 5000, antiSpamToken: null, ...extra });
+/* The Volunteer form asks for a country (2026-10-17); a test that brings its own one keeps it. */
+const body = (formId: string, fields: Record<string, unknown> = VISITOR, extra: Record<string, unknown> = {}) => ({ formId, fields: formId === "volunteer" ? { country: "India", ...fields } : fields, website: "", elapsedMs: 5000, antiSpamToken: null, ...extra });
 const failure = async (p: Promise<unknown>) => (await p.then(() => assert.fail("expected a refusal"), (e) => e)) as ApiError;
 
 const env = (over: Record<string, string> = {}) => ({

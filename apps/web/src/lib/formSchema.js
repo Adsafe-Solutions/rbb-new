@@ -3,6 +3,7 @@
    API. This module keeps the site's existing imports working; it adds
    nothing of its own. */
 export {
+  COUNTRY_NAMES,
   EMAIL_PATTERN,
   FIELD_RULES,
   FORM_SCHEMA,

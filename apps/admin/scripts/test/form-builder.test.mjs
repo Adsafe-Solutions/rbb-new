@@ -123,7 +123,7 @@ test("what is saved for the new types, and for an event's registration form", as
 
 test("Add a question: presets with unique ids; Name and E-mail put back the system field when it is missing", async () => {
   const { PALETTE, paletteFor, duplicateField } = await import("../../src/forms/builder.ts");
-  assert.deepEqual(paletteFor("contact").map((p) => p.name), ["Name", "E-mail", "Phone", "Short text", "Long text", "Choose one", "Choose any", "Dropdown", "Number", "Date", "Agreement"]);
+  assert.deepEqual(paletteFor("contact").map((p) => p.name), ["Name", "E-mail", "Phone", "Short text", "Long text", "Choose one", "Choose any", "Dropdown", "Number", "Date", "Country", "Agreement"]);
   assert.ok(paletteFor("career").some((p) => p.type === "file") && !paletteFor("event").some((p) => p.type === "file"));
   const by = (key) => PALETTE.find((p) => p.key === key);
   const fields = [...DEFAULT_FORMS.contact.fields];

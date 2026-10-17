@@ -138,6 +138,7 @@ export function notification(formId, data, { reference, submittedAt }) {
     ...(data.organization ? [["Organization", esc(data.organization)]] : []),
     ["Email", esc(data.email)],
     ...(data.phone ? [["Phone", esc(data.phone)]] : []),
+    ...(data.country ? [["Country", esc(data.country)]] : []),
     ...(formId === "contact" && data.topic
       ? [["Topic", esc(TOPIC_LABELS[data.topic] ?? data.topic)]]
       : []),
@@ -161,6 +162,7 @@ export function notification(formId, data, { reference, submittedAt }) {
     ...(data.organization ? [`Organization: ${data.organization}`] : []),
     `Email: ${data.email}`,
     ...(data.phone ? [`Phone: ${data.phone}`] : []),
+    ...(data.country ? [`Country: ${data.country}`] : []),
     ...(formId === "contact" && data.topic
       ? [`Topic: ${TOPIC_LABELS[data.topic] ?? data.topic}`]
       : []),

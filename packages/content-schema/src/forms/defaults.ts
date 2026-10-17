@@ -9,14 +9,16 @@
 
 /* select = a dropdown, radio = choose one, checkboxes = choose any (each
    lists its options); checkbox = one tick box (an agreement when it is
-   required); number and date are typed answers. */
-export const FORM_FIELD_TYPES = ["text", "email", "tel", "textarea", "select", "radio", "checkboxes", "checkbox", "number", "date", "file"] as const;
+   required); number and date are typed answers; country = a dropdown of
+   every country (the shared list, @rbb/forms COUNTRY_NAMES — no options
+   of its own). */
+export const FORM_FIELD_TYPES = ["text", "email", "tel", "textarea", "select", "radio", "checkboxes", "checkbox", "number", "date", "country", "file"] as const;
 export type FormFieldType = (typeof FORM_FIELD_TYPES)[number];
 /* The types that list options. */
 export const OPTION_FIELD_TYPES = ["select", "radio", "checkboxes"] as const;
 export const hasOptions = (type: FormFieldType) => (OPTION_FIELD_TYPES as readonly string[]).includes(type);
 /* The types with no placeholder (nothing is typed into an empty box). */
-export const NO_PLACEHOLDER_TYPES = ["select", "radio", "checkboxes", "checkbox", "date", "file"] as const;
+export const NO_PLACEHOLDER_TYPES = ["select", "radio", "checkboxes", "checkbox", "date", "country", "file"] as const;
 
 export const BUILT_IN_FORM_IDS = ["contact", "volunteer", "partner"] as const;
 export type BuiltInFormId = (typeof BUILT_IN_FORM_IDS)[number];
@@ -102,7 +104,8 @@ export const DEFAULT_FORMS: Record<BuiltInFormId, FormDefinitionData> = {
     submitLabel: "Send",
     successMessage: SUCCESS,
     errorMessage: ERROR,
-    fields: [NAME, EMAIL, message("How would you like to help?"), MARKETING],
+    /* Country: RBB's request (2026-10-17). */
+    fields: [NAME, EMAIL, { id: "country", type: "country", label: "Country", required: true }, message("How would you like to help?"), MARKETING],
   },
   partner: {
     id: "partner",

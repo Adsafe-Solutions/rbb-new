@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { Alert, Button, Checkbox, CircleDot, ChevronDown, FormField, Hash, CalendarDays, Input, ListChecks, Mail, Paperclip, Phone, Select, SquareCheck, TextAlignStart, Textarea, Type, UserRound, type IconComponent } from "../design-system";
+import { Alert, Button, Checkbox, CircleDot, ChevronDown, FormField, Globe, Hash, CalendarDays, Input, ListChecks, Mail, Paperclip, Phone, Select, SquareCheck, TextAlignStart, Textarea, Type, UserRound, type IconComponent } from "../design-system";
 import { ItemList } from "../blocks/fields";
 import type { FormFieldDefinition } from "./client";
 import { FILE_TYPE_NAMES, TYPE_LABELS, builderProblems, duplicateField, hasPlaceholder, isMarketingField, isSystemField, marketingField, paletteFor, retype, typesFor, type BuilderKind } from "./builder";
@@ -18,7 +18,7 @@ import local from "./forms.module.css";
    errorsUnder): "" for the list, "3.label" for field 4's label. */
 
 const MAX_FIELDS = 25;
-const ICONS: Record<string, IconComponent> = { name: UserRound, email: Mail, phone: Phone, text: Type, textarea: TextAlignStart, radio: CircleDot, checkboxes: ListChecks, select: ChevronDown, number: Hash, date: CalendarDays, agreement: SquareCheck, file: Paperclip };
+const ICONS: Record<string, IconComponent> = { name: UserRound, email: Mail, phone: Phone, text: Type, textarea: TextAlignStart, radio: CircleDot, checkboxes: ListChecks, select: ChevronDown, number: Hash, date: CalendarDays, country: Globe, agreement: SquareCheck, file: Paperclip };
 /* A typed whole number, or none when the box is empty. */
 const wholeOrNone = (value: string) => (value.trim() === "" || !Number.isFinite(Number(value)) ? undefined : Math.trunc(Number(value)));
 /* What each field's own inputs show; the rest is listed under the field. */

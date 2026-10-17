@@ -26,7 +26,8 @@ function world() {
   const forms = new FormService(memoryAuthStores(data, "org-a").throttle, audit, { orgId: "org-a", config: FORMS_OFF, secret: "test-only-auth-secret-0123456789abcdef", transport: async () => ({ ok: true, id: "x" }), log: silentLog, now: time.now, submissions: store });
   let ip = 10;
   const send = async (formId: string, fields: Record<string, unknown>) => {
-    await forms.submit(formId, { formId, fields, website: "", elapsedMs: 6000, antiSpamToken: null }, { requestId: "r", clientIp: `198.51.100.${ip++}`, idempotencyKey: null });
+    // The Volunteer form asks for a country (2026-10-17).
+    await forms.submit(formId, { formId, fields: formId === "volunteer" ? { country: "India", ...fields } : fields, website: "", elapsedMs: 6000, antiSpamToken: null }, { requestId: "r", clientIp: `198.51.100.${ip++}`, idempotencyKey: null });
     time.advance(60_000);
   };
   return { data, rows, send, audience: new AudienceService(store, audit) };

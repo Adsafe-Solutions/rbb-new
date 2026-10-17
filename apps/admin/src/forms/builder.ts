@@ -16,6 +16,7 @@ export const TYPE_LABELS: Record<FormFieldType, string> = {
   checkbox: "Checkbox",
   number: "Number",
   date: "Date",
+  country: "Country (list of every country)",
   file: "File upload (PDF or Word)",
 };
 
@@ -81,6 +82,7 @@ export const PALETTE: readonly FieldPreset[] = [
   preset("select", "Dropdown", "select", ""),
   preset("number", "Number", "number", ""),
   preset("date", "Date", "date", ""),
+  preset("country", "Country", "country", "Country"),
   preset("agreement", "Agreement", "checkbox", "I agree to …", { required: true }),
   preset("file", "File upload", "file", "", { help: "PDF or Word document, up to 4 MB." }),
 ];

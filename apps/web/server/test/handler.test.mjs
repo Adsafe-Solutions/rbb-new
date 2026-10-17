@@ -109,7 +109,7 @@ test("volunteer, partner, fundraise: each routed to its own recipient and templa
   const cases = [
     [
       "volunteer",
-      { name: "V", email: "v@example.org", message: "Weekends" },
+      { name: "V", email: "v@example.org", country: "India", message: "Weekends" },
       "volunteer-inbox@",
       /volunteer interest/,
     ],
@@ -133,6 +133,7 @@ test("volunteer, partner, fundraise: each routed to its own recipient and templa
     assert.ok(resend.calls[0].body.to[0].startsWith(to), formId);
     assert.match(resend.calls[0].body.subject, subject);
     if (formId === "partner") assert.ok(resend.calls[0].body.html.includes("Org Ltd"));
+    if (formId === "volunteer") assert.ok(resend.calls[0].body.text.includes("Country: India"));
   }
 });
 

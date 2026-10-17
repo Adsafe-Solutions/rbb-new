@@ -1,4 +1,4 @@
-import { CONTROL, EMAIL_PATTERN } from "@rbb/forms";
+import { CONTROL, COUNTRY_NAMES, EMAIL_PATTERN } from "@rbb/forms";
 import { DEFAULT_MAX_LENGTH, type FormDefinition } from "@rbb/content-schema";
 
 /* A submission checked against a form AS SAVED in the admin (2026-10-13)
@@ -15,7 +15,7 @@ import { DEFAULT_MAX_LENGTH, type FormDefinition } from "@rbb/content-schema";
    its options, each once, kept as one "A; B" string so every reader of a
    submission (the admin, the emails, Audience) stays a string reader. A
    number is a whole number within the field's min / max; a date a real
-   YYYY-MM-DD day. */
+   YYYY-MM-DD day; a country one of the shared list's names (@rbb/forms). */
 
 const BODY_KEYS = new Set(["formId", "fields", "website", "elapsedMs", "antiSpamToken"]);
 const UPLOAD_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -89,6 +89,7 @@ export function validateAgainstDefinition(definition: Checked, body: unknown): D
     else if (field.type === "email" && !EMAIL_PATTERN.test(text)) problems[field.id] = "format";
     else if (field.type === "tel" && !PHONE.test(text)) problems[field.id] = "format";
     else if ((field.type === "select" || field.type === "radio") && !(field.options ?? []).includes(text)) problems[field.id] = "invalid";
+    else if (field.type === "country" && !COUNTRY_NAMES.includes(text)) problems[field.id] = "invalid";
     else if (field.type === "number" && !INTEGER.test(text)) problems[field.id] = "format";
     else if (field.type === "number" && ((field.min !== undefined && Number(text) < field.min) || (field.max !== undefined && Number(text) > field.max))) problems[field.id] = "invalid";
     else if (field.type === "date" && !realDay(text)) problems[field.id] = "format";

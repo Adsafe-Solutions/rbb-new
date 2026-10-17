@@ -61,7 +61,7 @@
 import { ENV } from "../config/env.js";
 import { GET_INVOLVED } from "./getInvolved.js";
 import { policyLink } from "./policies.js";
-import { FIELD_RULES } from "../lib/formSchema.js";
+import { COUNTRY_NAMES, FIELD_RULES } from "../lib/formSchema.js";
 
 /* `missing` is the field's own "you left this empty" message, where the
    generic "Enter <label>" would read badly (a label that is a question). */
@@ -76,6 +76,10 @@ const message = (label, missing) => field("message", { label, missing });
    form opens — the owner's decision; see docs/ADMIN_IMPLEMENTATION_PLAN.md
    #18 for why a pre-ticked box is not valid consent everywhere. The same
    words as the admin's default (packages/content-schema MARKETING_LABEL). */
+/* Every country, as the dropdown's options (the shared list — the server
+   checks the answer against the same names). */
+const COUNTRY_OPTIONS = COUNTRY_NAMES.map((name) => ({ value: name, label: name }));
+const COUNTRY = field("country", { label: "Country", options: COUNTRY_OPTIONS, autoComplete: "country-name", missing: "Choose your country" });
 const MARKETING = field("marketing", { label: "Send me news and updates from Rising Beyond Borders by email. I can unsubscribe at any time.", defaultChecked: true });
 
 /* What every config starts from. A form still needs its endpoint, the
@@ -139,12 +143,13 @@ export const FORMS = {
   },
 
   /* /get-involved/volunteer — interest, not an application: no
-     eligibility questions, ages, locations or availability grids. */
+     eligibility questions, ages or availability grids. The country they
+     are in: RBB's request (2026-10-17). */
   volunteer: {
     ...pending("volunteer"),
     heading: "Tell us you are interested",
     submitLabel: "Send",
-    fields: [NAME, EMAIL, message("How would you like to help?", "Tell us how you would like to help"), MARKETING],
+    fields: [NAME, EMAIL, COUNTRY, message("How would you like to help?", "Tell us how you would like to help"), MARKETING],
   },
 
   /* /get-involved/partner — no packages, tiers or organisation types. */
@@ -225,9 +230,11 @@ const AUTOCOMPLETE = { name: "name", email: "email", organization: "organization
 export const UPLOAD_ACCEPT = ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 export const UPLOAD_MAX_BYTES = 4 * 1024 * 1024;
 
+/* A "country" field is drawn and checked as a dropdown of the shared list. */
 const webField = (f, endpoint) => ({
   name: f.id,
-  type: f.type,
+  type: f.type === "country" ? "select" : f.type,
+  ...(f.type === "country" && { options: COUNTRY_OPTIONS, autoComplete: "country-name" }),
   label: f.label,
   required: f.required,
   ...(f.help && { hint: f.help }),

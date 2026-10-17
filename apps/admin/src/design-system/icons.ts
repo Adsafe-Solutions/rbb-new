@@ -37,6 +37,7 @@ export {
   FileCheck,
   FileText,
   FolderKanban,
+  Globe,
   HandCoins,
   Hash,
   HeartHandshake,

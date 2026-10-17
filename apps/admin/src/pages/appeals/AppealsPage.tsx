@@ -2,7 +2,7 @@ import { HeartHandshake } from "../../design-system";
 import { appealsApi, formatDate, type Appeal } from "../../content/client";
 import { ContentListPage } from "../../content/ListPage";
 
-/* Appeals: emergency appeals and campaigns, managed here once the first is
+/* Appeals: emergency appeals, campaigns and special appeals, managed here once the first is
    created (until then the website keeps its own). */
 export default function AppealsPage() {
   return (
@@ -11,9 +11,9 @@ export default function AppealsPage() {
       base="appeals"
       kind="appeal"
       plural="Appeals"
-      description="Emergency appeals and campaigns. Givebutter takes the donations; published appeals go live when an owner publishes."
+      description="Emergency appeals, campaigns and special appeals. Givebutter takes the donations; published appeals go live when an owner publishes."
       icon={HeartHandshake}
-      emptyDescription="Create an appeal for an emergency response or a campaign. Once the first appeal exists here, the website's appeals are managed from this list."
+      emptyDescription="Create an appeal for an emergency response, a campaign or a special appeal. Once the first appeal exists here, the website's appeals are managed from this list."
       statusColumn
       dateSortLabel="By publish date"
       columns={[

@@ -11,7 +11,7 @@ import { AppealKind } from "./kind.ts";
    sections, then the closing "back to the form" band); the content
    supplies what the page is about, never the form.
 
-     Appeal               an emergency appeal or a campaign — many
+     Appeal               an emergency appeal, a campaign or a special appeal — many
      GeneralDonationPage  /appeals, giving where support is needed most —
                           one per organization
 

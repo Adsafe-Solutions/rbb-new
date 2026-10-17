@@ -50,6 +50,7 @@ const KINDS = [
   { value: "", label: "Every appeal" },
   { value: "emergency", label: "Emergency response appeals" },
   { value: "campaign", label: "Campaigns" },
+  { value: "special", label: "Special appeals" },
 ];
 
 export function DonationSections({ value, onChange, disabled, error, path, noun = "page" }: Props) {

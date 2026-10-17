@@ -20,7 +20,9 @@ import { SUBMISSION_STATUSES, type SubmissionCounts, type SubmissionStore, type 
 /* Newsletter (the footer's subscribe form, 2026-10-13) is stored only: no
    email to RBB per subscriber. Subscribing is the opt-in, so it is kept
    with marketing "Yes" and counts as opted in under Audience. */
-export const STORED_FORM_IDS = ["contact", "volunteer", "partner", "newsletter"] as const;
+/* Fundraise With Us (Get Involved, 2026-10-17) is stored too — its own
+   form id, so the admin filters it like the others. */
+export const STORED_FORM_IDS = ["contact", "volunteer", "partner", "fundraise", "newsletter"] as const;
 export const STORE_ONLY_FORM_IDS = ["newsletter"] as const;
 export const SUBMISSION_PAGE_SIZE = 50;
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
@@ -28,7 +30,7 @@ const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const ListQuery = z.strictObject({
   limit: z.coerce.number().int().min(1).max(100).optional(),
   before: z.string().max(200).optional(),
-  form: z.string().regex(/^(contact|volunteer|partner|newsletter|career-[a-z0-9]+(?:-[a-z0-9]+)*|event-[A-Za-z0-9_-]{1,128})$/).optional(),
+  form: z.string().regex(/^(contact|volunteer|partner|fundraise|newsletter|career-[a-z0-9]+(?:-[a-z0-9]+)*|event-[A-Za-z0-9_-]{1,128})$/).optional(),
   status: z.enum(SUBMISSION_STATUSES).optional(),
   from: z.string().regex(DAY).optional(),
   to: z.string().regex(DAY).optional(),

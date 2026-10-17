@@ -3,7 +3,8 @@ import { IsoDateTime, OrgId, Slug, text } from "../common/primitives.ts";
 import { BUILT_IN_FORM_IDS, DEFAULT_MAX_LENGTH, FORM_FIELD_TYPES, MARKETING_FIELD_ID, MAX_FILE_FIELDS, NO_PLACEHOLDER_TYPES, hasOptions } from "./defaults.ts";
 
 /* A website form as edited in the admin (owners only; live when saved —
-   owner decision, 2026-10-13): Contact Us, Volunteer, Partner With Us, and
+   owner decision, 2026-10-13): Contact Us, Volunteer, Partner With Us,
+   Fundraise With Us (2026-10-17), and
    one application form per open role on the Careers page.
 
    A form is its words (heading, intro, button, messages) and its ordered
@@ -12,7 +13,7 @@ import { BUILT_IN_FORM_IDS, DEFAULT_MAX_LENGTH, FORM_FIELD_TYPES, MARKETING_FIEL
    options; file fields (career forms only) take a PDF or Word document. */
 
 export const FormFieldId = z.string().regex(/^[a-z][a-z0-9_]{0,39}$/, "must be lowercase letters, digits or _ (starting with a letter)");
-export const FormId = z.string().regex(/^(contact|volunteer|partner|career-[a-z0-9]+(?:-[a-z0-9]+)*)$/, "must be contact, volunteer, partner or career-<role>");
+export const FormId = z.string().regex(/^(contact|volunteer|partner|fundraise|career-[a-z0-9]+(?:-[a-z0-9]+)*)$/, "must be contact, volunteer, partner, fundraise or career-<role>");
 
 export const FormField = z
   .strictObject({

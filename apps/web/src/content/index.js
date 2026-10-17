@@ -109,5 +109,6 @@ export {
   appealKindByPath,
   appealPath,
   appealsOf,
+  appealsOfCmsKind,
   appealByPath,
 } from "./appeals.js";

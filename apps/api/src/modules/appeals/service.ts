@@ -6,7 +6,7 @@ import type { ContentStore } from "../content/repository.ts";
 import type { CollectionConfig } from "../content/service.ts";
 import type { CheckoutVerifier } from "../donations/verify.ts";
 
-/* Appeals — emergency appeals and campaigns (the content contract's
+/* Appeals — emergency appeals, campaigns and special appeals (the content contract's
    Appeal), on the shared content lifecycle (modules/content): drafts,
    published, archived; unique addresses; confirmed address changes; media
    from the library; audit by field name.

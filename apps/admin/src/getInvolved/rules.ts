@@ -7,7 +7,7 @@ import { anchorOf, followsHeading, itemsFromText, paragraphsFromText, textFromIt
 
 export { anchorOf, followsHeading, type EditorSection };
 
-export const PAGE_IDS = ["hub", "volunteer", "fellowship", "partner", "travel"] as const;
+export const PAGE_IDS = ["hub", "volunteer", "fellowship", "partner", "fundraise", "travel"] as const;
 export type PageKey = (typeof PAGE_IDS)[number];
 export type PathKey = Exclude<PageKey, "hub">;
 
@@ -18,6 +18,7 @@ export const PAGE_INFO: Record<PageKey, { label: string; title: string; route: s
   volunteer: { label: "Volunteer page", title: "Volunteer", route: "/get-involved/volunteer" },
   fellowship: { label: "Fellowship page", title: "Fellowship", route: "/get-involved/fellowship" },
   partner: { label: "Partner With Us page", title: "Partner With Us", route: "/get-involved/partner" },
+  fundraise: { label: "Fundraise With Us page", title: "Fundraise With Us", route: "/get-involved/fundraise" },
   travel: { label: "Travel With Us page", title: "Travel With Us", route: "/get-involved/travel" },
 };
 

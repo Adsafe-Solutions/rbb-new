@@ -3,8 +3,9 @@ import assert from "node:assert/strict";
 import { CTA_TARGETS, GET_INVOLVED_PAGE_IDS, GET_INVOLVED_ROUTES, GetInvolvedHub, GetInvolvedPage, GetInvolvedPath, PublishedSnapshot, getInvolvedApprovalProblems, workingTextFindings } from "../index.ts";
 import * as fx from "../test/fixtures.ts";
 
-/* Get Involved (M20): five fixed pages, plain text, structured calls to
-   action, and them in a published snapshot. Test wording only. */
+/* Get Involved (M20): six fixed pages (Fundraise With Us back since
+   2026-10-17, RBB's request), plain text, structured calls to action, and
+   them in a published snapshot. Test wording only. */
 
 const org = fx.settings().orgId;
 const base = { orgId: org, schemaVersion: 1, status: "published" };
@@ -16,13 +17,13 @@ const issues = (schema: { safeParse(v: unknown): { success: boolean; error?: { i
   return r.success ? [] : r.error!.issues.map((i) => `${i.path.join(".")}: ${i.message}`);
 };
 
-test("five fixed pages, each at its fixed route; six call-to-action targets", () => {
-  assert.deepEqual([...GET_INVOLVED_PAGE_IDS], ["hub", "volunteer", "fellowship", "partner", "travel"]);
-  assert.deepEqual(GET_INVOLVED_ROUTES, { hub: "/get-involved", volunteer: "/get-involved/volunteer", fellowship: "/get-involved/fellowship", partner: "/get-involved/partner", travel: "/get-involved/travel" });
+test("six fixed pages, each at its fixed route; six call-to-action targets", () => {
+  assert.deepEqual([...GET_INVOLVED_PAGE_IDS], ["hub", "volunteer", "fellowship", "partner", "fundraise", "travel"]);
+  assert.deepEqual(GET_INVOLVED_ROUTES, { hub: "/get-involved", volunteer: "/get-involved/volunteer", fellowship: "/get-involved/fellowship", partner: "/get-involved/partner", fundraise: "/get-involved/fundraise", travel: "/get-involved/travel" });
   assert.deepEqual([...CTA_TARGETS], ["appeals", "work", "impact", "contact", "get-involved", "about"]);
-  for (const id of ["volunteer", "fellowship", "partner", "travel"]) assert.deepEqual(issues(GetInvolvedPage, path({ id })), [], id);
+  for (const id of ["volunteer", "fellowship", "partner", "fundraise", "travel"]) assert.deepEqual(issues(GetInvolvedPage, path({ id })), [], id);
   assert.deepEqual(issues(GetInvolvedPage, hub()), []);
-  for (const id of ["fundraise", "donate", "giving", "Volunteer"]) assert.ok(issues(GetInvolvedPage, path({ id })).length > 0, id);
+  for (const id of ["donate", "giving", "Volunteer"]) assert.ok(issues(GetInvolvedPage, path({ id })).length > 0, id);
 });
 
 test("empty drafts are valid; full records too", () => {

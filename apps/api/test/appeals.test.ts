@@ -362,3 +362,16 @@ test("M2's internal read: published appeals only, contract-checked", async () =>
   data.appeals[0]!.record = { ...data.appeals[0]!.record, kind: "unknown" as never };
   await rejects(publishedAppeal(store, "test-appeal"), "INTERNAL_ERROR");
 });
+
+test("appeals: a special appeal (2026-10-17) is the third kind — created, kept, approved like the others", async () => {
+  const { h, image } = setup();
+  const created = await h.appeals.create(owner, testAppeal(image.id, { kind: "special", slug: "test-special" }), FACTS);
+  assert.equal(created.record.kind, "special");
+  const kept = await h.appeals.update(owner, created.record.id, { revision: created.revision, changes: { title: "An edited special appeal" } }, FACTS);
+  assert.equal(kept.record.kind, "special");
+  const moved = await h.appeals.update(owner, created.record.id, { revision: kept.revision, changes: { kind: "campaign" } }, FACTS);
+  assert.equal(moved.record.kind, "campaign", "a kind can be changed");
+  const back = await h.appeals.update(owner, created.record.id, { revision: moved.revision, changes: { kind: "special" } }, FACTS);
+  await approve(h.appeals, owner, back.record.id, FACTS);
+  assert.equal((await h.appeals.get(owner, back.record.id)).record.status, "approved");
+});

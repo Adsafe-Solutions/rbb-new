@@ -12,9 +12,9 @@
    and both email templates (apps/web/server/email/templates.mjs) show it. */
 
 /* The contact form's topics: a general question, giving, and the site's
-   four ways to take part (content/getInvolved.js ids — content/validate.js
-   checks they still match). */
-export const TOPICS = ["general", "donate", "volunteer", "fellowship", "partner", "travel"];
+   five ways to take part (content/getInvolved.js ids, in order —
+   content/validate.js checks they still match). */
+export const TOPICS = ["general", "donate", "volunteer", "fellowship", "partner", "fundraise", "travel"];
 
 import { COUNTRY_NAMES } from "./countries.js";
 export { COUNTRY_NAMES };
@@ -47,7 +47,7 @@ export const FORM_SCHEMA = {
   volunteer: ["name", "email", "country", "message", "marketing"],
   partner: ["name", "organization", "email", "message", "marketing"],
   travel: ["name", "email", "phone", "message"],
-  fundraise: ["name", "email", "message"],
+  fundraise: ["name", "email", "message", "marketing"],
   newsletter: ["email", "consent"],
 };
 

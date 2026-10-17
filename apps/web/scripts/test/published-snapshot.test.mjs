@@ -624,7 +624,7 @@ test("get involved: published pages → nested targets in getInvolved.js; what a
 
 test("get involved: unknown, duplicated, unpublished, incomplete, untargetable or working-text pages fail the build", () => {
   for (const [pages, reason] of [
-    [[giPath("fundraise")], /"fundraise" this site has no page for/],
+    [[giPath("donate")], /"donate" this site has no page for/],
     [[giPath("volunteer"), giPath("volunteer")], /"volunteer" twice/],
     [[giPath("partner", { status: "approved" })], /"partner" is not published/],
     [[giPath("partner", { shortDescription: undefined })], /short description and at least one section/],

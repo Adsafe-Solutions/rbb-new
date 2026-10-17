@@ -87,19 +87,28 @@ export const WORK_SECTION = {
   children: PROGRAMS.map((p) => ({ label: p.title, to: p.to })),
 };
 
-/* Appeals — what the Donate page became. Its two groups and every appeal
-   in them come from content/appeals.js: add an appeal there and it is in
-   this menu, routed, and built from the shared appeal template. */
+/* Appeals — what the Donate page became. Its groups (one per kind of
+   appeal) and every appeal in them come from content/appeals.js: add an
+   appeal there and it is in this menu, routed, and built from the shared
+   appeal template.
+
+   A kind with no published appeal is not shown (2026-10-17, RBB's
+   request): it leaves the menu — with none open at all, Appeals is a
+   plain link — and the /appeals page (pages/Appeals). Its own page stays,
+   unlisted (UNLISTED_PAGES), so a saved link still lands on its "nothing
+   open" line rather than a 404. */
+const OPEN_KINDS = APPEAL_KINDS.filter((kind) => appealsOf(kind.id).length > 0);
+const kindEntry = (kind) => ({ label: kind.label, to: kind.to, description: kind.description });
 export const APPEALS_SECTION = {
   label: "Appeals",
   to: "/appeals",
-  description: "Emergency appeals and campaigns from Rising Beyond Borders, and how to give.",
-  children: APPEAL_KINDS.map((kind) => ({
-    label: kind.label,
-    to: kind.to,
-    description: kind.description,
-    children: appealsOf(kind.id).map((appeal) => ({ label: appeal.title, to: appealPath(appeal) })),
-  })),
+  description: "Emergency appeals, campaigns and special appeals from Rising Beyond Borders, and how to give.",
+  ...(OPEN_KINDS.length > 0 && {
+    children: OPEN_KINDS.map((kind) => ({
+      ...kindEntry(kind),
+      children: appealsOf(kind.id).map((appeal) => ({ label: appeal.title, to: appealPath(appeal) })),
+    })),
+  }),
 };
 
 /* Impact Stories here is the stories directory, which keeps its /stories
@@ -144,6 +153,8 @@ const UNLISTED_PAGES = [
     to: "/work/projects",
     parent: { label: WORK_SECTION.label, to: WORK_SECTION.to },
   },
+  /* Appeal kinds with nothing open: off the menu, still a page. */
+  ...APPEAL_KINDS.filter((kind) => !OPEN_KINDS.includes(kind)).map((kind) => ({ ...kindEntry(kind), parent: { label: APPEALS_SECTION.label, to: APPEALS_SECTION.to } })),
 ];
 
 /* The primary navigation, in screen order. An entry with `children` is

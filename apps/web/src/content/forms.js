@@ -119,6 +119,11 @@ const base = (formId) => ({
   requires: ["privacyLink"],
 });
 
+/* Where a form posts: its own endpoint, or — for a career form or Fundraise
+   With Us, which have none of their own — the Contact form's, with its id in place of "contact"
+   (the same API route, POST /api/v1/forms/:formId). */
+const endpointFor = (id) => ENV.formEndpoints[id] ?? (ENV.formEndpoints.contact ? ENV.formEndpoints.contact.replace(/\/contact$/, `/${id}`) : null);
+
 export const FORMS = {
   /* /contact — general inquiries. The topic list is the site's own paths,
      so a question can reach whoever handles it without a second form. */
@@ -181,13 +186,17 @@ export const FORMS = {
     ],
   },
 
-  /* Fundraise — no page in the current sitemap; kept for the server's
-     fundraise form id (server/config.mjs). */
+  /* /get-involved/fundraise — Fundraise With Us (2026-10-17): someone
+     raising money for RBB tells RBB about it. Stored under its own form
+     id, "fundraise", so the admin filters it. No platform, target or
+     approval step is implied. Its own endpoint, else the API's form
+     route next to the Contact form's (like a career form). */
   fundraise: {
     ...pending("fundraise"),
+    endpoint: ENV.formEndpoints.fundraise ?? endpointFor("fundraise"),
     heading: "Tell us about your fundraiser",
     submitLabel: "Send",
-    fields: [NAME, EMAIL, message("What are you planning?", "Tell us what you are planning")],
+    fields: [NAME, EMAIL, message("What are you planning?", "Tell us what you are planning"), MARKETING],
   },
 
   /* Newsletter sign-up: the footer's subscribe form (2026-10-13, owner's
@@ -221,10 +230,6 @@ export const FORMS = {
    so a saved form replaces the built-in one wherever it is drawn. */
 export const PUBLISHED_FORMS = { items: [] };
 
-/* Where a form posts: its own endpoint, or — for a career form, which has
-   none of its own — the Contact form's, with its id in place of "contact"
-   (the same API route, POST /api/v1/forms/:formId). */
-const endpointFor = (id) => ENV.formEndpoints[id] ?? (ENV.formEndpoints.contact ? ENV.formEndpoints.contact.replace(/\/contact$/, `/${id}`) : null);
 const MAX_LENGTH = { text: 200, email: 254, tel: 30, textarea: 5000 };
 const AUTOCOMPLETE = { name: "name", email: "email", organization: "organization", phone: "tel" };
 export const UPLOAD_ACCEPT = ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document";

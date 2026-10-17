@@ -18,6 +18,7 @@ import { BlockPageService, type BlockPageConfig, type BlockPageView } from "../p
      volunteer    /get-involved/volunteer    GetInvolvedPath
      fellowship   /get-involved/fellowship   GetInvolvedPath
      partner      /get-involved/partner      GetInvolvedPath
+     fundraise    /get-involved/fundraise    GetInvolvedPath (2026-10-17)
      travel       /get-involved/travel       GetInvolvedPath
 
    Lifecycle, revisions, 409 on a stale revision, owner-only approval and
@@ -49,6 +50,7 @@ export const GET_INVOLVED_LABELS: Record<GetInvolvedPageId, string> = {
   volunteer: "Volunteer page",
   fellowship: "Fellowship page",
   partner: "Partner With Us page",
+  fundraise: "Fundraise With Us page",
   travel: "Travel With Us page",
 };
 

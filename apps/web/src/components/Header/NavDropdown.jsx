@@ -184,8 +184,8 @@ export default function NavDropdown({
 function panelColumns(children) {
   const columns = [];
   for (const child of children) {
-    /* A group with nothing in it yet (Appeals before RBB launches one)
-       is an ordinary page link, not an empty column. */
+    /* A group with nothing in it yet is an ordinary page link, not an
+       empty column. */
     if (child.children?.length) columns.push({ group: child, entries: child.children });
     else if (columns.at(-1) && !columns.at(-1).group) columns.at(-1).entries.push(child);
     else columns.push({ group: null, entries: [child] });

@@ -4,13 +4,14 @@ import { Slug, text } from "../common/primitives.ts";
 import { workingTextFindings } from "../common/workingText.ts";
 import { SeoOverrides } from "../seo/seo.ts";
 
-/* Get Involved (M20) — FIVE fixed pages per organization (apps/web
+/* Get Involved (M20) — SIX fixed pages per organization (apps/web
    src/content/getInvolved.js):
 
      hub          /get-involved              GetInvolvedHub
      volunteer    /get-involved/volunteer    GetInvolvedPath
      fellowship   /get-involved/fellowship   GetInvolvedPath
      partner      /get-involved/partner      GetInvolvedPath
+     fundraise    /get-involved/fundraise    GetInvolvedPath (2026-10-17)
      travel       /get-involved/travel       GetInvolvedPath
 
    The id is the record's identity AND its address. What a path IS stays
@@ -44,7 +45,7 @@ import { SeoOverrides } from "../seo/seo.ts";
    path's short description and at least one section, and the hub's
    heading and introduction (`getInvolvedApprovalProblems`). */
 
-export const GET_INVOLVED_PATH_IDS = ["volunteer", "fellowship", "partner", "travel"] as const;
+export const GET_INVOLVED_PATH_IDS = ["volunteer", "fellowship", "partner", "fundraise", "travel"] as const;
 export const GetInvolvedPathId = z.enum(GET_INVOLVED_PATH_IDS);
 export type GetInvolvedPathId = z.infer<typeof GetInvolvedPathId>;
 
@@ -56,6 +57,7 @@ export const GET_INVOLVED_ROUTES: Record<GetInvolvedPageId, string> = {
   volunteer: "/get-involved/volunteer",
   fellowship: "/get-involved/fellowship",
   partner: "/get-involved/partner",
+  fundraise: "/get-involved/fundraise",
   travel: "/get-involved/travel",
 };
 

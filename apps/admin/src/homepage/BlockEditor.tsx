@@ -209,7 +209,7 @@ const EDITORS: { [T in BlockType]: (p: EditorProps<T>) => ReactNode } = {
 };
 
 function AppealListEditor({ data, set, err, disabled }: EditorProps<"appealList">) {
-  const load = useCallback(records(appealsApi.list, (r) => (r.kind === "campaign" ? "Campaign" : "Emergency appeal")), []);
+  const load = useCallback(records(appealsApi.list, (r) => (r.kind === "campaign" ? "Campaign" : r.kind === "special" ? "Special appeal" : "Emergency appeal")), []);
   const mode = data.appealIds ? "chosen" : "all";
   return (
     <>
@@ -228,7 +228,7 @@ function AppealListEditor({ data, set, err, disabled }: EditorProps<"appealList"
         <RecordPicker label="Appeals" load={load} value={data.appealIds ?? []} onChange={(ids) => set({ ...data, appealIds: ids as typeof data.appealIds })} max={6} disabled={disabled} error={err("appealIds")} />
       ) : (
         <FormField label="Kind" disabled={disabled}>
-          <Select options={[{ value: "", label: "Emergency appeals and campaigns" }, { value: "emergency", label: "Emergency appeals" }, { value: "campaign", label: "Campaigns" }]} value={data.kind ?? ""} onChange={(e) => set(clean({ ...data, kind: (e.target.value || undefined) as typeof data.kind }))} />
+          <Select options={[{ value: "", label: "Every appeal" }, { value: "emergency", label: "Emergency appeals" }, { value: "campaign", label: "Campaigns" }, { value: "special", label: "Special appeals" }]} value={data.kind ?? ""} onChange={(e) => set(clean({ ...data, kind: (e.target.value || undefined) as typeof data.kind }))} />
         </FormField>
       )}
       <Cta data={data} set={set} err={err} disabled={disabled} />

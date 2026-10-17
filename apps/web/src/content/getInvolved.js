@@ -1,4 +1,4 @@
-/* Get Involved — Document 06. ONE source for the four ways to take part:
+/* Get Involved — Document 06. ONE source for the five ways to take part:
    the nav's Get Involved menu, the footer, the homepage and program-page
    cards, /get-involved and each path's own page all read from here, so a
    path's name, address or description is stated once.
@@ -14,8 +14,10 @@
 
    Giving is not one of the four any more: it is the header's Donate
    button (a popup) and the Appeals section — content/donation.js and
-   content/appeals.js. Fundraise was a proposed path RBB does not offer
-   in the current sitemap, so it is gone, with its menu entry and page.
+   content/appeals.js. Fundraise With Us is back (2026-10-17, RBB's
+   request): a path of its own whose form tells RBB about someone's
+   fundraiser — stored under its own form id, "fundraise", so the admin
+   filters it apart from the other forms.
 
    ⚠ No operational detail may be invented here that RBB has not
    confirmed: no amounts, currency, payment provider, bank details or tax
@@ -38,7 +40,7 @@ import { ORG_CONTACT } from "./contact.js";
 import { withoutTrailingSlash } from "../lib/paths.js";
 
 export const GET_INVOLVED = {
-  /* The four paths. Titles and addresses are the approved architecture;
+  /* The five paths. Titles and addresses are the approved architecture;
      `shortDescription`, `sections` and the meta description are the
      CMS's (2026-10-13): the published snapshot merges them in by id.
      `featured` is the one path the cards set apart. Delete an entry and
@@ -77,6 +79,19 @@ export const GET_INVOLVED = {
       shortDescription: "",
       icon: "partner",
       ctaLabel: "Partner With Us",
+      status: "pending-review",
+      sections: [],
+    },
+    /* Fundraise With Us (2026-10-17): what it is, never how it operates —
+       no platforms, rules, targets or approvals until RBB confirms them. */
+    {
+      id: "fundraise",
+      slug: "fundraise",
+      to: "/get-involved/fundraise",
+      title: "Fundraise With Us",
+      shortDescription: "",
+      icon: "fundraise",
+      ctaLabel: "Fundraise With Us",
       status: "pending-review",
       sections: [],
     },

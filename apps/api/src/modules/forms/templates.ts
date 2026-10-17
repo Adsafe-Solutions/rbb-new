@@ -43,6 +43,7 @@ const TOPIC_LABELS: Record<string, string> = {
   volunteer: "Volunteer",
   fellowship: "Fellowship",
   partner: "Partner With Us",
+  fundraise: "Fundraise With Us",
   travel: "Travel With Us",
 };
 

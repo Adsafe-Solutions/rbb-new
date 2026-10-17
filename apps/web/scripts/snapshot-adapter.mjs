@@ -284,7 +284,7 @@ const checkoutOf = (donation) => {
   const c = donation?.checkout;
   return c ? drop({ provider: c.provider, widgetType: c.widgetType, widgetId: c.widgetId, amount: c.defaultAmount, frequency: c.defaultFrequency }) : undefined;
 };
-const VIEW_KIND = { emergency: "emergency", campaign: "campaigns" };
+const VIEW_KIND = { emergency: "emergency", campaign: "campaigns", special: "special" };
 const APPEAL_VIEW_SECTIONS = new Set(["statement", "richText", "numberedCards"]);
 
 /* Published appeals → the APPEALS view models (src/contract/appeals.js
@@ -676,7 +676,7 @@ export function policiesFrom(snapshot) {
    the site's. Like the policies, a page that is not published, not
    complete, of an unknown id, with an unknown target, or carrying
    working-placeholder text fails the build. */
-export const GET_INVOLVED_IDS = ["hub", "volunteer", "fellowship", "partner", "travel"];
+export const GET_INVOLVED_IDS = ["hub", "volunteer", "fellowship", "partner", "fundraise", "travel"];
 export const CTA_ROUTES = { appeals: "/appeals", work: "/work", impact: "/impact", contact: "/contact", "get-involved": "/get-involved", about: "/about" };
 export function getInvolvedFrom(snapshot) {
   const pages = snapshot.content?.getInvolved;

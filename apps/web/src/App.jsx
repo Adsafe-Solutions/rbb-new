@@ -95,7 +95,7 @@ const BUILT = {
   /* The ways to take part share one template; it finds its path by the
      URL (content/getInvolved.js). */
   ...Object.fromEntries(GET_INVOLVED.paths.map((path) => [path.to, InvolvePath])),
-  /* What the Donate page became, and its two kinds of appeal. Every
+  /* What the Donate page became, and its kinds of appeal. Every
      appeal shares one template, which finds its appeal by the URL
      (content/appeals.js). */
   "/appeals": Appeals,

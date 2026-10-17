@@ -4,9 +4,12 @@
    appeal is publishing one in the CMS — it gets a URL, a menu entry and a
    page built from the one shared template (pages/Appeal).
 
-   Two kinds, in the order the menu shows them:
+   Three kinds, in the order the menu shows them (each its own
+   subsection; `cms` is the content contract's AppealKind):
      emergency   Emergency Response — time-bound responses
      campaigns   Campaigns — longer-running pushes behind one aim
+     special     Special Appeals — one-off appeals for a particular need
+                 (2026-10-17, RBB's request)
 
    2026-10-13: the appeals are the CMS's only (Admin → Appeals): the
    published snapshot sets APPEALS, as the view model the components read
@@ -25,6 +28,7 @@ import { withoutTrailingSlash } from "../lib/paths.js";
 export const APPEAL_KINDS = [
   {
     id: "emergency",
+    cms: "emergency",
     label: "Emergency Response",
     to: "/appeals/emergency",
     icon: "shield",
@@ -39,6 +43,7 @@ export const APPEAL_KINDS = [
   },
   {
     id: "campaigns",
+    cms: "campaign",
     label: "Campaigns",
     to: "/appeals/campaigns",
     icon: "fundraise",
@@ -50,12 +55,27 @@ export const APPEAL_KINDS = [
       cta: { label: "Explore Our Work", to: "/work" },
     },
   },
+  {
+    id: "special",
+    cms: "special",
+    label: "Special Appeals",
+    to: "/appeals/special",
+    icon: "donate",
+    kicker: "Special appeals",
+    /* PROPOSED interface copy: what the list is, never a claim. */
+    body: "Appeals raised for one particular need, each open for as long as that need lasts.",
+    description: "Special appeals from Rising Beyond Borders.",
+    empty: {
+      text: "There is no special appeal open right now. When Rising Beyond Borders launches one, it will be listed here with what it is for and how support helps. You can still give where support is needed most.",
+      cta: { label: "Give where it's needed most", to: "/appeals#donate" },
+    },
+  },
 ];
 
 /* One appeal record (packages/content-schema `Appeal`):
      { id, orgId, schemaVersion, status, releaseMarker?, kind, slug,
        title, summary, imageId, highlight?, sections: [block] }
-   `kind` is "emergency" or "campaign". `sections` are typed blocks with
+   `kind` is "emergency", "campaign" or "special". `sections` are typed blocks with
    stable ids: the appeal page draws a `statement` (why it matters) and
    `numberedCards` (how support helps).
 
@@ -100,6 +120,8 @@ export const appealKind = (id) => APPEAL_KINDS.find((k) => k.id === id);
 export const appealKindByPath = (to) => APPEAL_KINDS.find((k) => k.to === withoutTrailingSlash(to));
 export const appealPath = (appeal) => `${appealKind(appeal.kind).to}/${appeal.id}`;
 export const appealsOf = (kind) => APPEALS.filter((a) => a.kind === kind);
+/* The appeals of a CMS kind ("campaign" lists the "campaigns" subsection). */
+export const appealsOfCmsKind = (cms) => appealsOf(APPEAL_KINDS.find((k) => k.cms === cms)?.id);
 export const appealByPath = (to) => APPEALS.find((a) => appealPath(a) === withoutTrailingSlash(to));
 
 /* ---------------- Page copy ----------------
@@ -108,7 +130,7 @@ export const APPEALS_PAGES = {
   hub: {
     kicker: "Donate",
     heading: "Appeals",
-    body: "Choose an emergency appeal or a campaign to support — or give where support is needed most.",
+    body: "Choose an emergency appeal, a campaign or a special appeal to support — or give where support is needed most.",
     listCta: "See all",
     general: { kicker: "Give where it's needed most" },
   },

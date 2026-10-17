@@ -3,7 +3,7 @@
 
 /* Newsletter: the footer's subscribe form (2026-10-13). It is fixed in the
    website, so it never appears in Admin → Forms. */
-export const FORM_LABELS: Record<string, string> = { contact: "Contact Us", volunteer: "Volunteer", partner: "Partner With Us", newsletter: "Newsletter" };
+export const FORM_LABELS: Record<string, string> = { contact: "Contact Us", volunteer: "Volunteer", partner: "Partner With Us", fundraise: "Fundraise With Us", newsletter: "Newsletter" };
 /* An event's registration form (2026-10-17): `event-<event record id>`;
    its submissions carry their name ("Registration — <event>"), and this is
    the fallback when none is at hand. */
@@ -12,7 +12,7 @@ export const formLabel = (formId: string): string => (Object.hasOwn(FORM_LABELS,
 
 /* The Contact form's topics (packages/forms TOPICS), worded as the
    website's own select offers them (apps/web content/forms.js). */
-const TOPIC_LABELS: Record<string, string> = { general: "A general question", donate: "Donate", volunteer: "Volunteer", fellowship: "Fellowship", partner: "Partner With Us", travel: "Travel With Us" };
+const TOPIC_LABELS: Record<string, string> = { general: "A general question", donate: "Donate", volunteer: "Volunteer", fellowship: "Fellowship", partner: "Partner With Us", fundraise: "Fundraise With Us", travel: "Travel With Us" };
 export const topicLabel = (topic: string): string => (Object.hasOwn(TOPIC_LABELS, topic) ? TOPIC_LABELS[topic]! : topic);
 
 /* The fields of a submission, in reading order, with their labels. */

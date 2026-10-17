@@ -346,11 +346,12 @@ export const generalDonation = () => {
   return null;
 };
 
-/* An emergency appeal or a campaign (content/appeals.js). Its own story
+/* An emergency appeal, a campaign or a special appeal (content/appeals.js). Its own story
    is the "why"; its own list of what support funds is the "how". */
 export const appealDonation = (appeal) => {
   const kind = appealKind(appeal.kind);
-  const emergency = appeal.kind === "emergency";
+  /* An emergency or special appeal is an appeal; a campaign, a campaign. */
+  const campaign = appeal.kind === "campaigns";
   /* The appeal's one "why" passage (a statement, or rich text from the
      CMS) and its one list of how support helps. */
   const situation = appeal.sections.find((s) => s.type === "statement" || s.type === "richText");
@@ -364,7 +365,7 @@ export const appealDonation = (appeal) => {
      were written for the record, never shown). */
   const cms = appeal.source === "cms";
   return {
-    type: emergency ? "appeal" : "campaign",
+    type: campaign ? "campaign" : "appeal",
     id: DONATION.donationAction.id,
     eyebrow: kind.label,
     title: `Support ${appeal.title}`,
@@ -374,12 +375,12 @@ export const appealDonation = (appeal) => {
     /* The summary above is the context; the story itself is the "why"
        below — never the same paragraph twice. */
     context: null,
-    donation: { type: emergency ? "appeal" : "campaign", [emergency ? "appeal" : "campaign"]: appeal.id },
+    donation: { type: campaign ? "campaign" : "appeal", [campaign ? "campaign" : "appeal"]: appeal.id },
     why: body.length
       ? {
           id: "why",
           kicker: (cms && situation.kicker) || kind.kicker,
-          heading: cms ? situation.heading : emergency ? "Why this response matters" : "Why this campaign matters",
+          heading: cms ? situation.heading : campaign ? "Why this campaign matters" : appeal.kind === "emergency" ? "Why this response matters" : "Why this appeal matters",
           body,
           ...(cms && situation.highlight && { highlight: situation.highlight }),
           ...(cms && situation.cta && { cta: situation.cta }),

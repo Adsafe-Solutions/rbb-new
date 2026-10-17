@@ -35,10 +35,10 @@ const site = async () => {
   return { data, h };
 };
 
-test("get involved: five fixed pages; a new page is empty; identity and unknown parts refused", async () => {
+test("get involved: six fixed pages; a new page is empty; identity and unknown parts refused", async () => {
   const { h } = await site();
   const list = await h.getInvolvedDirectory.list(editor);
-  assert.deepEqual(list.pages.map((p) => [p.id, p.route, p.view.record]), [["hub", "/get-involved", null], ["volunteer", "/get-involved/volunteer", null], ["fellowship", "/get-involved/fellowship", null], ["partner", "/get-involved/partner", null], ["travel", "/get-involved/travel", null]]);
+  assert.deepEqual(list.pages.map((p) => [p.id, p.route, p.view.record]), [["hub", "/get-involved", null], ["volunteer", "/get-involved/volunteer", null], ["fellowship", "/get-involved/fellowship", null], ["partner", "/get-involved/partner", null], ["fundraise", "/get-involved/fundraise", null], ["travel", "/get-involved/travel", null]]);
 
   const path = await h.getInvolved.volunteer.update(editor, { revision: 0, changes: {} }, FACTS);
   assert.deepEqual(path.record, { ...path.record, id: "volunteer", status: "draft", sections: [] });

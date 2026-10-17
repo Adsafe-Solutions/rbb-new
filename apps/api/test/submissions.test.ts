@@ -76,13 +76,21 @@ test("stored: with email off, Contact, Volunteer and Partner are taken and kept 
   for (const secret of [VISITOR.name, VISITOR.email, "reading club"]) assert.ok(!auditText.includes(secret), "the audit trail carries no visitor data");
 });
 
-test("not stored: bots, invalid input, and forms that are not stored (Fundraise, Travel)", async () => {
+test("not stored: bots, invalid input, and forms that are not stored (Travel)", async () => {
   const w = world();
   await w.forms.submit("contact", body("contact", VISITOR, { website: "https://spam.example" }), facts());
   await w.forms.submit("contact", body("contact", VISITOR, { elapsedMs: 10 }), facts("198.51.100.20"));
   assert.equal((await failure(w.forms.submit("contact", body("contact", { name: "", email: "x", message: "" }), facts("198.51.100.21")))).status, 422);
-  for (const id of ["fundraise", "travel"]) assert.equal((await failure(w.forms.submit(id, body(id), facts("198.51.100.22")))).status, 503, id);
+  assert.equal((await failure(w.forms.submit("travel", body("travel"), facts("198.51.100.22")))).status, 503, "travel");
   assert.equal(w.rows.length, 0);
+});
+
+test("Fundraise With Us (2026-10-17): stored under its own form id, so the admin filters it", async () => {
+  const w = world();
+  await w.forms.submit("fundraise", body("fundraise", { ...VISITOR, marketing: true }), facts("198.51.100.40"));
+  assert.deepEqual(w.rows.map((r) => [r.formId, r.fields.message, r.fields.marketing]), [["fundraise", VISITOR.message, "Yes"]]);
+  assert.deepEqual((await w.submissions.list(owner, { form: "fundraise" })).items.map((i) => i.formId), ["fundraise"]);
+  assert.deepEqual((await w.submissions.list(owner, { form: "contact" })).items, []);
 });
 
 test("newsletter (the footer's subscribe form): consent required; stored only, never emailed to RBB; kept as opted in", async () => {
@@ -147,7 +155,7 @@ test("admin: owners list newest first, filter by form, status, dates and text, p
   assert.deepEqual(second.items.map((i) => i.name), ["First Person"]);
   assert.equal(second.next, null);
   assert.equal(cursorOf(first.items[1]!), first.next);
-  for (const bad of [{ form: "fundraise" }, { status: "archived" }, { before: "not-a-cursor" }, { from: "2026-10-05", to: "2026-10-01" }, { limit: "500" }, { unknown: "x" }])
+  for (const bad of [{ form: "travel" }, { status: "archived" }, { before: "not-a-cursor" }, { from: "2026-10-05", to: "2026-10-01" }, { limit: "500" }, { unknown: "x" }])
     assert.equal((await failure(w.submissions.list(owner, bad))).code, "VALIDATION_ERROR", JSON.stringify(bad));
 });
 

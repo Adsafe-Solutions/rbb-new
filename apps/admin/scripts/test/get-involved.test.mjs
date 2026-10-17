@@ -14,7 +14,7 @@ test("the admin's pages, routes, targets and reserved ids are the contract's", (
   for (const id of PAGE_IDS) assert.equal(PAGE_INFO[id].route, GET_INVOLVED_ROUTES[id]);
   assert.deepEqual(CTA_OPTIONS.map((o) => o.value), [...CTA_TARGETS]);
   assert.deepEqual(RESERVED_SECTION_IDS, [...CONTRACT_RESERVED]);
-  assert.ok(isPageId("hub") && isPageId("travel") && !isPageId("fundraise") && !isPageId(""));
+  assert.ok(isPageId("hub") && isPageId("travel") && isPageId("fundraise") && !isPageId("donate") && !isPageId(""));
 });
 
 test("new pages are empty: nothing is written for the editor", () => {

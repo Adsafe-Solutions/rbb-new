@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { campaignCheckMessage } from "./checkMessage";
 import { ApiRequestError } from "../api";
 import { Alert, Button, Checkbox, FormField, Input, Select, ShieldCheck } from "../design-system";
 import { FREQUENCY_LABELS, campaignsApi, type DonationCheckout, type ProviderCampaign } from "./client";
@@ -45,11 +46,7 @@ export function CheckoutFields({ value, onChange, disabled, error, path }: Props
       setCheck({ state: "found", campaign: await campaignsApi.get(value.campaignId) });
     } catch (caught) {
       const status = caught instanceof ApiRequestError ? caught.status : 0;
-      setCheck({
-        state: "failed",
-        message:
-          status === 404 ? "Givebutter has no campaign with this ID in the connected account." : status === 400 ? "A campaign ID is digits only." : status === 503 ? "Givebutter could not be reached, or the server's connection to it is not set up. Try again later." : "The campaign could not be checked. Try again.",
-      });
+      setCheck({ state: "failed", message: campaignCheckMessage(status, caught instanceof Error ? caught.message : "") });
     }
   }
 

@@ -40,6 +40,7 @@ const TOPIC_LABELS = {
   volunteer: "Volunteer",
   fellowship: "Fellowship",
   partner: "Partner With Us",
+  fundraise: "Fundraise With Us",
   travel: "Travel With Us",
 };
 

@@ -48,7 +48,7 @@ export const PUBLISH_HREF = "/settings";
 /* Policies ("Privacy Policy", "Terms of Use", "Donation Policy") and the
    Get Involved pages ("Volunteer page" …) by their API labels' shape. */
 export const sectionHref = (section: string): string =>
-  SECTION_HREFS[section] ?? (/polic|terms of use/i.test(section) ? "/policies" : /get involved|volunteer|fellowship|partner|travel/i.test(section) ? "/get-involved" : PUBLISH_HREF);
+  SECTION_HREFS[section] ?? (/polic|terms of use/i.test(section) ? "/policies" : /get involved|volunteer|fellowship|partner|fundraise|travel/i.test(section) ? "/get-involved" : PUBLISH_HREF);
 
 export const itemLabel = (item: ReviewItem) => (item.title === item.section ? item.section : `${item.section}: ${item.title}`);
 

@@ -532,7 +532,7 @@ Variables.
 | `EMAIL_MODE` | no (`off`) | no | M18 forms: `off` · `test` (render, send nothing) · `staging` (only `EMAIL_TEST_RECIPIENT`, `[TEST]` subjects) · `live` |
 | `EMAIL_API_KEY` (alias `RESEND_API_KEY`) | staging/live | **yes** | Resend sending key for form email, restricted to the verified domain |
 | `EMAIL_FROM` | staging/live | no | Approved From on the verified domain; a `resend.dev` sender is refused in live |
-| `EMAIL_TO_CONTACT`, `_VOLUNTEER`, `_PARTNER`, `_FUNDRAISE` | per form | no | RBB's approved inbox for that form; unset or not one address = that form off |
+| `EMAIL_TO_CONTACT`, `_VOLUNTEER`, `_PARTNER`, `_FUNDRAISE` | per form | no | RBB's approved inbox for that form; unset or not one address = its submissions are stored only (Admin → Form submissions), with no email |
 | `EMAIL_TO_EVENTS` | no | no | RBB's inbox told of each event registration; unset = registrations are stored only. The registrant's confirmation goes out whenever email is on |
 | `EMAIL_ACK_FORMS` | no | no | Comma list of forms that email the submitter an acknowledgement |
 | `EMAIL_TEST_RECIPIENT` | staging | no | The one inbox all staging email goes to |

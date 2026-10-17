@@ -69,10 +69,10 @@ async function world(roles = [{ id: "programme-officer", title: "Programme Offic
 }
 const visit = (formId: string, fields: Record<string, unknown>, ip = "198.51.100.40") => [formId, { formId, fields, website: "", elapsedMs: 6000, antiSpamToken: null }, { requestId: "req-1", clientIp: ip, idempotencyKey: "abcdef12-0001" }] as const;
 
-test("builder: owners list the three built-in forms (unsaved) and the Careers roles; editors are refused", async () => {
+test("builder: owners list the four built-in forms (unsaved) and the Careers roles; editors are refused", async () => {
   const w = await world();
   const list = await w.builder.list(owner);
-  assert.deepEqual(list.forms.map((f) => [f.definition.id, f.saved]), [["contact", false], ["volunteer", false], ["partner", false]]);
+  assert.deepEqual(list.forms.map((f) => [f.definition.id, f.saved]), [["contact", false], ["volunteer", false], ["partner", false], ["fundraise", false]]);
   assert.deepEqual(list.roles, [{ id: "programme-officer", title: "Programme Officer", formId: "career-programme-officer", hasForm: false }]);
   assert.equal((await failure(w.builder.list(editor))).code, "FORBIDDEN");
   const fresh = await w.builder.get(owner, "career-programme-officer");

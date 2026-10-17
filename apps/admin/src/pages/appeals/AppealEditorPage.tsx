@@ -20,7 +20,7 @@ import { NoIndexField } from "../../content/NoIndexField";
    which campaign and form, never any payment detail. */
 
 const FIELDS = ["kind", "title", "slug", "summary", "startsOn", "endsOn", "highlight", "sections", "imageId", "donation", "seo"] as const;
-const PATHS = { emergency: "/appeals/emergency/", campaign: "/appeals/campaigns/" } as const;
+const PATHS = { emergency: "/appeals/emergency/", campaign: "/appeals/campaigns/", special: "/appeals/special/" } as const;
 
 export default function AppealEditorPage({ params }: PageProps) {
   const canEdit = useCan(params.id === "new" ? "content:create" : "content:update");
@@ -61,14 +61,14 @@ export default function AppealEditorPage({ params }: PageProps) {
       <PageHeader
         title={editor.view ? editor.view.record.title : "New appeal"}
         eyebrow={editor.view && statusBadge(editor.view.record.status, editor.view.live, editor.view.schedule)}
-        description={editor.view ? `Last edited ${new Date(editor.view.updatedAt).toLocaleString()} by ${editor.view.updatedBy.isYou ? "you" : editor.view.updatedBy.name}.` : "An emergency appeal or a campaign, with its own donation page."}
+        description={editor.view ? `Last edited ${new Date(editor.view.updatedAt).toLocaleString()} by ${editor.view.updatedBy.isYou ? "you" : editor.view.updatedBy.name}.` : "An emergency appeal, a campaign or a special appeal, with its own donation page."}
       />
       <EditorNotices editor={editor} kind="appeal" canEdit={canEdit} />
       <div className={styles.sections}>
         <Panel title="Basic information" as="h2">
           <div className={styles.fields}>
             <FormField label="Kind" disabled={readOnly} error={err("kind")}>
-              <Select options={[{ value: "emergency", label: "Emergency appeal" }, { value: "campaign", label: "Campaign" }]} value={d.kind ?? "emergency"} onChange={(e) => editor.set({ kind: e.target.value as Appeal["kind"] })} />
+              <Select options={[{ value: "emergency", label: "Emergency appeal" }, { value: "campaign", label: "Campaign" }, { value: "special", label: "Special appeal" }]} value={d.kind ?? "emergency"} onChange={(e) => editor.set({ kind: e.target.value as Appeal["kind"] })} />
             </FormField>
             <FormField label="Title" required disabled={readOnly} error={err("title")}>
               <Input maxLength={120} value={d.title ?? ""} onChange={(e) => editor.set({ title: e.target.value, ...(!slugTouched && { slug: slugify(e.target.value) }) })} />

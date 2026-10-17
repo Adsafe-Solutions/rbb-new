@@ -20,7 +20,7 @@ export const hasOptions = (type: FormFieldType) => (OPTION_FIELD_TYPES as readon
 /* The types with no placeholder (nothing is typed into an empty box). */
 export const NO_PLACEHOLDER_TYPES = ["select", "radio", "checkboxes", "checkbox", "date", "country", "file"] as const;
 
-export const BUILT_IN_FORM_IDS = ["contact", "volunteer", "partner"] as const;
+export const BUILT_IN_FORM_IDS = ["contact", "volunteer", "partner", "fundraise"] as const;
 export type BuiltInFormId = (typeof BUILT_IN_FORM_IDS)[number];
 export type FormKind = BuiltInFormId | "career";
 
@@ -91,7 +91,7 @@ export const DEFAULT_FORMS: Record<BuiltInFormId, FormDefinitionData> = {
     fields: [
       NAME,
       EMAIL,
-      { id: "topic", type: "select", label: "What is your message about?", required: false, options: ["A general question", "Donate", "Volunteer", "Fellowship", "Partner With Us", "Travel With Us"] },
+      { id: "topic", type: "select", label: "What is your message about?", required: false, options: ["A general question", "Donate", "Volunteer", "Fellowship", "Partner With Us", "Fundraise With Us", "Travel With Us"] },
       message("Your message"),
       MARKETING,
     ],
@@ -116,6 +116,19 @@ export const DEFAULT_FORMS: Record<BuiltInFormId, FormDefinitionData> = {
     successMessage: SUCCESS,
     errorMessage: ERROR,
     fields: [NAME, { id: "organization", type: "text", label: "Organization", required: false, maxLength: 200 }, EMAIL, message("What would you like to explore?"), MARKETING],
+  },
+  /* Fundraise With Us (Get Involved, 2026-10-17): someone raising money
+     for RBB tells RBB about it. Its submissions carry their own form id,
+     "fundraise", so the admin can filter them. */
+  fundraise: {
+    id: "fundraise",
+    kind: "fundraise",
+    title: "Fundraise With Us",
+    heading: "Tell us about your fundraiser",
+    submitLabel: "Send",
+    successMessage: SUCCESS,
+    errorMessage: ERROR,
+    fields: [NAME, EMAIL, message("What are you planning?"), MARKETING],
   },
 };
 

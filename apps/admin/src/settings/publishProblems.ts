@@ -48,7 +48,7 @@ const CONTENT: Record<string, { label: string; href: string; detail?: (segment: 
   storyStrip: { label: "Highlights", href: "/highlights" },
 };
 const POLICY_PAGES: Record<string, string> = { privacy: "Privacy Policy", terms: "Terms of Use", donation: "Donation Policy" };
-const GET_INVOLVED_PAGES: Record<string, string> = { hub: "Get Involved page", volunteer: "Volunteer page", fellowship: "Fellowship page", partner: "Partner With Us page", travel: "Travel With Us page" };
+const GET_INVOLVED_PAGES: Record<string, string> = { hub: "Get Involved page", volunteer: "Volunteer page", fellowship: "Fellowship page", partner: "Partner With Us page", fundraise: "Fundraise With Us page", travel: "Travel With Us page" };
 
 /* The publish's own section names (apps/api publishing/service.ts
    #sections / #pages), as a scheduled item is reported: "schedule.<name>.<id>". */
@@ -76,6 +76,7 @@ const SCHEDULED: Record<string, { href: string; record?: true }> = {
   "Volunteer page": { href: "/get-involved/volunteer" },
   "Fellowship page": { href: "/get-involved/fellowship" },
   "Partner With Us page": { href: "/get-involved/partner" },
+  "Fundraise With Us page": { href: "/get-involved/fundraise" },
   "Travel With Us page": { href: "/get-involved/travel" },
   "Announcement bar": { href: "/announcements" },
   Popup: { href: "/popups" },

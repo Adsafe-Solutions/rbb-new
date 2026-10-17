@@ -20,9 +20,8 @@ export const REDIRECTS = {
      Donate popup. */
   "/donate": "/appeals",
   "/get-involved/donate": "/appeals",
-  /* Fundraise is not a way to take part in the current sitemap. */
-  "/fundraise": "/get-involved",
-  "/get-involved/fundraise": "/get-involved",
+  /* Fundraise With Us lives under Get Involved (2026-10-17). */
+  "/fundraise": "/get-involved/fundraise",
   /* Reports are what Transparency & Financials will publish — a section
      of /about since the About pages were consolidated. */
   "/reports": "/about#transparency",

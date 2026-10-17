@@ -25,7 +25,7 @@ import {
   MEDIA_PAGES,
   NEWS,
   SITE,
-  appealsOf,
+  appealsOfCmsKind,
   blogCard,
   blogPath,
   eventGroup,
@@ -131,7 +131,7 @@ const RENDERERS = {
   faq: ({ id, index, tone, data }) => <Faq id={id} index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} items={data.items} />,
   cta: ({ tone, data }) => <CtaSection tone={tone} highlight={data.highlight} heading={data.heading} body={data.body} ctas={data.ctas} />,
   appealList: ({ index, tone, data }) => (
-    <AppealGrid index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} cta={data.cta} appeals={data.appeals ? data.appeals.map((slug) => bySlug(APPEALS, slug, "appeal")) : data.kind ? appealsOf(data.kind === "campaign" ? "campaigns" : "emergency") : APPEALS} />
+    <AppealGrid index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} cta={data.cta} appeals={data.appeals ? data.appeals.map((slug) => bySlug(APPEALS, slug, "appeal")) : data.kind ? appealsOfCmsKind(data.kind) : APPEALS} />
   ),
   postList: ({ index, tone, data }) => (
     <FeaturedBand index={index} tone={tone} kicker={data.kicker} heading={data.heading} highlight={data.highlight} cta={data.cta}>
@@ -146,7 +146,7 @@ const RENDERERS = {
 
 /* Whether a block has anything to show (the source page's own rules). */
 const shows = ({ type, data }) =>
-  type === "timeline" ? data.events.length > 0 : type === "stories" ? latestStories(data.count).length > 0 : type === "faq" ? data.items.length > 0 : type === "appealList" ? (data.appeals?.length ?? (data.kind ? appealsOf(data.kind === "campaign" ? "campaigns" : "emergency") : APPEALS).length) > 0 : true;
+  type === "timeline" ? data.events.length > 0 : type === "stories" ? latestStories(data.count).length > 0 : type === "faq" ? data.items.length > 0 : type === "appealList" ? (data.appeals?.length ?? (data.kind ? appealsOfCmsKind(data.kind) : APPEALS).length) > 0 : true;
 
 export default function CmsHome({ page }) {
   const blocks = page.sections.filter(shows);

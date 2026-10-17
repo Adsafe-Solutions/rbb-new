@@ -42,7 +42,7 @@ import { AnnouncementBar, Popup, StoryStrip, announcementBarApprovalProblems, po
                   news    Post records of type "news"
                   blogs   Post records of type "blog"
                   events  Event records
-                  appeals Appeal records (emergency appeals and campaigns)
+                  appeals Appeal records (emergency, campaign and special appeals)
                 Only PUBLISHED records, as the contract shapes them.
                   generalDonation  the GeneralDonationPage — present only
                                    while the organization's page is

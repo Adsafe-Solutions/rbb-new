@@ -109,7 +109,9 @@ test("/appeals from the CMS without them: the site's own trust panel and appeal 
   const a = main(absent.html("/appeals"));
   assert.ok(a.includes("Transparency matters."), "the site's own trust panel");
   assert.ok(!a.includes("Frequently asked questions"), "no built-in questions: the FAQ is the published page's own");
-  assert.match(a, /<h2[^>]*>Emergency Response<\/h2>[\s\S]*<h2[^>]*>Campaigns<\/h2>/, "the built-in appeal bands");
+  assert.match(a, /<h2[^>]*>Emergency Response<\/h2>/, "the built-in appeal band of the kind with an appeal open");
+  // A kind with nothing open is not shown (2026-10-17, RBB's request).
+  assert.doesNotMatch(a, /<h2[^>]*>(Campaigns|Special Appeals)<\/h2>/, "no band for a kind with no appeal");
   const off = await siteWith(snapshot({ page: [WHY, { ...TRUST, enabled: false }, { ...FAQ, enabled: false }, { ...LISTS[0], enabled: false }], appeals: [appeal("first-emergency", "emergency")] }));
   t.after(off.close);
   const o = main(off.html("/appeals"));

@@ -69,7 +69,7 @@ export default function PageHeader({
       className="relative -mt-[var(--header-h)] overflow-clip pt-[var(--header-h)]"
     >
       <Mark className="pointer-events-none absolute -right-[14%] top-[2%] h-[min(90vw,44rem)] w-[min(90vw,44rem)] rotate-[8deg] text-fg opacity-[0.05]" />
-      <Container className="relative pb-16 pt-10 md:pb-24 md:pt-14">
+      <Container className="relative pb-12 pt-10 md:pb-20 md:pt-14">
         <nav aria-label="Breadcrumb">
           <ol className="type-meta flex flex-wrap items-center gap-x-2 gap-y-1 text-quiet">
             <Crumb to="/">Home</Crumb>

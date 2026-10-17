@@ -31,6 +31,12 @@ import { HONEYPOT_FIELD } from "../../lib/formSchema.js";
                  typed so nothing has to be entered twice; the retry
                  reuses the same idempotency key
      rate-limited  the generic "please wait" line, same treatment
+     full, closed  an event's registration form only (409): the event's
+                 places are taken, or registration has closed. The line
+                 (config.fullMessage / closedMessage) REPLACES the form and
+                 takes focus, like success — the form stays gone, since
+                 sending it again cannot work and an offer to retry would
+                 say otherwise
    A server-side validation failure returns to "ready" with the server's
    field codes shown as this form's own messages (Document 21).
 
@@ -150,7 +156,7 @@ export default function FormShell({
   }, []);
 
   useEffect(() => {
-    if (status === "success" || status === "error" || status === "rate-limited")
+    if (["success", "error", "rate-limited", "full", "closed"].includes(status))
       statusRef.current?.focus();
   }, [status]);
 
@@ -209,10 +215,27 @@ export default function FormShell({
       setErrors(serverErrors);
       setStatus("ready");
       requestAnimationFrame(() => summaryRef.current?.focus());
+    } else if (result.outcome === "full" || result.outcome === "closed") {
+      setStatus(result.outcome);
     } else {
       setStatus(result.outcome === "rate-limited" ? "rate-limited" : "error");
     }
   };
+
+  if (status === "full" || status === "closed") {
+    /* No alternative route here: it is no fault to recover from, and
+       there is no other way to a place that is not there. A config
+       without its own line falls back to the error message. */
+    return (
+      <div className={className}>
+        <SubmissionStatus
+          ref={statusRef}
+          state="error"
+          message={(status === "full" ? config.fullMessage : config.closedMessage) ?? config.errorMessage}
+        />
+      </div>
+    );
+  }
 
   if (status === "success") {
     return (

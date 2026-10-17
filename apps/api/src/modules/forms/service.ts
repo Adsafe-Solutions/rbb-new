@@ -1,6 +1,6 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { FORM_SCHEMA, HONEYPOT_FIELD, MIN_FILL_MS, validateSubmission } from "@rbb/forms";
-import { errors } from "../../errors.ts";
+import { ApiError, errors } from "../../errors.ts";
 import type { Logger } from "../../logging/logger.ts";
 import type { AuditService } from "../audit/audit.ts";
 import type { ThrottleStore } from "../auth/repository.ts";
@@ -9,10 +9,11 @@ import { FORM_IDS, formEnabled, type FormId, type FormsConfig } from "./config.t
 import type { SubmissionStore } from "../submissions/repository.ts";
 import { STORE_ONLY_FORM_IDS, STORED_FORM_IDS } from "../submissions/service.ts";
 import { createDeliverer, type EmailTransport, type OutgoingEmail } from "./email.ts";
-import { acknowledgement, definitionNotification, notification, type SubmissionData } from "./templates.ts";
+import { acknowledgement, definitionNotification, eventConfirmation, notification, type SubmissionData } from "./templates.ts";
 import { validateAgainstDefinition } from "./definition.ts";
 import type { FormUpload, FormUploadService } from "./uploads.ts";
-import type { FormDefinition } from "@rbb/content-schema";
+import { minutesOf, zonedTimeToInstant, type Event, type FormDefinition } from "@rbb/content-schema";
+import type { PlaceStore } from "./places.ts";
 
 /* M18 — a public form submission, end to end (Document 21).
 
@@ -43,7 +44,7 @@ export interface SubmitFacts {
   idempotencyKey: string | null;
 }
 
-type Outcome = "delivered" | "stored" | "stored_and_delivered" | "stored_email_failed" | "spam_discarded" | "invalid" | "rate_limited" | "provider_rejected" | "provider_unavailable";
+type Outcome = "registration_closed" | "registration_full" | "delivered" | "stored" | "stored_and_delivered" | "stored_email_failed" | "spam_discarded" | "invalid" | "rate_limited" | "provider_rejected" | "provider_unavailable";
 
 /* Crockford-style alphabet: no 0/O or 1/I to misread over the phone. */
 const B32 = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -67,6 +68,32 @@ export interface FormServiceOptions {
   definitions?: { live(id: string): Promise<FormDefinition | null> };
   /* Career-form attachments (uploads.ts). */
   uploads?: FormUploadService;
+  /* Event registrations (2026-10-17): the event AS PUBLISHED on the
+     website — what the visitor's page shows — by record id, and the
+     events' place counters. Without both, no event takes registrations. */
+  events?: { live(id: string): Promise<Event | null> };
+  places?: PlaceStore;
+  /* The website's origin, for the event's link in the confirmation. */
+  siteOrigin?: string | null;
+}
+
+/* An event registration form's id: "event-" and the event's record id. */
+export const EVENT_FORM_PREFIX = "event-";
+const registrationRefused = (reason: "closed" | "full") =>
+  new ApiError("CONFLICT", reason === "full" ? "This event is full." : "Registration for this event has closed.", { details: [{ path: "registration", message: reason }] });
+
+/* When an event's registration closes: at its end, in its own time zone
+   (the end of its day when it has no end time). A record without a zone
+   (never one the CMS saved) closes at the latest that day could end
+   anywhere, UTC+14. */
+export function registrationClosesAt(event: Pick<Event, "date" | "startTime" | "endTime" | "timezone">): number {
+  const end = event.endTime ? minutesOf(event.endTime) : 24 * 60 - 1;
+  const local = `${event.date}T${String(Math.floor(end / 60)).padStart(2, "0")}:${String(end % 60).padStart(2, "0")}`;
+  if (event.timezone) {
+    const converted = zonedTimeToInstant(local, event.timezone);
+    if (converted.ok) return Date.parse(converted.instant) + 60_000;
+  }
+  return Date.parse(`${local}:00Z`) - 14 * 3_600_000 + 60_000;
 }
 
 const isFormId = (id: string): id is FormId => (FORM_IDS as readonly string[]).includes(id);
@@ -87,6 +114,7 @@ export class FormService {
   }
 
   async submit(formId: string, body: unknown, facts: SubmitFacts): Promise<{ reference: string }> {
+    if (formId.startsWith(EVENT_FORM_PREFIX)) return this.#register(formId, formId.slice(EVENT_FORM_PREFIX.length), body, facts);
     const { config } = this.#options;
     /* A form saved in the admin is checked against what was saved; one
        never saved keeps the built-in schema (2026-10-13). */
@@ -191,6 +219,97 @@ export class FormService {
       const ack = await deliver({ to: data.email, ...acknowledgement(formId, meta) }, `${formId}:${idem}:ack`);
       if (!ack.ok) this.#options.log.warn("form acknowledgement failed", { form: formId, reference, category: ack.category });
     }
+    return { reference };
+  }
+
+  /* An event registration (2026-10-17), against the event AS PUBLISHED:
+
+       published, with an open registration form? ──▶ rate limit ──▶ bot?
+       ──▶ before the event ends? ──▶ validate ──▶ a place (the limit,
+       atomically) ──▶ store ──▶ tell RBB's events inbox (if set)
+       ──▶ confirm to the registrant (whenever email is on)
+
+     Always stored: a registration is received once it is kept, whatever
+     the emails then do (a failure is logged, never shown as an error —
+     the place is taken). A full or closed event answers 409 with the
+     reason, which the page turns into its own words. */
+  async #register(formId: string, eventId: string, body: unknown, facts: SubmitFacts): Promise<{ reference: string }> {
+    const { config, submissions, places } = this.#options;
+    const event = (await this.#options.events?.live(eventId)) ?? null;
+    const registration = event?.registration;
+    if (!event || !registration || !submissions || !places) throw errors.notFound("form");
+    if (body && typeof body === "object" && !Array.isArray(body) && (body as { formId?: unknown }).formId !== formId)
+      throw errors.badRequest("The request does not match this form.");
+
+    const reference = newReference();
+    await this.#rateLimit(formId, facts, reference);
+    const fields = body as Record<string, unknown>;
+    const honeypot = fields?.[HONEYPOT_FIELD];
+    const elapsed = Number(fields?.elapsedMs);
+    if ((typeof honeypot === "string" && honeypot.trim()) || (Number.isFinite(elapsed) && elapsed < MIN_FILL_MS)) {
+      await this.#record(formId, "spam_discarded", reference, facts);
+      return { reference };
+    }
+    if (!registration.open || this.#now().getTime() >= registrationClosesAt(event)) {
+      await this.#record(formId, "registration_closed", reference, facts);
+      throw registrationRefused("closed");
+    }
+    const result = validateAgainstDefinition(registration, body);
+    if (!result.ok) {
+      await this.#record(formId, "invalid", reference, facts);
+      if (result.status === 422 && result.fields) throw errors.unprocessable(Object.entries(result.fields).map(([name, code]) => ({ path: `fields.${name}`, message: code })));
+      throw errors.badRequest("The request is malformed.");
+    }
+    const data = result.data;
+
+    if (!(await places.take(formId, registration.capacity ?? null, async () => (await submissions.counts()).byForm[formId]?.total ?? 0))) {
+      await this.#record(formId, "registration_full", reference, facts);
+      throw registrationRefused("full");
+    }
+    const title = `Registration — ${event.title}`.slice(0, 200);
+    const at = this.#now().toISOString();
+    try {
+      await submissions.insert({
+        id: randomUUID(),
+        orgId: this.#options.orgId,
+        formId,
+        reference,
+        fields: storedFields(data),
+        formTitle: title,
+        labels: Object.fromEntries(registration.fields.map((f) => [f.id, f.label])),
+        status: "new",
+        createdAt: at,
+        updatedAt: at,
+      });
+    } catch {
+      await places.release(formId);
+      this.#options.log.error("event registration could not be stored", { form: formId, reference });
+      throw errors.unavailable("Your registration could not be sent. Please try again in a moment.");
+    }
+
+    if (config.mode === "off") {
+      await this.#record(formId, "stored", reference, facts);
+      return { reference };
+    }
+    const meta = { reference, submittedAt: at.slice(0, 16).replace("T", " ") };
+    const idem = facts.idempotencyKey && IDEMPOTENCY_KEY.test(facts.idempotencyKey) ? facts.idempotencyKey : randomUUID();
+    const deliver = createDeliverer(config, this.#options.transport, this.#options.capture);
+    let delivered = true;
+    if (config.eventsRecipient) {
+      const sent = await deliver({ to: config.eventsRecipient, replyTo: data.email, ...definitionNotification({ title, fields: registration.fields }, data, [], meta) }, `${formId}:${idem}:notify`);
+      if (!sent.ok) {
+        delivered = false;
+        this.#options.log.warn("event registration notification failed", { form: formId, reference, category: sent.category });
+      }
+    }
+    const origin = this.#options.siteOrigin;
+    const confirmation = eventConfirmation({ ...event, ...(origin && { pageUrl: `${origin}/media/events/${event.slug}` }) }, meta);
+    const confirmed = await deliver({ to: data.email!, ...confirmation }, `${formId}:${idem}:confirm`);
+    if (!confirmed.ok) {
+      delivered = false;
+      this.#options.log.warn("event registration confirmation failed", { form: formId, reference, category: confirmed.category });
+    }
+    await this.#record(formId, delivered ? "stored_and_delivered" : "stored_email_failed", reference, facts);
     return { reference };
   }
 

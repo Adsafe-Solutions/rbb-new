@@ -1,6 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { newEventRegistration } from "@rbb/content-schema/form-defaults";
 import { useCan } from "../../auth";
-import { Alert, EmptyState, FormField, Input, PageContainer, PageHeader, Panel, Select, Spinner, Textarea } from "../../design-system";
+import { Alert, Badge, Button, Checkbox, EmptyState, FormField, Inbox, Input, PageContainer, PageHeader, Panel, Radio, RadioGroup, Select, Spinner, Textarea } from "../../design-system";
+import { navigate } from "../../router";
+import { cleanRegistration, errorsUnder } from "../../forms/builder";
+import { FieldsBuilder } from "../../forms/FieldsBuilder";
+import { submissionsApi } from "../../submissions/client";
 import { eventsApi, fromTimeInput, toTimeInput, type Event } from "../../content/client";
 import { EditorNotices, EditorSaveBar, statusBadge, useContentEditor } from "../../content/editor";
 import { WorkflowControls, isLocked } from "../../content/workflow";
@@ -21,17 +26,27 @@ import { ItemList } from "../../blocks/fields";
    real, the start happens in that zone on that day, and every timed
    schedule step falls within the event, in order (content/eventFields
    shows the same problems beside each step first). Milestone 4: the
-   program area (None = open to all) and the day's schedule. */
+   program area (None = open to all) and the day's schedule.
 
-const FIELDS = ["title", "slug", "subtitle", "summary", "about", "date", "startTime", "endTime", "timezone", "programId", "schedule", "venue", "address", "mapUrl", "registrationUrl", "imageId", "seo"] as const;
+   Registration (2026-10-17): none, a link to another website, or a form
+   on the event's own page (forms/FieldsBuilder). The API takes
+   registrations against the PUBLISHED event (`event-<id>` in Form
+   submissions), so the form's changes go live when the event is
+   published. Switching away from a way clears it: the save sends null. */
+
+const FIELDS = ["title", "slug", "subtitle", "summary", "about", "date", "startTime", "endTime", "timezone", "programId", "schedule", "venue", "address", "mapUrl", "registrationUrl", "registration", "imageId", "seo"] as const;
 
 export default function EventEditorPage({ params }: PageProps) {
   const canEdit = useCan(params.id === "new" ? "content:create" : "content:update");
   const canArchive = useCan("content:delete");
   const canApprove = useCan("content:approve");
-  const editor = useContentEditor<Event>({ api: eventsApi, id: params.id!, base: "events", fields: FIELDS, initial: { status: "draft" }, kind: "event" });
+  const editor = useContentEditor<Event>({ api: eventsApi, id: params.id!, base: "events", fields: FIELDS, initial: { status: "draft" }, kind: "event", prepare: (draft) => (draft.registration ? { ...draft, registration: cleanRegistration(draft.registration) } : draft) });
   const [slugTouched, setSlugTouched] = useState(params.id !== "new");
+  /* "Registration link" chosen, its address not typed yet. */
+  const [linkChosen, setLinkChosen] = useState(false);
   const d = editor.draft;
+  const mode: RegistrationMode = d.registration ? "form" : d.registrationUrl || linkChosen ? "link" : "none";
+  const registered = useRegistrations(editor.view?.record.id);
   const zones = useMemo(() => zoneOptions(d.timezone, Intl.supportedValuesOf("timeZone")), [d.timezone]);
   const schedule: ScheduleStep[] = d.schedule ?? [];
   const stepProblems = scheduleProblems(d.startTime, d.endTime, schedule);
@@ -46,6 +61,14 @@ export default function EventEditorPage({ params }: PageProps) {
         <EmptyState title={editor.status === "missing" ? "This event doesn't exist" : "The event could not be loaded"} description="It may have been removed, or the link is wrong." />
       </PageContainer>
     );
+
+  const setMode = (next: RegistrationMode) => {
+    setLinkChosen(next === "link");
+    if (next === "form") editor.set({ registration: d.registration ?? newEventRegistration(), registrationUrl: undefined });
+    else if (next === "link") editor.set({ registration: undefined });
+    else editor.set({ registration: undefined, registrationUrl: undefined });
+  };
+  const setRegistration = (changes: Partial<NonNullable<Event["registration"]>>) => d.registration && editor.set({ registration: { ...d.registration, ...changes } });
 
   const seo = d.seo ?? {};
   const setSeo = (changes: Partial<NonNullable<Event["seo"]>>) => {
@@ -130,10 +153,53 @@ export default function EventEditorPage({ params }: PageProps) {
             </FormField>
           </div>
         </Panel>
-        <Panel title="Registration" as="h2">
-          <FormField label="Registration link" helper="An https:// page where people register (optional)." disabled={readOnly} error={err("registrationUrl")}>
-            <Input type="url" maxLength={2048} value={d.registrationUrl ?? ""} onChange={(e) => editor.set({ registrationUrl: e.target.value })} />
-          </FormField>
+        <Panel title="Registration" as="h2" description="People register here on the event's page, or through a link to another website. A registration form is checked against the published event, so changes to it go live when the event is published to the website. Each registration is emailed to RBB's events inbox (when one is set up) and the person gets a confirmation email.">
+          <div className={styles.fields}>
+            <RadioGroup legend="How people register" value={mode} disabled={readOnly} error={err("registration")} onValueChange={(next) => setMode(next as RegistrationMode)}>
+              <Radio value="none" label="No registration" />
+              <Radio value="form" label="Registration form on this page" description="Visitors fill in a form on the event page. You choose the questions." />
+              <Radio value="link" label="Registration link (another website)" description="For example a ticketing site." />
+            </RadioGroup>
+            {mode === "link" && (
+              <FormField label="Registration link" required helper="An https:// page where people register." disabled={readOnly} error={err("registrationUrl")}>
+                <Input type="url" maxLength={2048} value={d.registrationUrl ?? ""} onChange={(e) => editor.set({ registrationUrl: e.target.value })} />
+              </FormField>
+            )}
+            {mode !== "link" && err("registrationUrl") && <Alert tone="danger">{err("registrationUrl")}</Alert>}
+            {mode === "form" && d.registration && (
+              <>
+                {registered && (
+                  <div className={styles.saveActions} aria-label="Registrations">
+                    <Badge tone={registered.new ? "info" : "neutral"}>
+                      {registered.total === 1 ? "1 registration" : `${registered.total} registrations`}
+                      {registered.new ? ` (${registered.new} new)` : ""}
+                    </Badge>
+                    {d.registration.capacity !== undefined && <Badge tone={registered.total >= d.registration.capacity ? "warning" : "neutral"}>Places left: {Math.max(0, d.registration.capacity - registered.total)}</Badge>}
+                    <Button size="sm" leadingIcon={<Inbox />} onClick={() => navigate(`/submissions?form=event-${editor.view!.record.id}`)}>
+                      View registrations
+                    </Button>
+                  </div>
+                )}
+                <Checkbox
+                  label="Taking registrations"
+                  description="Untick to stop sign-ups: the form stays on the event page, closed. Registrations also stop when the event is over or the places are taken."
+                  checked={d.registration.open}
+                  disabled={readOnly}
+                  onChange={(e) => setRegistration({ open: e.target.checked })}
+                />
+                <FormField label="Spots" helper="How many people can register. Leave blank if it is not limited." disabled={readOnly} error={err("registration.capacity")}>
+                  <Input type="number" min={1} max={100000} step={1} value={d.registration.capacity ?? ""} onChange={(e) => setRegistration({ capacity: e.target.value.trim() === "" ? undefined : Math.trunc(Number(e.target.value)) || undefined })} />
+                </FormField>
+                <FormField label="Button text" required disabled={readOnly} error={err("registration.submitLabel")}>
+                  <Input maxLength={40} value={d.registration.submitLabel} onChange={(e) => setRegistration({ submitLabel: e.target.value })} />
+                </FormField>
+                <FormField label="Message after registering" required helper="Shown on the page once someone has registered." disabled={readOnly} error={err("registration.successMessage")}>
+                  <Textarea rows={2} maxLength={300} value={d.registration.successMessage} onChange={(e) => setRegistration({ successMessage: e.target.value })} />
+                </FormField>
+                <FieldsBuilder fields={d.registration.fields} onChange={(fields) => setRegistration({ fields })} kind="event" disabled={readOnly} errors={errorsUnder(editor.errors, "registration.fields")} />
+              </>
+            )}
+          </div>
         </Panel>
         <Panel title="Content" as="h2">
           <RichTextEditor label="About the event" required value={d.about} onChange={(about) => editor.set({ about })} disabled={readOnly} error={err("about") ?? [...editor.errors.keys()].filter((k) => k.startsWith("about.")).map((k) => editor.errors.get(k)).join(" ")} helper="What happens, who it is for." />
@@ -167,4 +233,22 @@ export default function EventEditorPage({ params }: PageProps) {
       <EditorSaveBar editor={editor} kind="event" canEdit={canEdit} canArchive={canArchive} />
     </PageContainer>
   );
+}
+
+type RegistrationMode = "none" | "form" | "link";
+
+/* The saved event's registrations so far (Form submissions, `event-<id>`),
+   for owners who can read them; nothing when the call fails. */
+function useRegistrations(eventId: string | undefined) {
+  const canRead = useCan("submissions:read");
+  const [totals, setTotals] = useState<{ total: number; new: number } | null>(null);
+  useEffect(() => {
+    if (!eventId || !canRead) return;
+    let live = true;
+    submissionsApi.totals(`event-${eventId}`).then((t) => live && setTotals(t), () => undefined);
+    return () => {
+      live = false;
+    };
+  }, [eventId, canRead]);
+  return eventId && canRead ? totals : null;
 }

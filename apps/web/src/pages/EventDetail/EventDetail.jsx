@@ -11,6 +11,9 @@ import Button from "../../components/Button/Button.jsx";
 import EventCard from "../../components/EventCard/EventCard.jsx";
 import SectionHeading from "../../components/SectionHeading/SectionHeading.jsx";
 import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
+import FormShell from "../../components/FormShell/FormShell.jsx";
+import { formState } from "../../lib/forms.js";
+import { eventRegistrationConfig } from "../../content/forms.js";
 import NotFound from "../NotFound/NotFound.jsx";
 import { notFoundMeta, routeMeta } from "../../content/seo.js";
 import { EVENTS, MEDIA_PAGES, PROGRAMS, eventById, eventGroup, eventPath, eventStatus, todayIso } from "../../content/index.js";
@@ -19,16 +22,31 @@ import { EVENTS, MEDIA_PAGES, PROGRAMS, eventById, eventGroup, eventPath, eventS
 
          paper   PageHeader    ← All events, the date, the program chip,
                                the title and its one line
-         white   the event     the photograph, "About this event" and "How
-                               the day runs" beside a sticky facts card —
-                               date, time, where (with directions when
-                               there is a real map link), taking part
+         white   the event     the photograph, "About this event", "How
+                               the day runs" and — when the event takes
+                               registrations here — its Register form,
+                               beside a sticky facts card: date, time,
+                               where (with directions when there is a real
+                               map link), taking part
          paper   More events   the next three in the directory
          accent  ClosingCta    Volunteer · Contact Us
 
-   A slug that is not an event is the site's ordinary 404. Registration
-   is a pending line, never a form: nothing here may look like it books a
-   place until RBB has a way to take bookings. */
+   A slug that is not an event is the site's ordinary 404.
+
+   Taking part, one of three ways (2026-10-17):
+     - registration on this page (the CMS event's `registration`, carried
+       only while open): the form in the event's own column, and a
+       "Register" button in the facts card that jumps to it. The API
+       checks each registration against the published event and says when
+       it is full or closed (FormShell's "full" / "closed"). Once the event
+       has ended — known only after hydration, from the reader's date —
+       the closed line replaces the form.
+     - a registration link (`registrationUrl`): the external button.
+     - neither: the pending line pointing to the Contact page.
+   A form that cannot be drawn (no endpoint or no published Privacy
+   Policy — lib/forms.js formState) shows that pending line too, and the
+   facts card offers no button to it: nothing may look like it books a
+   place unless it can. */
 function Detail({ event }) {
   const t = MEDIA_PAGES.event;
   const list = MEDIA_PAGES.events;
@@ -41,6 +59,9 @@ function Detail({ event }) {
      (events published from the CMS do) — never converted. */
   const time = (event.end ? `${event.start}–${event.end}` : event.start) + (event.timezone ? ` (${event.timezone.replace(/_/g, " ")})` : "");
   const others = EVENTS.filter((e) => e.id !== event.id).slice(0, 3);
+  const registration = eventRegistrationConfig(event);
+  const ended = status === "ended";
+  const canRegister = registration && !ended && formState(registration) === "ready";
 
   return (
     <>
@@ -101,6 +122,30 @@ function Detail({ event }) {
                 </ol>
               </section>
             )}
+
+            {registration && (
+              /* The form is not revealed: it must be there to land on
+                 when the facts card's button jumps here. */
+              <section id="register" aria-labelledby="event-register" className="mt-14 scroll-mt-[calc(var(--header-h)+2rem)]">
+                <h2 id="event-register" className="type-meta text-quiet">
+                  {registration.heading}
+                </h2>
+                {ended ? (
+                  <p className="mt-5 max-w-[62ch] text-[length:var(--text-body)] leading-[1.75] text-copy">{registration.closedMessage}</p>
+                ) : (
+                  <>
+                    {event.registration.capacity != null && (
+                      <p className="mt-5 max-w-[62ch] text-[length:var(--text-body)] leading-[1.75] text-copy">{t.placesLimited}</p>
+                    )}
+                    <FormShell
+                      config={registration}
+                      className="mt-6 max-w-2xl"
+                      fallback={<p className="mt-5 max-w-[62ch] text-[length:var(--text-body)] leading-[1.75] text-copy">{t.takePartBody}</p>}
+                    />
+                  </>
+                )}
+              </section>
+            )}
           </div>
 
           {/* The facts, in the order a visitor asks them. Sticky beside a
@@ -121,7 +166,15 @@ function Detail({ event }) {
                   )}
                 </Fact>
                 <Fact label={t.takePart}>
-                  {event.registrationUrl ? (
+                  {canRegister ? (
+                    /* A same-page link through the router: App.jsx's
+                       ScrollToTop lines #register up under the header
+                       through animations/lenis.js jumpTo, so smooth
+                       scrolling cannot undo the jump. */
+                    <Button to="#register" size="sm">
+                      {t.register}
+                    </Button>
+                  ) : event.registrationUrl ? (
                     <Button href={event.registrationUrl} size="sm" rel="noopener noreferrer" target="_blank">
                       {t.register}
                     </Button>

@@ -30,7 +30,7 @@ export default function ProgramAreas({ index, kicker, heading, items, tone = "in
 
   return (
     <Section tone={tone} pad="none" aria-labelledby={headingId} bare>
-      <div className="relative mx-auto w-full max-w-[var(--page-max-width)] px-5 pt-20 md:px-8 md:pt-32">
+      <div className="relative mx-auto w-full max-w-[var(--page-max-width)] px-5 pt-16 md:px-8 md:pt-24">
         <SectionHeading id={headingId} index={index} kicker={kicker} heading={heading} highlight={highlight} intro={intro} />
         {cta && (
           <Button data-anim="soft" variant="outline" to={cta.to} className="mt-9">
@@ -56,7 +56,7 @@ export default function ProgramAreas({ index, kicker, heading, items, tone = "in
         </ul>
       </div>
 
-      <Marquee items={items.map((item) => item.title)} className="mt-20 border-t-2 border-hair md:mt-36" />
+      <Marquee items={items.map((item) => item.title)} className="mt-16 border-t-2 border-hair md:mt-28" />
     </Section>
   );
 }

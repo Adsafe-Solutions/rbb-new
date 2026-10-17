@@ -19,6 +19,7 @@ test("the bell counts only what this person can act on", async () => {
 test("form breakdown in the usual order, career forms together; links per section", async () => {
   const { formBreakdown, sectionHref, itemLabel, plural } = await import("../../src/notifications/model.ts");
   assert.deepEqual(formBreakdown({ newsletter: 2, contact: 1, "career-a": 1, "career-b": 2 }), [["Contact Us", 1], ["Newsletter", 2], ["Careers", 3]]);
+  assert.deepEqual(formBreakdown({ "event-b": 1, contact: 1, "event-a": 2 }), [["Contact Us", 1], ["Event registrations", 3]], "every event's registrations together");
   assert.equal(sectionHref("Stories"), "/stories");
   assert.equal(sectionHref("News and blogs"), "/posts");
   assert.equal(sectionHref("Privacy Policy"), "/policies");

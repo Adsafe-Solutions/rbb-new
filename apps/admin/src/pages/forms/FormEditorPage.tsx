@@ -1,18 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ApiRequestError } from "../../api";
-import { Alert, Button, Checkbox, Dialog, EmptyState, FileText, FormField, Input, PageContainer, PageHeader, Panel, Select, Spinner, Textarea, Trash2, useToast } from "../../design-system";
-import { ItemList } from "../../blocks/fields";
+import { Alert, Button, Dialog, EmptyState, FileText, FormField, Input, PageContainer, PageHeader, Panel, Spinner, Textarea, Trash2, useToast } from "../../design-system";
 import { navigate } from "../../router";
 import type { PageProps } from "../../routes";
-import { formsApi, type FormDefinitionData, type FormFieldDefinition, type FormListItem } from "../../forms/client";
-import { FILE_TYPE_NAMES, TYPE_LABELS, builderProblems, cleanForm, isMarketingField, isSystemField, marketingField, newField, retype, typesFor } from "../../forms/builder";
+import { formsApi, type FormDefinitionData, type FormListItem } from "../../forms/client";
+import { builderProblems, cleanForm, errorsUnder } from "../../forms/builder";
+import { FieldsBuilder } from "../../forms/FieldsBuilder";
 import styles from "../../content/content.module.css";
 
 /* /forms/:id — one website form (owners only). Its words, and its fields
-   in order: each a label, a type, required or not, optional help and
-   placeholder, options for a dropdown. Name and Email stay (replies need
-   them). Saving puts the form on the website AT ONCE; a built-in form can
-   be reset to the website's own, a career form deleted. */
+   in order (forms/FieldsBuilder: each a label, a type, required or not,
+   optional help and placeholder, options for a choice, limits for a
+   number). Name and Email stay (replies need them). Saving puts the form
+   on the website AT ONCE; a built-in form can be reset to the website's
+   own, a career form deleted. */
 
 export default function FormEditorPage({ params }: PageProps) {
   const id = params.id ?? "";
@@ -43,8 +44,6 @@ export default function FormEditorPage({ params }: PageProps) {
   const set = (changes: Partial<FormDefinitionData>) => setDraft((d) => (d ? { ...d, ...changes } : d));
   const local = builderProblems(draft);
   const err = (path: string) => problem?.fields.get(path);
-  const fieldErr = (i: number) => [...(problem?.fields.entries() ?? [])].filter(([p]) => p.startsWith(`fields.${i}.`)).map(([, m]) => m).join(" ");
-  const types = typesFor(draft.kind);
 
   async function save() {
     if (!draft) return;
@@ -73,42 +72,6 @@ export default function FormEditorPage({ params }: PageProps) {
       setProblem({ message: caught instanceof Error ? caught.message : "It could not be changed.", fields: new Map() });
     }
   }
-
-  const fieldEditor = (field: FormFieldDefinition, setField: (f: FormFieldDefinition) => void, i: number) => {
-    const system = isSystemField(field.id);
-    const marketing = isMarketingField(field.id);
-    return (
-      <div className={styles.fields}>
-        <FormField label="Label" required error={err(`fields.${i}.label`)}>
-          <Input maxLength={120} value={field.label} onChange={(e) => setField({ ...field, label: e.target.value })} />
-        </FormField>
-        <FormField label="Type" helper={system ? "Needed for replies: its type cannot change." : marketing ? "The marketing emails choice (Audience): always a checkbox, never required." : undefined}>
-          <Select disabled={system || marketing} options={types.map((t) => ({ value: t, label: TYPE_LABELS[t] }))} value={field.type} onChange={(e) => setField(retype(field, e.target.value as FormFieldDefinition["type"]))} />
-        </FormField>
-        <Checkbox label="Required" checked={!marketing && (system || field.required)} disabled={system || marketing} onChange={(e) => setField({ ...field, required: e.target.checked })} />
-        {field.type === "checkbox" && (
-          <Checkbox label="Ticked when the form opens" checked={Boolean(field.defaultChecked)} onChange={(e) => setField({ ...field, defaultChecked: e.target.checked || undefined })} />
-        )}
-        {marketing && field.defaultChecked && <p className={styles.muted}>Ticked by default (owner decision). Note: a pre-ticked box is generally not valid consent for marketing emails under UK/EU or Indian law.</p>}
-        <FormField label="Help text" helper="Optional. Shown under the label.">
-          <Input maxLength={300} value={field.help ?? ""} onChange={(e) => setField({ ...field, help: e.target.value || undefined })} />
-        </FormField>
-        {!["checkbox", "select", "file"].includes(field.type) && (
-          <FormField label="Placeholder" helper="Optional. Shown inside the empty box.">
-            <Input maxLength={120} value={field.placeholder ?? ""} onChange={(e) => setField({ ...field, placeholder: e.target.value || undefined })} />
-          </FormField>
-        )}
-        {field.type === "select" && (
-          <FormField label="Options" required helper="One per line, in order." error={err(`fields.${i}.options`)}>
-            <Textarea rows={5} value={(field.options ?? []).join("\n")} onChange={(e) => setField({ ...field, options: e.target.value.split("\n") })} />
-          </FormField>
-        )}
-        {field.type === "file" && <p className={styles.muted}>Visitors attach one {FILE_TYPE_NAMES} file, up to 4 MB. Files are private: owners open them from Form submissions.</p>}
-        <p className={styles.muted}>Field id: {field.id}</p>
-        {fieldErr(i) && <p role="alert" style={{ color: "var(--color-danger-fg)", margin: 0 }}>{fieldErr(i)}</p>}
-      </div>
-    );
-  };
 
   return (
     <PageContainer width="narrow">
@@ -151,36 +114,7 @@ export default function FormEditorPage({ params }: PageProps) {
           </div>
         </Panel>
         <Panel title="Fields" as="h2" description="In the order the website shows them. Name and Email stay on every form.">
-          <div className={styles.fields}>
-            <ItemList
-              label="Fields"
-              items={draft.fields}
-              max={25}
-              disabled={saving}
-              error={err("fields")}
-              itemLabel={(i) => draft.fields[i]?.label || `Field ${i + 1}`}
-              addLabel="Add a field"
-              onChange={(fields) => set({ fields })}
-              make={() => newField("text", draft.fields)}
-              render={fieldEditor}
-            />
-            {!draft.fields.some((f) => isMarketingField(f.id)) && (
-              <div>
-                <Button size="sm" onClick={() => set({ fields: [...draft.fields, marketingField()] })}>
-                  Restore marketing checkbox
-                </Button>
-              </div>
-            )}
-            {local.length > 0 && (
-              <Alert tone="warning">
-                <ul style={{ margin: 0 }}>
-                  {local.map((p) => (
-                    <li key={p}>{p}</li>
-                  ))}
-                </ul>
-              </Alert>
-            )}
-          </div>
+          <FieldsBuilder fields={draft.fields} onChange={(fields) => set({ fields })} kind={draft.kind} disabled={saving} errors={errorsUnder(problem?.fields ?? new Map(), "fields")} />
         </Panel>
       </div>
       <div className={styles.saveBar} data-dirty={dirty || undefined}>

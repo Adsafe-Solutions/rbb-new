@@ -26,10 +26,16 @@ import { isApproval } from "../content/workflow.ts";
    day's schedule.
      programId  a program's slug, checked at save like a story's; null (or
                 cleared) = open to all
-     schedule   up to 20 steps { time?, item }; cleared = no schedule */
+     schedule   up to 20 steps { time?, item }; cleared = no schedule
+   and (2026-10-17) the registration form on the event's page:
+     registration  { open, capacity?, submitLabel, successMessage, fields }
+                   (content-schema EventRegistration); replaced whole on a
+                   save, cleared (null) = no form. Never together with an
+                   open registrationUrl. Registrations are taken against
+                   the PUBLISHED event (modules/forms). */
 
 const editable = Object.fromEntries(
-  ["title", "slug", "subtitle", "summary", "about", "date", "startTime", "endTime", "timezone", "programId", "venue", "address", "mapUrl", "registrationUrl", "schedule", "imageId", "seo"].map((f) => [f, z.unknown()])
+  ["title", "slug", "subtitle", "summary", "about", "date", "startTime", "endTime", "timezone", "programId", "venue", "address", "mapUrl", "registrationUrl", "registration", "schedule", "imageId", "seo"].map((f) => [f, z.unknown()])
 );
 
 export const EVENT_COLLECTION: CollectionConfig<Event> = {
@@ -49,7 +55,7 @@ export const EVENT_COLLECTION: CollectionConfig<Event> = {
     ["body.imageId", event.imageId],
     ["body.seo.ogImageId", event.seo?.ogImageId],
   ],
-  opaque: ["about"],
+  opaque: ["about", "registration"],
 };
 
 /* The collection with its program reference checked against this

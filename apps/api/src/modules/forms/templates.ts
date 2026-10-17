@@ -245,3 +245,75 @@ export function definitionNotification(
   ].join("\n");
   return { subject: `New submission: ${title} · ${reference}`, html, text };
 }
+
+/* The registrant's confirmation of an event registration (2026-10-17):
+   the event's details as RBB published them — title, day, time, place,
+   a map link and the event's page. Like the acknowledgement, it never
+   quotes what the registrant typed (not even their name): it goes to an
+   address anyone can type into the form. The subject carries RBB's event
+   title (owner-written, one line) and the reference only. */
+export interface ConfirmedEvent {
+  title: string;
+  date: string;
+  startTime: string;
+  endTime?: string;
+  timezone?: string;
+  venue: string;
+  address: string;
+  mapUrl?: string;
+  /* The event's page on the website, when the API knows the site's origin. */
+  pageUrl?: string;
+}
+
+const eventDay = (iso: string) => {
+  const d = new Date(`${iso}T12:00:00Z`);
+  return Number.isNaN(d.getTime()) ? iso : new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(d);
+};
+
+/* An https link button: white on Deep Trust Blue. */
+function linkButton(href: string, label: string) {
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 18px;"><tr><td style="background:${C.blue};border-radius:12px;">
+<a href="${esc(href)}" style="display:inline-block;padding:12px 22px;font-family:${FONT};font-size:15px;font-weight:bold;color:${C.white};text-decoration:none;">${esc(label)}</a>
+</td></tr></table>`;
+}
+
+export function eventConfirmation(event: ConfirmedEvent, { reference, submittedAt }: { reference: string; submittedAt: string }): RenderedEmail {
+  const title = event.title.replace(/[\r\n]+/g, " ").trim();
+  const day = eventDay(event.date);
+  const time = (event.endTime ? `${event.startTime} – ${event.endTime}` : event.startTime) + (event.timezone ? ` (${event.timezone.replace(/_/g, " ")})` : "");
+  const map = event.mapUrl?.startsWith("https://") ? event.mapUrl : undefined;
+  const page = event.pageUrl?.startsWith("https://") ? event.pageUrl : undefined;
+  const html = layout({
+    preheader: `You're registered for ${title} on ${day}.`,
+    heading: "You're registered",
+    body:
+      p(`Thank you for registering for <strong>${esc(title)}</strong>. Here are the details.`) +
+      detailRows([
+        ["Date", esc(day)],
+        ["Time", esc(time)],
+        ["Where", `${esc(event.venue)}<br>${esc(event.address)}${map ? `<br><a href="${esc(map)}" style="color:${C.blue};">Get directions</a>` : ""}`],
+      ]) +
+      (page ? linkButton(page, "View the event") : "") +
+      p(`If you need to refer to your registration, please quote reference <strong>${esc(reference)}</strong>.`) +
+      p(`If you did not register for this event, you can ignore this email.`) +
+      metaLine(reference, submittedAt),
+  });
+  const text = [
+    "You're registered",
+    "",
+    `Thank you for registering for ${title}. Here are the details.`,
+    "",
+    `Date: ${day}`,
+    `Time: ${time}`,
+    `Where: ${event.venue}, ${event.address}`,
+    ...(map ? [`Directions: ${map}`] : []),
+    ...(page ? [`The event: ${page}`] : []),
+    "",
+    `If you need to refer to your registration, please quote reference ${reference}.`,
+    "If you did not register for this event, you can ignore this email.",
+    "",
+    `Reference ${reference} · Received ${submittedAt} (UTC)`,
+    BRAND,
+  ].join("\n");
+  return { subject: `You're registered: ${title} · ${reference}`, html, text };
+}

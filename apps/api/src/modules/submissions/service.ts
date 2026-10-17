@@ -7,6 +7,7 @@ import type { AuditService, RequestFacts } from "../audit/audit.ts";
 import { requirePermission } from "../auth/permissions.ts";
 import type { AuthContext } from "../auth/types.ts";
 import type { ObjectStorage } from "../media/storage.ts";
+import type { PlaceStore } from "../forms/places.ts";
 import { SUBMISSION_STATUSES, type SubmissionCounts, type SubmissionStore, type StoredSubmission } from "./repository.ts";
 
 /* Form submissions in the admin — OWNERS only (submissions:read to look,
@@ -27,7 +28,7 @@ const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const ListQuery = z.strictObject({
   limit: z.coerce.number().int().min(1).max(100).optional(),
   before: z.string().max(200).optional(),
-  form: z.string().regex(/^(contact|volunteer|partner|newsletter|career-[a-z0-9]+(?:-[a-z0-9]+)*)$/).optional(),
+  form: z.string().regex(/^(contact|volunteer|partner|newsletter|career-[a-z0-9]+(?:-[a-z0-9]+)*|event-[A-Za-z0-9_-]{1,128})$/).optional(),
   status: z.enum(SUBMISSION_STATUSES).optional(),
   from: z.string().regex(DAY).optional(),
   to: z.string().regex(DAY).optional(),
@@ -105,14 +106,16 @@ export class SubmissionService {
   readonly #mailer: ReplyMailer | null;
   readonly #storage: ObjectStorage | null;
   readonly #titles: (() => Promise<Record<string, string>>) | null;
+  readonly #places: PlaceStore | null;
 
-  constructor(store: SubmissionStore, audit: AuditService, options: { now?: () => Date; mailer?: ReplyMailer | null; storage?: ObjectStorage | null; titles?: () => Promise<Record<string, string>> } = {}) {
+  constructor(store: SubmissionStore, audit: AuditService, options: { now?: () => Date; mailer?: ReplyMailer | null; storage?: ObjectStorage | null; titles?: () => Promise<Record<string, string>>; places?: PlaceStore | null } = {}) {
     this.#store = store;
     this.#audit = audit;
     this.#now = options.now ?? (() => new Date());
     this.#mailer = options.mailer ?? null;
     this.#storage = options.storage ?? null;
     this.#titles = options.titles ?? null;
+    this.#places = options.places ?? null;
   }
 
   /* A short-lived signed link to one attached file (owners). */
@@ -209,6 +212,8 @@ export class SubmissionService {
     /* Its files first: a submission is never deleted while its CV remains. */
     for (const a of current.attachments ?? []) await this.#storage?.delete(a.key);
     if (!(await this.#store.remove(current.id))) throw errors.notFound("submission");
+    /* A deleted event registration gives its place back. */
+    if (current.formId.startsWith("event-")) await this.#places?.release(current.formId);
     await this.#audit.recordSafely({ action: "submissions.deleted", resourceType: "submission", resourceId: current.id, actorUserId: member.user.id, metadata: { form: current.formId } }, facts);
     return { deleted: true };
   }

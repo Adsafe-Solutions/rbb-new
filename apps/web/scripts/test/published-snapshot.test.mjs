@@ -194,6 +194,29 @@ test("collections: only the ones the snapshot carries; published records → the
   assert.deepEqual(Object.keys(o["src/content/media.js"]).sort(), ["EVENTS", "NEWS"]);
 });
 
+test("events: an OPEN registration comes with the event as its page's form (event-<record id>); a closed one or none, no key", () => {
+  const fields = [
+    { id: "name", type: "text", label: "Your full name", required: true, maxLength: 200 },
+    { id: "email", type: "email", label: "Email address", required: true, maxLength: 254 },
+    { id: "dietary_needs", type: "checkboxes", label: "Dietary needs", required: false, options: ["Vegetarian", "Vegan"] },
+    { id: "guests", type: "number", label: "Guests", required: true, min: 0, max: 4 },
+  ];
+  const registration = (extra) => ({ open: true, submitLabel: "Register", successMessage: "You're registered.", fields, ...extra });
+  const event = (id, extra) => ({ id, slug: id, title: "Gathering", summary: "S.", about: body, date: "2026-11-14", startTime: "6:30 PM", programId: null, venue: "Hall", address: "1 Street", schedule: [], imageId: "img", status: "published", ...extra });
+  const c = collectionsFrom(withContent({ events: [
+    event("limited", { registration: registration({ capacity: 40 }) }),
+    event("unlimited", { registration: registration() }),
+    event("closed", { registration: registration({ open: false, capacity: 10 }) }),
+    event("linked", { registrationUrl: "https://r.example.org" }),
+  ] }));
+  const byId = new Map(c.EVENTS.map((e) => [e.id, e]));
+  assert.deepEqual(byId.get("limited").registration, { formId: "event-limited", capacity: 40, submitLabel: "Register", successMessage: "You're registered.", fields }, "fields as the contract has them");
+  assert.equal(byId.get("unlimited").registration.capacity, null, "no capacity → null (no limit)");
+  assert.ok(!("registration" in byId.get("closed")), "closed → no form");
+  assert.ok(!("registration" in byId.get("linked")), "a link, not a form");
+  assert.equal(byId.get("linked").registrationUrl, "https://r.example.org", "the link stays as it was");
+});
+
 test("a collection's contents are replaced in place (the export stays the same array)", () => {
   const out = appendOverrides("export const NEWS = [{ id: 'sample' }].map((n) => n);", "src/content/media.js", { NEWS: [{ id: "cms" }] });
   assert.match(out, /NEWS\.splice\(0, NEWS\.length, \.\.\.\[\{"id":"cms"\}\]\);/);

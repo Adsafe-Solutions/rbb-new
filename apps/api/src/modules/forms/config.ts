@@ -34,11 +34,15 @@ export interface FormsConfig {
   /* The inbox for career applications (EMAIL_TO_CAREERS, 2026-10-13), or
      null: applications are then stored only. */
   careersRecipient: string | null;
+  /* The inbox told of each event registration (EMAIL_TO_EVENTS,
+     2026-10-17), or null: registrations are then stored only. The
+     registrant's confirmation goes out whenever email is on. */
+  eventsRecipient: string | null;
   testRecipient: string | null;
   rateLimit: { max: number; windowMs: number };
 }
 
-export const FORMS_OFF: FormsConfig = { mode: "off", problems: [], apiKey: null, from: null, recipients: {}, acknowledge: [], careersRecipient: null, testRecipient: null, rateLimit: { max: 5, windowMs: 600_000 } };
+export const FORMS_OFF: FormsConfig = { mode: "off", problems: [], apiKey: null, from: null, recipients: {}, acknowledge: [], careersRecipient: null, eventsRecipient: null, testRecipient: null, rateLimit: { max: 5, windowMs: 600_000 } };
 
 /* One address, no display name, none of the characters that could add a
    recipient or a header (the same rule as @rbb/forms' EMAIL_PATTERN). */
@@ -81,6 +85,10 @@ export function loadFormsConfig(env: Record<string, string | undefined>): FormsC
   let careersRecipient: string | null = null;
   if (careersTo && SINGLE_ADDRESS.test(careersTo)) careersRecipient = careersTo;
   else if (careersTo) problems.push("EMAIL_TO_CAREERS is not a single email address — applications are stored only");
+  const eventsTo = clean(env.EMAIL_TO_EVENTS);
+  let eventsRecipient: string | null = null;
+  if (eventsTo && SINGLE_ADDRESS.test(eventsTo)) eventsRecipient = eventsTo;
+  else if (eventsTo) problems.push("EMAIL_TO_EVENTS is not a single email address — registrations are stored only");
   for (const name of ["EMAIL_TO_TRAVEL", "EMAIL_TO_NEWSLETTER", "NEWSLETTER_ENABLED"])
     if (clean(env[name])) problems.push(`${name} is ignored: that form is not enabled in the API`);
 
@@ -108,6 +116,7 @@ export function loadFormsConfig(env: Record<string, string | undefined>): FormsC
     from,
     recipients: global.length ? {} : recipients,
     careersRecipient: global.length ? null : careersRecipient,
+    eventsRecipient: global.length ? null : eventsRecipient,
     acknowledge,
     testRecipient,
     rateLimit,

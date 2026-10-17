@@ -77,6 +77,7 @@ import { MongoMediaStore } from "./modules/media/repository.ts";
 import { createDeliverer, refusingTransport, resendTransport, type EmailTransport, type OutgoingEmail } from "./modules/forms/email.ts";
 import { formRoutes } from "./modules/forms/routes.ts";
 import { FormService } from "./modules/forms/service.ts";
+import { MongoPlaceStore } from "./modules/forms/places.ts";
 import { mediaRoutes } from "./modules/media/routes.ts";
 import { MediaService } from "./modules/media/service.ts";
 import type { ObjectStorage } from "./modules/media/storage.ts";
@@ -282,6 +283,11 @@ export function createApp(options: AppOptions = {}): App {
       submissions: new MongoSubmissionStore(db, config.orgId),
       definitions: { live: (id: string) => new MongoFormDefinitionStore(db, config.orgId).get(id) },
       uploads: formUploads(db, config),
+      /* Event registrations: the event as the LIVE snapshot has it — the
+         page the visitor registered from — never an unpublished edit. */
+      events: { live: async (id: string) => (await new MongoPublishStore(db, config.orgId).activeSnapshot())?.snapshot.content.events?.find((e) => e.id === id) ?? null },
+      places: new MongoPlaceStore(db, config.orgId),
+      siteOrigin: config.cors.web,
     });
   };
 
@@ -315,12 +321,13 @@ export function createApp(options: AppOptions = {}): App {
     const db = await mongo.db();
     /* Replies go out the forms' way (same sender and mode), only while
        email is on; the visitor's answer goes to the form's RBB inbox. */
-    const emailOn = config.forms.mode !== "off" && (Object.keys(config.forms.recipients).length > 0 || Boolean(config.forms.careersRecipient));
-    const replyTo = (formId: string) => (formId.startsWith("career-") ? (config.forms.careersRecipient ?? undefined) : config.forms.recipients[formId as keyof typeof config.forms.recipients]);
+    const emailOn = config.forms.mode !== "off" && (Object.keys(config.forms.recipients).length > 0 || Boolean(config.forms.careersRecipient) || Boolean(config.forms.eventsRecipient));
+    const replyTo = (formId: string) =>
+      formId.startsWith("career-") ? (config.forms.careersRecipient ?? undefined) : formId.startsWith("event-") ? (config.forms.eventsRecipient ?? undefined) : config.forms.recipients[formId as keyof typeof config.forms.recipients];
     const mailer = emailOn ? { deliver: createDeliverer(config.forms, emailTransport, options.formsCapture), replyTo } : null;
     const definitions = new MongoFormDefinitionStore(db, config.orgId);
     const titles = async () => Object.fromEntries((await definitions.list()).map((d) => [d.id, d.title]));
-    return new SubmissionService(new MongoSubmissionStore(db, config.orgId), auditFor(db, config), { ...(options.now && { now: options.now }), mailer, storage, titles });
+    return new SubmissionService(new MongoSubmissionStore(db, config.orgId), auditFor(db, config), { ...(options.now && { now: options.now }), mailer, storage, titles, places: new MongoPlaceStore(db, config.orgId) });
   };
 
   const members = async () => {

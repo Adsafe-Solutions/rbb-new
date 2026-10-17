@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { IsoDateTime, OrgId, Slug, text } from "../common/primitives.ts";
-import { BUILT_IN_FORM_IDS, DEFAULT_MAX_LENGTH, FORM_FIELD_TYPES, MARKETING_FIELD_ID, MAX_FILE_FIELDS } from "./defaults.ts";
+import { BUILT_IN_FORM_IDS, DEFAULT_MAX_LENGTH, FORM_FIELD_TYPES, MARKETING_FIELD_ID, MAX_FILE_FIELDS, NO_PLACEHOLDER_TYPES, hasOptions } from "./defaults.ts";
 
 /* A website form as edited in the admin (owners only; live when saved —
    owner decision, 2026-10-13): Contact Us, Volunteer, Partner With Us, and
@@ -25,17 +25,48 @@ export const FormField = z
     options: z.array(text(80)).min(1).max(30).optional(),
     maxLength: z.int().min(1).max(5000).optional(),
     defaultChecked: z.boolean().optional(),
+    min: z.int().min(-1_000_000).max(1_000_000).optional(),
+    max: z.int().min(-1_000_000).max(1_000_000).optional(),
   })
   .superRefine((f, ctx) => {
-    if (f.type === "select" && !f.options) ctx.addIssue({ code: "custom", path: ["options"], message: "a dropdown needs at least one option" });
-    if (f.type !== "select" && f.options) ctx.addIssue({ code: "custom", path: ["options"], message: "only a dropdown has options" });
+    if (hasOptions(f.type) && !f.options) ctx.addIssue({ code: "custom", path: ["options"], message: "a choice field needs at least one option" });
+    if (!hasOptions(f.type) && f.options) ctx.addIssue({ code: "custom", path: ["options"], message: "only a dropdown or a choice field has options" });
     if (f.options && new Set(f.options).size !== f.options.length) ctx.addIssue({ code: "custom", path: ["options"], message: "each option once" });
     const limit = DEFAULT_MAX_LENGTH[f.type];
     if (f.maxLength !== undefined && (limit === undefined || f.maxLength > limit)) ctx.addIssue({ code: "custom", path: ["maxLength"], message: limit ? `at most ${limit}` : "this field type has no length" });
-    if ((f.type === "checkbox" || f.type === "file" || f.type === "select") && f.placeholder) ctx.addIssue({ code: "custom", path: ["placeholder"], message: "this field type has no placeholder" });
+    if ((NO_PLACEHOLDER_TYPES as readonly string[]).includes(f.type) && f.placeholder) ctx.addIssue({ code: "custom", path: ["placeholder"], message: "this field type has no placeholder" });
     if (f.defaultChecked !== undefined && f.type !== "checkbox") ctx.addIssue({ code: "custom", path: ["defaultChecked"], message: "only a checkbox starts ticked" });
+    if ((f.min !== undefined || f.max !== undefined) && f.type !== "number") ctx.addIssue({ code: "custom", path: ["min"], message: "only a number has a smallest and largest answer" });
+    if (f.min !== undefined && f.max !== undefined && f.min > f.max) ctx.addIssue({ code: "custom", path: ["max"], message: "must not be below the smallest answer" });
   });
 export type FormField = z.infer<typeof FormField>;
+
+/* The rules for a form's list of fields, shared by the website forms and
+   an event's registration form: ids once each, a required "name" (text)
+   and "email" (email), the marketing checkbox (when present) optional,
+   file uploads only where `files` allows them, and at most three. */
+export function fieldListProblems(fields: readonly FormField[], { files }: { files: boolean }): { path: (string | number)[]; message: string }[] {
+  const problems: { path: (string | number)[]; message: string }[] = [];
+  const ids = new Set<string>();
+  fields.forEach((f, i) => {
+    if (ids.has(f.id)) problems.push({ path: ["fields", i, "id"], message: `"${f.id}" is used twice` });
+    ids.add(f.id);
+    if (f.type === "file" && !files) problems.push({ path: ["fields", i, "type"], message: "file uploads are for career forms only" });
+  });
+  const byId = new Map(fields.map((f) => [f.id, f]));
+  for (const [id, type] of [["name", "text"], ["email", "email"]] as const) {
+    const f = byId.get(id);
+    if (!f || f.type !== type || !f.required) problems.push({ path: ["fields"], message: `every form keeps a required "${id}" field (${type})` });
+  }
+  /* The marketing checkbox, when present, is an optional checkbox. Its
+     PRESENCE is required of every NEW save (form-definitions service and
+     the admin builder), not here: forms saved before it existed stay
+     valid in stored records and published snapshots. */
+  const marketing = byId.get(MARKETING_FIELD_ID);
+  if (marketing && (marketing.type !== "checkbox" || marketing.required)) problems.push({ path: ["fields"], message: `the "${MARKETING_FIELD_ID}" field is the optional news-and-updates checkbox` });
+  if (fields.filter((f) => f.type === "file").length > MAX_FILE_FIELDS) problems.push({ path: ["fields"], message: `at most ${MAX_FILE_FIELDS} file uploads` });
+  return problems;
+}
 
 export const FormDefinition = z
   .strictObject({
@@ -57,23 +88,6 @@ export const FormDefinition = z
   .superRefine((d, ctx) => {
     if (d.kind === "career" ? d.id !== `career-${d.roleId}` : d.id !== d.kind) ctx.addIssue({ code: "custom", path: ["id"], message: "does not match the form's kind (and role)" });
     if (d.kind !== "career" && d.roleId !== undefined) ctx.addIssue({ code: "custom", path: ["roleId"], message: "only a career form has a role" });
-    const ids = new Set<string>();
-    d.fields.forEach((f, i) => {
-      if (ids.has(f.id)) ctx.addIssue({ code: "custom", path: ["fields", i, "id"], message: `"${f.id}" is used twice` });
-      ids.add(f.id);
-      if (f.type === "file" && d.kind !== "career") ctx.addIssue({ code: "custom", path: ["fields", i, "type"], message: "file uploads are for career forms only" });
-    });
-    const byId = new Map(d.fields.map((f) => [f.id, f]));
-    for (const [id, type] of [["name", "text"], ["email", "email"]] as const) {
-      const f = byId.get(id);
-      if (!f || f.type !== type || !f.required) ctx.addIssue({ code: "custom", path: ["fields"], message: `every form keeps a required "${id}" field (${type})` });
-    }
-    /* The marketing checkbox, when present, is an optional checkbox. Its
-       PRESENCE is required of every NEW save (form-definitions service and
-       the admin builder), not here: forms saved before it existed stay
-       valid in stored records and published snapshots. */
-    const marketing = byId.get(MARKETING_FIELD_ID);
-    if (marketing && (marketing.type !== "checkbox" || marketing.required)) ctx.addIssue({ code: "custom", path: ["fields"], message: `the "${MARKETING_FIELD_ID}" field is the optional news-and-updates checkbox` });
-    if (d.fields.filter((f) => f.type === "file").length > MAX_FILE_FIELDS) ctx.addIssue({ code: "custom", path: ["fields"], message: `at most ${MAX_FILE_FIELDS} file uploads` });
+    fieldListProblems(d.fields, { files: d.kind === "career" }).forEach((issue) => ctx.addIssue({ code: "custom", ...issue }));
   });
 export type FormDefinition = z.infer<typeof FormDefinition>;

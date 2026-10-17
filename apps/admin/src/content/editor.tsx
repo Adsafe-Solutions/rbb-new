@@ -43,7 +43,7 @@ export interface EditorState<R> {
 }
 
 export function useContentEditor<R extends { id: string; status: ContentStatus }>(
-  { api, id, base, fields, initial, kind }: { api: Api<R>; id: string; base: string; fields: readonly (keyof R & string)[]; initial: Partial<R>; kind: string }
+  { api, id, base, fields, initial, kind, prepare }: { api: Api<R>; id: string; base: string; fields: readonly (keyof R & string)[]; initial: Partial<R>; kind: string; prepare?: (draft: Partial<R>) => Partial<R> }
 ): EditorState<R> {
   const { toast } = useToast();
   const isNew = id === "new";
@@ -118,15 +118,18 @@ export function useContentEditor<R extends { id: string; status: ContentStatus }
     setProblem(null);
     setErrors(new Map());
     try {
+      /* What is sent: the draft as `prepare` tidies it (an event's
+         registration form: trimmed words, options without blanks). */
+      const out = prepare ? prepare(draft) : draft;
       if (isNew) {
-        const body = Object.fromEntries(fields.filter((f) => draft[f] !== undefined && draft[f] !== "").map((f) => [f, draft[f]]));
+        const body = Object.fromEntries(fields.filter((f) => out[f] !== undefined && out[f] !== "").map((f) => [f, out[f]]));
         const created = await api.create(body);
         toast({ title: `${kind[0]!.toUpperCase()}${kind.slice(1)} created`, tone: "success" });
         navigate(`/${base}/${created.record.id}`, { replace: true });
         return;
       }
       if (!view) return;
-      const changes = Object.fromEntries(changed.map((f) => [f, draft[f] === undefined || draft[f] === "" ? null : draft[f]]));
+      const changes = Object.fromEntries(changed.map((f) => [f, out[f] === undefined || out[f] === "" ? null : out[f]]));
       const next = await api.update(view.record.id, view.revision, changes, confirmSlugChange);
       show(next);
       toast({ title: "Saved", tone: "success" });

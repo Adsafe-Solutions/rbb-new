@@ -7,8 +7,16 @@
    their built-in form (packages/forms); once saved, the saved definition
    is the form. */
 
-export const FORM_FIELD_TYPES = ["text", "email", "tel", "textarea", "select", "checkbox", "file"] as const;
+/* select = a dropdown, radio = choose one, checkboxes = choose any (each
+   lists its options); checkbox = one tick box (an agreement when it is
+   required); number and date are typed answers. */
+export const FORM_FIELD_TYPES = ["text", "email", "tel", "textarea", "select", "radio", "checkboxes", "checkbox", "number", "date", "file"] as const;
 export type FormFieldType = (typeof FORM_FIELD_TYPES)[number];
+/* The types that list options. */
+export const OPTION_FIELD_TYPES = ["select", "radio", "checkboxes"] as const;
+export const hasOptions = (type: FormFieldType) => (OPTION_FIELD_TYPES as readonly string[]).includes(type);
+/* The types with no placeholder (nothing is typed into an empty box). */
+export const NO_PLACEHOLDER_TYPES = ["select", "radio", "checkboxes", "checkbox", "date", "file"] as const;
 
 export const BUILT_IN_FORM_IDS = ["contact", "volunteer", "partner"] as const;
 export type BuiltInFormId = (typeof BUILT_IN_FORM_IDS)[number];
@@ -44,6 +52,9 @@ export interface FormFieldDefinition {
   maxLength?: number;
   /* A checkbox ticked when the form opens. */
   defaultChecked?: boolean;
+  /* A number field's smallest and largest answer (whole numbers). */
+  min?: number;
+  max?: number;
 }
 
 export interface FormDefinitionData {
@@ -117,4 +128,29 @@ export const newCareerForm = (roleId: string, roleTitle: string): FormDefinition
   successMessage: "Thank you — your application has been sent to Rising Beyond Borders.",
   errorMessage: "Sorry, your application could not be sent. Please try again in a moment.",
   fields: [NAME, EMAIL, { id: "cv", type: "file", label: "Your CV", help: "PDF or Word document, up to 4 MB.", required: true }, { id: "message", type: "textarea", label: "Why are you interested in this role?", required: false, maxLength: 5000 }, MARKETING],
+});
+
+/* An event's registration form (2026-10-17): on the event's own page,
+   checked by the API against the PUBLISHED event. Every registration form
+   keeps a name and an email address — the confirmation goes to it — and
+   the marketing checkbox, like every other form. */
+export interface EventRegistrationData {
+  open: boolean;
+  /* Places; absent = no limit. */
+  capacity?: number;
+  submitLabel: string;
+  successMessage: string;
+  fields: FormFieldDefinition[];
+}
+
+export const newEventRegistration = (): EventRegistrationData => ({
+  open: true,
+  submitLabel: "Register",
+  successMessage: "You're registered. We've emailed a confirmation to the address you gave.",
+  fields: [
+    { ...NAME, label: "Your full name" },
+    EMAIL,
+    { id: "phone", type: "tel", label: "Phone number", required: false, maxLength: 30 },
+    MARKETING,
+  ],
 });

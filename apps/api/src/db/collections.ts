@@ -174,6 +174,7 @@ export const COLLECTIONS = {
   formSubmissions: "form_submissions",
   formDefinitions: "form_definitions",
   formUploads: "form_uploads",
+  eventPlaces: "event_places",
 } as const;
 
 export const INDEXES: Record<keyof typeof COLLECTIONS, IndexDescription[]> = {
@@ -279,6 +280,8 @@ export const INDEXES: Record<keyof typeof COLLECTIONS, IndexDescription[]> = {
     { name: "orgId_id_unique", key: { orgId: 1, id: 1 }, unique: true },
     { name: "orgId_used_createdAt", key: { orgId: 1, usedBy: 1, createdAt: 1 } },
   ],
+  /* One counter per event registration form (modules/forms/places.ts). */
+  eventPlaces: [{ name: "orgId_formId_unique", key: { orgId: 1, formId: 1 }, unique: true }],
   formSubmissions: [
     { name: "orgId_id_unique", key: { orgId: 1, id: 1 }, unique: true },
     { name: "orgId_createdAt", key: { orgId: 1, createdAt: -1, id: -1 } },

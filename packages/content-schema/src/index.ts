@@ -62,7 +62,7 @@ export { AppealKind } from "./appeals/kind.ts";
 export { Appeal, AppealDonation, AppealHighlight, DonationHero, GeneralDonationPage } from "./appeals/appeal.ts";
 export { Metric, MetricVerification } from "./impact/metric.ts";
 export { BLOG_CATEGORY_IDS, Post, PostType, STORY_CATEGORY_IDS, STORY_IMPACT_MAX, STORY_QUOTES_MAX, StoryImpact, StoryQuote, StoryQuotes } from "./posts/post.ts";
-export { Event, ScheduleItem, minutesOf } from "./events/event.ts";
+export { Event, EventRegistration, ScheduleItem, minutesOf } from "./events/event.ts";
 export { Announcement, AnnouncementBar, AnnouncementBarItem, POPUP_RECORD_ID, Popup, STORY_STRIP_LIMIT, StoryStrip, announcementBarApprovalProblems, popupCmsProblems, storyStripApprovalProblems } from "./engagement/engagement.ts";
 export {
   EventListData,
@@ -89,9 +89,9 @@ export { PROGRAM_ICONS, Program } from "./programs/program.ts";
 export { PROJECT_IMPACT_MAX, PROJECT_PARTNERS_MAX, Project, ProjectImpact, projectMediaIds } from "./projects/project.ts";
 export { CareerRole, Careers, CareersSeo } from "./careers/careers.ts";
 export { HowWeWork } from "./howWeWork/howWeWork.ts";
-export { FormDefinition, FormField, FormFieldId, FormId } from "./forms/formDefinition.ts";
-export { BUILT_IN_FORM_IDS, DEFAULT_FORMS, DEFAULT_MAX_LENGTH, FILE_TYPES, FORM_FIELD_TYPES, MARKETING_FIELD_ID, MARKETING_LABEL, MAX_FILE_BYTES, MAX_FILE_FIELDS, SYSTEM_FIELD_IDS, newCareerForm } from "./forms/defaults.ts";
-export type { BuiltInFormId, FormDefinitionData, FormFieldDefinition, FormFieldType, FormKind } from "./forms/defaults.ts";
+export { FormDefinition, FormField, FormFieldId, FormId, fieldListProblems } from "./forms/formDefinition.ts";
+export { BUILT_IN_FORM_IDS, DEFAULT_FORMS, DEFAULT_MAX_LENGTH, FILE_TYPES, FORM_FIELD_TYPES, MARKETING_FIELD_ID, MARKETING_LABEL, MAX_FILE_BYTES, MAX_FILE_FIELDS, NO_PLACEHOLDER_TYPES, OPTION_FIELD_TYPES, SYSTEM_FIELD_IDS, hasOptions, newCareerForm, newEventRegistration } from "./forms/defaults.ts";
+export type { BuiltInFormId, EventRegistrationData, FormDefinitionData, FormFieldDefinition, FormFieldType, FormKind } from "./forms/defaults.ts";
 export { POLICY_IDS, POLICY_ROUTES, Policy, PolicyId, PolicySection, PolicySeo, policyApprovalProblems } from "./policies/policy.ts";
 export {
   CTA_TARGETS,

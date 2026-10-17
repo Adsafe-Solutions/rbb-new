@@ -33,6 +33,18 @@ import { gsap } from "./gsap.js";
 import { EASE } from "./config.js";
 import { jumpTo } from "./lenis.js";
 
+/* `--header-h` is a calc() (announcement bar and story strip included),
+   which getComputedStyle hands back unresolved — so measure it, from
+   inside the page: `.site-shell` redeclares it with the bar in. */
+function headerHeight(within) {
+  const probe = document.createElement("div");
+  probe.style.cssText = "position:absolute;visibility:hidden;pointer-events:none;height:var(--header-h)";
+  within.appendChild(probe);
+  const h = probe.offsetHeight;
+  probe.remove();
+  return h;
+}
+
 export function bindTimeline(section, { small = false } = {}) {
   const pin = section.querySelector("[data-timeline-pin]");
   const viewport = section.querySelector("[data-timeline-viewport]");
@@ -53,11 +65,17 @@ export function bindTimeline(section, { small = false } = {}) {
     ease: EASE.none,
     scrollTrigger: {
       trigger: pin,
-      /* Pinned at the top when the block fits the window; when it does
-         not (a short laptop screen), pinned by its BOTTOM edge, so the
-         cards and the timeline stay whole and only the heading has
-         scrolled away. */
-      start: () => (pin.offsetHeight > window.innerHeight ? "bottom bottom" : "top top"),
+      /* Pinned centred in the window below the header when the block
+         fits there; when it does not (a short laptop screen or phone),
+         pinned by its BOTTOM edge, so the cards and the timeline stay
+         whole and only the heading has scrolled away. The block is only
+         as tall as its content, so it scrolls in straight after the band
+         above — no screen-tall stage with the content floating in it. */
+      start: () => {
+        const top = headerHeight(section);
+        const room = window.innerHeight - top;
+        return pin.offsetHeight > room ? "bottom bottom" : `center ${Math.round(top + room / 2)}px`;
+      },
       /* 1.5 screens of wheel per screen of travel: the row moves at two
          thirds of the reader's scroll, so each event has a moment as
          the current one rather than flicking past. */

@@ -76,4 +76,7 @@ export const submissionsApi = {
   /* A short-lived signed link to an attached file. */
   attachment: (id: string, attachmentId: string) => api<{ url: string; expiresAt: string; name: string }>(`${one(id)}/attachments/${encodeURIComponent(attachmentId)}`),
   reply: (id: string, message: string) => api<Submission>(`${one(id)}/replies`, { method: "POST", body: JSON.stringify({ message }) }),
+  /* One form's totals (an event's registrations, `event-<id>`): the
+     counts that come with a one-item page. */
+  totals: (formId: string) => api<SubmissionPage>(`/api/v1/submissions?${new URLSearchParams({ form: formId, limit: "1" })}`).then((page) => page.counts.byForm[formId] ?? { total: 0, new: 0 }),
 };

@@ -4,7 +4,6 @@ import { cx } from "../../lib/cx.js";
 import { pauseScroll, resumeScroll } from "../../animations/lenis.js";
 import Button from "../Button/Button.jsx";
 import Logo from "../Logo/Logo.jsx";
-import Mark from "../Mark/Mark.jsx";
 import DesktopNav from "./DesktopNav.jsx";
 import MobileNav from "./MobileNav.jsx";
 import { useDonate } from "../DonateDialog/DonateDialog.jsx";
@@ -168,14 +167,13 @@ export default function Header({ announcement = null, onCloseAnnouncement, stori
             aria-label={`${BRAND.fullName} home`}
             className="flex shrink-0 items-center rounded-lg py-2"
           >
-            {/* The supplied logo needs about 150px to keep its two lines
-              of lettering legible, and a 320px phone has about 100px here
-              once the Donate button and the menu toggle have taken
-              theirs. So the phone shows the mark alone — the same
-              artwork, as vector — and the full logo appears as soon as
-              there is room for it. */}
-            <Mark className="h-8 w-8 shrink-0 text-bumble-honey sm:hidden" />
-            <Logo className="hidden h-8 shrink-0 sm:block" />
+            {/* The full logo at every width — the name is the point of
+              the header on a phone too (RBB, Oct 2026). At 32px tall it
+              is 152px wide, which fits beside the Donate button and the
+              menu toggle from a 360px phone up. Narrower than that the
+              bar has about 125px, so the logo steps down to 26px tall
+              (124px wide), where each line of lettering is still ~10px. */}
+            <Logo className="h-6.5 shrink-0 min-[360px]:h-8" />
           </Link>
 
           <DesktopNav />
@@ -208,8 +206,11 @@ export default function Header({ announcement = null, onCloseAnnouncement, stori
                  theme (styles/index.css). `!` so they win over the
                  solid variant's radius and Night text whatever order
                  Tailwind emits them in. ⚠ Paper on Sky Blue measures
-                 below the 4.5:1 WCAG AA asks of text this size. */
-              className="h-11 rounded-[25px]! text-[var(--nav-cta-fg)]! lg:px-5"
+                 below the 4.5:1 WCAG AA asks of text this size.
+                 Hover hands the text back to the variant's on-flip colour:
+                 the fill swaps to ink there, and a pinned `--nav-cta-fg`
+                 vanished on it (Poster: #28282b on #28282b). */
+              className="h-11 rounded-[25px]! text-[var(--nav-cta-fg)]! hover:text-on-flip! lg:px-5"
             >
               {NAV_CTA.label}
             </Button>

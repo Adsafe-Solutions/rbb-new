@@ -4,7 +4,11 @@
 /* Newsletter: the footer's subscribe form (2026-10-13). It is fixed in the
    website, so it never appears in Admin → Forms. */
 export const FORM_LABELS: Record<string, string> = { contact: "Contact Us", volunteer: "Volunteer", partner: "Partner With Us", newsletter: "Newsletter" };
-export const formLabel = (formId: string): string => (Object.hasOwn(FORM_LABELS, formId) ? FORM_LABELS[formId]! : formId);
+/* An event's registration form (2026-10-17): `event-<event record id>`;
+   its submissions carry their name ("Registration — <event>"), and this is
+   the fallback when none is at hand. */
+export const isEventForm = (formId: string): boolean => /^event-[A-Za-z0-9_-]+$/.test(formId);
+export const formLabel = (formId: string): string => (Object.hasOwn(FORM_LABELS, formId) ? FORM_LABELS[formId]! : isEventForm(formId) ? "Event registration" : formId);
 
 /* The Contact form's topics (packages/forms TOPICS), worded as the
    website's own select offers them (apps/web content/forms.js). */
@@ -56,4 +60,8 @@ export function submissionsQuery(filters: SubmissionFilters, before: string | nu
 /* A reply in the member's own mail program — the address and a subject;
    nothing is sent by the admin. */
 export const replyHref = (email: string, formId: string, reference: string): string =>
-  `mailto:${encodeURIComponent(email).replace(/%40/g, "@")}?subject=${encodeURIComponent(`Re: your ${formLabel(formId)} message (${reference})`)}`;
+  `mailto:${encodeURIComponent(email).replace(/%40/g, "@")}?subject=${encodeURIComponent(`Re: your ${isEventForm(formId) ? "registration" : `${formLabel(formId)} message`} (${reference})`)}`;
+
+/* The form filter's choice from the address (`/submissions?form=…`, e.g.
+   an event's "View registrations"). */
+export const filtersFromSearch = (search: string): SubmissionFilters => ({ ...NO_FILTERS, form: new URLSearchParams(search).get("form")?.trim() ?? "" });

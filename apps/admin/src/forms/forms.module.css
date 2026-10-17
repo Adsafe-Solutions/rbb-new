@@ -1,0 +1,13 @@
+/* The form builder's "Add a question" row: one small button per kind of
+   question, wrapping on narrow screens. */
+.palette {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.paletteLabel {
+  flex-basis: 100%;
+  font-weight: 500;
+  font-size: var(--type-body-small-size);
+}

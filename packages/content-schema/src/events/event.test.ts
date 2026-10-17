@@ -84,3 +84,18 @@ test("the snapshot: a blog post's category, when it has one, is a blog category"
   assert.deepEqual(paths(snapshot([], [blog("field")])), ["content.blogs.0.category"], "a story category is not a blog category");
   assert.deepEqual(paths(snapshot([news()], [])), []);
 });
+
+test("registration (2026-10-17): a form on the event's page with a required name and email, an optional place limit, never with a registration link", () => {
+  const form = { open: true, submitLabel: "Register", successMessage: "You're registered.", fields: [{ id: "name", type: "text", label: "Your full name", required: true }, { id: "email", type: "email", label: "Email address", required: true }, { id: "position", type: "radio", label: "Position", required: true, options: ["Goalkeeper", "Defender"] }, { id: "days", type: "checkboxes", label: "Days", required: false, options: ["Sat", "Sun"] }, { id: "guests", type: "number", label: "Guests", required: false, min: 0, max: 3 }, { id: "born", type: "date", label: "Born", required: false }] };
+  ok({ ...fx.event(), registration: form });
+  ok({ ...fx.event(), registration: { ...form, capacity: 40 } });
+  ok({ ...fx.event(), registration: { ...form, open: false }, registrationUrl: "https://tickets.example.org/e" });
+  fails({ ...fx.event(), registration: form, registrationUrl: "https://tickets.example.org/e" }, ["registrationUrl"]);
+  fails({ ...fx.event(), registration: { ...form, capacity: 0 } }, ["registration", "capacity"]);
+  fails({ ...fx.event(), registration: { ...form, fields: form.fields.slice(1) } }, ["registration", "fields"], /"name"/);
+  fails({ ...fx.event(), registration: { ...form, fields: [...form.fields, { id: "cv", type: "file", label: "CV", required: false }] } }, ["registration", "fields", 6, "type"]);
+  fails({ ...fx.event(), registration: { ...form, fields: [...form.fields.slice(0, 2), { id: "pick", type: "radio", label: "Pick", required: true }] } }, ["registration", "fields", 2, "options"]);
+  fails({ ...fx.event(), registration: { ...form, fields: [...form.fields.slice(0, 2), { id: "n", type: "number", label: "N", required: false, min: 5, max: 1 }] } }, ["registration", "fields", 2, "max"]);
+  fails({ ...fx.event(), registration: { ...form, fields: [...form.fields.slice(0, 2), { id: "d", type: "date", label: "D", required: false, placeholder: "dd/mm" }] } }, ["registration", "fields", 2, "placeholder"]);
+  fails({ ...fx.event(), registration: { ...form, fields: [...form.fields.slice(0, 2), { id: "t", type: "text", label: "T", required: false, min: 1 }] } }, ["registration", "fields", 2, "min"]);
+});

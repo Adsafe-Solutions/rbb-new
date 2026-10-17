@@ -27,9 +27,9 @@ import Mark from "../Mark/Mark.jsx";
    is what separates them, so there are no dividers between sections. */
 const PAD = {
   none: "",
-  sm: "py-12 md:py-16",
-  md: "py-16 md:py-24",
-  lg: "py-20 md:py-32",
+  sm: "py-10 md:py-12",
+  md: "py-12 md:py-20",
+  lg: "py-16 md:py-24",
 };
 
 /* Each position bleeds the mark past the band's edge, so it is cropped

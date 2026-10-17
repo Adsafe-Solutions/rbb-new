@@ -92,7 +92,12 @@ export default function ProgressTimeline({ index, timeline, programOf, tone = "w
       aria-labelledby={headingId}
       className="group/timeline relative scroll-mt-[var(--header-h)] [--short-h:clamp(14rem,40svh,24rem)] [--card-w:min(78vw,20rem)] md:[--card-w:calc(var(--short-h)*3/4+1.25rem)]"
     >
-      <div data-timeline-pin="" className="flex flex-col justify-center overflow-clip py-16 md:py-24 group-data-[timeline-pinned]/timeline:min-h-svh group-data-[timeline-pinned]/timeline:py-0 group-data-[timeline-pinned]/timeline:pt-[var(--header-h)]">
+      {/* The pinned block keeps its own height and the band's padding,
+          pinned or not: the motion system centres it under the header
+          while pinned (animations/timeline.js). A full-screen block with
+          its content centred left half a phone screen of empty band above
+          the heading as the section scrolled in. */}
+      <div data-timeline-pin="" className="flex flex-col overflow-clip py-12 md:py-20">
         <Container>
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <SectionHeading id={headingId} index={index} kicker={timeline.kicker} heading={timeline.heading} highlight={highlight} intro={timeline.body} />

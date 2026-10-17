@@ -37,8 +37,12 @@
        heading, intro:  the form's own heading and line (PROPOSED copy)
        fields:          [{ name, type, label, required?, hint?, missing?,
                            autoComplete?, maxLength?, options? }]
-                        type: "text" | "email" | "textarea" | "select"
-                              | "checkbox"
+                        type: "text" | "email" | "tel" | "textarea"
+                              | "select" | "radio" | "checkboxes"
+                              | "checkbox" | "number" | "date" | "file"
+                        (radio = choose one, checkboxes = choose any —
+                        its value is an ARRAY of the chosen options;
+                        number may carry whole-number min / max)
        submitLabel
        recipient:       null — server-side only (see above)
        provider:        the form service RBB chooses, by name — display
@@ -229,7 +233,11 @@ const webField = (f, endpoint) => ({
   ...(f.help && { hint: f.help }),
   ...(f.placeholder && { placeholder: f.placeholder }),
   ...((f.maxLength ?? MAX_LENGTH[f.type]) && { maxLength: f.maxLength ?? MAX_LENGTH[f.type] }),
+  /* A dropdown, "choose one" (radio) and "choose any" (checkboxes) all
+     list their options; the option's words are also what is sent. */
   ...(f.options && { options: f.options.map((o) => ({ value: o, label: o })) }),
+  ...(f.type === "number" && f.min !== undefined && { min: f.min }),
+  ...(f.type === "number" && f.max !== undefined && { max: f.max }),
   ...(AUTOCOMPLETE[f.id] && { autoComplete: AUTOCOMPLETE[f.id] }),
   ...(f.type === "checkbox" && f.defaultChecked && { defaultChecked: true }),
   ...(f.type === "file" && { accept: UPLOAD_ACCEPT, maxBytes: UPLOAD_MAX_BYTES, uploadEndpoint: endpoint ? `${endpoint}/files` : null }),
@@ -251,6 +259,31 @@ export function formConfig(id) {
     successMessage: saved.successMessage,
     errorMessage: saved.errorMessage,
     fields: saved.fields.map((f) => webField(f, endpoint)),
+  };
+}
+
+/* An event's registration form (2026-10-17), or null — an event whose
+   registration is not open has none (scripts/snapshot-adapter.mjs only
+   carries an OPEN one). Built like a saved form: the same readiness
+   rules (an endpoint, the published Privacy Policy), the same route
+   (POST /api/v1/forms/event-<record id>), and the API checks it against
+   the event as PUBLISHED. The event names its button and success line;
+   the error, "full" and "closed" lines are the site's (FORM_COPY). */
+export function eventRegistrationConfig(event) {
+  const registration = event?.registration;
+  if (!registration) return null;
+  const endpoint = endpointFor(registration.formId);
+  const copy = FORM_COPY.registration;
+  return {
+    ...pending(registration.formId),
+    endpoint,
+    heading: copy.heading,
+    submitLabel: registration.submitLabel,
+    successMessage: registration.successMessage,
+    errorMessage: copy.errorMessage,
+    fullMessage: copy.full,
+    closedMessage: copy.closed,
+    fields: registration.fields.map((f) => webField(f, endpoint)),
   };
 }
 
@@ -283,6 +316,28 @@ export const FORM_COPY = {
     invalid: (label) => `Check “${label}” and try again`,
     phone: (label) => `Enter ${label.toLowerCase()} using digits, spaces and + ( ) - only`,
     file: (label) => `Choose a file for “${label}”`,
+    /* "Choose one" (radio) and "choose any" (checkboxes). */
+    choose: (label) => `Choose one answer for “${label}”`,
+    chooseAny: (label) => `Choose at least one answer for “${label}”`,
+    number: (label) => `Enter a whole number for “${label}”, using digits only`,
+    numberRange: (label, min, max) =>
+      min != null && max != null
+        ? `“${label}” must be between ${min} and ${max}`
+        : min != null
+          ? `“${label}” must be ${min} or more`
+          : `“${label}” must be ${max} or fewer`,
+    date: (label) => `Enter a real date for “${label}”`,
+  },
+  /* An event's registration form (content/forms.js
+     eventRegistrationConfig). The event names its own button and success
+     line; these are the rest. "Full" and "closed" say what happened and
+     nothing more — no waiting list, no "try again", which would not
+     help. */
+  registration: {
+    heading: "Register",
+    errorMessage: "Sorry, your registration could not be sent. Please try again in a moment.",
+    full: "Sorry — this event is now full.",
+    closed: "Registration for this event has closed.",
   },
   /* A file field (career applications). */
   upload: {

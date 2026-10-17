@@ -11,7 +11,13 @@
    form shows its own message for each code (lib/forms.js
    serverFieldMessage). */
 const CODES = new Set(["required", "format", "too-long", "invalid"]);
-const NAME = /^[a-z][a-zA-Z]{0,30}$/;
+/* A field name: the built-in forms' camelCase, and the ids the admin
+   gives a field it builds (packages/content-schema FormFieldId — lowercase
+   letters, digits and "_"). It used to be letters only, and a server error
+   on an admin-built field like "dietary_needs" or "guest2" was dropped,
+   leaving the visitor with no message. Still never "__proto__": a name
+   starts with a letter. */
+const NAME = /^[a-z][a-zA-Z0-9_]{0,39}$/;
 
 export function fieldCodesFrom(body) {
   const fields = {};
@@ -28,4 +34,14 @@ export function fieldCodesFrom(body) {
     for (const [name, code] of Object.entries(body.fields)) add(name, code);
   }
   return fields;
+}
+
+/* A 409 from an event's registration form (2026-10-17): the API's
+   envelope names why in `details` — { path: "registration", message:
+   "full" | "closed" }. Anything else is an ordinary error. */
+export function registrationOutcome(body) {
+  const details = body?.error?.details;
+  if (!Array.isArray(details)) return "error";
+  const reason = details.find((d) => d?.path === "registration")?.message;
+  return reason === "full" || reason === "closed" ? reason : "error";
 }

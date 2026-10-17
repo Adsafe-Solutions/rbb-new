@@ -5,6 +5,7 @@ import { IsoDate, MediaId, Slug, TimeOfDay, text } from "../common/primitives.ts
 import { HttpsUrl } from "../common/link.ts";
 import { RichText } from "../richText/richText.ts";
 import { SeoOverrides } from "../seo/seo.ts";
+import { FormField, fieldListProblems } from "../forms/formDefinition.ts";
 
 /* An event (/media/events/<slug>) — the fields content/media.js EVENTS
    carries today. Whether it is upcoming or past is worked out from `date`
@@ -27,6 +28,25 @@ import { SeoOverrides } from "../seo/seo.ts";
    A schedule is the day's running order: an optional time and a line per
    step. A timed step is within the event (not before the start, not after
    the end) and timed steps run in order; an untimed step sits between. */
+/* Registration on the event's own page (2026-10-17) — the alternative to
+   an external `registrationUrl`, never both. While `open`, the page shows
+   the form and the API takes registrations for the event AS PUBLISHED
+   (forms service, `event-<id>`), until it ends or `capacity` places are
+   taken. Each registration is stored for owners, emailed to RBB's events
+   inbox when one is set, and confirmed to the address given. The fields
+   follow the website forms' rules (a required name and email, file
+   uploads never). */
+export const EventRegistration = z
+  .strictObject({
+    open: z.boolean(),
+    capacity: z.int().min(1).max(100_000).optional(),
+    submitLabel: text(40),
+    successMessage: text(300),
+    fields: z.array(FormField).min(2).max(25),
+  })
+  .superRefine((r, ctx) => fieldListProblems(r.fields, { files: false }).forEach((issue) => ctx.addIssue({ code: "custom", ...issue })));
+export type EventRegistration = z.infer<typeof EventRegistration>;
+
 export const ScheduleItem = z.strictObject({
   time: TimeOfDay.optional(),
   item: text(200),
@@ -57,10 +77,12 @@ export const Event = z.strictObject({
   address: text(300),
   mapUrl: HttpsUrl.optional(),
   registrationUrl: HttpsUrl.optional(),
+  registration: EventRegistration.optional(),
   schedule: z.array(ScheduleItem).max(20),
   imageId: MediaId,
   seo: SeoOverrides.optional(),
 }).superRefine((event, ctx) => {
+  if (event.registration?.open && event.registrationUrl) ctx.addIssue({ code: "custom", path: ["registrationUrl"], message: "an event takes registrations on its page or through a link, not both" });
   /* One calendar day, in the event's own time: an end must come after
      the start. Times are never converted — they are what the event says. */
   const start = minutesOf(event.startTime);

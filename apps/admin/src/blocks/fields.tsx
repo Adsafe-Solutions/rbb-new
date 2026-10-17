@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { ArrowDown, ArrowUp, Badge, Button, Checkbox, FormField, IconButton, Input, Plus, Spinner, Textarea, Trash2 } from "../design-system";
+import { ArrowDown, ArrowUp, Badge, Copy, Button, Checkbox, FormField, IconButton, Input, Plus, Spinner, Textarea, Trash2 } from "../design-system";
 import { isReady, readinessWord } from "../content/workflow";
 import { MediaPicker } from "../media/MediaPicker";
 import { unlistedChoices, withoutChoice } from "./pickerChoices";
@@ -61,8 +61,11 @@ export function ImageField({ label, value, onChange, error, disabled, helper, op
 }
 
 /* An ordered list of items with Add, Remove and keyboard-reachable
-   Move up / Move down. Focus follows a moved item's button. */
-export function ItemList<T>({ label, items, onChange, render, make, max, disabled, itemLabel, error, addLabel }: { label: string; items: T[]; onChange: (items: T[]) => void; render: (item: T, set: (item: T) => void, i: number) => ReactNode; make: () => T; max: number; disabled: boolean; itemLabel: (i: number) => string; error?: string; addLabel?: string }) {
+   Move up / Move down. Focus follows a moved item's button. Without
+   `make` the list has no Add button (the caller offers its own — the form
+   builder's "Add a question"); with `duplicate`, each item has a Duplicate
+   button that puts the copy under it. */
+export function ItemList<T>({ label, items, onChange, render, make, max, disabled, itemLabel, error, addLabel, duplicate }: { label: string; items: T[]; onChange: (items: T[]) => void; render: (item: T, set: (item: T) => void, i: number) => ReactNode; make?: () => T; max: number; disabled: boolean; itemLabel: (i: number) => string; error?: string; addLabel?: string; duplicate?: (item: T, items: T[]) => T }) {
   const move = (i: number, by: number, action: "up" | "down") => {
     const next = [...items];
     const [item] = next.splice(i, 1);
@@ -87,6 +90,7 @@ export function ItemList<T>({ label, items, onChange, render, make, max, disable
               <span className={styles.itemActions}>
                 <IconButton size="sm" label={`Move ${itemLabel(i)} up`} icon={<ArrowUp />} disabled={disabled || i === 0} onClick={() => move(i, -1, "up")} data-list={label} data-item={i} data-move="up" />
                 <IconButton size="sm" label={`Move ${itemLabel(i)} down`} icon={<ArrowDown />} disabled={disabled || i === items.length - 1} onClick={() => move(i, 1, "down")} data-list={label} data-item={i} data-move="down" />
+                {duplicate && <IconButton size="sm" label={`Duplicate ${itemLabel(i)}`} icon={<Copy />} disabled={disabled || items.length >= max} onClick={() => onChange([...items.slice(0, i + 1), duplicate(item, items), ...items.slice(i + 1)])} />}
                 <IconButton size="sm" label={`Remove ${itemLabel(i)}`} icon={<Trash2 />} disabled={disabled} onClick={() => onChange(items.filter((_, j) => j !== i))} />
               </span>
             </div>
@@ -94,11 +98,13 @@ export function ItemList<T>({ label, items, onChange, render, make, max, disable
           </li>
         ))}
       </ol>
-      <div>
-        <Button size="sm" leadingIcon={<Plus />} disabled={disabled || items.length >= max} onClick={() => onChange([...items, make()])}>
-          {addLabel ?? `Add ${label.toLowerCase().replace(/s$/, "")}`}
-        </Button>
-      </div>
+      {make && (
+        <div>
+          <Button size="sm" leadingIcon={<Plus />} disabled={disabled || items.length >= max} onClick={() => onChange([...items, make()])}>
+            {addLabel ?? `Add ${label.toLowerCase().replace(/s$/, "")}`}
+          </Button>
+        </div>
+      )}
     </fieldset>
   );
 }

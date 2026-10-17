@@ -210,3 +210,18 @@ test("publishing: the new fields reach the snapshot; drafts and archived records
   assert.deepEqual(snapshot.content.events!.map((e) => [e.slug, e.programId, e.schedule, e.timezone]), [["live-event", "education", schedule, "Asia/Kolkata"]]);
   assert.ok(snapshot.content.programs!.some((p) => p.slug === "education"), "the program it names is published with it");
 });
+
+test("events: a registration form (2026-10-17) is stored whole, replaced whole, cleared with null — never alongside a registration link", async () => {
+  const { h, image } = await site();
+  const registration = { open: true, capacity: 30, submitLabel: "Register", successMessage: "You're registered.", fields: [{ id: "name", type: "text", label: "Your full name", required: true }, { id: "email", type: "email", label: "Email address", required: true }, { id: "position", type: "radio", label: "Position", required: true, options: ["Goalkeeper", "Defender"] }] };
+  const created = await h.events.create(owner, event(image.id, { registration }), FACTS);
+  assert.deepEqual(created.record.registration, registration);
+  const closed = await h.events.update(owner, created.record.id, { revision: created.revision, changes: { registration: { ...registration, open: false, capacity: undefined } } }, FACTS);
+  assert.deepEqual(closed.record.registration, { ...registration, open: false, capacity: undefined });
+  await rejects(h.events.update(owner, created.record.id, { revision: closed.revision, changes: { registration, registrationUrl: "https://tickets.example.org/e" } }, FACTS), "body.registrationUrl", /not both/);
+  await rejects(h.events.update(owner, created.record.id, { revision: closed.revision, changes: { registration: { ...registration, fields: [{ id: "name", type: "text", label: "Name", required: true }, { id: "cv", type: "file", label: "CV", required: false }] } } }, FACTS), "body.registration.fields");
+  const switched = await h.events.update(owner, created.record.id, { revision: closed.revision, changes: { registration: null, registrationUrl: "https://tickets.example.org/e" } }, FACTS);
+  assert.equal(switched.record.registration, undefined);
+  assert.equal(switched.record.registrationUrl, "https://tickets.example.org/e");
+  await approve(h.events, owner, created.record.id, FACTS);
+});

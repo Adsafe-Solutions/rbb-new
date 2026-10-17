@@ -40,3 +40,15 @@ test("reply from the admin: a composer that sends through the API, the replies s
   const client = readFileSync(new URL("../../src/submissions/client.ts", import.meta.url), "utf8");
   assert.match(client, /\/replies`, \{ method: "POST"/);
 });
+
+test("event registrations (event-<id>): named, chosen from the address, replied to as a registration", async () => {
+  const { filtersFromSearch, isEventForm } = await import("../../src/submissions/format.ts");
+  assert.equal(formLabel("event-6650f1c2a9"), "Event registration");
+  assert.ok(isEventForm("event-abc") && !isEventForm("events") && !isEventForm("contact"));
+  assert.deepEqual(filtersFromSearch("?form=event-abc"), { ...NO_FILTERS, form: "event-abc" });
+  assert.deepEqual(filtersFromSearch(""), NO_FILTERS);
+  assert.equal(replyHref("a@b.example", "event-abc", "RBB-1"), "mailto:a@b.example?subject=Re%3A%20your%20registration%20(RBB-1)");
+  assert.deepEqual(fieldRows({ name: "A", email: "a@b.example", diet: "Vegan; Halal" }, { name: "Your full name", email: "Email address", diet: "Diet" }).map((r) => r.value), ["A", "a@b.example", "Vegan; Halal"]);
+  const page = readFileSync(new URL("../../src/pages/submissions/SubmissionsPage.tsx", import.meta.url), "utf8");
+  assert.match(page, /useState<SubmissionFilters>\(\(\) => filtersFromSearch\(window\.location\.search\)\)/);
+});

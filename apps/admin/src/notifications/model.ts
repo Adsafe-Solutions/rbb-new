@@ -1,4 +1,4 @@
-import { FORM_LABELS } from "../submissions/format.ts";
+import { FORM_LABELS, isEventForm } from "../submissions/format.ts";
 
 /* The topbar's notifications (2026-10-13): GET /api/v1/notifications, read
    live — nothing to mark read here. An entry goes away when the work is
@@ -64,10 +64,11 @@ export function badgeCount(n: Notifications | null): number {
 }
 
 /* New submissions per form — [["Contact Us", 1], ["Newsletter", 2]] — in
-   the forms' usual order, every career form together as "Careers". */
+   the forms' usual order, every career form together as "Careers" and
+   every event's registrations together as "Event registrations". */
 export function formBreakdown(byForm: Record<string, number>): [string, number][] {
-  const label = (id: string) => (Object.hasOwn(FORM_LABELS, id) ? FORM_LABELS[id]! : id.startsWith("career-") ? "Careers" : id);
-  const order = [...Object.values(FORM_LABELS), "Careers"];
+  const label = (id: string) => (Object.hasOwn(FORM_LABELS, id) ? FORM_LABELS[id]! : id.startsWith("career-") ? "Careers" : isEventForm(id) ? "Event registrations" : id);
+  const order = [...Object.values(FORM_LABELS), "Careers", "Event registrations"];
   const totals = new Map<string, number>();
   for (const [id, count] of Object.entries(byForm)) totals.set(label(id), (totals.get(label(id)) ?? 0) + count);
   return [...totals]

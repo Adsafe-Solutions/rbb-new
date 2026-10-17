@@ -30,7 +30,7 @@ import {
 } from "../../design-system";
 import type { PageProps } from "../../routes";
 import { submissionsApi, type Submission, type SubmissionCounts, type SubmissionSummary } from "../../submissions/client";
-import { FORM_LABELS, NO_FILTERS, fieldRows, formLabel, replyHref, topicLabel, type SubmissionFilters } from "../../submissions/format";
+import { FORM_LABELS, NO_FILTERS, fieldRows, filtersFromSearch, formLabel, replyHref, topicLabel, type SubmissionFilters } from "../../submissions/format";
 import styles from "./submissions.module.css";
 
 /* /submissions — what visitors sent through the website's Contact Us,
@@ -50,11 +50,15 @@ type ListState =
 
 const when = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" });
 /* The filter: the three built-in forms, and every other form (career
-   applications) the list knows by name or has submissions for. */
-const formOptions = (titles: Record<string, string>, seen: string[]) => {
-  const extra = [...new Set([...Object.keys(titles), ...seen])].filter((id) => !Object.hasOwn(FORM_LABELS, id)).sort();
-  return [{ value: "", label: "All forms" }, ...Object.entries(FORM_LABELS).map(([value, label]) => ({ value, label })), ...extra.map((id) => ({ value: id, label: titles[id] ?? id }))];
+   applications, event registrations) the list knows by name or has
+   submissions for — and the one chosen, even before it has any. */
+const formOptions = (titles: Record<string, string>, seen: string[], chosen: string) => {
+  const extra = [...new Set([...Object.keys(titles), ...seen, ...(chosen ? [chosen] : [])])].filter((id) => !Object.hasOwn(FORM_LABELS, id)).sort();
+  return [{ value: "", label: "All forms" }, ...Object.entries(FORM_LABELS).map(([value, label]) => ({ value, label })), ...extra.map((id) => ({ value: id, label: titles[id] ?? formLabel(id) }))];
 };
+/* Form names the submissions carry (an event's registrations are not in
+   the API's saved-forms list): kept across loads, for the filter. */
+const titlesOf = (items: SubmissionSummary[]) => Object.fromEntries(items.flatMap((i) => (i.formTitle ? [[i.formId, i.formTitle] as const] : [])));
 const size = (n: number) => (n >= 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
 const STATUS_OPTIONS = [
   { value: "", label: "New and read" },
@@ -65,7 +69,9 @@ const STATUS_OPTIONS = [
 export default function SubmissionsPage(_: PageProps) {
   const canWrite = useCan("submissions:write");
   const { toast } = useToast();
-  const [filters, setFilters] = useState<SubmissionFilters>(NO_FILTERS);
+  /* `?form=` (an event's "View registrations") chooses the form. */
+  const [filters, setFilters] = useState<SubmissionFilters>(() => filtersFromSearch(window.location.search));
+  const [seenTitles, setSeenTitles] = useState<Record<string, string>>({});
   const [search, setSearch] = useState("");
   const [list, setList] = useState<ListState>({ status: "loading" });
   const [open, setOpen] = useState<{ id: string; item: Submission | null; failed?: boolean } | null>(null);
@@ -87,6 +93,7 @@ export default function SubmissionsPage(_: PageProps) {
     try {
       const page = await submissionsApi.list(current);
       if (mine === generation.current) setList({ status: "ready", items: page.items, next: page.next, counts: page.counts, canReply: page.canReply, formTitles: page.formTitles, more: "idle" });
+      setSeenTitles((t) => ({ ...t, ...titlesOf(page.items) }));
     } catch {
       if (mine === generation.current) setList({ status: "failed" });
     }
@@ -104,6 +111,7 @@ export default function SubmissionsPage(_: PageProps) {
     try {
       const page = await submissionsApi.list(filters, before);
       if (mine === generation.current) setList((s) => (s.status === "ready" ? { ...s, items: [...s.items, ...page.items], next: page.next, counts: page.counts, more: "idle" } : s));
+      setSeenTitles((t) => ({ ...t, ...titlesOf(page.items) }));
     } catch {
       if (mine === generation.current) setList((s) => (s.status === "ready" ? { ...s, more: "failed" } : s));
     }
@@ -198,12 +206,15 @@ export default function SubmissionsPage(_: PageProps) {
   const counts = list.status === "ready" ? list.counts : null;
   const item = open?.item ?? null;
   const canReply = list.status === "ready" && list.canReply;
+  const titles = { ...seenTitles, ...(list.status === "ready" ? list.formTitles : {}) };
+  /* A chosen form beyond the built-in three (a career form, an event's registrations): its own total. */
+  const chosenExtra = filters.form && !Object.hasOwn(FORM_LABELS, filters.form) ? filters.form : null;
 
   return (
     <PageContainer>
       <PageHeader
         title="Form submissions"
-        description="What visitors send through the website's Contact Us, Volunteer, Partner With Us and career forms, and the footer's Newsletter sign-up. Newest first; kept until you delete them. Only owners can see this page."
+        description="What visitors send through the website's Contact Us, Volunteer, Partner With Us and career forms, events' registration forms, and the footer's Newsletter sign-up. Newest first; kept until you delete them. Only owners can see this page."
       />
       {counts && (
         <div className={styles.counts} aria-label="Totals">
@@ -214,11 +225,17 @@ export default function SubmissionsPage(_: PageProps) {
               {counts.byForm[id]?.new ? ` (${counts.byForm[id]!.new} new)` : ""}
             </Badge>
           ))}
+          {chosenExtra && (
+            <Badge tone="neutral">
+              {titles[chosenExtra] ?? formLabel(chosenExtra)}: {counts.byForm[chosenExtra]?.total ?? 0}
+              {counts.byForm[chosenExtra]?.new ? ` (${counts.byForm[chosenExtra]!.new} new)` : ""}
+            </Badge>
+          )}
         </div>
       )}
       <div className={styles.toolbar} role="search" aria-label="Filter the submissions">
         <Input type="search" aria-label="Search name, email, organisation or message" placeholder="Search name, email, organisation or message" leadingIcon={<Search />} value={search} onChange={(e) => setSearch(e.target.value)} />
-        <Select aria-label="Form" options={formOptions(list.status === "ready" ? list.formTitles : {}, counts ? Object.keys(counts.byForm) : [])} value={filters.form} onChange={set("form")} />
+        <Select aria-label="Form" options={formOptions(titles, counts ? Object.keys(counts.byForm) : [], filters.form)} value={filters.form} onChange={set("form")} />
         <Select aria-label="Status" options={STATUS_OPTIONS} value={filters.status} onChange={set("status")} />
         <Input type="date" aria-label="From" value={filters.from} max={filters.to || undefined} onChange={set("from")} />
         <Input type="date" aria-label="To" value={filters.to} min={filters.from || undefined} onChange={set("to")} />
@@ -227,6 +244,8 @@ export default function SubmissionsPage(_: PageProps) {
           onClick={() => {
             setSearch("");
             setFilters(NO_FILTERS);
+            /* A reload shows everything too (no `?form=` left behind). */
+            if (window.location.search) window.history.replaceState(null, "", window.location.pathname);
           }}
         >
           Clear

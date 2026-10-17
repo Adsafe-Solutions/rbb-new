@@ -466,6 +466,16 @@ still carry only the form, outcome and reference. Routes: `modules/submissions/`
   - Notification goes to RBB's inbox with Reply-To set to the visitor's
     validated address. The optional acknowledgement (`EMAIL_ACK_FORMS`)
     never quotes the submission.
+  - **Event registration** (2026-10-17): an event with a registration
+    form takes registrations at `POST /api/v1/forms/event-<event id>`,
+    checked against the event AS PUBLISHED (the live snapshot). Closed or
+    ended → 409 `registration: closed`; its place limit reached → 409
+    `registration: full` (one atomic counter per event, `event_places`,
+    created from the registrations already stored; a deleted registration
+    gives its place back). Always stored (Admin → Form submissions);
+    `EMAIL_TO_EVENTS` is told when set; the registrant gets a confirmation
+    with the event's published details whenever email is on — it quotes
+    nothing they typed. `test/event-registration.test.ts`.
   - Templates escape everything a visitor typed. They are byte-identical to
     the website server's while both exist (`test/forms.test.ts`).
 - **No real email in tests.** Under `NODE_ENV=test` the default transport
@@ -518,6 +528,7 @@ Variables.
 | `EMAIL_API_KEY` (alias `RESEND_API_KEY`) | staging/live | **yes** | Resend sending key for form email, restricted to the verified domain |
 | `EMAIL_FROM` | staging/live | no | Approved From on the verified domain; a `resend.dev` sender is refused in live |
 | `EMAIL_TO_CONTACT`, `_VOLUNTEER`, `_PARTNER`, `_FUNDRAISE` | per form | no | RBB's approved inbox for that form; unset or not one address = that form off |
+| `EMAIL_TO_EVENTS` | no | no | RBB's inbox told of each event registration; unset = registrations are stored only. The registrant's confirmation goes out whenever email is on |
 | `EMAIL_ACK_FORMS` | no | no | Comma list of forms that email the submitter an acknowledgement |
 | `EMAIL_TEST_RECIPIENT` | staging | no | The one inbox all staging email goes to |
 | `FORMS_RATE_LIMIT_MAX`, `FORMS_RATE_LIMIT_WINDOW_S` | no (5, 600) | no | Submissions per client and form per window (shared MongoDB counter) |

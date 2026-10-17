@@ -22,6 +22,8 @@
      content.news   → NEWS   (/media/news)      a collection the CMS manages
      content.blogs  → BLOGS  (/media/blogs)     replaces the source list
      content.events → EVENTS (/media/events)    entirely — published records only
+                       (an event's open registration form comes with it as
+                       `registration`, formId event-<id>)
      content.appeals → APPEALS (/appeals/emergency|campaigns/<slug>, the
                        Appeals menu, the story circles)
      content.generalDonation → PUBLISHED_GENERAL_DONATION (/appeals: the
@@ -218,6 +220,15 @@ export function collectionsFrom(snapshot) {
           address: e.address,
           mapUrl: e.mapUrl ?? null,
           registrationUrl: e.registrationUrl,
+          /* Registration on the event's own page (2026-10-17): only while
+             it is open — a closed form is no form, so the page shows the
+             event as it did before. The form posts to the API as
+             `event-<record id>` (the slug can change; the id cannot), and
+             the fields stay the contract's, which content/forms.js
+             eventRegistrationConfig turns into the page's form. */
+          registration: e.registration?.open
+            ? { formId: `event-${e.id}`, capacity: e.registration.capacity ?? null, submitLabel: e.registration.submitLabel, successMessage: e.registration.successMessage, fields: e.registration.fields }
+            : undefined,
           image: imageOf(snapshot, e.imageId),
           seo: seoOf(snapshot, e.seo),
           status: "approved",

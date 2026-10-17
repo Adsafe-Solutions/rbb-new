@@ -167,6 +167,10 @@ test("one field builder for website forms and event registration forms", () => {
   assert.match(event, /<FieldsBuilder fields=\{d\.registration\.fields\}.*kind="event"/);
   assert.match(event, /errorsUnder\(editor\.errors, "registration\.fields"\)/);
   assert.match(event, /navigate\(`\/submissions\?form=event-\$\{editor\.view!\.record\.id\}`\)/);
-  assert.match(event, /registration: undefined, registrationUrl: undefined/, "No registration clears both (sent as null)");
+  assert.match(event, /registration: d\.registration \?\? newEventRegistration\(\), registrationUrl: undefined/, "turning the form on removes an older link (sent as null)");
+  assert.match(event, /: \{ registration: undefined \}/, "turning it off clears the form (sent as null)");
+  // People register on the website only (2026-10-17): no field to type a link to another site.
+  assert.doesNotMatch(event, /<Input type="url"[^>]*registrationUrl/);
+  assert.doesNotMatch(event, /Registration link \(another website\)/);
   assert.match(src("content/editor.tsx"), /out\[f\] === undefined \|\| out\[f\] === "" \? null : out\[f\]/, "a cleared field is sent as null");
 });

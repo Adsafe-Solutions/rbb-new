@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { newEventRegistration } from "@rbb/content-schema/form-defaults";
 import { useCan } from "../../auth";
-import { Alert, Badge, Button, Checkbox, EmptyState, FormField, Inbox, Input, PageContainer, PageHeader, Panel, Radio, RadioGroup, Select, Spinner, Textarea } from "../../design-system";
+import { Alert, Badge, Button, Checkbox, EmptyState, FormField, Inbox, Input, PageContainer, PageHeader, Panel, Select, Spinner, Textarea } from "../../design-system";
 import { navigate } from "../../router";
 import { cleanRegistration, errorsUnder } from "../../forms/builder";
 import { FieldsBuilder } from "../../forms/FieldsBuilder";
@@ -28,11 +28,14 @@ import { ItemList } from "../../blocks/fields";
    shows the same problems beside each step first). Milestone 4: the
    program area (None = open to all) and the day's schedule.
 
-   Registration (2026-10-17): none, a link to another website, or a form
-   on the event's own page (forms/FieldsBuilder). The API takes
-   registrations against the PUBLISHED event (`event-<id>` in Form
-   submissions), so the form's changes go live when the event is
-   published. Switching away from a way clears it: the save sends null. */
+   Registration (2026-10-17): a form on the event's own page
+   (forms/FieldsBuilder), opened in a popup there — or none. People
+   register on RBB's website only: there is no link to another site
+   (owner decision, 2026-10-17); an older event's link is not shown on the
+   website and can be removed here. The API takes registrations against
+   the PUBLISHED event (`event-<id>` in Form submissions), so the form's
+   changes go live when the event is published. Turning the form off
+   clears it: the save sends null. */
 
 const FIELDS = ["title", "slug", "subtitle", "summary", "about", "date", "startTime", "endTime", "timezone", "programId", "schedule", "venue", "address", "mapUrl", "registrationUrl", "registration", "imageId", "seo"] as const;
 
@@ -42,10 +45,7 @@ export default function EventEditorPage({ params }: PageProps) {
   const canApprove = useCan("content:approve");
   const editor = useContentEditor<Event>({ api: eventsApi, id: params.id!, base: "events", fields: FIELDS, initial: { status: "draft" }, kind: "event", prepare: (draft) => (draft.registration ? { ...draft, registration: cleanRegistration(draft.registration) } : draft) });
   const [slugTouched, setSlugTouched] = useState(params.id !== "new");
-  /* "Registration link" chosen, its address not typed yet. */
-  const [linkChosen, setLinkChosen] = useState(false);
   const d = editor.draft;
-  const mode: RegistrationMode = d.registration ? "form" : d.registrationUrl || linkChosen ? "link" : "none";
   const registered = useRegistrations(editor.view?.record.id);
   const zones = useMemo(() => zoneOptions(d.timezone, Intl.supportedValuesOf("timeZone")), [d.timezone]);
   const schedule: ScheduleStep[] = d.schedule ?? [];
@@ -62,12 +62,9 @@ export default function EventEditorPage({ params }: PageProps) {
       </PageContainer>
     );
 
-  const setMode = (next: RegistrationMode) => {
-    setLinkChosen(next === "link");
-    if (next === "form") editor.set({ registration: d.registration ?? newEventRegistration(), registrationUrl: undefined });
-    else if (next === "link") editor.set({ registration: undefined });
-    else editor.set({ registration: undefined, registrationUrl: undefined });
-  };
+  /* On: the event's form (a new one starts from the default questions),
+     and any older registration link goes — the two never coexist. */
+  const setRegistering = (on: boolean) => editor.set(on ? { registration: d.registration ?? newEventRegistration(), registrationUrl: undefined } : { registration: undefined });
   const setRegistration = (changes: Partial<NonNullable<Event["registration"]>>) => d.registration && editor.set({ registration: { ...d.registration, ...changes } });
 
   const seo = d.seo ?? {};
@@ -153,20 +150,26 @@ export default function EventEditorPage({ params }: PageProps) {
             </FormField>
           </div>
         </Panel>
-        <Panel title="Registration" as="h2" description="People register here on the event's page, or through a link to another website. A registration form is checked against the published event, so changes to it go live when the event is published to the website. Each registration is emailed to RBB's events inbox (when one is set up) and the person gets a confirmation email.">
+        <Panel title="Registration" as="h2" description="People register on the event's page: its Register button opens this form in a popup. The form is checked against the published event, so changes to it go live when the event is published to the website. Each registration is emailed to RBB's events inbox (when one is set up) and the person gets a confirmation email.">
           <div className={styles.fields}>
-            <RadioGroup legend="How people register" value={mode} disabled={readOnly} error={err("registration")} onValueChange={(next) => setMode(next as RegistrationMode)}>
-              <Radio value="none" label="No registration" />
-              <Radio value="form" label="Registration form on this page" description="Visitors fill in a form on the event page. You choose the questions." />
-              <Radio value="link" label="Registration link (another website)" description="For example a ticketing site." />
-            </RadioGroup>
-            {mode === "link" && (
-              <FormField label="Registration link" required helper="An https:// page where people register." disabled={readOnly} error={err("registrationUrl")}>
-                <Input type="url" maxLength={2048} value={d.registrationUrl ?? ""} onChange={(e) => editor.set({ registrationUrl: e.target.value })} />
-              </FormField>
+            <Checkbox
+              label="People can register for this event"
+              description="Adds a Register button to the event page, which opens the registration form. You choose the questions."
+              checked={Boolean(d.registration)}
+              disabled={readOnly}
+              onChange={(e) => setRegistering(e.target.checked)}
+            />
+            {err("registration") && <Alert tone="danger">{err("registration")}</Alert>}
+            {d.registrationUrl && (
+              <Alert tone="info">
+                This event still has an older registration link to another website ({d.registrationUrl}). The website no longer shows it — people register on the event page.{" "}
+                <Button size="sm" variant="ghost" disabled={readOnly} onClick={() => editor.set({ registrationUrl: undefined })}>
+                  Remove the link
+                </Button>
+              </Alert>
             )}
-            {mode !== "link" && err("registrationUrl") && <Alert tone="danger">{err("registrationUrl")}</Alert>}
-            {mode === "form" && d.registration && (
+            {err("registrationUrl") && <Alert tone="danger">{err("registrationUrl")}</Alert>}
+            {d.registration && (
               <>
                 {registered && (
                   <div className={styles.saveActions} aria-label="Registrations">
@@ -234,8 +237,6 @@ export default function EventEditorPage({ params }: PageProps) {
     </PageContainer>
   );
 }
-
-type RegistrationMode = "none" | "form" | "link";
 
 /* The saved event's registrations so far (Form submissions, `event-<id>`),
    for owners who can read them; nothing when the call fails. */

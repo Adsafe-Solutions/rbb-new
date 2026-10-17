@@ -129,6 +129,9 @@ export default function FormShell({
      sign-up beside a newsletter band) passes its own, so no two
      labels point at one field. What the server receives is unchanged. */
   idPrefix,
+  /* false: no sheet of its own — the form sits in a frame that already
+     is one (an event's registration popup, components/Modal). */
+  frame = true,
 }) {
   const domId = idPrefix ?? config.formId;
   const ready = formState(config) === "ready";
@@ -263,10 +266,10 @@ export default function FormShell({
          band's hard shadow, square to the page — a form is something you
          fill in, and a form on a slant feels unreliable. The inline
          layout (one field and a button) sits straight on its band. */
-      data-tone={layout === "inline" ? undefined : "card"}
+      data-tone={layout === "inline" || !frame ? undefined : "card"}
       className={cx(
         "relative",
-        layout !== "inline" && "rounded-2xl border-rim bg-paper-white p-6 cast sm:p-8 md:p-10",
+        layout !== "inline" && frame && "rounded-2xl border-rim bg-paper-white p-6 cast sm:p-8 md:p-10",
         className
       )}
     >

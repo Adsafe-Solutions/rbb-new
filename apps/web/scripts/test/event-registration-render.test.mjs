@@ -61,22 +61,36 @@ test("the config: the event's own form, posting to event-<record id>, with the s
   assert.equal(forms.eventRegistrationConfig((await media()).eventById(other.slug)), null, "no registration: no form");
 });
 
-test("rendered: the Register section with the form, places limited, and the facts card's button jumping to it", () => {
+test("rendered: Register buttons that open the form in a popup — the form itself is not on the page until then", () => {
   const page = main(render(`/media/events/${withForm.slug}`).html);
   assert.match(page, /<section id="register"/);
-  assert.match(page, new RegExp(`data-form="event-${withForm.id}"`));
   const words = text(page);
   assert.match(words, /Places are limited\./);
-  assert.match(words, /Save my place/);
-  assert.match(page, /href="[^"]*#register"/, "the facts card's Register button");
-  assert.match(page, /<fieldset[^>]*>\s*<legend/, "a choice field is a fieldset with a legend");
-  assert.match(page, /type="radio"[^>]*name="meal"|name="meal"[^>]*type="radio"/);
-  assert.match(page, /type="number"/);
-  assert.match(page, /type="date"/);
-  assert.match(page, new RegExp(`id="event-${withForm.id}-meal"`), "the group's first option carries the field's id (the error summary links to it)");
+  const buttons = page.match(/<a[^>]*href="#register"[^>]*aria-haspopup="dialog"|<a[^>]*aria-haspopup="dialog"[^>]*href="#register"/g) ?? [];
+  assert.equal(buttons.length, 2, "the facts card's and the section's Register buttons: links to the section until hydration, then the popup");
+  assert.doesNotMatch(page, new RegExp(`data-form="event-${withForm.id}"`), "the form mounts only in the open popup");
 
   const plain = main(render(`/media/events/${other.slug}`).html);
   assert.doesNotMatch(plain, /id="register"/, "an event without a form has no Register section");
+  if (other.registrationUrl) assert.ok(!plain.includes(other.registrationUrl), "an older registration link to another site is never followed (owner decision, 2026-10-17)");
+});
+
+test("the popup's form: its fields as the page draws them — choice groups, number and date", async () => {
+  // Plain imports: the SSR build keeps these external, so they are the same instances the page renders with.
+  const React = await import("react");
+  const { renderToString } = await import("react-dom/server");
+  const { StaticRouter } = await import("react-router-dom");
+  const { default: FormShell } = await vite.ssrLoadModule("/src/components/FormShell/FormShell.jsx");
+  const event = (await media()).eventById(withForm.slug);
+  const html = renderToString(React.createElement(StaticRouter, { location: "/" }, React.createElement(FormShell, { config: forms.eventRegistrationConfig(event), frame: false })));
+  assert.match(html, new RegExp(`data-form="event-${withForm.id}"`));
+  assert.match(text(html), /Save my place/);
+  assert.match(html, /<fieldset[^>]*>\s*<legend/, "a choice field is a fieldset with a legend");
+  assert.match(html, /type="radio"[^>]*name="meal"|name="meal"[^>]*type="radio"/);
+  assert.match(html, /type="number"/);
+  assert.match(html, /type="date"/);
+  assert.match(html, new RegExp(`id="event-${withForm.id}-meal"`), "the group's first option carries the field's id (the error summary links to it)");
+  assert.doesNotMatch(html, /data-tone="card"/, "no sheet of its own inside the popup's");
 });
 
 test("checks: choose one, choose any (an array), whole numbers within range, real dates — and the server's codes for them", () => {

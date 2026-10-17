@@ -1,3 +1,4 @@
+import { useId, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import useHydrated from "../../hooks/useHydrated.js";
 import useSeo from "../../hooks/useSeo.js";
@@ -12,6 +13,7 @@ import EventCard from "../../components/EventCard/EventCard.jsx";
 import SectionHeading from "../../components/SectionHeading/SectionHeading.jsx";
 import ClosingCta from "../../components/ClosingCta/ClosingCta.jsx";
 import FormShell from "../../components/FormShell/FormShell.jsx";
+import Modal from "../../components/Modal/Modal.jsx";
 import { formState } from "../../lib/forms.js";
 import { eventRegistrationConfig } from "../../content/forms.js";
 import NotFound from "../NotFound/NotFound.jsx";
@@ -24,7 +26,7 @@ import { EVENTS, MEDIA_PAGES, PROGRAMS, eventById, eventGroup, eventPath, eventS
                                the title and its one line
          white   the event     the photograph, "About this event", "How
                                the day runs" and — when the event takes
-                               registrations here — its Register form,
+                               registrations — its Register line and button,
                                beside a sticky facts card: date, time,
                                where (with directions when there is a real
                                map link), taking part
@@ -33,16 +35,18 @@ import { EVENTS, MEDIA_PAGES, PROGRAMS, eventById, eventGroup, eventPath, eventS
 
    A slug that is not an event is the site's ordinary 404.
 
-   Taking part, one of three ways (2026-10-17):
-     - registration on this page (the CMS event's `registration`, carried
-       only while open): the form in the event's own column, and a
-       "Register" button in the facts card that jumps to it. The API
-       checks each registration against the published event and says when
-       it is full or closed (FormShell's "full" / "closed"). Once the event
-       has ended — known only after hydration, from the reader's date —
-       the closed line replaces the form.
-     - a registration link (`registrationUrl`): the external button.
-     - neither: the pending line pointing to the Contact page.
+   Taking part (2026-10-17):
+     - registration (the CMS event's `registration`, carried only while
+       open): a "Register" button in the facts card and in the event's own
+       column, each opening the form in the site's popup
+       (components/Modal). Before hydration the buttons are plain links
+       to the Register section. The API checks each registration against
+       the published event and says when it is full or closed (FormShell's
+       "full" / "closed"). Once the event has ended — known only after
+       hydration, from the reader's date — the closed line replaces it.
+     - none: the pending line pointing to the Contact page.
+   People register on RBB's website only (owner decision, 2026-10-17): an
+   older event's `registrationUrl` to another site is never followed.
    A form that cannot be drawn (no endpoint or no published Privacy
    Policy — lib/forms.js formState) shows that pending line too, and the
    facts card offers no button to it: nothing may look like it books a
@@ -62,6 +66,22 @@ function Detail({ event }) {
   const registration = eventRegistrationConfig(event);
   const ended = status === "ended";
   const canRegister = registration && !ended && formState(registration) === "ready";
+  const [registering, setRegistering] = useState(false);
+  const formHeadingId = useId();
+  /* A link to the Register section until hydration; then it opens the form. */
+  const registerButton = (props) => (
+    <Button
+      href="#register"
+      onClick={(e) => {
+        e.preventDefault();
+        setRegistering(true);
+      }}
+      aria-haspopup="dialog"
+      {...props}
+    >
+      {t.register}
+    </Button>
+  );
 
   return (
     <>
@@ -124,26 +144,16 @@ function Detail({ event }) {
             )}
 
             {registration && (
-              /* The form is not revealed: it must be there to land on
-                 when the facts card's button jumps here. */
+              /* Not revealed: it must be there to land on when a Register
+                 link is followed before hydration. */
               <section id="register" aria-labelledby="event-register" className="mt-14 scroll-mt-[calc(var(--header-h)+2rem)]">
                 <h2 id="event-register" className="type-meta text-quiet">
                   {registration.heading}
                 </h2>
-                {ended ? (
-                  <p className="mt-5 max-w-[62ch] text-[length:var(--text-body)] leading-[1.75] text-copy">{registration.closedMessage}</p>
-                ) : (
-                  <>
-                    {event.registration.capacity != null && (
-                      <p className="mt-5 max-w-[62ch] text-[length:var(--text-body)] leading-[1.75] text-copy">{t.placesLimited}</p>
-                    )}
-                    <FormShell
-                      config={registration}
-                      className="mt-6 max-w-2xl"
-                      fallback={<p className="mt-5 max-w-[62ch] text-[length:var(--text-body)] leading-[1.75] text-copy">{t.takePartBody}</p>}
-                    />
-                  </>
-                )}
+                <p className="mt-5 max-w-[62ch] text-[length:var(--text-body)] leading-[1.75] text-copy">
+                  {ended ? registration.closedMessage : !canRegister ? t.takePartBody : event.registration.capacity != null ? t.placesLimited : t.registerBody}
+                </p>
+                {canRegister && registerButton({ className: "mt-6" })}
               </section>
             )}
           </div>
@@ -166,27 +176,29 @@ function Detail({ event }) {
                   )}
                 </Fact>
                 <Fact label={t.takePart}>
-                  {canRegister ? (
-                    /* A same-page link through the router: App.jsx's
-                       ScrollToTop lines #register up under the header
-                       through animations/lenis.js jumpTo, so smooth
-                       scrolling cannot undo the jump. */
-                    <Button to="#register" size="sm">
-                      {t.register}
-                    </Button>
-                  ) : event.registrationUrl ? (
-                    <Button href={event.registrationUrl} size="sm" rel="noopener noreferrer" target="_blank">
-                      {t.register}
-                    </Button>
-                  ) : (
-                    t.takePartBody
-                  )}
+                  {canRegister ? registerButton({ size: "sm" }) : ended && registration ? registration.closedMessage : t.takePartBody}
                 </Fact>
               </dl>
             </OffsetCard>
           </aside>
         </div>
       </Section>
+
+      {canRegister && (
+        <Modal open={registering} onClose={() => setRegistering(false)} labelledBy={formHeadingId}>
+          <div className="p-6 sm:p-8">
+            <p className="type-meta pr-12 text-quiet">{registration.heading}</p>
+            <h2 id={formHeadingId} className="type-card mt-3 pr-12 text-[clamp(1.5rem,2.6vw,2rem)]!">
+              {event.title}
+            </h2>
+            <p className="mt-3 text-copy">
+              {formatDate(event.date)} · {time}
+            </p>
+            {event.registration.capacity != null && <p className="mt-1 text-copy">{t.placesLimited}</p>}
+            <FormShell config={registration} frame={false} className="mt-8" />
+          </div>
+        </Modal>
+      )}
 
       {others.length > 0 && (
         <Section tone="paper" pad="lg">

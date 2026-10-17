@@ -2,11 +2,10 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { cx } from "../../lib/cx.js";
 import { isWithin } from "../../lib/paths.js";
-import { pauseScroll, resumeScroll } from "../../animations/lenis.js";
 import Button from "../Button/Button.jsx";
 import Picture from "../Picture/Picture.jsx";
 import { withHighlight } from "../HighlightText/HighlightText.jsx";
-import { MenuIcon } from "../Header/icons.jsx";
+import Modal from "../Modal/Modal.jsx";
 import { cardFocal } from "../../lib/focal.js";
 
 /* The on-screen popup (content/announcements.js `popup`): a photograph,
@@ -22,9 +21,9 @@ import { cardFocal } from "../../lib/focal.js";
        ("once"), remembered against the popup's `id` — change the id and
        a new popup shows to everyone again
 
-   A native <dialog> opened with showModal(), like DonateDialog: focus
-   trap, Escape, the inert page behind it and the top layer come from the
-   browser. Smooth scrolling pauses while it is open. Browser storage is
+   Drawn in the site's popup frame (components/Modal), like the Donate
+   popup: the native dialog, its rounded panel and close button, smooth
+   scrolling paused while it is open. Browser storage is
    only a convenience: if it throws (private mode, blocked storage) the
    popup still opens at most once per page view. */
 const storageFor = (frequency) => {
@@ -36,7 +35,6 @@ const storageFor = (frequency) => {
 };
 
 export default function SitePopup({ popup }) {
-  const ref = useRef(null);
   const headingId = useId();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
@@ -71,18 +69,6 @@ export default function SitePopup({ popup }) {
     return () => clearTimeout(timer);
   }, [excluded, key, popup.delayMs, popup.frequency]);
 
-  useEffect(() => {
-    const dialog = ref.current;
-    if (!dialog) return undefined;
-    if (!open) {
-      if (dialog.open) dialog.close();
-      return undefined;
-    }
-    dialog.showModal();
-    pauseScroll();
-    return resumeScroll;
-  }, [open]);
-
   const close = () => {
     setOpen(false);
     try {
@@ -93,61 +79,42 @@ export default function SitePopup({ popup }) {
   };
 
   return (
-    <dialog
-      ref={ref}
-      aria-labelledby={headingId}
-      onClose={() => open && close()}
-      onClick={(e) => e.target === e.currentTarget && close()}
-      data-lenis-prevent=""
-      data-tone="card"
-      className="m-auto max-h-[calc(100dvh-2rem)] w-[min(calc(100%-2rem),44rem)] overflow-y-auto overscroll-contain rounded-2xl border-rim bg-paper-white p-0 text-fg shadow-[8px_8px_0_var(--color-bumble-honey)] backdrop:bg-bumble-ink/50"
-    >
-      {open && (
-        <div className={cx("relative grid", popup.image && "sm:grid-cols-[5fr_6fr]")}>
-          {popup.releaseMarker && <span hidden data-release-marker={popup.releaseMarker} />}
-          {popup.image && (
-            <div className="relative aspect-[16/9] border-b-2 border-[var(--tone-rim)] sm:aspect-auto sm:border-b-0 sm:border-r-2">
-              <Picture
-                src={popup.image.src}
-                alt={popup.image.alt}
-                focal={cardFocal(popup.image)}
-                sizes="(min-width: 640px) 20rem, 92vw"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            </div>
-          )}
+    <Modal open={open} onClose={close} labelledBy={headingId} closeLabel={popup.close} size="lg">
+      <div className={cx("grid", popup.image && "sm:grid-cols-[5fr_6fr]")}>
+        {popup.releaseMarker && <span hidden data-release-marker={popup.releaseMarker} />}
+        {popup.image && (
+          <div className="relative aspect-[16/9] border-b-2 border-[var(--tone-rim)] sm:aspect-auto sm:border-b-0 sm:border-r-2">
+            <Picture
+              src={popup.image.src}
+              alt={popup.image.alt}
+              focal={cardFocal(popup.image)}
+              sizes="(min-width: 640px) 20rem, 92vw"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          </div>
+        )}
 
-          <div className="p-6 sm:p-8">
-            <button
-              type="button"
-              aria-label={popup.close}
-              onClick={close}
-              className="absolute right-3 top-3 z-10 grid h-11 w-11 cursor-pointer place-items-center rounded-full bg-paper-white text-trust-blue transition-colors hover:bg-mist"
-            >
-              <MenuIcon open />
-            </button>
+        <div className="p-6 sm:p-8">
+          {popup.kicker && <p className="type-meta pr-12 text-quiet">{popup.kicker}</p>}
+          {/* A card, so a card heading: sentence case, card weight —
+              larger than a card's (`!`: one property, two utilities). */}
+          <h2 id={headingId} className="type-card mt-3 pr-6 text-[clamp(1.6rem,2.8vw,2.1rem)]!">
+            {withHighlight(popup.heading, popup.highlight)}
+          </h2>
+          {popup.body && <p className="mt-4 text-copy">{popup.body}</p>}
 
-            {popup.kicker && <p className="type-meta pr-10 text-quiet">{popup.kicker}</p>}
-            {/* A card, so a card heading: sentence case, card weight —
-                larger than a card's (`!`: one property, two utilities). */}
-            <h2 id={headingId} className="type-card mt-3 pr-6 text-[clamp(1.6rem,2.8vw,2.1rem)]!">
-              {withHighlight(popup.heading, popup.highlight)}
-            </h2>
-            {popup.body && <p className="mt-4 text-copy">{popup.body}</p>}
-
-            <div className="mt-7 flex flex-wrap items-center gap-4">
-              {popup.cta && (
-                <Button to={popup.cta.to} onClick={close}>
-                  {popup.cta.label}
-                </Button>
-              )}
-              <Button variant="link" onClick={close}>
-                {popup.dismiss}
+          <div className="mt-7 flex flex-wrap items-center gap-4">
+            {popup.cta && (
+              <Button to={popup.cta.to} onClick={close}>
+                {popup.cta.label}
               </Button>
-            </div>
+            )}
+            <Button variant="link" onClick={close}>
+              {popup.dismiss}
+            </Button>
           </div>
         </div>
-      )}
-    </dialog>
+      </div>
+    </Modal>
   );
 }

@@ -155,14 +155,15 @@ export const MEDIA_PAGES = {
     time: "Time",
     takePart: "Taking part",
     takePartBody: "To ask about taking part, get in touch through our Contact page.",
-    /* Shown instead, when an event published from the CMS has a
-       registration link, or takes registrations on its own page (the
-       button then leads to the form, further down). */
+    /* Shown instead, when an event published from the CMS takes
+       registrations: the button opens its form in a popup. */
     register: "Register",
     /* Above an event's registration form when it has a set number of
        places — never the number, which would be out of date the moment
        someone registers. */
     placesLimited: "Places are limited.",
+    /* Beside the Register button when places are not limited. */
+    registerBody: "Register to save your place.",
     more: "More about",
     others: "More events",
   },
